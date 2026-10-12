@@ -1758,70 +1758,31 @@
       ? window.location.origin
       : 'http://localhost:5000';
 
-    // In-memory posts list (persisted in localStorage)
-    let communityPosts = [
-      {
-        id: "post-1",
-        author: "Dhaka Traffic Command",
-        verified: true,
-        type: "official",
-        category: "Commute Advisory",
-        time: "45m ago",
-        content: "Temporary waterlogging reported along Kazipara. Recommended alternate route for late-night transit: Rokeya Sarani bypass.",
-        media: null,
-        likes: 189,
-        approved: true
-      },
-      {
-        id: "post-2",
-        author: "SAFE BD Community",
-        verified: true,
-        type: "community",
-        category: "General Safety",
-        time: "2h ago",
-        content: "Street lights repaired across Baily Road and Shantinagar crossing. Night transit safety score currently marked Normal.",
-        media: null,
-        likes: 94,
-        approved: true
-      },
-      {
-        id: "post-pending-1",
-        author: "Citizen Tanvir",
-        verified: false,
-        type: "community",
-        category: "Road Hazard",
-        time: "10m ago",
-        content: "Open excavation and dark stretch reported near Dhanmondi 27 / Lake Circus. Caution advised for late evening pedestrians.",
-        media: null,
-        likes: 0,
-        approved: false
-      }
-    ];
+    // High-Throughput Scalable Posts State (Backed by Database Engine for Millions of Citizens)
+    let liveApprovedPosts = [];
+    let adminPendingPostsList = [];
+    let feedPage = 1;
+    let hasMoreFeedPosts = false;
+    let isLoadingFeed = false;
 
-    try {
-      const savedPosts = localStorage.getItem('safe_bd_posts');
-      if (savedPosts) {
-        let parsed = JSON.parse(savedPosts);
-        // Clean out any legacy police post
-        communityPosts = parsed.filter(p => !p.author.toLowerCase().includes("police"));
-        // Ensure at least one pending post is available for demo if queue was empty
-        if (!communityPosts.some(p => !p.approved)) {
-          communityPosts.unshift({
-            id: "post-pending-" + Date.now(),
-            author: "Citizen Tanvir",
-            verified: false,
-            type: "community",
-            category: "Road Hazard",
-            time: "10m ago",
-            content: "Open excavation and dark stretch reported near Dhanmondi 27 / Lake Circus. Caution advised for late evening pedestrians.",
-            media: null,
-            likes: 0,
-            approved: false
+    // Purge legacy dummy posts (Dhaka Traffic Command, SAFE BD Community) from client storage
+    function purgeLegacyDummyPosts() {
+      try {
+        const raw = localStorage.getItem('safe_bd_posts');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const cleaned = (parsed || []).filter(p => {
+            const author = (p.author || '').toLowerCase();
+            return !author.includes('traffic command') && !author.includes('safe bd community') && !author.includes('police') && p.id !== 'post-1' && p.id !== 'post-2';
           });
+          liveApprovedPosts = cleaned.filter(p => p.approved);
+          localStorage.setItem('safe_bd_posts', JSON.stringify(cleaned));
         }
-        localStorage.setItem('safe_bd_posts', JSON.stringify(communityPosts));
+      } catch (e) {
+        console.warn("Storage purge warning:", e);
       }
-    } catch(e) {}
+    }
+    purgeLegacyDummyPosts();
 
     // Live High-Precision Geolocation (Device GPS Only)
     let currentCoords = {
@@ -1851,7 +1812,8 @@
     } catch(e) {
       loadUserContacts(null);
     }
-    renderCommunityPosts();
+    fetchLiveFeedPosts(1, false);
+    fetchAdminPendingPosts();
 
     // =========================================================================
     // DIRECT HIGH-PRECISION DEVICE GPS ENGINE (VIA DEVICE SENSORS & GOOGLE MAPS)
@@ -2032,149 +1994,262 @@
       }
 
       const authorName = currentUser ? currentUser.name : "Citizen Reporter";
-      const newPost = {
-        id: "post-" + Date.now(),
+      const authorPhone = currentUser ? currentUser.phone : "";
+      const isVerified = !!(currentUser && currentUser.nidVerified);
+
+      const postPayload = {
         author: authorName,
-        verified: !!(currentUser && currentUser.nidVerified),
-        type: "community",
+        authorPhone: authorPhone,
+        verified: isVerified,
         category: selectedCategory,
-        time: "Just now",
         content: text,
-        media: attachedMediaBase64,
-        likes: 0,
-        approved: false // Submitted to moderation queue awaiting approval
+        media: attachedMediaBase64
       };
 
-      communityPosts.unshift(newPost);
-      localStorage.setItem('safe_bd_posts', JSON.stringify(communityPosts));
+      const submitBtn = document.querySelector('#modal-composer .btn-action-primary');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+      }
 
-      // Reset composer
-      document.getElementById('composer-text').value = '';
-      removeAttachedMedia();
-      updatePendingBadge();
-      renderCommunityPosts();
+      fetch(`${API_BASE}/api/feed/posts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(postPayload)
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit for Review';
+        }
 
-      alert("📋 Post Submitted for Moderation!\n\nYour awareness report has been submitted and is currently in the moderation review queue.");
+        if (!res.success) {
+          throw new Error(res.error || res.message || "Failed to submit post.");
+        }
+
+        // Reset composer & close modal
+        document.getElementById('composer-text').value = '';
+        removeAttachedMedia();
+        closeCreatePostModal();
+
+        alert("📋 Report Submitted for Moderation!\n\nYour awareness post has been recorded and submitted to the Chief Administrator.\nIt will permanently appear on the live feed once officially approved.");
+
+        // Refresh moderation queue and live feed
+        fetchAdminPendingPosts();
+        fetchLiveFeedPosts(1, false);
+      })
+      .catch(err => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit for Review';
+        }
+        alert("⚠️ Post submission error: " + err.message);
+      });
+    }
+
+    // Scalable Live Public Feed Fetcher (Only Admin-Approved Posts, supports millions)
+    function fetchLiveFeedPosts(page = 1, append = false) {
+      if (isLoadingFeed) return;
+      isLoadingFeed = true;
+
+      const catParam = (activeFeedFilter === 'all' || activeFeedFilter === 'community') ? 'all' : activeFeedFilter;
+      const url = `${API_BASE}/api/feed/posts?page=${page}&limit=20&category=${encodeURIComponent(catParam)}`;
+
+      fetch(url)
+        .then(r => r.json())
+        .then(data => {
+          isLoadingFeed = false;
+          const serverPosts = (data && data.posts && Array.isArray(data.posts)) ? data.posts : [];
+          
+          if (append) {
+            const existingIds = new Set(liveApprovedPosts.map(p => p.id));
+            serverPosts.forEach(p => { if (!existingIds.has(p.id)) liveApprovedPosts.push(p); });
+          } else {
+            liveApprovedPosts = serverPosts;
+          }
+
+          feedPage = page;
+          hasMoreFeedPosts = !!(data && data.hasMore);
+
+          try {
+            localStorage.setItem('safe_bd_approved_posts', JSON.stringify(liveApprovedPosts.slice(0, 50)));
+          } catch(e) {}
+
+          renderCommunityPosts();
+        })
+        .catch(err => {
+          isLoadingFeed = false;
+          console.warn("Live feed fetch error, rendering cached:", err);
+          renderCommunityPosts();
+        });
+    }
+
+    // Admin Pending Reports Fetcher
+    function fetchAdminPendingPosts() {
+      const token = localStorage.getItem('safe_bd_token') || '';
+      fetch(`${API_BASE}/api/admin/posts/pending?page=1&limit=100`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(r => r.json())
+      .then(data => {
+        adminPendingPostsList = (data && data.posts && Array.isArray(data.posts)) ? data.posts : [];
+        renderAdminPendingPosts();
+        updatePendingBadge();
+      })
+      .catch(err => {
+        console.warn("Pending posts fetch error:", err);
+        renderAdminPendingPosts();
+      });
     }
 
     function approvePost(id) {
-      const p = communityPosts.find(item => item.id === id);
-      if (p) {
-        p.approved = true;
-        p.time = "Just approved";
-        localStorage.setItem('safe_bd_posts', JSON.stringify(communityPosts));
-        updatePendingBadge();
-        renderCommunityPosts();
-        renderAdminPendingPosts();
-        alert("✅ Post Officially Approved!\nIt is now live on the citizen feed.");
-      }
+      const adminName = currentUser ? currentUser.name : "Chief Administrator";
+      fetch(`${API_BASE}/api/admin/posts/${encodeURIComponent(id)}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminName })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          alert("✅ Post Officially Approved!\nIt is now live and permanently saved on the citizen feed.");
+          fetchAdminPendingPosts();
+          fetchLiveFeedPosts(1, false);
+        } else {
+          alert("Approval error: " + (res.message || "Failed to approve post."));
+        }
+      })
+      .catch(err => {
+        console.error("Approve request failed:", err);
+        alert("Network error while approving post.");
+      });
     }
 
     function rejectPost(id) {
-      if (confirm("Are you sure you want to decline and remove this submission?")) {
-        communityPosts = communityPosts.filter(item => item.id !== id);
-        localStorage.setItem('safe_bd_posts', JSON.stringify(communityPosts));
-        updatePendingBadge();
-        renderCommunityPosts();
-        renderAdminPendingPosts();
-      }
+      if (!confirm("Are you sure you want to decline and remove this citizen report from the queue?")) return;
+      fetch(`${API_BASE}/api/admin/posts/${encodeURIComponent(id)}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminName: currentUser ? currentUser.name : "Chief Administrator" })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          fetchAdminPendingPosts();
+        } else {
+          alert("Decline error: " + (res.message || "Failed to decline post."));
+        }
+      })
+      .catch(err => {
+        console.error("Decline request failed:", err);
+      });
     }
 
     function updatePendingBadge() {
-      const count = communityPosts.filter(p => !p.approved).length;
+      const count = adminPendingPostsList.length;
       const badge = document.getElementById('pending-count-badge');
       const bannerBadge = document.getElementById('banner-pending-count');
+      const adminPendingStat = document.getElementById('admin-pending-stat');
       if (badge) badge.innerText = count;
       if (bannerBadge) bannerBadge.innerText = count;
+      if (adminPendingStat) adminPendingStat.innerText = count;
     }
 
     function renderCommunityPosts() {
       const container = document.getElementById('posts-container');
+      if (!container) return;
       container.innerHTML = '';
       updatePendingBadge();
 
-      let filtered = [];
-      if (activeFeedFilter === 'pending') {
-        filtered = communityPosts.filter(p => !p.approved);
-      } else if (activeFeedFilter === 'community') {
-        filtered = communityPosts.filter(p => p.approved && p.type === 'community');
-      } else {
-        // 'all' shows all approved posts
-        filtered = communityPosts.filter(p => p.approved);
-      }
+      // Live Public Feed: STRICTLY SHOWS ONLY APPROVED POSTS
+      const postsToRender = liveApprovedPosts;
 
-      if (filtered.length === 0) {
-        if (activeFeedFilter === 'pending') {
-          container.innerHTML = `
-            <div style="text-align:center; padding:36px 20px; color:var(--text-muted); font-size:12px; background:var(--black-subtle); border-radius:14px; border:1px solid var(--border-quiet);">
-              <i class="fas fa-check-circle" style="font-size:28px; color:#10b981; margin-bottom:10px; display:block;"></i>
-              <strong style="color:#fff;">No Pending Submissions</strong>
-              <div style="margin-top:6px; color:var(--text-muted);">All community reports have been reviewed and published.</div>
-            </div>`;
-        } else {
-          container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:12px;">No posts in this category yet.</div>`;
-        }
+      if (postsToRender.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; background: var(--black-subtle); border-radius: 16px; border: 1px solid var(--border-quiet); margin: 10px 0;">
+            <i class="fas fa-shield-halved" style="font-size: 32px; color: var(--text-muted); margin-bottom: 12px; display: block;"></i>
+            <h4 style="font-size: 14px; color: #fff; margin-bottom: 4px;">Civic Safety Feed Active</h4>
+            <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">All community reports are moderated for high trust and safety. Approved citizen reports will appear here.</p>
+          </div>
+        `;
         return;
       }
 
-      filtered.forEach(p => {
+      postsToRender.forEach(p => {
         const card = document.createElement('div');
         card.className = 'feed-card';
-
-        const statusBadge = p.approved 
-          ? `<span class="mod-pending-badge" style="color:#10b981; border-color:rgba(16,185,129,0.3); background:rgba(16,185,129,0.15);"><i class="fas fa-shield"></i> Live</span>`
-          : `<span class="mod-pending-badge" style="color:#f59e0b; border-color:rgba(245,158,11,0.3); background:rgba(245,158,11,0.15);"><i class="fas fa-clock"></i> Pending Review</span>`;
-
-        const moderationButtons = !p.approved ? `
-          <div style="display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border-quiet);">
-            <button onclick="approvePost('${p.id}')" style="flex:1; background:linear-gradient(135deg, #059669 0%, #10b981 100%); color:#fff; border:none; padding:9px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer;">
-              <i class="fas fa-check"></i> Approve & Publish Live
-            </button>
-            <button onclick="rejectPost('${p.id}')" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#ef4444; padding:9px 14px; border-radius:10px; font-size:12px; font-weight:600; cursor:pointer;">
-              <i class="fas fa-trash"></i> Decline
-            </button>
-          </div>
-        ` : `
-          <div class="post-actions-row">
-            <div class="post-action-btn" onclick="likePost('${p.id}', this)"><i class="far fa-heart"></i> <span>${p.likes}</span></div>
-            <div class="post-action-btn" onclick="alert('Comments are monitored by community moderation guidelines.')"><i class="far fa-comment"></i> Comment</div>
-            <div class="post-action-btn" onclick="sharePost('${p.id}')"><i class="fas fa-share-nodes"></i> Share</div>
-          </div>
-        `;
 
         card.innerHTML = `
           <div class="feed-card-header">
             <div class="author-info">
-              <div class="author-avatar">${p.author.charAt(0).toUpperCase()}</div>
+              <div class="author-avatar">${(p.author || 'C').charAt(0).toUpperCase()}</div>
               <div>
                 <div class="author-name">
                   ${p.author}
                   ${p.verified ? '<i class="fas fa-check-circle verified-icon" title="Verified Citizen / Authority"></i>' : ''}
                 </div>
-                <div style="font-size:10px; color:var(--text-muted);">${p.time} • <span style="color:#e57373;">${p.category}</span></div>
+                <div style="font-size: 10px; color: var(--text-muted);">${p.time || 'Just now'} • <span style="color: #e57373;">${p.category || 'General Safety'}</span></div>
               </div>
             </div>
             <div>
-              ${statusBadge}
+              <span class="mod-pending-badge" style="color: #10b981; border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.15);">
+                <i class="fas fa-shield-check"></i> Verified Live
+              </span>
             </div>
           </div>
-          <div class="post-text">${p.content}</div>
-          ${p.media ? `<img src="${p.media}" class="post-media-attachment" alt="Post Media">` : ''}
-          ${moderationButtons}
+          <div class="post-text">${escapeHtml(p.content || '')}</div>
+          ${p.media ? `<img src="${p.media}" class="post-media-attachment" alt="Post Media" loading="lazy">` : ''}
+          <div class="post-actions-row">
+            <div class="post-action-btn" onclick="likePost('${p.id}', this)">
+              <i class="far fa-heart"></i> <span>${p.likes || 0}</span>
+            </div>
+            <div class="post-action-btn" onclick="alert('Community safety discussions are monitored under Bangladesh cybersecurity guidelines.')">
+              <i class="far fa-comment"></i> Comment
+            </div>
+            <div class="post-action-btn" onclick="sharePost('${p.id}')">
+              <i class="fas fa-share-nodes"></i> Share
+            </div>
+          </div>
         `;
         container.appendChild(card);
       });
+
+      // Pagination Button for High Scalability
+      if (hasMoreFeedPosts) {
+        const moreBtnContainer = document.createElement('div');
+        moreBtnContainer.style.textAlign = 'center';
+        moreBtnContainer.style.margin = '16px 0';
+        moreBtnContainer.innerHTML = `
+          <button onclick="fetchLiveFeedPosts(${feedPage + 1}, true)" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-quiet); color: #fff; padding: 10px 20px; border-radius: 12px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fas fa-chevron-down"></i> Load More Safety Reports
+          </button>
+        `;
+        container.appendChild(moreBtnContainer);
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.innerText = text;
+      return div.innerHTML;
     }
 
     function likePost(id, el) {
-      const p = communityPosts.find(item => item.id === id);
-      if (p) {
-        p.likes++;
-        el.querySelector('span').innerText = p.likes;
-        el.querySelector('i').className = "fas fa-heart";
-        el.querySelector('i').style.color = "#ef4444";
-        localStorage.setItem('safe_bd_posts', JSON.stringify(communityPosts));
-      }
+      fetch(`${API_BASE}/api/feed/posts/${encodeURIComponent(id)}/like`, { method: 'POST' })
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.likes !== undefined && el) {
+            const span = el.querySelector('span');
+            if (span) span.innerText = res.likes;
+            const icon = el.querySelector('i');
+            if (icon) {
+              icon.className = "fas fa-heart";
+              icon.style.color = "#ef4444";
+            }
+          }
+        })
+        .catch(err => console.warn("Like error:", err));
     }
 
     function sharePost(id) {
@@ -2189,7 +2264,7 @@
       activeFeedFilter = type;
       document.querySelectorAll('#screen-feed .auth-toggle-tab').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      renderCommunityPosts();
+      fetchLiveFeedPosts(1, false);
     }
 
     /* ----------------------------------------------------
@@ -3155,9 +3230,11 @@
       if (btn) btn.classList.add('active');
 
       if (id === 'screen-admin') {
-        renderAdminPendingPosts();
+        fetchAdminPendingPosts();
         fetchAdminEmergencyEvidence();
         fetchAdminActiveJourneys();
+      } else if (id === 'screen-feed') {
+        fetchLiveFeedPosts(1, false);
       }
     }
 
@@ -3548,7 +3625,7 @@
       if (section === 'reports') {
         document.getElementById('admin-tab-reports').classList.add('active');
         document.getElementById('admin-section-reports').style.display = 'block';
-        renderAdminPendingPosts();
+        fetchAdminPendingPosts();
         fetchAdminEmergencyEvidence();
       } else if (section === 'evidence') {
         if (evTab) evTab.classList.add('active');
@@ -4007,8 +4084,8 @@
       if (!container) return;
       container.innerHTML = '';
 
-      const pendingPosts = communityPosts.filter(p => !p.approved);
-      const approvedPosts = communityPosts.filter(p => p.approved);
+      const pendingPosts = adminPendingPostsList;
+      const approvedPosts = liveApprovedPosts;
 
       const pendingStat = document.getElementById('admin-pending-stat');
       const approvedStat = document.getElementById('admin-approved-stat');
@@ -4033,13 +4110,13 @@
         card.innerHTML = `
           <div class="feed-card-header">
             <div class="author-info">
-              <div class="author-avatar" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;">${p.author.charAt(0).toUpperCase()}</div>
+              <div class="author-avatar" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;">${(p.author || 'C').charAt(0).toUpperCase()}</div>
               <div>
                 <div class="author-name">
-                  ${p.author}
+                  ${escapeHtml(p.author || 'Citizen Reporter')}
                   ${p.verified ? '<i class="fas fa-check-circle verified-icon" title="Verified Citizen"></i>' : ''}
                 </div>
-                <div style="font-size: 10px; color: var(--text-muted);">${p.time} • <span style="color: #e57373;">${p.category}</span></div>
+                <div style="font-size: 10px; color: var(--text-muted);">${p.time || 'Just now'} • <span style="color: #e57373;">${escapeHtml(p.category || 'General Safety')}</span></div>
               </div>
             </div>
             <div>
@@ -4048,8 +4125,8 @@
               </span>
             </div>
           </div>
-          <div class="post-text">${p.content}</div>
-          ${p.media ? `<img src="${p.media}" class="post-media-attachment" alt="Post Media Attachment">` : ''}
+          <div class="post-text">${escapeHtml(p.content || '')}</div>
+          ${p.media ? `<img src="${p.media}" class="post-media-attachment" alt="Post Media Attachment" loading="lazy">` : ''}
           <div style="display: flex; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-quiet);">
             <button onclick="approvePost('${p.id}')" style="flex: 1; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #fff; border: none; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
               <i class="fas fa-check"></i> Approve & Publish to Feed
