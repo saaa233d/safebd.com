@@ -3592,6 +3592,9 @@
         } else {
           urgentContainer.style.display = 'block';
           const latest = adminEmergencyEvidenceList[0];
+          const latestUrl = (latest.videoUrl && latest.videoUrl.startsWith('http')) ? latest.videoUrl : `${API_BASE}${latest.videoUrl || ''}`;
+          const latestDlName = `evidence-${latest.id}.${latest.fileName ? latest.fileName.split('.').pop() : 'webm'}`;
+
           urgentContainer.innerHTML = `
             <div style="background: rgba(239, 68, 68, 0.12); border: 1.5px solid rgba(239, 68, 68, 0.6); border-radius: 14px; padding: 12px 14px; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.25);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -3609,14 +3612,23 @@
                 <i class="fas fa-location-dot"></i> ${latest.location.address}
               </div>
               <!-- Embedded video & audio evidence player directly on post moderation queue -->
-              <div style="border-radius: 10px; overflow: hidden; background: #000; border: 1px solid rgba(255,255,255,0.15); margin-bottom: 8px;">
-                <video controls playsinline preload="metadata" style="width: 100%; max-height: 220px; display: block;" src="${latest.videoUrl}"></video>
+              <div style="border-radius: 10px; overflow: hidden; background: #000; border: 1px solid rgba(255,255,255,0.18); margin-bottom: 8px;">
+                <video controls playsinline preload="auto" crossorigin="anonymous" style="width: 100%; max-height: 240px; display: block; object-fit: contain; background: #000;" src="${latestUrl}">
+                  <source src="${latestUrl}" type="${latest.mimeType || 'video/webm'}">
+                  Your browser cannot play this video directly. Click Save / Download below to view.
+                </video>
               </div>
-              <div style="display: flex; gap: 8px;">
-                <a href="https://www.google.com/maps?q=${latest.location.lat},${latest.location.lon}" target="_blank" style="flex: 1; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: #fff; padding: 7px; border-radius: 8px; font-size: 11px; font-weight: 700; text-align: center; text-decoration: none;">
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" onclick="saveEmergencyEvidence('${latestUrl}', '${latestDlName}')" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245,158,11,0.45); color: #f59e0b; padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                  <i class="fas fa-download"></i> Save Recording
+                </button>
+                <a href="${latestUrl}" target="_blank" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-quiet); color: #fff; padding: 8px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 4px;">
+                  <i class="fas fa-arrow-up-right-from-square"></i> Open Tab
+                </a>
+                <a href="https://www.google.com/maps?q=${latest.location.lat},${latest.location.lon}" target="_blank" style="flex: 1; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: #fff; padding: 8px; border-radius: 8px; font-size: 11px; font-weight: 700; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px;">
                   <i class="fas fa-location-crosshairs"></i> Google Maps Pin
                 </a>
-                <a href="tel:${latest.userPhone.replace(/\s+/g, '')}" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16,185,129,0.4); color: #10b981; padding: 7px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; text-decoration: none;">
+                <a href="tel:${latest.userPhone.replace(/\s+/g, '')}" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16,185,129,0.4); color: #10b981; padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; text-decoration: none;">
                   <i class="fas fa-phone"></i> Call
                 </a>
               </div>
@@ -3642,6 +3654,9 @@
 
       fullContainer.innerHTML = '';
       adminEmergencyEvidenceList.forEach(item => {
+        const itemUrl = (item.videoUrl && item.videoUrl.startsWith('http')) ? item.videoUrl : `${API_BASE}${item.videoUrl || ''}`;
+        const itemDlName = `evidence-${item.id}.${item.fileName ? item.fileName.split('.').pop() : 'webm'}`;
+
         const card = document.createElement('div');
         card.className = 'feed-card';
         card.style.borderColor = 'rgba(239, 68, 68, 0.65)';
@@ -3669,24 +3684,63 @@
           </div>
 
           <!-- Video & Audio Evidence Player -->
-          <div style="margin: 10px 0; border-radius: 12px; overflow: hidden; background: #000; border: 1px solid rgba(255,255,255,0.15);">
-            <video controls playsinline preload="metadata" style="width: 100%; max-height: 280px; display: block; object-fit: contain;" src="${item.videoUrl}"></video>
+          <div style="margin: 10px 0; border-radius: 12px; overflow: hidden; background: #000; border: 1px solid rgba(255,255,255,0.18);">
+            <video controls playsinline preload="auto" crossorigin="anonymous" style="width: 100%; max-height: 280px; display: block; object-fit: contain; background: #000;" src="${itemUrl}">
+              <source src="${itemUrl}" type="${item.mimeType || 'video/webm'}">
+              Your browser cannot play this video directly. Click Save / Download below to view.
+            </video>
           </div>
 
           <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+            <button type="button" onclick="saveEmergencyEvidence('${itemUrl}', '${itemDlName}')" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245,158,11,0.45); color: #f59e0b; padding: 9px 13px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+              <i class="fas fa-download"></i> Save Recording
+            </button>
+            <a href="${itemUrl}" target="_blank" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-quiet); color: #fff; padding: 9px 12px; border-radius: 10px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+              <i class="fas fa-arrow-up-right-from-square"></i> Open Tab
+            </a>
             <a href="https://www.google.com/maps?q=${item.location.lat},${item.location.lon}" target="_blank" style="flex: 1; min-width: 130px; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: #fff; padding: 9px; border-radius: 10px; font-size: 11px; font-weight: 700; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px;">
               <i class="fas fa-location-crosshairs"></i> Google Maps Pin
             </a>
             <a href="tel:${item.userPhone.replace(/\s+/g, '')}" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16,185,129,0.3); color: #10b981; padding: 9px 12px; border-radius: 10px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px;">
               <i class="fas fa-phone"></i> Call Citizen
             </a>
-            <a href="${item.videoUrl}" download="evidence-${item.id}.webm" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245,158,11,0.3); color: #f59e0b; padding: 9px 12px; border-radius: 10px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px;">
-              <i class="fas fa-download"></i> Save Evidence
-            </a>
           </div>
         `;
         fullContainer.appendChild(card);
       });
+    }
+
+    async function saveEmergencyEvidence(rawUrl, defaultName) {
+      if (!rawUrl) return;
+      const fullUrl = rawUrl.startsWith('http') ? rawUrl : `${API_BASE}${rawUrl}`;
+      const filename = defaultName || 'safe_bd_covert_evidence.webm';
+
+      try {
+        const res = await fetch(fullUrl, { mode: 'cors' });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const blob = await res.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(blobUrl);
+        }, 3000);
+      } catch (err) {
+        console.warn("Direct blob download fallback to download URL:", err);
+        const dlUrl = fullUrl + (fullUrl.includes('?') ? '&' : '?') + 'download=1';
+        const a = document.createElement('a');
+        a.href = dlUrl;
+        a.target = '_blank';
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => a.remove(), 1000);
+      }
     }
 
     function formatEvidenceTime(iso) {
