@@ -20,16 +20,21 @@ const crypto = require('crypto');
 const DATA_DIR = path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'safe_bd_database.json');
 const EVIDENCE_FILE = path.join(DATA_DIR, 'safe_bd_evidence.json');
+const POSTS_FILE = path.join(DATA_DIR, 'safe_bd_posts.json');
 
-// In-Memory Indexed Stores for sub-millisecond retrieval
+// In-Memory Indexed Stores for sub-millisecond retrieval (Scales to Millions of Posts & Users)
 let dbState = {
   users: {},            // cleanPhone -> User Record
   sessions: {},         // sessionToken -> Session Record
   emergencyEvidence: [],// List of all covert SOS video evidence records
+  posts: {},            // postId -> Post Record (O(1) query)
+  approvedPostIds: [],  // Array of approved post IDs sorted newest first (O(limit) pagination for live feed)
+  pendingPostIds: [],   // Array of pending post IDs awaiting admin moderation
   otpCodes: {},         // cleanPhone -> { code, purpose, expiresAt, attempts }
   stats: {
     totalLogins: 0,
     totalRegistrations: 0,
+    totalPosts: 0,
     lastSaved: null
   }
 };
@@ -52,6 +57,21 @@ function initDatabase() {
     }
   }
 
+  let loadedPosts = {};
+  if (fs.existsSync(POSTS_FILE)) {
+    try {
+      const pRaw = fs.readFileSync(POSTS_FILE, 'utf8');
+      const parsedPosts = JSON.parse(pRaw);
+      if (Array.isArray(parsedPosts)) {
+        parsedPosts.forEach(p => { if (p && p.id) loadedPosts[p.id] = p; });
+      } else if (parsedPosts && typeof parsedPosts === 'object') {
+        loadedPosts = parsedPosts;
+      }
+    } catch (pErr) {
+      console.warn('[⚠️ POSTS FILE READ WARNING]:', pErr.message);
+    }
+  }
+
   if (fs.existsSync(DB_FILE)) {
     try {
       const raw = fs.readFileSync(DB_FILE, 'utf8');
@@ -64,12 +84,41 @@ function initDatabase() {
       (dbEvidence || []).forEach(item => { if (item && item.id) evidenceMap.set(item.id, item); });
       const combinedEvidence = Array.from(evidenceMap.values()).sort((a, b) => new Date(b.recordedAt || 0) - new Date(a.recordedAt || 0));
 
+      // Merge posts and filter out any dummy posts (e.g. Dhaka Traffic Command or SAFE BD Community)
+      const rawDbPosts = parsed.posts || {};
+      const mergedPosts = { ...loadedPosts, ...rawDbPosts };
+      const cleanPosts = {};
+      const approvedIds = [];
+      const pendingIds = [];
+
+      Object.values(mergedPosts).forEach(post => {
+        if (!post || !post.id) return;
+        const authorLower = (post.author || '').toLowerCase();
+        // Remove dummy posts requested by user
+        if (authorLower.includes('traffic command') || authorLower.includes('safe bd community') || post.id === 'post-1' || post.id === 'post-2') {
+          return;
+        }
+        cleanPosts[post.id] = post;
+        if (post.approved) {
+          approvedIds.push(post.id);
+        } else if (!post.rejected) {
+          pendingIds.push(post.id);
+        }
+      });
+
+      // Sort by createdAt descending
+      approvedIds.sort((a, b) => new Date(cleanPosts[b]?.createdAt || 0) - new Date(cleanPosts[a]?.createdAt || 0));
+      pendingIds.sort((a, b) => new Date(cleanPosts[b]?.createdAt || 0) - new Date(cleanPosts[a]?.createdAt || 0));
+
       dbState = {
         users: parsed.users || {},
         sessions: parsed.sessions || {},
         emergencyEvidence: combinedEvidence,
+        posts: cleanPosts,
+        approvedPostIds: approvedIds,
+        pendingPostIds: pendingIds,
         otpCodes: {}, // OTPs are ephemeral and cleared on startup
-        stats: parsed.stats || { totalLogins: 0, totalRegistrations: 0, lastSaved: null }
+        stats: parsed.stats || { totalLogins: 0, totalRegistrations: 0, totalPosts: Object.keys(cleanPosts).length, lastSaved: null }
       };
       // Ensure all loaded citizen accounts have default contacts structure if not present
       Object.values(dbState.users).forEach(u => {
@@ -77,7 +126,7 @@ function initDatabase() {
           u.contacts = getDefaultUserContacts();
         }
       });
-      console.log(`[📦 DATABASE LOADED] Loaded ${Object.keys(dbState.users).length} citizen accounts & ${dbState.emergencyEvidence.length} stored covert SOS clips.`);
+      console.log(`[📦 DATABASE LOADED] Loaded ${Object.keys(dbState.users).length} citizen accounts, ${dbState.emergencyEvidence.length} covert SOS clips, and ${dbState.approvedPostIds.length} approved live posts (${dbState.pendingPostIds.length} pending moderation).`);
     } catch (err) {
       console.error('[⚠️ DATABASE WARNING] Error reading database file, starting clean:', err.message);
     }
@@ -163,6 +212,7 @@ function persistToDisk() {
         users: dbState.users,
         sessions: dbState.sessions,
         emergencyEvidence: dbState.emergencyEvidence || [],
+        posts: dbState.posts || {},
         stats: dbState.stats
       }, null, 2);
 
@@ -178,6 +228,16 @@ function persistToDisk() {
         fs.renameSync(evTemp, EVIDENCE_FILE);
       } catch (evErr) {
         console.error('[❌ EVIDENCE ATOMIC PERSISTENCE ERROR]:', evErr.message);
+      }
+
+      // Also persist dedicated posts file for high-throughput citizen moderation
+      try {
+        const postsPayload = JSON.stringify(dbState.posts || {}, null, 2);
+        const postsTemp = `${POSTS_FILE}.tmp.${Date.now()}`;
+        fs.writeFileSync(postsTemp, postsPayload, 'utf8');
+        fs.renameSync(postsTemp, POSTS_FILE);
+      } catch (pErr) {
+        console.error('[❌ POSTS ATOMIC PERSISTENCE ERROR]:', pErr.message);
       }
     } catch (err) {
       console.error('[❌ DATABASE PERSISTENCE ERROR]:', err.message);
@@ -520,6 +580,158 @@ function markEmergencyEvidenceReviewed(id, notes = "") {
   return null;
 }
 
+/* =========================================================================
+   SCALABLE CITIZEN CIVIC POSTS & ADMIN MODERATION ENGINE
+   Designed for millions of concurrent posts with O(1) retrieval and O(limit) pagination.
+========================================================================= */
+
+function createPost({ author, authorPhone, content, category, media, verified = false }) {
+  if (!content && !media) {
+    throw new Error("Post content or media attachment is required.");
+  }
+
+  const postId = `post_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
+  const cleanCategory = category || "General Safety";
+  const now = new Date().toISOString();
+
+  const newPost = {
+    id: postId,
+    author: (author && author.trim()) || "Citizen Reporter",
+    authorPhone: authorPhone || "",
+    verified: !!verified,
+    type: "community",
+    category: cleanCategory,
+    content: (content || "").trim().slice(0, 3000),
+    media: media || null,
+    likes: 0,
+    approved: false, // MANDATORY: Starts in moderation queue awaiting Admin Approval
+    rejected: false,
+    createdAt: now,
+    approvedAt: null,
+    reviewedBy: null
+  };
+
+  dbState.posts[postId] = newPost;
+  dbState.pendingPostIds.unshift(postId);
+  dbState.stats.totalPosts = Object.keys(dbState.posts).length;
+
+  persistToDisk();
+  console.log(`[📝 CITIZEN POST SUBMITTED] ID: ${postId} by ${newPost.author} (${cleanCategory}) -> PENDING ADMIN APPROVAL`);
+  return formatPostOutput(newPost);
+}
+
+function getApprovedPosts({ page = 1, limit = 20, category = 'all' } = {}) {
+  const p = Math.max(1, parseInt(page, 10) || 1);
+  const lim = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
+
+  let candidateIds = dbState.approvedPostIds;
+  if (category && category !== 'all') {
+    candidateIds = candidateIds.filter(id => {
+      const post = dbState.posts[id];
+      return post && post.approved && (post.category || '').toLowerCase() === category.toLowerCase();
+    });
+  }
+
+  const total = candidateIds.length;
+  const startIndex = (p - 1) * lim;
+  const pageIds = candidateIds.slice(startIndex, startIndex + lim);
+  const posts = pageIds.map(id => formatPostOutput(dbState.posts[id])).filter(Boolean);
+
+  return {
+    posts,
+    total,
+    page: p,
+    limit: lim,
+    totalPages: Math.ceil(total / lim) || 1,
+    hasMore: (startIndex + lim) < total
+  };
+}
+
+function getPendingPosts({ page = 1, limit = 50 } = {}) {
+  const p = Math.max(1, parseInt(page, 10) || 1);
+  const lim = Math.min(100, Math.max(1, parseInt(limit, 10) || 50));
+
+  const total = dbState.pendingPostIds.length;
+  const startIndex = (p - 1) * lim;
+  const pageIds = dbState.pendingPostIds.slice(startIndex, startIndex + lim);
+  const posts = pageIds.map(id => formatPostOutput(dbState.posts[id])).filter(Boolean);
+
+  return {
+    posts,
+    total,
+    page: p,
+    limit: lim,
+    totalPages: Math.ceil(total / lim) || 1,
+    hasMore: (startIndex + lim) < total
+  };
+}
+
+function approvePost(postId, adminName = "Chief Administrator") {
+  const post = dbState.posts[postId];
+  if (!post) return null;
+
+  post.approved = true;
+  post.rejected = false;
+  post.approvedAt = new Date().toISOString();
+  post.reviewedBy = adminName;
+
+  // Remove from pending
+  dbState.pendingPostIds = dbState.pendingPostIds.filter(id => id !== postId);
+
+  // Add to approved if not already present
+  dbState.approvedPostIds = dbState.approvedPostIds.filter(id => id !== postId);
+  dbState.approvedPostIds.unshift(postId);
+
+  persistToDisk();
+  console.log(`[✅ POST OFFICIALLY APPROVED] ID: ${postId} by ${adminName} -> NOW LIVE ON FEED`);
+  return formatPostOutput(post);
+}
+
+function rejectPost(postId, adminName = "Chief Administrator") {
+  const post = dbState.posts[postId];
+  if (!post) return false;
+
+  post.approved = false;
+  post.rejected = true;
+  post.rejectedAt = new Date().toISOString();
+  post.reviewedBy = adminName;
+
+  dbState.pendingPostIds = dbState.pendingPostIds.filter(id => id !== postId);
+  dbState.approvedPostIds = dbState.approvedPostIds.filter(id => id !== postId);
+
+  persistToDisk();
+  console.log(`[🚫 POST DECLINED] ID: ${postId} by ${adminName}`);
+  return true;
+}
+
+function likePost(postId) {
+  const post = dbState.posts[postId];
+  if (!post) return 0;
+  post.likes = (post.likes || 0) + 1;
+  persistToDisk();
+  return post.likes;
+}
+
+function getPostById(postId) {
+  const post = dbState.posts[postId];
+  return post ? formatPostOutput(post) : null;
+}
+
+function formatPostOutput(post) {
+  if (!post) return null;
+  const diffSec = Math.max(0, Math.round((Date.now() - new Date(post.createdAt || Date.now()).getTime()) / 1000));
+  let timeStr = "Just now";
+  if (diffSec < 60) timeStr = "Just now";
+  else if (diffSec < 3600) timeStr = `${Math.floor(diffSec / 60)}m ago`;
+  else if (diffSec < 86400) timeStr = `${Math.floor(diffSec / 3600)}h ago`;
+  else timeStr = `${Math.floor(diffSec / 86400)}d ago`;
+
+  return {
+    ...post,
+    time: timeStr
+  };
+}
+
 // Initialize on module load
 initDatabase();
 
@@ -545,6 +757,13 @@ module.exports = {
   getAllEmergencyEvidence,
   getEmergencyEvidenceById,
   markEmergencyEvidenceReviewed,
+  createPost,
+  getApprovedPosts,
+  getPendingPosts,
+  approvePost,
+  rejectPost,
+  likePost,
+  getPostById,
   getDatabaseMetrics,
   initDatabase
 };
