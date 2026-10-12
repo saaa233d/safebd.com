@@ -1,0 +1,18 @@
+{
+  "name": "safe-bd",
+  "version": "1.0.0",
+  "description": "SAFE BD - National Digital Safety & Civic Emergency Ecosystem",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "build": "echo 'Build complete'"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "ws": "^8.17.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
