@@ -2044,6 +2044,34 @@
     let overdueReminderPromptShown = false;
     let overdueAutoEscalated = false;
 
+    // GPS Deadband & Map Stabilizer (Prevents Flickering on Sensor Jitter)
+    let lastProcessedGpsCoords = { lat: 0, lon: 0 };
+    let lastRouteCalculatedCoords = { lat: 0, lon: 0 };
+    let lastRouteCalculatedTime = 0;
+    let isRouteCalculating = false;
+    let currentMapFrameSrc = "";
+
+    function computeGeoDistanceMeters(lat1, lon1, lat2, lon2) {
+      if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+      const R = 6371000; // Earth radius in meters
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    function safelyUpdateMapFrame(targetUrl) {
+      const mapFrame = document.getElementById('gmaps-frame');
+      if (!mapFrame || !targetUrl) return;
+      // CRITICAL: Reassigning .src to an identical URL forces the iframe to blank and reload!
+      if (currentMapFrameSrc === targetUrl) return;
+      currentMapFrameSrc = targetUrl;
+      mapFrame.src = targetUrl;
+    }
+
     try {
       const saved = localStorage.getItem('safe_bd_user');
       if (saved) {
@@ -2113,6 +2141,31 @@
       currentCoords.lon = lon;
       currentCoords.accuracy = acc;
 
+      const isFirstFix = (lastProcessedGpsCoords.lat === 0 && lastProcessedGpsCoords.lon === 0);
+      const movedMeters = isFirstFix ? 999999 : computeGeoDistanceMeters(lastProcessedGpsCoords.lat, lastProcessedGpsCoords.lon, lat, lon);
+
+      // STABILIZER: If user moved less than 40 meters (and not forced alert), suppress heavy re-render to eliminate flickering
+      if (!isFirstFix && movedMeters !== null && movedMeters < 40 && !showAlert) {
+        updateTelemetryUI(currentCoords.address, `Coordinates: ${lat.toFixed(5)}, ${lon.toFixed(5)}`, `GPS Live (±${acc}m)`, "#10b981");
+
+        // Sync coordinates silently if on an active journey
+        if (activeJourneySessionId) {
+          fetch(`${API_BASE}/api/walk/update-location`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId: activeJourneySessionId,
+              lat,
+              lon,
+              address: currentCoords.address
+            })
+          }).catch(() => {});
+        }
+        return;
+      }
+
+      lastProcessedGpsCoords = { lat, lon };
+
       // Reverse geocode directly for exact street/landmark
       fetchAccurateReverseGeocode(lat, lon, showAlert);
     }
@@ -2149,17 +2202,22 @@
       const walkStartEl = document.getElementById('walk-start');
       if (walkStartEl) walkStartEl.value = `📍 ${locName}`;
 
-      // Center Google Maps exactly on the real device coordinates with pin popup balloon (iwloc=B)
-      const gmapsUrl = `https://maps.google.com/maps?q=${lat},${lon}&t=&z=16&ie=UTF8&iwloc=B&output=embed`;
-      const mapFrame = document.getElementById('gmaps-frame');
-      if (mapFrame && !currentDestinationQuery) mapFrame.src = gmapsUrl;
+      // Center Google Maps safely without blanking/reloading if no destination selected
+      if (!currentDestinationQuery) {
+        const gmapsUrl = `https://maps.google.com/maps?q=${lat},${lon}&t=&z=16&ie=UTF8&iwloc=B&output=embed`;
+        safelyUpdateMapFrame(gmapsUrl);
 
-      const extGmaps = document.getElementById('btn-external-gmaps');
-      if (extGmaps && !currentDestinationQuery) extGmaps.href = `https://www.google.com/maps?q=${lat},${lon}`;
+        const extGmaps = document.getElementById('btn-external-gmaps');
+        if (extGmaps) extGmaps.href = `https://www.google.com/maps?q=${lat},${lon}`;
+      }
 
-      // Recalculate route if destination is already selected
+      // If destination is selected, only recompute route if user physically moved > 150 meters or > 60 seconds have passed
       if (currentDestinationQuery) {
-        computeLiveGoogleMapsRoute(currentDestinationQuery);
+        const routeMovedMeters = computeGeoDistanceMeters(lastRouteCalculatedCoords.lat, lastRouteCalculatedCoords.lon, lat, lon);
+        const timeSinceLastRoute = Date.now() - lastRouteCalculatedTime;
+        if (lastRouteCalculatedCoords.lat === 0 || (routeMovedMeters !== null && routeMovedMeters >= 150) || timeSinceLastRoute > 60000) {
+          computeLiveGoogleMapsRoute(currentDestinationQuery, selectedDestCoords, false);
+        }
       }
 
       // If in active journey, sync live coordinate to backend
@@ -2955,7 +3013,7 @@
       const destText = (currentDestinationQuery || (destInput ? destInput.value.trim() : '')).trim();
       if (destText) {
         currentDestinationQuery = destText;
-        computeLiveGoogleMapsRoute(currentDestinationQuery, selectedDestCoords);
+        computeLiveGoogleMapsRoute(currentDestinationQuery, selectedDestCoords, true);
       }
     }
 
@@ -2975,7 +3033,7 @@
       currentDestinationQuery = query || `${displayName}, Bangladesh`;
       selectedDestCoords = (lat && lon) ? { lat: parseFloat(lat), lon: parseFloat(lon) } : null;
 
-      computeLiveGoogleMapsRoute(currentDestinationQuery, selectedDestCoords);
+      computeLiveGoogleMapsRoute(currentDestinationQuery, selectedDestCoords, true);
     }
 
     function selectCustomLocation(rawQuery) {
@@ -3000,13 +3058,14 @@
 
       currentDestinationQuery = "";
       selectedDestCoords = null;
+      lastRouteCalculatedCoords = { lat: 0, lon: 0 };
+      lastRouteCalculatedTime = 0;
+      isRouteCalculating = false;
 
-      // Reset map view to user's live device GPS location with popup balloon open
+      // Reset map view to user's live device GPS location safely without flicker
       if (currentCoords.lat && currentCoords.lon) {
-        const mapFrame = document.getElementById('gmaps-frame');
-        if (mapFrame) {
-          mapFrame.src = `https://maps.google.com/maps?q=${currentCoords.lat},${currentCoords.lon}&t=&z=16&ie=UTF8&iwloc=B&output=embed`;
-        }
+        const gmapsUrl = `https://maps.google.com/maps?q=${currentCoords.lat},${currentCoords.lon}&t=&z=16&ie=UTF8&iwloc=B&output=embed`;
+        safelyUpdateMapFrame(gmapsUrl);
       }
     }
 
@@ -3022,36 +3081,14 @@
       return Math.max(0.2, Math.round(R * c * 1.35 * 10) / 10);
     }
 
-    // Live Distance & Travel Mode ETA Calculation from Device GPS to Destination
-    function computeLiveGoogleMapsRoute(destQuery, explicitCoords = null) {
+    // Live Distance & Travel Mode ETA Calculation (Flicker-Free & Stabilized)
+    function computeLiveGoogleMapsRoute(destQuery, explicitCoords = null, forceMapReload = true) {
       if (!destQuery || !destQuery.trim()) return;
       const cleanDest = destQuery.trim();
       const originParam = `${currentCoords.lat},${currentCoords.lon}`;
-      const encodedDest = encodeURIComponent(cleanDest);
       const modeParam = selectedTravelMode === 'driving' ? 'driving' : (selectedTravelMode === 'bicycling' ? 'bicycling' : 'walking');
-
-      // Update embedded map with real origin & destination route, opening popup on destination pin (iwloc=B)
-      const mapFrame = document.getElementById('gmaps-frame');
-      if (mapFrame) {
-        mapFrame.src = `https://maps.google.com/maps?saddr=${encodeURIComponent(originParam)}&daddr=${encodedDest}&directionsmode=${modeParam}&t=&z=14&ie=UTF8&iwloc=B&output=embed`;
-      }
-
-      const extGmaps = document.getElementById('btn-external-gmaps');
-      if (extGmaps) {
-        extGmaps.href = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originParam)}&destination=${encodedDest}&travelmode=${modeParam}`;
-      }
-
-      // Show immediate loading feedback on estimate banner
-      const banner = document.getElementById('route-estimate-banner');
-      if (banner) {
-        banner.style.display = 'flex';
-        const modeIcon = modeParam === 'driving' ? 'fa-car-side' : (modeParam === 'bicycling' ? 'fa-motorcycle' : 'fa-person-walking');
-        const modeTitle = modeParam === 'driving' ? 'Car / CNG' : (modeParam === 'bicycling' ? 'Bike' : 'Walk');
-        const distEl = document.getElementById('route-est-distance');
-        if (distEl) distEl.innerHTML = `<i class="fas ${modeIcon}" style="color: #10b981;"></i> <span>Fetching live Google Maps ${modeTitle} route...</span>`;
-        const timeEl = document.getElementById('route-est-time');
-        if (timeEl) timeEl.innerText = '-- mins';
-      }
+      const modeTitle = modeParam === 'driving' ? 'Car / CNG' : (modeParam === 'bicycling' ? 'Bike' : 'Walk');
+      const modeIcon = modeParam === 'driving' ? 'fa-car-side' : (modeParam === 'bicycling' ? 'fa-motorcycle' : 'fa-person-walking');
 
       // Resolve destination coordinates
       let dLat = explicitCoords && explicitCoords.lat ? explicitCoords.lat : (selectedDestCoords && selectedDestCoords.lat ? selectedDestCoords.lat : null);
@@ -3065,6 +3102,41 @@
           selectedDestCoords = { lat: dLat, lon: dLon };
         }
       }
+
+      // Construct optimal target embed URL
+      const daddrParam = (dLat && dLon) ? `${dLat},${dLon}` : encodeURIComponent(cleanDest);
+      const targetEmbedUrl = `https://maps.google.com/maps?saddr=${encodeURIComponent(originParam)}&daddr=${daddrParam}&directionsmode=${modeParam}&t=&z=14&ie=UTF8&iwloc=B&output=embed`;
+
+      if (forceMapReload) {
+        safelyUpdateMapFrame(targetEmbedUrl);
+      }
+
+      const extGmaps = document.getElementById('btn-external-gmaps');
+      if (extGmaps) {
+        const extDest = (dLat && dLon) ? `${dLat},${dLon}` : encodeURIComponent(cleanDest);
+        extGmaps.href = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originParam)}&destination=${extDest}&travelmode=${modeParam}`;
+      }
+
+      // Smooth green banner display (NO FLICKER: never wipe existing valid ETA to '-- mins')
+      const banner = document.getElementById('route-estimate-banner');
+      if (banner) {
+        banner.style.display = 'flex';
+        const distEl = document.getElementById('route-est-distance');
+        const timeEl = document.getElementById('route-est-time');
+
+        // Only show placeholder if banner has no estimate yet
+        if (!timeEl || !timeEl.innerText || timeEl.innerText.trim() === '-- mins' || timeEl.innerText.trim() === '') {
+          if (distEl) distEl.innerHTML = `<i class="fas ${modeIcon}" style="color: #10b981;"></i> <span>Calculating ${modeTitle} route...</span>`;
+          if (timeEl) timeEl.innerHTML = `<span style="opacity: 0.7; font-size: 11px;">Estimating...</span>`;
+        }
+      }
+
+      lastRouteCalculatedCoords = { lat: currentCoords.lat, lon: currentCoords.lon };
+      lastRouteCalculatedTime = Date.now();
+
+      // In-flight guard to prevent multiple concurrent backend requests
+      if (isRouteCalculating) return;
+      isRouteCalculating = true;
 
       // Request live routing, road network distance, and BD traffic index from backend
       const queryParams = new URLSearchParams({
@@ -3081,6 +3153,7 @@
       fetch(`${API_BASE}/api/routing/directions?${queryParams.toString()}`)
         .then(r => r.json())
         .then(data => {
+          isRouteCalculating = false;
           if (data && data.success) {
             calculatedRouteDistanceKm = data.distanceKm;
             calculatedDurationMinutes = data.durationMinutes;
@@ -3088,8 +3161,9 @@
               selectedDestCoords = data.destination;
             }
 
-            if (mapFrame && data.embedUrl) {
-              mapFrame.src = data.embedUrl;
+            // Update map safely only if embed URL actually changed
+            if (data.embedUrl) {
+              safelyUpdateMapFrame(data.embedUrl);
             }
             if (extGmaps && data.googleMapsUrl) {
               extGmaps.href = data.googleMapsUrl;
@@ -3101,6 +3175,7 @@
           }
         })
         .catch(err => {
+          isRouteCalculating = false;
           console.warn("[ROUTING] Live backend route fetch failed, using realistic fallback:", err);
           fallbackLocalEta(cleanDest, dLat, dLon, modeParam);
         });
