@@ -1976,7 +1976,7 @@
     let hasMoreFeedPosts = false;
     let isLoadingFeed = false;
 
-    // Purge legacy dummy posts (Dhaka Traffic Command, SAFE BD Community) from client storage
+    // Purge legacy dummy posts & reset initial like counts to 0
     function purgeLegacyDummyPosts() {
       try {
         const raw = localStorage.getItem('safe_bd_posts');
@@ -1986,14 +1986,47 @@
             const author = (p.author || '').toLowerCase();
             return !author.includes('traffic command') && !author.includes('safe bd community') && !author.includes('police') && p.id !== 'post-1' && p.id !== 'post-2';
           });
+          cleaned.forEach(p => {
+            if (p.id === 'post_saad_rizwan_founder_01') {
+              p.likes = 0;
+              p.likedBy = [];
+            }
+          });
           liveApprovedPosts = cleaned.filter(p => p.approved);
           localStorage.setItem('safe_bd_posts', JSON.stringify(cleaned));
+        }
+
+        const approvedRaw = localStorage.getItem('safe_bd_approved_posts');
+        if (approvedRaw) {
+          const parsedApp = JSON.parse(approvedRaw);
+          if (Array.isArray(parsedApp)) {
+            parsedApp.forEach(p => {
+              if (p.id === 'post_saad_rizwan_founder_01') {
+                p.likes = 0;
+                p.likedBy = [];
+              }
+            });
+            localStorage.setItem('safe_bd_approved_posts', JSON.stringify(parsedApp));
+          }
         }
       } catch (e) {
         console.warn("Storage purge warning:", e);
       }
     }
     purgeLegacyDummyPosts();
+
+    // Unique Citizen / Device Identifier (Ensures 1 Like per Citizen)
+    function getClientUserIdentifier() {
+      if (currentUser && (currentUser.phone || currentUser.id)) {
+        return 'user_' + String(currentUser.phone || currentUser.id).replace(/\D/g, '');
+      }
+      let deviceId = localStorage.getItem('safe_bd_device_id');
+      if (!deviceId) {
+        deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+        localStorage.setItem('safe_bd_device_id', deviceId);
+      }
+      return deviceId;
+    }
 
     // Live High-Precision Geolocation (Device GPS Only)
     let currentCoords = {
@@ -2396,6 +2429,10 @@
         const safeAuthorAttr = authorNameClean.replace(/'/g, "\\'");
         const safeRoleAttr = (p.authorRole || (isSaadRizwan ? 'Founder & CEO, SAFE bd' : '')).replace(/'/g, "\\'");
 
+        const myUserId = getClientUserIdentifier();
+        const isLikedByMe = Array.isArray(p.likedBy) ? p.likedBy.includes(myUserId) : false;
+        const currentLikesCount = (typeof p.likes === 'number' && !isNaN(p.likes)) ? p.likes : 0;
+
         card.innerHTML = `
           <div class="feed-card-header">
             <div class="author-info" onclick="openAuthorProfileModal('${safeAuthorAttr}', ${isSaadRizwan ? 'true' : 'false'}, '${safeRoleAttr}')" style="cursor: pointer;" title="Tap to view official profile">
@@ -2434,8 +2471,8 @@
           <div class="post-text">${escapeHtml(p.content || '')}</div>
           ${p.media ? `<img src="${p.media}" class="post-media-attachment" alt="Post Media" loading="lazy">` : ''}
           <div class="post-actions-row">
-            <div class="post-action-btn" onclick="likePost('${p.id}', this)">
-              <i class="far fa-heart"></i> <span>${p.likes || 0}</span>
+            <div class="post-action-btn ${isLikedByMe ? 'liked' : ''}" onclick="likePost('${p.id}', this)" title="${isLikedByMe ? 'Unlike (1 like per citizen)' : 'Like'}">
+              <i class="${isLikedByMe ? 'fas fa-heart' : 'far fa-heart'}" style="${isLikedByMe ? 'color: #ef4444;' : ''}"></i> <span>${currentLikesCount}</span>
             </div>
             <div class="post-action-btn" onclick="alert('Community safety discussions are monitored under Bangladesh cybersecurity guidelines.')">
               <i class="far fa-comment"></i> Comment
@@ -2583,7 +2620,12 @@
     }
 
     function likePost(id, el) {
-      fetch(`${API_BASE}/api/feed/posts/${encodeURIComponent(id)}/like`, { method: 'POST' })
+      const userId = getClientUserIdentifier();
+      fetch(`${API_BASE}/api/feed/posts/${encodeURIComponent(id)}/like`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userId })
+      })
         .then(r => r.json())
         .then(res => {
           if (res && res.likes !== undefined && el) {
@@ -2591,8 +2633,32 @@
             if (span) span.innerText = res.likes;
             const icon = el.querySelector('i');
             if (icon) {
-              icon.className = "fas fa-heart";
-              icon.style.color = "#ef4444";
+              if (res.liked) {
+                icon.className = "fas fa-heart";
+                icon.style.color = "#ef4444";
+                el.classList.add('liked');
+                el.title = "Unlike (1 like per citizen)";
+              } else {
+                icon.className = "far fa-heart";
+                icon.style.color = "";
+                el.classList.remove('liked');
+                el.title = "Like";
+              }
+            }
+
+            // Sync with local in-memory posts list
+            const target = liveApprovedPosts.find(p => p.id === id);
+            if (target) {
+              target.likes = res.likes;
+              if (!Array.isArray(target.likedBy)) target.likedBy = [];
+              if (res.liked) {
+                if (!target.likedBy.includes(userId)) target.likedBy.push(userId);
+              } else {
+                target.likedBy = target.likedBy.filter(u => u !== userId);
+              }
+              try {
+                localStorage.setItem('safe_bd_approved_posts', JSON.stringify(liveApprovedPosts.slice(0, 50)));
+              } catch (e) {}
             }
           }
         })
