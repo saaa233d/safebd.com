@@ -580,6 +580,7 @@ app.post('/api/emergency/covert-recording', async (req, res) => {
       userPhone: userPhone || "01XXXXXXXXX",
       location: location || { lat: 23.8103, lon: 90.4125, address: "Dhaka, Bangladesh" },
       videoUrl: `/api/emergency/evidence/${fileName}`,
+      videoData: videoData, // Stored persistently so video is NEVER lost across server restarts
       fileName,
       fileSizeKb: Math.round(videoBuffer.length / 1024),
       mimeType: mimeType || 'video/webm',
@@ -591,7 +592,7 @@ app.post('/api/emergency/covert-recording', async (req, res) => {
 
     db.addEmergencyEvidence(evidenceItem);
 
-    console.log(`[📹🚨 SPY COVERT SOS VIDEO CAPTURED] Citizen: ${evidenceItem.userName} (${evidenceItem.userPhone}) at ${evidenceItem.location.address} | Size: ${evidenceItem.fileSizeKb} KB`);
+    console.log(`[📹🚨 SPY COVERT SOS VIDEO CAPTURED & ARCHIVED] Citizen: ${evidenceItem.userName} (${evidenceItem.userPhone}) at ${evidenceItem.location.address} | Size: ${evidenceItem.fileSizeKb} KB`);
 
     // Broadcast live to Admin and Emergency circle listeners
     broadcastLocationUpdate({
@@ -610,10 +611,34 @@ app.post('/api/emergency/covert-recording', async (req, res) => {
   }
 });
 
-// 2.3 Stream / Serve Emergency Video Evidence to Admin Portal
+// 2.3 Stream / Serve / Download Emergency Video Evidence
 app.get('/api/emergency/evidence/:filename', (req, res) => {
   const filename = path.basename(req.params.filename);
   const filePath = path.join(EVIDENCE_DIR, filename);
+
+  // Auto-recovery: If file was removed or container restarted, rebuild file from persistent database
+  if (!fs.existsSync(filePath)) {
+    const allEvidence = db.getAllEmergencyEvidence();
+    const match = allEvidence.find(e => e.fileName === filename);
+    if (match && match.videoData) {
+      try {
+        let base64Clean = match.videoData;
+        const base64Marker = ';base64,';
+        const markerIndex = base64Clean.indexOf(base64Marker);
+        if (markerIndex !== -1) {
+          base64Clean = base64Clean.substring(markerIndex + base64Marker.length);
+        } else if (base64Clean.startsWith('data:')) {
+          const commaIdx = base64Clean.indexOf(',');
+          if (commaIdx !== -1) base64Clean = base64Clean.substring(commaIdx + 1);
+        }
+        if (!fs.existsSync(EVIDENCE_DIR)) fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
+        fs.writeFileSync(filePath, Buffer.from(base64Clean.trim(), 'base64'));
+        console.log(`[♻️ EVIDENCE RESTORED FROM DATABASE] Reconstructed ${filename} (${fs.statSync(filePath).size} bytes)`);
+      } catch (recErr) {
+        console.error(`[RECOVERY FAILED] ${filename}:`, recErr.message);
+      }
+    }
+  }
 
   if (!fs.existsSync(filePath)) {
     return res.status(404).json({ error: "EVIDENCE_NOT_FOUND", message: "Requested evidence file does not exist." });
@@ -621,19 +646,25 @@ app.get('/api/emergency/evidence/:filename', (req, res) => {
 
   const stat = fs.statSync(filePath);
   const fileSize = stat.size;
-  const range = req.headers.range;
-  const contentType = filename.endsWith('.mp4') ? 'video/mp4' : 'video/webm';
+  const isDownload = req.query.download === '1' || req.query.dl === '1';
 
-  // Support direct downloads with Content-Disposition
-  if (req.query.download === '1' || req.query.dl === '1') {
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-  }
-
-  // Universal Cross-Origin and byte streaming headers
+  // Universal Cross-Origin headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', '*');
   res.setHeader('Access-Control-Expose-Headers', 'Content-Range, Content-Length, Accept-Ranges, Content-Disposition');
+
+  // Direct 1-Click File Download Handler (Forces browser download prompt)
+  if (isDownload) {
+    return res.download(filePath, filename, (err) => {
+      if (err && !res.headersSent) {
+        res.status(500).json({ error: "DOWNLOAD_FAILED", message: err.message });
+      }
+    });
+  }
+
+  const range = req.headers.range;
+  const contentType = filename.endsWith('.mp4') ? 'video/mp4' : 'video/webm';
   res.setHeader('Accept-Ranges', 'bytes');
   res.setHeader('Cache-Control', 'public, max-age=86400');
 
@@ -651,12 +682,16 @@ app.get('/api/emergency/evidence/:filename', (req, res) => {
       'Content-Range': `bytes ${start}-${end}/${fileSize}`,
       'Content-Length': chunksize,
       'Content-Type': contentType,
+      'Access-Control-Allow-Origin': '*',
+      'Accept-Ranges': 'bytes'
     });
     file.pipe(res);
   } else {
     res.writeHead(200, {
       'Content-Length': fileSize,
       'Content-Type': contentType,
+      'Access-Control-Allow-Origin': '*',
+      'Accept-Ranges': 'bytes'
     });
     fs.createReadStream(filePath).pipe(res);
   }
