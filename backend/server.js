@@ -534,27 +534,53 @@ try {
   ffmpegPath = 'ffmpeg';
 }
 
+let isTranscoding = false;
+const transcodeQueue = [];
+
 function convertToMp4(inputPath, outputPath) {
   return new Promise((resolve, reject) => {
-    if (!ffmpegPath) return reject(new Error('FFmpeg binary not found'));
-    const args = [
-      '-y',
-      '-i', inputPath,
-      '-c:v', 'libx264',
-      '-preset', 'ultrafast',
-      '-crf', '26',
-      '-c:a', 'aac',
-      '-b:a', '128k',
-      '-movflags', '+faststart',
-      outputPath
-    ];
-    execFile(ffmpegPath, args, (err, stdout, stderr) => {
-      if (err) {
-        console.warn('[FFMPEG TRANSCODE ERROR]:', err.message);
-        return reject(err);
-      }
+    transcodeQueue.push({ inputPath, outputPath, resolve, reject });
+    processNextTranscode();
+  });
+}
+
+function processNextTranscode() {
+  if (isTranscoding || transcodeQueue.length === 0) return;
+  const { inputPath, outputPath, resolve, reject } = transcodeQueue.shift();
+  isTranscoding = true;
+
+  if (!ffmpegPath) {
+    isTranscoding = false;
+    reject(new Error('FFmpeg binary not found'));
+    processNextTranscode();
+    return;
+  }
+
+  // Single-threaded, low-RAM preset designed for Render 512MB RAM containers
+  const args = [
+    '-y',
+    '-threads', '1',
+    '-i', inputPath,
+    '-c:v', 'libx264',
+    '-preset', 'ultrafast',
+    '-crf', '28',
+    '-c:a', 'aac',
+    '-b:a', '96k',
+    '-max_muxing_queue_size', '1024',
+    '-movflags', '+faststart',
+    outputPath
+  ];
+
+  execFile(ffmpegPath, args, { maxBuffer: 1024 * 1024 * 4 }, (err, stdout, stderr) => {
+    isTranscoding = false;
+    if (err) {
+      console.warn('[FFMPEG TRANSCODE ERROR]:', err.message);
+      reject(err);
+    } else {
       resolve(outputPath);
-    });
+    }
+    // Yield to V8 garbage collector before starting next transcode
+    setTimeout(processNextTranscode, 300);
   });
 }
 
@@ -590,12 +616,12 @@ app.post('/api/emergency/covert-recording', async (req, res) => {
     const filePath = path.join(EVIDENCE_DIR, fileName);
 
     fs.writeFileSync(filePath, videoBuffer);
+    const initialFileSizeKb = Math.round(videoBuffer.length / 1024);
 
     let finalFileName = fileName;
     let finalFilePath = filePath;
     let finalMimeType = (mimeType && mimeType.includes('mp4')) ? 'video/mp4' : (mimeType || 'video/webm');
-    let finalVideoData = videoData;
-    let finalBuffer = videoBuffer;
+    let finalFileSizeKb = initialFileSizeKb;
 
     // Universal Mobile Compatibility: Auto-transcode WebM to standard MP4 (H.264/AAC +faststart)
     if (fileName.endsWith('.webm') || (mimeType && mimeType.includes('webm'))) {
@@ -604,12 +630,11 @@ app.post('/api/emergency/covert-recording', async (req, res) => {
       try {
         await convertToMp4(filePath, mp4FilePath);
         if (fs.existsSync(mp4FilePath) && fs.statSync(mp4FilePath).size > 0) {
-          finalBuffer = fs.readFileSync(mp4FilePath);
           finalFileName = mp4FileName;
           finalFilePath = mp4FilePath;
           finalMimeType = 'video/mp4';
-          finalVideoData = 'data:video/mp4;base64,' + finalBuffer.toString('base64');
-          console.log(`[🎬 TRANSCODE SUCCESS] Converted ${fileName} to mobile-friendly MP4 (${finalFileName}, ${Math.round(finalBuffer.length / 1024)} KB)`);
+          finalFileSizeKb = Math.round(fs.statSync(mp4FilePath).size / 1024);
+          console.log(`[🎬 TRANSCODE SUCCESS] Converted ${fileName} to mobile-friendly MP4 (${finalFileName}, ${finalFileSizeKb} KB)`);
         }
       } catch (transcodeErr) {
         console.warn(`[⚠️ MP4 TRANSCODE FALLBACK] Keeping original ${fileName}:`, transcodeErr.message);
@@ -626,9 +651,9 @@ app.post('/api/emergency/covert-recording', async (req, res) => {
       userPhone: userPhone || "01XXXXXXXXX",
       location: location || { lat: 23.8103, lon: 90.4125, address: "Dhaka, Bangladesh" },
       videoUrl: `/api/emergency/evidence/${finalFileName}`,
-      videoData: finalVideoData, // Stored persistently so video is NEVER lost across server restarts
+      // Stored on disk at EVIDENCE_DIR; never bloat RAM heap with multi-megabyte strings
       fileName: finalFileName,
-      fileSizeKb: Math.round(finalBuffer.length / 1024),
+      fileSizeKb: finalFileSizeKb,
       mimeType: finalMimeType,
       durationSeconds: durationSeconds || 15,
       recordedAt: new Date().toISOString(),
@@ -672,7 +697,7 @@ app.get('/api/emergency/evidence/:filename', async (req, res) => {
     return res.status(200).end();
   }
 
-  // If requesting .mp4 but only .webm exists on disk, transcode to mobile-friendly .mp4 on-the-fly!
+  // If requesting .mp4 but only .webm exists on disk, transcode or fallback to webm
   if (filename.endsWith('.mp4') && !fs.existsSync(filePath)) {
     const webmName = filename.replace(/\.mp4$/i, '.webm');
     const webmPath = path.join(EVIDENCE_DIR, webmName);
@@ -681,55 +706,26 @@ app.get('/api/emergency/evidence/:filename', async (req, res) => {
         await convertToMp4(webmPath, filePath);
         console.log(`[🎬 ON-DEMAND MP4 TRANSCODE] Transcoded ${webmName} -> ${filename}`);
       } catch (e) {
-        console.warn(`[TRANSCODE WARN]:`, e.message);
+        console.warn(`[TRANSCODE FALLBACK]: Serving WebM directly for ${filename}`);
+        filePath = webmPath;
       }
     }
   }
 
-  // Auto-recovery: If file was removed or container restarted, rebuild file from persistent database
+  // If still not found, check if alternative extension exists
   if (!fs.existsSync(filePath)) {
-    const allEvidence = db.getAllEmergencyEvidence();
     const rawBase = filename.replace(/\.(mp4|webm)$/i, '');
-    const match = allEvidence.find(e => 
-      e.fileName === filename || 
-      (e.id && filename.includes(e.id)) || 
-      (e.fileName && e.fileName.includes(rawBase)) ||
-      (e.videoUrl && e.videoUrl.includes(rawBase))
-    );
-    if (match && match.videoData) {
-      try {
-        let base64Clean = match.videoData;
-        const base64Marker = ';base64,';
-        const markerIndex = base64Clean.indexOf(base64Marker);
-        if (markerIndex !== -1) {
-          base64Clean = base64Clean.substring(markerIndex + base64Marker.length);
-        } else if (base64Clean.startsWith('data:')) {
-          const commaIdx = base64Clean.indexOf(',');
-          if (commaIdx !== -1) base64Clean = base64Clean.substring(commaIdx + 1);
-        }
-        if (!fs.existsSync(EVIDENCE_DIR)) fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
-
-        // If database record was WebM but client requested MP4, write WebM then convert to MP4
-        if (filename.endsWith('.mp4') && match.fileName && match.fileName.endsWith('.webm')) {
-          const tempWebm = path.join(EVIDENCE_DIR, match.fileName);
-          fs.writeFileSync(tempWebm, Buffer.from(base64Clean.trim(), 'base64'));
-          try {
-            await convertToMp4(tempWebm, filePath);
-          } catch(tcErr) {
-            fs.writeFileSync(filePath, Buffer.from(base64Clean.trim(), 'base64'));
-          }
-        } else {
-          fs.writeFileSync(filePath, Buffer.from(base64Clean.trim(), 'base64'));
-        }
-        console.log(`[♻️ EVIDENCE RESTORED FROM DATABASE] Reconstructed ${filename} (${fs.statSync(filePath).size} bytes)`);
-      } catch (recErr) {
-        console.error(`[RECOVERY FAILED] ${filename}:`, recErr.message);
-      }
+    const altMp4 = path.join(EVIDENCE_DIR, rawBase + '.mp4');
+    const altWebm = path.join(EVIDENCE_DIR, rawBase + '.webm');
+    if (fs.existsSync(altMp4)) {
+      filePath = altMp4;
+    } else if (fs.existsSync(altWebm)) {
+      filePath = altWebm;
     }
   }
 
   if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ error: "EVIDENCE_NOT_FOUND", message: "Requested evidence file does not exist." });
+    return res.status(404).json({ error: "EVIDENCE_NOT_FOUND", message: "Requested evidence file does not exist on disk." });
   }
 
   const stat = fs.statSync(filePath);
