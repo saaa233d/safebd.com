@@ -116,6 +116,16 @@ app.use('/api/', apiLimiter);
 // Serve the Cross-Platform Web & Mobile App to any connected phone, iPad, or desktop
 app.use(express.static(path.join(__dirname, '../mobile-web-app/www')));
 
+// Lightweight 24/7 Keep-Alive & Health Check Endpoints (Prevents Render Cold-Start Sleep)
+app.get(['/api/health', '/ping'], (req, res) => {
+  res.status(200).json({
+    status: 'ONLINE',
+    service: 'SAFE bd Emergency Dispatch API',
+    uptimeSeconds: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString()
+  });
+});
+
 // In-Memory Secure State (for production: backed by Redis + PostgreSQL PostGIS)
 const users = new Map();             // phone -> userProfile
 const activeSessions = new Map();    // token -> user
