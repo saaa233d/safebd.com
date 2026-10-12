@@ -4,7 +4,7 @@
   "description": "SAFE BD - National Digital Safety & 999 Emergency Core Backend",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node --max-old-space-size=384 server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
