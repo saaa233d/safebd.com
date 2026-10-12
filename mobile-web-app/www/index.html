@@ -774,10 +774,34 @@
       display: flex;
       align-items: center;
       gap: 5px;
+      flex-wrap: wrap;
     }
     .verified-icon {
       color: #38bdf8;
-      font-size: 11px;
+      font-size: 13px;
+      margin-left: 2px;
+    }
+    .founder-avatar {
+      background: linear-gradient(135deg, #4a0414 0%, #1c181f 100%) !important;
+      border: 1.5px solid #d4af37 !important;
+      box-shadow: 0 0 10px rgba(212, 175, 55, 0.4) !important;
+      color: #d4af37 !important;
+      font-weight: 800 !important;
+      cursor: pointer;
+    }
+    .founder-title-pill {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #d4af37;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      padding: 1px 7px;
+      border-radius: 10px;
+      margin-left: 4px;
+      letter-spacing: 0.3px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
     }
     .mod-pending-badge {
       font-size: 10px;
@@ -790,8 +814,10 @@
     .post-text {
       font-size: 13px;
       color: #e2e8f0;
-      line-height: 1.5;
-      margin-bottom: 10px;
+      line-height: 1.6;
+      margin-bottom: 12px;
+      white-space: pre-line;
+      word-break: break-word;
     }
     .post-media-attachment {
       width: 100%;
@@ -800,6 +826,176 @@
       border-radius: 10px;
       margin-bottom: 10px;
       border: 1px solid var(--border-quiet);
+    }
+    
+    /* Author & Founder Profile Modal */
+    .author-profile-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      z-index: 99999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+    .author-profile-modal-backdrop.open {
+      display: flex;
+    }
+    .author-profile-card {
+      width: 100%;
+      max-width: 360px;
+      background: #0a090d;
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      border-radius: 24px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 35px rgba(120, 0, 22, 0.25);
+      animation: profileModalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes profileModalIn {
+      from { opacity: 0; transform: scale(0.92) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .founder-card-header {
+      height: 90px;
+      background: radial-gradient(circle at 50% 20%, #780016 0%, #20040a 60%, #0a090d 100%);
+      position: relative;
+      display: flex;
+      justify-content: center;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.22);
+    }
+    .founder-avatar-lg {
+      position: absolute;
+      bottom: -32px;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: #0d0b10;
+      border: 3px solid #d4af37;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 800;
+      color: #d4af37;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.9), 0 0 18px rgba(212, 175, 55, 0.4);
+    }
+    .founder-verified-crest {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #38bdf8;
+      color: #000;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #0a090d;
+    }
+    .founder-card-body {
+      padding: 42px 18px 20px;
+      text-align: center;
+    }
+    .founder-name-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .founder-name {
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      color: #fff;
+    }
+    .founder-official-chip {
+      font-size: 10px;
+      font-weight: 700;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      padding: 2px 7px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .founder-designation {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #d4af37;
+      margin-top: 5px;
+      letter-spacing: 0.3px;
+    }
+    .founder-org-tag {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      letter-spacing: 0.2px;
+    }
+    .founder-bio-quote {
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border-left: 3px solid #d4af37;
+      border-radius: 8px;
+      font-size: 11.5px;
+      color: #e2e8f0;
+      line-height: 1.55;
+      text-align: left;
+    }
+    .founder-credentials-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 14px;
+      text-align: left;
+    }
+    .credential-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-quiet);
+      border-radius: 10px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .credential-item i {
+      font-size: 15px;
+    }
+    .cred-title {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .cred-desc {
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+    .founder-footer-actions {
+      margin-top: 16px;
+    }
+    .btn-founder-action {
+      width: 100%;
+      background: linear-gradient(135deg, #780016 0%, #4a0414 100%);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: #fff;
+      padding: 11px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
     .post-actions-row {
       display: flex;
@@ -1470,8 +1666,9 @@
           <div style="background: var(--black-subtle); border: 1px solid var(--burgundy-border); border-radius: 16px; padding: 16px; margin-bottom: 20px; text-align: center;">
             <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--burgundy-deep); border: 2px solid var(--burgundy-vivid); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #fff;" id="profile-badge-letter">K</div>
             <h4 style="font-size: 15px; color: #fff;" id="profile-display-name">Kazi Rahman</h4>
+            <div id="profile-role-badge" style="display: none; font-size: 11px; color: #d4af37; font-weight: 700; margin-top: 3px;"><i class="fas fa-crown"></i> Founder &amp; CEO, SAFE bd</div>
             <p style="font-size: 12px; color: var(--text-muted); margin-top: 3px;" id="profile-display-phone">+880 1712-345678</p>
-            <div style="display: inline-block; font-size: 10px; color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16,185,129,0.3); padding: 2px 8px; border-radius: 12px; margin-top: 8px;">
+            <div id="profile-status-badge" style="display: inline-block; font-size: 10px; color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16,185,129,0.3); padding: 2px 8px; border-radius: 12px; margin-top: 8px;">
               <i class="fas fa-check-shield"></i> Verified BD Citizen (NID Linked)
             </div>
           </div>
@@ -1656,6 +1853,20 @@
           <button style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-quiet); padding: 11px; border-radius: 11px; font-size: 12px; cursor: pointer;" onclick="abortEmergencySOS()">
             Cancel (False Alarm)
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL 5: AUTHOR & FOUNDER PROFILE MODAL
+    ======================================================== -->
+    <div id="author-profile-modal" class="author-profile-modal-backdrop" onclick="closeAuthorProfileModal(event)">
+      <div class="author-profile-card" onclick="event.stopPropagation()">
+        <button class="modal-close-x" onclick="closeAuthorProfileModal()" style="position: absolute; top: 12px; right: 12px; z-index: 10; background: rgba(0,0,0,0.6); border: 1px solid var(--border-quiet); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer;">
+          <i class="fas fa-xmark"></i>
+        </button>
+        <div id="author-modal-content">
+          <!-- Rendered dynamically -->
         </div>
       </div>
     </div>
@@ -2179,23 +2390,45 @@
       postsToRender.forEach(p => {
         const card = document.createElement('div');
         card.className = 'feed-card';
+        const isSaadRizwan = (p.author && p.author.toUpperCase().includes('SAAD RIZWAN')) || p.isFounder;
+        const authorInitials = isSaadRizwan ? 'SR' : ((p.author || 'C').charAt(0).toUpperCase());
+        const authorNameClean = p.author || (isSaadRizwan ? 'SAAD RIZWAN' : 'Citizen Reporter');
+        const safeAuthorAttr = authorNameClean.replace(/'/g, "\\'");
+        const safeRoleAttr = (p.authorRole || (isSaadRizwan ? 'Founder & CEO, SAFE bd' : '')).replace(/'/g, "\\'");
 
         card.innerHTML = `
           <div class="feed-card-header">
-            <div class="author-info">
-              <div class="author-avatar">${(p.author || 'C').charAt(0).toUpperCase()}</div>
+            <div class="author-info" onclick="openAuthorProfileModal('${safeAuthorAttr}', ${isSaadRizwan ? 'true' : 'false'}, '${safeRoleAttr}')" style="cursor: pointer;" title="Tap to view official profile">
+              <div class="author-avatar ${isSaadRizwan ? 'founder-avatar' : ''}">
+                ${authorInitials}
+              </div>
               <div>
                 <div class="author-name">
-                  ${p.author}
-                  ${p.verified ? '<i class="fas fa-check-circle verified-icon" title="Verified Citizen / Authority"></i>' : ''}
+                  <span>${escapeHtml(authorNameClean)}</span>
+                  ${(p.verified || isSaadRizwan) ? `
+                    <span title="${isSaadRizwan ? 'Verified Founder & CEO' : 'Verified Citizen'}">
+                      <i class="fas fa-certificate verified-icon" style="color: #38bdf8; font-size: 13px;"></i>
+                    </span>
+                  ` : ''}
+                  ${isSaadRizwan ? `
+                    <span class="founder-title-pill">
+                      <i class="fas fa-crown"></i> Founder &amp; CEO
+                    </span>
+                  ` : ''}
                 </div>
-                <div style="font-size: 10px; color: var(--text-muted);">${p.time || 'Just now'} • <span style="color: #e57373;">${p.category || 'General Safety'}</span></div>
+                <div style="font-size: 10px; color: var(--text-muted);">${p.time || 'Just now'} • <span style="color: ${isSaadRizwan ? '#d4af37' : '#e57373'}; font-weight: ${isSaadRizwan ? '700' : 'normal'};">${escapeHtml(p.category || 'General Safety')}</span></div>
               </div>
             </div>
             <div>
-              <span class="mod-pending-badge" style="color: #10b981; border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.15);">
-                <i class="fas fa-shield-check"></i> Verified Live
-              </span>
+              ${isSaadRizwan ? `
+                <span class="mod-pending-badge" style="color: #d4af37; border-color: rgba(212, 175, 55, 0.4); background: rgba(212, 175, 55, 0.15); font-weight: 700;">
+                  <i class="fas fa-certificate"></i> Official Release
+                </span>
+              ` : `
+                <span class="mod-pending-badge" style="color: #10b981; border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.15);">
+                  <i class="fas fa-shield-check"></i> Verified Live
+                </span>
+              `}
             </div>
           </div>
           <div class="post-text">${escapeHtml(p.content || '')}</div>
@@ -2226,6 +2459,120 @@
           </button>
         `;
         container.appendChild(moreBtnContainer);
+      }
+    }
+
+    function openAuthorProfileModal(authorName, isFounder, role) {
+      const modal = document.getElementById('author-profile-modal');
+      const content = document.getElementById('author-modal-content');
+      if (!modal || !content) return;
+
+      if (isFounder || (authorName && authorName.toUpperCase().includes('SAAD RIZWAN'))) {
+        content.innerHTML = `
+          <div class="founder-card-header">
+            <div class="founder-avatar-lg">
+              <span>SR</span>
+              <div class="founder-verified-crest" title="Verified Founder &amp; CEO">
+                <i class="fas fa-check"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="founder-card-body">
+            <div class="founder-name-row">
+              <h2 class="founder-name">SAAD RIZWAN</h2>
+              <span class="founder-official-chip">
+                <i class="fas fa-certificate" style="color: #38bdf8;"></i> Verified Official
+              </span>
+            </div>
+
+            <div class="founder-designation">
+              <i class="fas fa-crown" style="color: #d4af37; margin-right: 4px;"></i> Founder &amp; CEO, SAFE bd
+            </div>
+
+            <div class="founder-org-tag">
+              Safety • Awareness • Fast Response • Emergency Assistance
+            </div>
+
+            <div class="founder-bio-quote">
+              “In an emergency, every second counts. That is why I founded SAFE bd—a national digital safety and emergency response ecosystem designed to bridge the gap between citizens and rapid assistance.”
+            </div>
+
+            <div class="founder-credentials-grid">
+              <div class="credential-item">
+                <i class="fas fa-shield-halved" style="color: #ef4444;"></i>
+                <div>
+                  <div class="cred-title">National 999 Integration</div>
+                  <div class="cred-desc">Police • Fire • Ambulance CAD</div>
+                </div>
+              </div>
+              <div class="credential-item">
+                <i class="fas fa-lock" style="color: #10b981;"></i>
+                <div>
+                  <div class="cred-title">E2E Spatial Encryption</div>
+                  <div class="cred-desc">Zero-Knowledge GPS Relay</div>
+                </div>
+              </div>
+              <div class="credential-item">
+                <i class="fas fa-users-viewfinder" style="color: #38bdf8;"></i>
+                <div>
+                  <div class="cred-title">Civic Awareness Network</div>
+                  <div class="cred-desc">Verified Public Safety Feed</div>
+                </div>
+              </div>
+              <div class="credential-item">
+                <i class="fas fa-building-columns" style="color: #f59e0b;"></i>
+                <div>
+                  <div class="cred-title">Jurisdiction &amp; Base</div>
+                  <div class="cred-desc">Dhaka, Bangladesh</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="founder-footer-actions">
+              <button type="button" class="btn-founder-action" onclick="closeAuthorProfileModal()">
+                <i class="fas fa-check"></i> Close Profile
+              </button>
+            </div>
+          </div>
+        `;
+      } else {
+        const initial = (authorName || 'C').charAt(0).toUpperCase();
+        content.innerHTML = `
+          <div class="founder-card-header" style="height: 70px; background: rgba(255,255,255,0.03);">
+            <div class="founder-avatar-lg" style="width: 56px; height: 56px; bottom: -24px; font-size: 18px; border-color: var(--burgundy-vivid); background: var(--burgundy-deep); color: #fff;">
+              <span>${initial}</span>
+            </div>
+          </div>
+          <div class="founder-card-body" style="padding-top: 32px;">
+            <div class="founder-name-row">
+              <h2 class="founder-name" style="font-size: 16px;">${escapeHtml(authorName || 'Citizen Reporter')}</h2>
+              <span class="founder-official-chip">
+                <i class="fas fa-check-circle" style="color: #38bdf8;"></i> Verified Citizen
+              </span>
+            </div>
+            <div class="founder-designation" style="color: var(--text-muted); font-size: 12px; margin-top: 3px;">
+              <i class="fas fa-user-shield"></i> Community Safety Reporter
+            </div>
+            <p style="font-size: 11.5px; color: var(--text-muted); margin-top: 12px; line-height: 1.5;">
+              Active contributor to the SAFE bd national civic safety network.
+            </p>
+            <div class="founder-footer-actions" style="margin-top: 14px;">
+              <button type="button" class="btn-founder-action" style="padding: 9px;" onclick="closeAuthorProfileModal()">
+                Close
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      modal.classList.add('open');
+    }
+
+    function closeAuthorProfileModal(e) {
+      if (!e || e.target.id === 'author-profile-modal' || e.target.classList.contains('modal-close-x') || e.target.closest('.modal-close-x') || e.target.classList.contains('btn-founder-action') || e.target.closest('.btn-founder-action')) {
+        const modal = document.getElementById('author-profile-modal');
+        if (modal) modal.classList.remove('open');
       }
     }
 
@@ -4217,11 +4564,38 @@
     }
 
     function setLoggedInState() {
+      const isFounder = (currentUser.name && currentUser.name.toUpperCase().includes('SAAD RIZWAN')) || currentUser.isFounder;
       document.getElementById('profile-display-name').innerText = currentUser.name;
-      document.getElementById('profile-display-phone').innerText = currentUser.phone;
-      document.getElementById('profile-badge-letter').innerText = currentUser.name.charAt(0).toUpperCase();
+      document.getElementById('profile-display-phone').innerText = currentUser.displayPhone || currentUser.phone;
+      document.getElementById('profile-badge-letter').innerText = isFounder ? "SR" : currentUser.name.charAt(0).toUpperCase();
+
+      const roleBadge = document.getElementById('profile-role-badge');
+      if (roleBadge) {
+        if (isFounder) {
+          roleBadge.style.display = 'block';
+          roleBadge.innerHTML = '<i class="fas fa-crown" style="color: #d4af37;"></i> Founder &amp; CEO, SAFE bd';
+        } else {
+          roleBadge.style.display = 'none';
+        }
+      }
+
+      const statusBadge = document.getElementById('profile-status-badge');
+      if (statusBadge) {
+        if (isFounder) {
+          statusBadge.innerHTML = '<i class="fas fa-certificate" style="color: #38bdf8;"></i> Founder &amp; Executive Command';
+          statusBadge.style.color = '#d4af37';
+          statusBadge.style.borderColor = 'rgba(212, 175, 55, 0.4)';
+          statusBadge.style.background = 'rgba(212, 175, 55, 0.12)';
+        } else {
+          statusBadge.innerHTML = '<i class="fas fa-check-shield"></i> Verified BD Citizen (NID Linked)';
+          statusBadge.style.color = '#10b981';
+          statusBadge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+          statusBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+        }
+      }
+
       document.getElementById('top-profile-btn').classList.add('logged-in');
-      document.getElementById('profile-icon').className = currentUser.isAdmin ? "fas fa-shield-halved" : "fas fa-user-check";
+      document.getElementById('profile-icon').className = isFounder ? "fas fa-crown" : (currentUser.isAdmin ? "fas fa-shield-halved" : "fas fa-user-check");
 
       // Toggle Admin UI elements
       const adminNavBtn = document.getElementById('nav-btn-admin');
