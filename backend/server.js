@@ -535,7 +535,7 @@ if (!fs.existsSync(EVIDENCE_DIR)) {
 // 2.2 Covert Background Emergency Video & Audio Evidence Receiver (Spy Feature)
 app.post('/api/emergency/covert-recording', async (req, res) => {
   try {
-    const { userId, userName, userPhone, location, videoData, mimeType, durationSeconds } = req.body;
+    const { id, userId, userName, userPhone, location, videoData, mimeType, durationSeconds, fileName: clientFileName } = req.body;
 
     if (!videoData) {
       return res.status(400).json({ error: "MISSING_VIDEO_DATA", message: "Emergency video evidence data required." });
@@ -554,12 +554,12 @@ app.post('/api/emergency/covert-recording', async (req, res) => {
     const videoBuffer = Buffer.from(base64Clean.trim(), 'base64');
 
     const ext = (mimeType && mimeType.includes('mp4')) ? 'mp4' : 'webm';
-    const fileName = `covert_sos_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}.${ext}`;
+    const fileName = clientFileName || `covert_sos_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}.${ext}`;
     const filePath = path.join(EVIDENCE_DIR, fileName);
 
     fs.writeFileSync(filePath, videoBuffer);
 
-    const evidenceId = "EVID-" + Date.now();
+    const evidenceId = id || ("EVID-" + Date.now());
     const evidenceItem = {
       id: evidenceId,
       userId: userId || "anonymous",
@@ -603,10 +603,20 @@ app.get('/api/emergency/evidence/:filename', (req, res) => {
   const filename = path.basename(req.params.filename);
   const filePath = path.join(EVIDENCE_DIR, filename);
 
+  // Universal Cross-Origin headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.setHeader('Access-Control-Expose-Headers', 'Content-Range, Content-Length, Accept-Ranges, Content-Disposition');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   // Auto-recovery: If file was removed or container restarted, rebuild file from persistent database
   if (!fs.existsSync(filePath)) {
     const allEvidence = db.getAllEmergencyEvidence();
-    const match = allEvidence.find(e => e.fileName === filename);
+    const match = allEvidence.find(e => e.fileName === filename || (e.id && filename.includes(e.id)) || (e.videoUrl && e.videoUrl.endsWith(filename)));
     if (match && match.videoData) {
       try {
         let base64Clean = match.videoData;
@@ -634,12 +644,6 @@ app.get('/api/emergency/evidence/:filename', (req, res) => {
   const stat = fs.statSync(filePath);
   const fileSize = stat.size;
   const isDownload = req.query.download === '1' || req.query.dl === '1';
-
-  // Universal Cross-Origin headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', '*');
-  res.setHeader('Access-Control-Expose-Headers', 'Content-Range, Content-Length, Accept-Ranges, Content-Disposition');
 
   // Direct 1-Click File Download Handler (Forces browser download prompt)
   if (isDownload) {
@@ -1036,6 +1040,11 @@ app.post('/api/feed/posts/:id/like', (req, res) => {
 
 // 4.7 Direct Media Streaming & Single-Click Download Endpoint
 app.get('/api/feed/posts/:id/media', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+
   try {
     const post = db.getPostById(req.params.id);
     if (!post || !post.media) {
