@@ -50,6 +50,12 @@ function initDatabase() {
         otpCodes: {}, // OTPs are ephemeral and cleared on startup
         stats: parsed.stats || { totalLogins: 0, totalRegistrations: 0, lastSaved: null }
       };
+      // Ensure all loaded citizen accounts have default contacts structure if not present
+      Object.values(dbState.users).forEach(u => {
+        if (!u.contacts || !Array.isArray(u.contacts) || u.contacts.length === 0) {
+          u.contacts = getDefaultUserContacts();
+        }
+      });
       console.log(`[📦 DATABASE LOADED] Loaded ${Object.keys(dbState.users).length} citizen accounts from persistent storage.`);
     } catch (err) {
       console.error('[⚠️ DATABASE WARNING] Error reading database file, starting clean:', err.message);
@@ -63,6 +69,14 @@ function initDatabase() {
 
   // Commit initial state
   persistToDisk();
+}
+
+function getDefaultUserContacts() {
+  return [
+    { id: "c1", name: "Father", phone: "", initial: "F" },
+    { id: "c2", name: "Mother", phone: "", initial: "M" },
+    { id: "c3", name: "Guardian", phone: "", initial: "G" }
+  ];
 }
 
 // Pre-seed Chief Administrator Account
@@ -87,12 +101,16 @@ function seedChiefAdmin() {
       createdAt: new Date().toISOString(),
       lastLoginAt: null,
       lastLogoutAt: null,
-      loginCount: 0
+      loginCount: 0,
+      contacts: getDefaultUserContacts()
     };
     console.log('[🛡️ ADMIN ACCOUNT SEEDED] Chief Administrator (+880 1316-750712) ready.');
   } else {
     // Keep admin privileges guaranteed
     dbState.users[adminPhone].isAdmin = true;
+    if (!dbState.users[adminPhone].contacts || !Array.isArray(dbState.users[adminPhone].contacts)) {
+      dbState.users[adminPhone].contacts = getDefaultUserContacts();
+    }
   }
 }
 
@@ -194,10 +212,30 @@ function validateBdPhone(phone) {
 
 function getUserByPhone(phone) {
   const cleanPhone = normalizePhone(phone);
-  return dbState.users[cleanPhone] || null;
+  const user = dbState.users[cleanPhone];
+  if (user && (!user.contacts || !Array.isArray(user.contacts))) {
+    user.contacts = getDefaultUserContacts();
+  }
+  return user || null;
 }
 
-function createUser({ phone, name, password, nidVerified = true }) {
+function sanitizeContacts(contactList) {
+  if (!Array.isArray(contactList)) return getDefaultUserContacts();
+  return contactList.slice(0, 5).map((c, idx) => {
+    const defaultName = (idx === 0 ? "Father" : idx === 1 ? "Mother" : "Guardian");
+    const name = (c.name && c.name.trim()) ? c.name.trim() : defaultName;
+    const rawDigits = c.phone ? String(c.phone).replace(/\D/g, '') : '';
+    const cleanPhone = (rawDigits.length >= 10 && c.phone !== '01XXXXXXXXX') ? rawDigits.slice(-10) : '';
+    return {
+      id: c.id || `c${idx + 1}`,
+      name: name,
+      phone: cleanPhone,
+      initial: name.charAt(0).toUpperCase()
+    };
+  });
+}
+
+function createUser({ phone, name, password, nidVerified = true, contacts = null }) {
   const phoneValidation = validateBdPhone(phone);
   if (!phoneValidation.valid) {
     throw new Error(phoneValidation.message);
@@ -214,6 +252,9 @@ function createUser({ phone, name, password, nidVerified = true }) {
 
   const salt = crypto.randomBytes(16).toString('hex');
   const passwordHash = hashPassword(password, salt);
+  const userContacts = (Array.isArray(contacts) && contacts.length > 0)
+    ? sanitizeContacts(contacts)
+    : getDefaultUserContacts();
 
   const newUser = {
     id: `usr_${cleanPhone}`,
@@ -228,7 +269,8 @@ function createUser({ phone, name, password, nidVerified = true }) {
     createdAt: new Date().toISOString(),
     lastLoginAt: new Date().toISOString(),
     lastLogoutAt: null,
-    loginCount: 1
+    loginCount: 1,
+    contacts: userContacts
   };
 
   dbState.users[cleanPhone] = newUser;
@@ -237,6 +279,28 @@ function createUser({ phone, name, password, nidVerified = true }) {
 
   persistToDisk();
   return newUser;
+}
+
+function updateUserContacts(phone, newContacts) {
+  const cleanPhone = normalizePhone(phone);
+  const user = dbState.users[cleanPhone];
+  if (!user) {
+    throw new Error('User account not found in database.');
+  }
+
+  user.contacts = sanitizeContacts(newContacts);
+  user.updatedAt = new Date().toISOString();
+  persistToDisk();
+  return user.contacts;
+}
+
+function getUserContacts(phone) {
+  const cleanPhone = normalizePhone(phone);
+  const user = dbState.users[cleanPhone];
+  if (user && Array.isArray(user.contacts) && user.contacts.length) {
+    return user.contacts;
+  }
+  return getDefaultUserContacts();
 }
 
 function verifyUserCredentials(phone, password) {
@@ -409,6 +473,10 @@ module.exports = {
   normalizePhone,
   validateBdPhone,
   VALID_OPERATOR_PREFIXES,
+  updateUserContacts,
+  getUserContacts,
+  getDefaultUserContacts,
+  sanitizeContacts,
   getDatabaseMetrics,
   initDatabase
 };
