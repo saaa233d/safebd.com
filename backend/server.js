@@ -16,6 +16,7 @@ const { WebSocketServer } = require('ws');
 const app = express();
 const PORT = process.env.PORT || 5000;
 const path = require('path');
+const fs = require('fs');
 
 app.disable('x-powered-by');
 
@@ -25,7 +26,7 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'geolocation=(self), microphone=(), camera=()');
+  res.setHeader('Permissions-Policy', 'geolocation=(self), microphone=(self), camera=(self)');
   if (process.env.NODE_ENV === 'production') {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   }
@@ -33,7 +34,8 @@ app.use((req, res, next) => {
 });
 
 app.use(cors());
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Persistent Database Engine (Scales to Millions of Citizen Accounts)
 const db = require('./database');
@@ -535,6 +537,120 @@ app.post('/api/emergency/sos-trigger', (req, res) => {
     message: "Distress signal accepted by Bangladesh 999 Emergency CAD.",
     incident
   });
+});
+
+// Ensure Evidence Directory exists
+const EVIDENCE_DIR = path.join(__dirname, 'data', 'evidence');
+if (!fs.existsSync(EVIDENCE_DIR)) {
+  fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
+}
+
+// 2.2 Covert Background Emergency Video & Audio Evidence Receiver (Spy Feature)
+app.post('/api/emergency/covert-recording', async (req, res) => {
+  try {
+    const { userId, userName, userPhone, location, videoData, mimeType, durationSeconds } = req.body;
+
+    if (!videoData) {
+      return res.status(400).json({ error: "MISSING_VIDEO_DATA", message: "Emergency video evidence data required." });
+    }
+
+    // Decode base64 video buffer
+    const base64Clean = videoData.replace(/^data:[^;]+;base64,/, '');
+    const videoBuffer = Buffer.from(base64Clean, 'base64');
+
+    const ext = (mimeType && mimeType.includes('mp4')) ? 'mp4' : 'webm';
+    const fileName = `covert_sos_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}.${ext}`;
+    const filePath = path.join(EVIDENCE_DIR, fileName);
+
+    fs.writeFileSync(filePath, videoBuffer);
+
+    const evidenceId = "EVID-" + Date.now();
+    const evidenceItem = {
+      id: evidenceId,
+      userId: userId || "anonymous",
+      userName: userName || "Citizen in Distress",
+      userPhone: userPhone || "01XXXXXXXXX",
+      location: location || { lat: 23.8103, lon: 90.4125, address: "Dhaka, Bangladesh" },
+      videoUrl: `/api/emergency/evidence/${fileName}`,
+      fileName,
+      fileSizeKb: Math.round(videoBuffer.length / 1024),
+      mimeType: mimeType || 'video/webm',
+      durationSeconds: durationSeconds || 15,
+      recordedAt: new Date().toISOString(),
+      status: "PENDING_ADMIN_DISPATCH",
+      reviewed: false
+    };
+
+    db.addEmergencyEvidence(evidenceItem);
+
+    console.log(`[📹🚨 SPY COVERT SOS VIDEO CAPTURED] Citizen: ${evidenceItem.userName} (${evidenceItem.userPhone}) at ${evidenceItem.location.address} | Size: ${evidenceItem.fileSizeKb} KB`);
+
+    // Broadcast live to Admin and Emergency circle listeners
+    broadcastLocationUpdate({
+      type: "EMERGENCY_COVERT_VIDEO_EVIDENCE",
+      evidence: evidenceItem
+    });
+
+    return res.json({
+      success: true,
+      message: "Emergency spy video & audio evidence safely archived and delivered to Admin Command Portal.",
+      evidence: evidenceItem
+    });
+  } catch (err) {
+    console.error("[ERROR] Failed to save covert emergency recording:", err);
+    return res.status(500).json({ error: "INTERNAL_ERROR", message: err.message });
+  }
+});
+
+// 2.3 Stream / Serve Emergency Video Evidence to Admin Portal
+app.get('/api/emergency/evidence/:filename', (req, res) => {
+  const filePath = path.join(EVIDENCE_DIR, req.params.filename);
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: "EVIDENCE_NOT_FOUND", message: "Requested evidence file does not exist." });
+  }
+
+  const stat = fs.statSync(filePath);
+  const fileSize = stat.size;
+  const range = req.headers.range;
+  const contentType = req.params.filename.endsWith('.mp4') ? 'video/mp4' : 'video/webm';
+
+  if (range) {
+    const parts = range.replace(/bytes=/, "").split("-");
+    const start = parseInt(parts[0], 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+    const chunksize = (end - start) + 1;
+    const file = fs.createReadStream(filePath, { start, end });
+    const head = {
+      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': chunksize,
+      'Content-Type': contentType,
+    };
+    res.writeHead(206, head);
+    file.pipe(res);
+  } else {
+    const head = {
+      'Content-Length': fileSize,
+      'Content-Type': contentType,
+    };
+    res.writeHead(200, head);
+    fs.createReadStream(filePath).pipe(res);
+  }
+});
+
+// 2.4 Admin Emergency Evidence Telemetry (Displayed where posts are approved)
+app.get('/api/admin/emergency-evidence', (req, res) => {
+  const allEvidence = db.getAllEmergencyEvidence();
+  return res.json({ success: true, evidence: allEvidence });
+});
+
+app.post('/api/admin/emergency-evidence/:id/review', (req, res) => {
+  const updated = db.markEmergencyEvidenceReviewed(req.params.id, req.body.notes);
+  if (updated) {
+    return res.json({ success: true, message: "Emergency evidence marked reviewed & dispatched.", evidence: updated });
+  }
+  return res.status(404).json({ error: "NOT_FOUND", message: "Evidence record not found." });
 });
 
 /* ==========================================================
