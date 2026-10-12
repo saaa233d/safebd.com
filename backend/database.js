@@ -619,7 +619,21 @@ function addEmergencyEvidence(record) {
   if (!dbState.emergencyEvidence) {
     dbState.emergencyEvidence = [];
   }
-  dbState.emergencyEvidence.unshift(record);
+  const existingIdx = dbState.emergencyEvidence.findIndex(e => e.id === record.id);
+  if (existingIdx !== -1) {
+    dbState.emergencyEvidence[existingIdx] = { ...dbState.emergencyEvidence[existingIdx], ...record };
+  } else {
+    dbState.emergencyEvidence.unshift(record);
+  }
+  
+  // Instant disk synchronization to prevent loss across container restarts
+  try {
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+    const evPayload = JSON.stringify(dbState.emergencyEvidence, null, 2);
+    fs.writeFileSync(EVIDENCE_FILE, evPayload, 'utf8');
+  } catch (err) {
+    console.warn('[EVIDENCE SYNC DISK WRITE WARNING]:', err.message);
+  }
   persistToDisk();
   return record;
 }
