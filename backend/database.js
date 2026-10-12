@@ -652,7 +652,7 @@ function markEmergencyEvidenceReviewed(id, notes = "") {
    Designed for millions of concurrent posts with O(1) retrieval and O(limit) pagination.
 ========================================================================= */
 
-function createPost({ author, authorPhone, content, category, media, verified = false }) {
+function createPost({ author, authorPhone, content, category, media, verified = false, authorRole }) {
   if (!content && !media) {
     throw new Error("Post content or media attachment is required.");
   }
@@ -661,30 +661,38 @@ function createPost({ author, authorPhone, content, category, media, verified = 
   const cleanCategory = category || "General Safety";
   const now = new Date().toISOString();
 
+  const isChiefAdmin = authorPhone === '01316750712' || (author && author.toUpperCase().includes('SAAD RIZWAN'));
+
   const newPost = {
     id: postId,
-    author: (author && author.trim()) || "Citizen Reporter",
-    authorPhone: authorPhone || "",
-    verified: !!verified,
-    type: "community",
+    author: (author && author.trim()) || (isChiefAdmin ? "SAAD RIZWAN" : "Citizen Reporter"),
+    authorPhone: authorPhone || (isChiefAdmin ? "01316750712" : ""),
+    authorRole: isChiefAdmin ? "Founder & CEO, SAFE bd" : (authorRole || ""),
+    isFounder: isChiefAdmin,
+    verified: isChiefAdmin || !!verified,
+    type: isChiefAdmin ? "official" : "community",
     category: cleanCategory,
     content: (content || "").trim().slice(0, 3000),
     media: media || null,
     likes: 0,
     likedBy: [],
-    approved: false, // MANDATORY: Starts in moderation queue awaiting Admin Approval
+    approved: isChiefAdmin ? true : false,
     rejected: false,
     createdAt: now,
-    approvedAt: null,
-    reviewedBy: null
+    approvedAt: isChiefAdmin ? now : null,
+    reviewedBy: isChiefAdmin ? "Chief Administrator (Official)" : null
   };
 
   dbState.posts[postId] = newPost;
-  dbState.pendingPostIds.unshift(postId);
+  if (isChiefAdmin) {
+    dbState.approvedPostIds.unshift(postId);
+  } else {
+    dbState.pendingPostIds.unshift(postId);
+  }
   dbState.stats.totalPosts = Object.keys(dbState.posts).length;
 
   persistToDisk();
-  console.log(`[📝 CITIZEN POST SUBMITTED] ID: ${postId} by ${newPost.author} (${cleanCategory}) -> PENDING ADMIN APPROVAL`);
+  console.log(`[📝 ${isChiefAdmin ? 'OFFICIAL FOUNDER POST' : 'CITIZEN POST SUBMITTED'}] ID: ${postId} by ${newPost.author} (${cleanCategory}) -> ${isChiefAdmin ? 'LIVE APPROVED' : 'PENDING ADMIN APPROVAL'}`);
   return formatPostOutput(newPost);
 }
 
