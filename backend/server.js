@@ -1013,10 +1013,12 @@ app.post('/api/admin/posts/:id/reject', (req, res) => {
   return res.json({ success: true, message: "Submission declined and removed from moderation queue." });
 });
 
-// 4.6 Like Post
+// 4.6 Single Like per User (Toggle Like / Unlike)
 app.post('/api/feed/posts/:id/like', (req, res) => {
-  const likes = db.likePost(req.params.id);
-  return res.json({ success: true, likes });
+  const rawIp = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : (req.socket.remoteAddress || '127.0.0.1');
+  const userId = (req.body && req.body.userId) || (req.query && req.query.userId) || `ip_${rawIp}`;
+  const result = db.toggleLikePost(req.params.id, userId);
+  return res.json({ success: true, ...result });
 });
 
 /* ==========================================================
