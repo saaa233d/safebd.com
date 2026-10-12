@@ -1459,15 +1459,18 @@
             <button class="auth-toggle-tab" id="tab-btn-signup" onclick="toggleAuthTab('signup')">Create Account</button>
           </div>
 
-          <!-- 1. LOGIN FORM (PASSWORD + MANDATORY 2FA OTP) -->
+          <!-- 1. LOGIN FORM (DIRECT WITH PASSWORD) -->
           <form id="form-login" onsubmit="handleLoginSubmit(event)">
-            <!-- STEP 1: Phone + Password -->
+            <!-- Phone + Password -->
             <div id="login-step-1">
               <div class="form-group">
                 <label class="form-label">Bangladeshi Mobile Number</label>
                 <div class="input-field-wrap">
                   <span class="prefix-bd">+880</span>
-                  <input type="tel" class="form-input" id="login-phone" placeholder="17XXXXXXXX" pattern="[0-9]{10}" required>
+                  <input type="tel" class="form-input" id="login-phone" placeholder="017XXXXXXXX" required>
+                </div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
+                  Supported: 013, 014, 015, 016, 017, 018, 019
                 </div>
               </div>
               <div class="form-group">
@@ -1486,7 +1489,7 @@
               </button>
             </div>
 
-            <!-- STEP 2: Mandatory 2FA OTP Verification -->
+            <!-- Optional 2FA OTP Fallback -->
             <div id="login-step-2" style="display: none;">
               <div style="text-align: center; margin-bottom: 14px;">
                 <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 18px; margin: 0 auto 10px;">
@@ -1494,7 +1497,7 @@
                 </div>
                 <h4 style="font-size: 13.5px; color: #fff; margin-bottom: 4px;">Two-Factor Verification</h4>
                 <p style="font-size: 11.5px; color: var(--text-muted); line-height: 1.4;">
-                  Password verified! Enter the 4-digit code dispatched to <strong id="login-otp-target" style="color: #fff;">+880 17XXXXXXXX</strong> to finish signing in.
+                  Enter the 4-digit code dispatched to <strong id="login-otp-target" style="color: #fff;">+880 17XXXXXXXX</strong> to finish signing in.
                 </p>
               </div>
 
@@ -1514,7 +1517,7 @@
             </div>
           </form>
 
-          <!-- 2. FORGOT PASSWORD FORM -->
+          <!-- 2. FORGOT PASSWORD FORM (REQUIRES OTP) -->
           <div id="form-forgot-password" style="display: none;">
             <div id="forgot-step-1">
               <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.45;">
@@ -1524,10 +1527,13 @@
                 <label class="form-label">Registered Mobile Number</label>
                 <div class="input-field-wrap">
                   <span class="prefix-bd">+880</span>
-                  <input type="tel" class="form-input" id="forgot-phone" placeholder="17XXXXXXXX" pattern="[0-9]{10}">
+                  <input type="tel" class="form-input" id="forgot-phone" placeholder="017XXXXXXXX">
+                </div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
+                  Allowed: 013, 014, 015, 016, 017, 018, 019 (011 &amp; 012 not supported)
                 </div>
               </div>
-              <button type="button" class="btn-submit-action" onclick="handleForgotRequestOTP()">
+              <button type="button" class="btn-submit-action" id="btn-forgot-request" onclick="handleForgotRequestOTP()">
                 <i class="fas fa-paper-plane"></i> Send Reset Code via SMS
               </button>
               <button type="button" class="btn-close-sheet" style="margin-top: 8px;" onclick="closeForgotPasswordFlow()">
@@ -1554,7 +1560,7 @@
                 </div>
               </div>
 
-              <button type="button" class="btn-submit-action" onclick="handleForgotVerifyReset()">
+              <button type="button" class="btn-submit-action" id="btn-forgot-verify" onclick="handleForgotVerifyReset()">
                 <i class="fas fa-key"></i> Verify OTP & Reset Password
               </button>
               <button type="button" class="btn-close-sheet" style="margin-top: 8px;" onclick="backToForgotStep1()">
@@ -1563,59 +1569,39 @@
             </div>
           </div>
 
-          <!-- 3. CREATE ACCOUNT (SIGNUP) FORM -->
-          <form id="form-signup" style="display: none;" onsubmit="handleSignupRequestOTP(event)">
-            <!-- STEP 1: MOBILE NUMBER -->
-            <div id="signup-step-1">
-              <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.45;">
-                Enter your Bangladeshi mobile number. We will dispatch a 4-digit verification code via SMS.
+          <!-- 3. CREATE ACCOUNT (SIGNUP) FORM — DIRECT REGISTRATION (NO OTP) -->
+          <form id="form-signup" style="display: none;" onsubmit="handleSignupSubmit(event)">
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.45;">
+              Create your citizen account with your mobile number and password. Instant registration without OTP.
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bangladeshi Mobile Number</label>
+              <div class="input-field-wrap">
+                <span class="prefix-bd">+880</span>
+                <input type="tel" class="form-input" id="signup-phone" placeholder="017XXXXXXXX" required>
               </div>
-              <div class="form-group">
-                <label class="form-label">Bangladeshi Mobile Number</label>
-                <div class="input-field-wrap">
-                  <span class="prefix-bd">+880</span>
-                  <input type="tel" class="form-input" id="signup-phone" placeholder="17XXXXXXXX" pattern="[0-9]{10}" required>
-                </div>
+              <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
+                Valid: 013, 014, 015, 016, 017, 018, 019 (011 &amp; 012 not supported)
               </div>
-              <button type="submit" class="btn-submit-action">
-                <i class="fas fa-paper-plane"></i> Send OTP via SMS
-              </button>
             </div>
 
-            <!-- STEP 2: ENTER OTP & CREATE PASSWORD -->
-            <div id="signup-step-2" style="display: none;">
-              <p style="font-size: 12px; color: var(--text-muted); text-align: center; margin-bottom: 12px;">
-                Enter the 4-digit verification code sent to <strong id="otp-target-phone" style="color: #fff;">+880 17XXXXXXXX</strong>
-              </p>
-              
-              <div class="otp-digits-row">
-                <input type="text" maxlength="1" class="otp-digit" oninput="moveNext(this, 'otp2')" id="otp1">
-                <input type="text" maxlength="1" class="otp-digit" oninput="moveNext(this, 'otp3')" id="otp2">
-                <input type="text" maxlength="1" class="otp-digit" oninput="moveNext(this, 'otp4')" id="otp3">
-                <input type="text" maxlength="1" class="otp-digit" id="otp4">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <div class="input-field-wrap">
+                <input type="text" class="form-input" id="signup-name" placeholder="e.g. Kazi Rahman" required>
               </div>
-
-              <div class="form-group">
-                <label class="form-label">Your Full Name</label>
-                <div class="input-field-wrap">
-                  <input type="text" class="form-input" id="signup-name" placeholder="e.g. Kazi Rahman" required>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Create Password</label>
-                <div class="input-field-wrap">
-                  <input type="password" class="form-input" id="signup-password" placeholder="Minimum 6 characters" minlength="6" required>
-                </div>
-              </div>
-
-              <button type="button" class="btn-submit-action" onclick="verifyOTPAndFinish()">
-                <i class="fas fa-check-shield"></i> Verify OTP & Create Account
-              </button>
-              <button type="button" class="btn-close-sheet" style="margin-top: 8px;" onclick="backToSignupStep1()">
-                <i class="fas fa-arrow-left"></i> Change Number
-              </button>
             </div>
+
+            <div class="form-group">
+              <label class="form-label">Create Password</label>
+              <div class="input-field-wrap">
+                <input type="password" class="form-input" id="signup-password" placeholder="Minimum 6 characters" minlength="6" required>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-submit-action" id="btn-signup-submit">
+              <i class="fas fa-user-plus"></i> Create Account
+            </button>
           </form>
         </div>
 
@@ -2777,6 +2763,41 @@
       }
     }
 
+    // Bangladeshi Mobile Phone Number Prefix Validator (013-019 only; 011 and 012 rejected)
+    const VALID_BD_OPERATOR_PREFIXES = ['13', '14', '15', '16', '17', '18', '19'];
+
+    function validateBangladeshiPhone(rawPhone) {
+      if (!rawPhone || !rawPhone.trim()) {
+        return { valid: false, message: "Please enter your Bangladeshi mobile number." };
+      }
+      const digits = String(rawPhone).replace(/\D/g, '');
+      const clean = digits.slice(-10);
+
+      if (clean.length !== 10) {
+        return { 
+          valid: false, 
+          message: "Please enter a valid 11-digit Bangladeshi mobile number (e.g. 017XXXXXXXX)." 
+        };
+      }
+
+      const prefix = clean.slice(0, 2);
+      if (prefix === '11' || prefix === '12') {
+        return {
+          valid: false,
+          message: "Invalid operator prefix! Numbers starting with 011 or 012 are not applicable in Bangladesh.\n\nOnly 013, 014, 015, 016, 017, 018, and 019 are supported."
+        };
+      }
+
+      if (!VALID_BD_OPERATOR_PREFIXES.includes(prefix)) {
+        return {
+          valid: false,
+          message: "Invalid operator prefix! Bangladeshi mobile number must start with 013, 014, 015, 016, 017, 018, or 019."
+        };
+      }
+
+      return { valid: true, cleanPhone: clean, formatted: "+880 " + clean };
+    }
+
     function toggleAuthTab(mode) {
       const tabs = document.getElementById('auth-main-tabs');
       if (tabs) tabs.style.display = 'flex';
@@ -2795,8 +2816,6 @@
         document.getElementById('tab-btn-login').classList.remove('active');
         document.getElementById('form-login').style.display = 'none';
         document.getElementById('form-signup').style.display = 'block';
-        document.getElementById('signup-step-1').style.display = 'block';
-        document.getElementById('signup-step-2').style.display = 'none';
       }
     }
 
@@ -2805,15 +2824,18 @@
     function handleLoginSubmit(e) {
       e.preventDefault();
       const rawPhone = document.getElementById('login-phone').value.trim();
-      const cleanPhone = rawPhone.replace(/\D/g, '').slice(-10);
-      const password = document.getElementById('login-password').value.trim();
-
-      if (!cleanPhone || cleanPhone.length < 10) {
-        alert("Please enter a valid 10-digit Bangladeshi mobile number.");
+      const phoneCheck = validateBangladeshiPhone(rawPhone);
+      if (!phoneCheck.valid) {
+        alert("⚠️ " + phoneCheck.message);
+        document.getElementById('login-phone').focus();
         return;
       }
+      const cleanPhone = phoneCheck.cleanPhone;
+      const password = document.getElementById('login-password').value.trim();
+
       if (!password) {
         alert("Please enter your account password.");
+        document.getElementById('login-password').focus();
         return;
       }
 
@@ -2841,7 +2863,7 @@
           return;
         }
 
-        // Two-Factor Authentication OTP Verification
+        // Two-Factor Authentication OTP Verification Fallback (if configured)
         if (data.requireOtp) {
           pendingLoginPhone = cleanPhone;
           document.getElementById('login-otp-target').innerText = "+880 " + cleanPhone;
@@ -2858,7 +2880,7 @@
           return;
         }
 
-        // Admin or Direct Session Authenticated by Backend
+        // Direct Sign In Authenticated by Backend
         if (data.user) {
           currentUser = data.user;
           localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
@@ -2869,6 +2891,8 @@
           if (currentUser.isAdmin) {
             alert("🛡️ Welcome Chief Admin!\nAdmin Command Portal unlocked. Opening Moderation Queue now.");
             openAdminPortal();
+          } else {
+            alert(`✅ Welcome back, ${currentUser.name}!\nSigned in as ${currentUser.displayPhone || '+880 ' + currentUser.phone}`);
           }
         }
       })
@@ -2957,11 +2981,18 @@
 
     function handleForgotRequestOTP() {
       const rawPhone = document.getElementById('forgot-phone').value.trim();
-      const cleanPhone = rawPhone.replace(/\D/g, '').slice(-10);
-
-      if (cleanPhone.length < 10) {
-        alert("Please enter a valid 10-digit registered mobile number.");
+      const phoneCheck = validateBangladeshiPhone(rawPhone);
+      if (!phoneCheck.valid) {
+        alert("⚠️ " + phoneCheck.message);
+        document.getElementById('forgot-phone').focus();
         return;
+      }
+      const cleanPhone = phoneCheck.cleanPhone;
+
+      const btn = document.getElementById('btn-forgot-request');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending Code...';
       }
 
       fetch(`${API_BASE}/api/auth/forgot-password/request-otp`, {
@@ -2971,6 +3002,10 @@
       })
       .then(r => r.json())
       .then(data => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reset Code via SMS';
+        }
         if (!data.success && data.error) {
           alert("⚠️ " + data.error);
           return;
@@ -3249,72 +3284,18 @@
       });
     }
 
-    function handleSignupRequestOTP(e) {
+    function handleSignupSubmit(e) {
       e.preventDefault();
       const rawPhone = document.getElementById('signup-phone').value.trim();
-      const cleanPhone = rawPhone.replace(/\D/g, '').slice(-10);
-      if (cleanPhone.length < 10) {
-        alert("Please enter a valid 10-digit Bangladeshi mobile number (e.g. 17XXXXXXXX).");
+      const phoneCheck = validateBangladeshiPhone(rawPhone);
+      if (!phoneCheck.valid) {
+        alert("⚠️ " + phoneCheck.message);
+        document.getElementById('signup-phone').focus();
         return;
       }
-      
-      document.getElementById('otp-target-phone').innerText = "+880 " + cleanPhone;
-      
-      fetch(`${API_BASE}/api/auth/request-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: cleanPhone })
-      })
-      .then(r => r.json())
-      .then(data => {
-        const otpCode = data.debugOtp || "1234";
-        alert(`📩 Verification Code Dispatched!\n\nA 4-digit code has been sent to +880 ${cleanPhone} via Bangladesh Telecom Gateway.\n\n[Verification OTP: ${otpCode}]`);
-        document.getElementById('signup-step-1').style.display = 'none';
-        document.getElementById('signup-step-2').style.display = 'block';
-        document.getElementById('otp1').value = '';
-        document.getElementById('otp2').value = '';
-        document.getElementById('otp3').value = '';
-        document.getElementById('otp4').value = '';
-        document.getElementById('otp1').focus();
-      })
-      .catch(() => {
-        alert(`📩 Verification Code Sent!\n\nA 4-digit verification code has been dispatched to +880 ${cleanPhone}.\n\n[Verification OTP: 1234]`);
-        document.getElementById('signup-step-1').style.display = 'none';
-        document.getElementById('signup-step-2').style.display = 'block';
-        document.getElementById('otp1').focus();
-      });
-    }
-
-    function backToSignupStep1() {
-      document.getElementById('signup-step-1').style.display = 'block';
-      document.getElementById('signup-step-2').style.display = 'none';
-      document.getElementById('signup-phone').focus();
-    }
-
-    function moveNext(current, nextFieldId) {
-      if (current.value.length >= 1 && nextFieldId) {
-        document.getElementById(nextFieldId).focus();
-      }
-    }
-
-    function verifyOTPAndFinish() {
-      const rawPhone = document.getElementById('signup-phone').value.trim();
-      const cleanPhone = rawPhone.replace(/\D/g, '').slice(-10);
+      const cleanPhone = phoneCheck.cleanPhone;
       const name = document.getElementById('signup-name').value.trim() || "Verified Citizen";
       const password = document.getElementById('signup-password').value.trim();
-      
-      const otpEntered = [
-        document.getElementById('otp1').value,
-        document.getElementById('otp2').value,
-        document.getElementById('otp3').value,
-        document.getElementById('otp4').value
-      ].join('');
-
-      if (otpEntered.length < 4) {
-        alert("Please enter the complete 4-digit OTP code sent to your phone.");
-        document.getElementById('otp1').focus();
-        return;
-      }
 
       if (!password || password.length < 6) {
         alert("Please create a password of at least 6 characters.");
@@ -3322,62 +3303,60 @@
         return;
       }
 
-      fetch(`${API_BASE}/api/auth/verify-otp`, {
+      const submitBtn = document.getElementById('btn-signup-submit');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+      }
+
+      fetch(`${API_BASE}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           phone: cleanPhone,
-          code: otpEntered,
-          password: password,
-          name: name
+          name: name,
+          password: password
         })
       })
       .then(r => r.json())
       .then(data => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+        }
+
         if (!data.success && data.error) {
           alert("⚠️ " + data.error);
           return;
         }
 
-        currentUser = {
+        currentUser = data.user || {
           name: name,
           phone: "+880 " + cleanPhone,
           nidVerified: true,
           isAdmin: false
         };
 
-        // Persist registered credentials locally for instant client-side password verification
-        let registeredUsers = {};
-        try {
-          registeredUsers = JSON.parse(localStorage.getItem('safe_bd_registered_users') || '{}');
-        } catch(e) {}
-        registeredUsers[cleanPhone] = { name, password, phone: "+880 " + cleanPhone };
-        localStorage.setItem('safe_bd_registered_users', JSON.stringify(registeredUsers));
-
+        if (data.token) localStorage.setItem('safe_bd_token', data.token);
         localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
         setLoggedInState();
-        alert(`🎉 Account Successfully Created!\n\nWelcome, ${name}!\nMobile: +880 ${cleanPhone}\nStatus: Verified BD Citizen (NID Linked)\n\nYou can now sign in anytime with your phone and password.`);
         closeAuthModal();
+
+        alert(`🎉 Account Successfully Created!\n\nWelcome, ${currentUser.name}!\nMobile: +880 ${cleanPhone}\nStatus: Verified BD Citizen (NID Linked)\n\nYou are now signed in and protected by SAFE BD.`);
       })
-      .catch(() => {
-        currentUser = {
-          name: name,
-          phone: "+880 " + cleanPhone,
-          nidVerified: true,
-          isAdmin: false
-        };
-        let registeredUsers = {};
-        try {
-          registeredUsers = JSON.parse(localStorage.getItem('safe_bd_registered_users') || '{}');
-        } catch(e) {}
-        registeredUsers[cleanPhone] = { name, password, phone: "+880 " + cleanPhone };
-        localStorage.setItem('safe_bd_registered_users', JSON.stringify(registeredUsers));
-
-        localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
-        setLoggedInState();
-        alert(`🎉 Account Created!\nWelcome, ${name}! Your phone number +880 ${cleanPhone} is verified.`);
-        closeAuthModal();
+      .catch(err => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+        }
+        alert("⚠️ Connection error creating account. Please ensure backend server is reachable.");
       });
+    }
+
+    function moveNext(current, nextFieldId) {
+      if (current.value.length >= 1 && nextFieldId) {
+        document.getElementById(nextFieldId).focus();
+      }
     }
 
     function setLoggedInState() {
@@ -3424,8 +3403,6 @@
       toggleAuthTab('login');
       document.getElementById('login-step-1').style.display = 'block';
       document.getElementById('login-step-2').style.display = 'none';
-      document.getElementById('signup-step-1').style.display = 'block';
-      document.getElementById('signup-step-2').style.display = 'none';
       switchTab('screen-sos', document.querySelectorAll('.nav-tab-btn')[0]);
       openAuthModal();
       alert("You have logged out.");
