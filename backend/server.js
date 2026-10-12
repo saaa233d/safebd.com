@@ -177,7 +177,8 @@ app.post('/api/auth/register', authLimiter, (req, res) => {
       phone: cleanPhone,
       name: (name && name.trim()) || "Verified Citizen",
       password: password,
-      nidVerified: true
+      nidVerified: true,
+      contacts: req.body.contacts || null
     });
 
     const token = db.generateSecureToken();
@@ -280,13 +281,8 @@ app.post('/api/auth/login', authLimiter, (req, res) => {
   if ((cleanPhone === '1316750712' || cleanPhone === '8801316750712' || cleanPhone === '01316750712') && password === (process.env.ADMIN_PASSWORD || 'naxbagmo24')) {
     const token = db.generateSecureToken('safe_token_admin_');
     db.markUserLogin('1316750712', token);
-    const adminUser = {
-      id: 'usr_admin_1316750712',
-      phone: '+880 1316-750712',
-      name: 'Chief Administrator',
-      isAdmin: true,
-      nidVerified: true
-    };
+    const adminRecord = db.getUserByPhone('1316750712');
+    const { salt: _, passwordHash: __, ...adminUser } = adminRecord;
     return res.json({
       success: true,
       requireOtp: false,
@@ -425,7 +421,82 @@ app.post('/api/auth/logout', (req, res) => {
   return res.json({ success: true, message: "Signed out successfully." });
 });
 
-// 1.8 Database Scale & Health Metrics (Protected by Admin Auth)
+// 1.8 Citizen Emergency Contacts Sync (Per-Profile Cloud Storage)
+app.get('/api/user/contacts', (req, res) => {
+  const authHeader = req.headers['authorization'] || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.query.token;
+  let phone = req.query.phone;
+
+  if (token) {
+    const session = db.getSession(token);
+    if (session) phone = session.phone;
+  }
+
+  if (phone) {
+    const cleanPhone = db.normalizePhone(phone);
+    const contacts = db.getUserContacts(cleanPhone);
+    return res.json({ success: true, contacts });
+  }
+
+  return res.json({ success: true, contacts: db.getDefaultUserContacts() });
+});
+
+app.put('/api/user/contacts', authLimiter, (req, res) => {
+  const authHeader = req.headers['authorization'] || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.body.token;
+  let phone = req.body.phone;
+
+  if (token) {
+    const session = db.getSession(token);
+    if (session) phone = session.phone;
+  }
+
+  if (!phone) {
+    return res.status(401).json({ error: "UNAUTHORIZED", message: "User phone or authorization token required to save contacts." });
+  }
+
+  const cleanPhone = db.normalizePhone(phone);
+  try {
+    const updated = db.updateUserContacts(cleanPhone, req.body.contacts);
+    console.log(`[👥 CONTACTS SYNCED TO DB] Citizen +880 ${cleanPhone} saved emergency contacts.`);
+    return res.json({
+      success: true,
+      message: "Emergency contacts updated in user profile.",
+      contacts: updated
+    });
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
+});
+
+app.post('/api/user/contacts', authLimiter, (req, res) => {
+  const authHeader = req.headers['authorization'] || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.body.token;
+  let phone = req.body.phone;
+
+  if (token) {
+    const session = db.getSession(token);
+    if (session) phone = session.phone;
+  }
+
+  if (!phone) {
+    return res.status(401).json({ error: "UNAUTHORIZED", message: "User phone or authorization token required to save contacts." });
+  }
+
+  const cleanPhone = db.normalizePhone(phone);
+  try {
+    const updated = db.updateUserContacts(cleanPhone, req.body.contacts);
+    return res.json({
+      success: true,
+      message: "Emergency contacts updated in user profile.",
+      contacts: updated
+    });
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
+});
+
+// 1.9 Database Scale & Health Metrics (Protected by Admin Auth)
 app.get('/api/database/metrics', (req, res) => {
   const metrics = db.getDatabaseMetrics();
   return res.json({ success: true, metrics });
