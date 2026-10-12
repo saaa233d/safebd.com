@@ -46,13 +46,18 @@ const db = require('./database');
 const rateLimitBuckets = {
   api: new Map(),
   auth: new Map(),
-  otp: new Map()
+  otp: new Map(),
+  post_create: new Map()
 };
 
 function createSlidingRateLimiter(bucketName, windowMs, maxRequests, customMessage) {
+  if (!rateLimitBuckets[bucketName]) {
+    rateLimitBuckets[bucketName] = new Map();
+  }
   const bucket = rateLimitBuckets[bucketName];
   // Periodic cleanup of expired rate limit keys
   setInterval(() => {
+    if (!bucket) return;
     const now = Date.now();
     for (const [key, item] of bucket.entries()) {
       if (now > item.resetTime) bucket.delete(key);
