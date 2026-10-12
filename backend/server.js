@@ -526,6 +526,38 @@ app.post('/api/emergency/sos-trigger', (req, res) => {
   });
 });
 
+const { execFile } = require('child_process');
+let ffmpegPath = null;
+try {
+  ffmpegPath = require('ffmpeg-static');
+} catch (e) {
+  ffmpegPath = 'ffmpeg';
+}
+
+function convertToMp4(inputPath, outputPath) {
+  return new Promise((resolve, reject) => {
+    if (!ffmpegPath) return reject(new Error('FFmpeg binary not found'));
+    const args = [
+      '-y',
+      '-i', inputPath,
+      '-c:v', 'libx264',
+      '-preset', 'ultrafast',
+      '-crf', '26',
+      '-c:a', 'aac',
+      '-b:a', '128k',
+      '-movflags', '+faststart',
+      outputPath
+    ];
+    execFile(ffmpegPath, args, (err, stdout, stderr) => {
+      if (err) {
+        console.warn('[FFMPEG TRANSCODE ERROR]:', err.message);
+        return reject(err);
+      }
+      resolve(outputPath);
+    });
+  });
+}
+
 // Ensure Evidence Directory exists
 const EVIDENCE_DIR = path.join(__dirname, 'data', 'evidence');
 if (!fs.existsSync(EVIDENCE_DIR)) {
@@ -559,6 +591,33 @@ app.post('/api/emergency/covert-recording', async (req, res) => {
 
     fs.writeFileSync(filePath, videoBuffer);
 
+    let finalFileName = fileName;
+    let finalFilePath = filePath;
+    let finalMimeType = (mimeType && mimeType.includes('mp4')) ? 'video/mp4' : (mimeType || 'video/webm');
+    let finalVideoData = videoData;
+    let finalBuffer = videoBuffer;
+
+    // Universal Mobile Compatibility: Auto-transcode WebM to standard MP4 (H.264/AAC +faststart)
+    if (fileName.endsWith('.webm') || (mimeType && mimeType.includes('webm'))) {
+      const mp4FileName = fileName.replace(/\.webm$/i, '') + '.mp4';
+      const mp4FilePath = path.join(EVIDENCE_DIR, mp4FileName);
+      try {
+        await convertToMp4(filePath, mp4FilePath);
+        if (fs.existsSync(mp4FilePath) && fs.statSync(mp4FilePath).size > 0) {
+          finalBuffer = fs.readFileSync(mp4FilePath);
+          finalFileName = mp4FileName;
+          finalFilePath = mp4FilePath;
+          finalMimeType = 'video/mp4';
+          finalVideoData = 'data:video/mp4;base64,' + finalBuffer.toString('base64');
+          console.log(`[🎬 TRANSCODE SUCCESS] Converted ${fileName} to mobile-friendly MP4 (${finalFileName}, ${Math.round(finalBuffer.length / 1024)} KB)`);
+        }
+      } catch (transcodeErr) {
+        console.warn(`[⚠️ MP4 TRANSCODE FALLBACK] Keeping original ${fileName}:`, transcodeErr.message);
+      }
+    } else if (fileName.endsWith('.mp4')) {
+      finalMimeType = 'video/mp4';
+    }
+
     const evidenceId = id || ("EVID-" + Date.now());
     const evidenceItem = {
       id: evidenceId,
@@ -566,11 +625,11 @@ app.post('/api/emergency/covert-recording', async (req, res) => {
       userName: userName || "Citizen in Distress",
       userPhone: userPhone || "01XXXXXXXXX",
       location: location || { lat: 23.8103, lon: 90.4125, address: "Dhaka, Bangladesh" },
-      videoUrl: `/api/emergency/evidence/${fileName}`,
-      videoData: videoData, // Stored persistently so video is NEVER lost across server restarts
-      fileName,
-      fileSizeKb: Math.round(videoBuffer.length / 1024),
-      mimeType: mimeType || 'video/webm',
+      videoUrl: `/api/emergency/evidence/${finalFileName}`,
+      videoData: finalVideoData, // Stored persistently so video is NEVER lost across server restarts
+      fileName: finalFileName,
+      fileSizeKb: Math.round(finalBuffer.length / 1024),
+      mimeType: finalMimeType,
       durationSeconds: durationSeconds || 15,
       recordedAt: new Date().toISOString(),
       status: "PENDING_ADMIN_DISPATCH",
@@ -579,7 +638,7 @@ app.post('/api/emergency/covert-recording', async (req, res) => {
 
     db.addEmergencyEvidence(evidenceItem);
 
-    console.log(`[📹🚨 SPY COVERT SOS VIDEO CAPTURED & ARCHIVED] Citizen: ${evidenceItem.userName} (${evidenceItem.userPhone}) at ${evidenceItem.location.address} | Size: ${evidenceItem.fileSizeKb} KB`);
+    console.log(`[📹🚨 SPY COVERT SOS VIDEO CAPTURED & ARCHIVED] Citizen: ${evidenceItem.userName} (${evidenceItem.userPhone}) at ${evidenceItem.location.address} | Size: ${evidenceItem.fileSizeKb} KB (${finalMimeType})`);
 
     // Broadcast live to Admin and Emergency circle listeners
     broadcastLocationUpdate({
@@ -589,7 +648,7 @@ app.post('/api/emergency/covert-recording', async (req, res) => {
 
     return res.json({
       success: true,
-      message: "Emergency spy video & audio evidence safely archived and delivered to Admin Command Portal.",
+      message: "Emergency spy video & audio evidence safely archived in mobile-friendly MP4 and delivered to Admin Command Portal.",
       evidence: evidenceItem
     });
   } catch (err) {
@@ -598,10 +657,10 @@ app.post('/api/emergency/covert-recording', async (req, res) => {
   }
 });
 
-// 2.3 Stream / Serve / Download Emergency Video Evidence
-app.get('/api/emergency/evidence/:filename', (req, res) => {
+// 2.3 Stream / Serve / Download Emergency Video Evidence (Native MP4 for Mobile Compatibility)
+app.get('/api/emergency/evidence/:filename', async (req, res) => {
   const filename = path.basename(req.params.filename);
-  const filePath = path.join(EVIDENCE_DIR, filename);
+  let filePath = path.join(EVIDENCE_DIR, filename);
 
   // Universal Cross-Origin headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -613,10 +672,30 @@ app.get('/api/emergency/evidence/:filename', (req, res) => {
     return res.status(200).end();
   }
 
+  // If requesting .mp4 but only .webm exists on disk, transcode to mobile-friendly .mp4 on-the-fly!
+  if (filename.endsWith('.mp4') && !fs.existsSync(filePath)) {
+    const webmName = filename.replace(/\.mp4$/i, '.webm');
+    const webmPath = path.join(EVIDENCE_DIR, webmName);
+    if (fs.existsSync(webmPath)) {
+      try {
+        await convertToMp4(webmPath, filePath);
+        console.log(`[🎬 ON-DEMAND MP4 TRANSCODE] Transcoded ${webmName} -> ${filename}`);
+      } catch (e) {
+        console.warn(`[TRANSCODE WARN]:`, e.message);
+      }
+    }
+  }
+
   // Auto-recovery: If file was removed or container restarted, rebuild file from persistent database
   if (!fs.existsSync(filePath)) {
     const allEvidence = db.getAllEmergencyEvidence();
-    const match = allEvidence.find(e => e.fileName === filename || (e.id && filename.includes(e.id)) || (e.videoUrl && e.videoUrl.endsWith(filename)));
+    const rawBase = filename.replace(/\.(mp4|webm)$/i, '');
+    const match = allEvidence.find(e => 
+      e.fileName === filename || 
+      (e.id && filename.includes(e.id)) || 
+      (e.fileName && e.fileName.includes(rawBase)) ||
+      (e.videoUrl && e.videoUrl.includes(rawBase))
+    );
     if (match && match.videoData) {
       try {
         let base64Clean = match.videoData;
@@ -629,7 +708,19 @@ app.get('/api/emergency/evidence/:filename', (req, res) => {
           if (commaIdx !== -1) base64Clean = base64Clean.substring(commaIdx + 1);
         }
         if (!fs.existsSync(EVIDENCE_DIR)) fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
-        fs.writeFileSync(filePath, Buffer.from(base64Clean.trim(), 'base64'));
+
+        // If database record was WebM but client requested MP4, write WebM then convert to MP4
+        if (filename.endsWith('.mp4') && match.fileName && match.fileName.endsWith('.webm')) {
+          const tempWebm = path.join(EVIDENCE_DIR, match.fileName);
+          fs.writeFileSync(tempWebm, Buffer.from(base64Clean.trim(), 'base64'));
+          try {
+            await convertToMp4(tempWebm, filePath);
+          } catch(tcErr) {
+            fs.writeFileSync(filePath, Buffer.from(base64Clean.trim(), 'base64'));
+          }
+        } else {
+          fs.writeFileSync(filePath, Buffer.from(base64Clean.trim(), 'base64'));
+        }
         console.log(`[♻️ EVIDENCE RESTORED FROM DATABASE] Reconstructed ${filename} (${fs.statSync(filePath).size} bytes)`);
       } catch (recErr) {
         console.error(`[RECOVERY FAILED] ${filename}:`, recErr.message);
