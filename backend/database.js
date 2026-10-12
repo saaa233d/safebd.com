@@ -47,6 +47,7 @@ function initDatabase() {
       dbState = {
         users: parsed.users || {},
         sessions: parsed.sessions || {},
+        emergencyEvidence: parsed.emergencyEvidence || [],
         otpCodes: {}, // OTPs are ephemeral and cleared on startup
         stats: parsed.stats || { totalLogins: 0, totalRegistrations: 0, lastSaved: null }
       };
@@ -456,6 +457,38 @@ function getDatabaseMetrics() {
   };
 }
 
+function addEmergencyEvidence(record) {
+  if (!dbState.emergencyEvidence) {
+    dbState.emergencyEvidence = [];
+  }
+  dbState.emergencyEvidence.unshift(record);
+  persistToDisk();
+  return record;
+}
+
+function getAllEmergencyEvidence() {
+  return dbState.emergencyEvidence || [];
+}
+
+function getEmergencyEvidenceById(id) {
+  if (!dbState.emergencyEvidence) return null;
+  return dbState.emergencyEvidence.find(e => e.id === id) || null;
+}
+
+function markEmergencyEvidenceReviewed(id, notes = "") {
+  if (!dbState.emergencyEvidence) return null;
+  const item = dbState.emergencyEvidence.find(e => e.id === id);
+  if (item) {
+    item.reviewed = true;
+    item.status = "DISPATCHED_TO_POLICE";
+    item.reviewedAt = new Date().toISOString();
+    if (notes) item.adminNotes = notes;
+    persistToDisk();
+    return item;
+  }
+  return null;
+}
+
 // Initialize on module load
 initDatabase();
 
@@ -477,6 +510,10 @@ module.exports = {
   getUserContacts,
   getDefaultUserContacts,
   sanitizeContacts,
+  addEmergencyEvidence,
+  getAllEmergencyEvidence,
+  getEmergencyEvidenceById,
+  markEmergencyEvidenceReviewed,
   getDatabaseMetrics,
   initDatabase
 };
