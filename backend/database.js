@@ -78,10 +78,24 @@ function initDatabase() {
       const parsed = JSON.parse(raw);
       
       const dbEvidence = parsed.emergencyEvidence || [];
-      // Merge and deduplicate evidence by id
+      // Merge and deduplicate evidence by id (stripping heavy base64 to keep memory low)
       const evidenceMap = new Map();
-      (loadedEvidence || []).forEach(item => { if (item && item.id) evidenceMap.set(item.id, item); });
-      (dbEvidence || []).forEach(item => { if (item && item.id) evidenceMap.set(item.id, item); });
+      (loadedEvidence || []).forEach(item => {
+        if (item && item.id) {
+          delete item.videoData;
+          delete item.videoBlob;
+          delete item._blobUrl;
+          evidenceMap.set(item.id, item);
+        }
+      });
+      (dbEvidence || []).forEach(item => {
+        if (item && item.id) {
+          delete item.videoData;
+          delete item.videoBlob;
+          delete item._blobUrl;
+          evidenceMap.set(item.id, item);
+        }
+      });
       const combinedEvidence = Array.from(evidenceMap.values()).sort((a, b) => new Date(b.recordedAt || 0) - new Date(a.recordedAt || 0));
 
       // Merge posts and filter out any dummy posts (e.g. Dhaka Traffic Command or SAFE BD Community)
@@ -616,17 +630,23 @@ function getDatabaseMetrics() {
 }
 
 function addEmergencyEvidence(record) {
+  if (!record || !record.id) return null;
   if (!dbState.emergencyEvidence) {
     dbState.emergencyEvidence = [];
   }
-  const existingIdx = dbState.emergencyEvidence.findIndex(e => e.id === record.id);
+  const cleanRecord = { ...record };
+  delete cleanRecord.videoData;
+  delete cleanRecord.videoBlob;
+  delete cleanRecord._blobUrl;
+
+  const existingIdx = dbState.emergencyEvidence.findIndex(e => e.id === cleanRecord.id);
   if (existingIdx !== -1) {
-    dbState.emergencyEvidence[existingIdx] = { ...dbState.emergencyEvidence[existingIdx], ...record };
+    dbState.emergencyEvidence[existingIdx] = { ...dbState.emergencyEvidence[existingIdx], ...cleanRecord };
   } else {
-    dbState.emergencyEvidence.unshift(record);
+    dbState.emergencyEvidence.unshift(cleanRecord);
   }
   
-  // Instant disk synchronization to prevent loss across container restarts
+  // Instant disk synchronization to prevent loss across container restarts (lightweight metadata)
   try {
     if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
     const evPayload = JSON.stringify(dbState.emergencyEvidence, null, 2);
@@ -635,7 +655,7 @@ function addEmergencyEvidence(record) {
     console.warn('[EVIDENCE SYNC DISK WRITE WARNING]:', err.message);
   }
   persistToDisk();
-  return record;
+  return cleanRecord;
 }
 
 function getAllEmergencyEvidence() {
