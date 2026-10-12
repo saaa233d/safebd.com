@@ -647,6 +647,72 @@
       cursor: pointer;
     }
 
+    /* GOOGLE MAPS LIVE TRACKING HUD & FLOATING CONTROLS */
+    .map-floating-controls {
+      position: absolute;
+      right: 14px;
+      top: 130px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 95;
+    }
+    .btn-map-control {
+      background: rgba(18, 15, 23, 0.94);
+      border: 1px solid var(--border-quiet);
+      color: #fff;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-map-control:hover, .btn-map-control:active {
+      background: var(--burgundy-vivid);
+      border-color: var(--burgundy-core);
+      transform: scale(1.08);
+    }
+    .transit-live-hud {
+      display: none;
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      background: rgba(12, 11, 14, 0.95);
+      border: 1px solid var(--burgundy-border);
+      border-radius: 16px;
+      padding: 12px 14px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
+      z-index: 100;
+    }
+    .live-pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #10b981;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: livePulse 1.8s infinite;
+    }
+    @keyframes livePulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+      }
+    }
+
     /* ========================================================
        SCREEN 3: INTERACTIVE SOCIAL MEDIA & CIVIC FEED
     ======================================================== */
@@ -1350,14 +1416,14 @@
         </iframe>
 
         <!-- Floating Walk With Me Header -->
-        <div class="walk-overlay-panel">
+        <div class="walk-overlay-panel" id="walk-overlay-panel">
           <div class="walk-header-row">
             <div class="walk-title">
               <i class="fas fa-person-walking" style="color: #e57373;"></i>
               <span>Walk With Me</span>
             </div>
             <div class="walk-live-indicator" id="map-live-status-pill">
-              <i class="fas fa-satellite-dish"></i> GPS Active
+              <span class="live-pulse-dot" style="margin-right: 2px;"></span> GPS Active
             </div>
           </div>
 
@@ -1416,6 +1482,45 @@
           </div>
         </div>
 
+        <!-- Live In-Transit HUD (Active during Walk / Transport) -->
+        <div id="transit-live-hud" class="transit-live-hud">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div style="display: flex; align-items: center; gap: 7px;">
+              <span class="live-pulse-dot"></span>
+              <span style="font-size: 12px; font-weight: 700; color: #fff;" id="transit-mode-badge"><i class="fas fa-person-walking"></i> Live Walk Tracking</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="font-size: 11px; color: #10b981; font-weight: 700; background: rgba(16, 185, 129, 0.15); padding: 2px 8px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);" id="transit-speed-badge">
+                ⚡ 0 km/h
+              </div>
+              <button type="button" onclick="editWalkDestination()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px 4px; font-size: 11px;" title="Edit route">
+                <i class="fas fa-pen-to-square"></i>
+              </button>
+            </div>
+          </div>
+          <div style="font-size: 11.5px; color: #f1f5f9; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            <i class="fas fa-location-dot" style="color: #ef4444; font-size: 11px; flex-shrink: 0;"></i>
+            <span id="transit-current-street" style="overflow: hidden; text-overflow: ellipsis;">Detecting street location...</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 10.5px; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.08); padding-top: 6px;">
+            <div>To: <strong style="color: #fff;" id="transit-target-dest">--</strong></div>
+            <div id="transit-eta-metric" style="color: #38bdf8; font-weight: 600;">Remaining: ~-- mins</div>
+          </div>
+        </div>
+
+        <!-- Floating Google Maps Live Tracking Quick Actions -->
+        <div class="map-floating-controls" id="map-floating-controls">
+          <button type="button" class="btn-map-control" onclick="centerOnUserLiveLocation(true)" title="Center on My Live Location">
+            <i class="fas fa-crosshairs" style="color: #38bdf8;"></i>
+          </button>
+          <button type="button" class="btn-map-control" onclick="toggleMapOverviewRoute()" id="btn-toggle-route-view" title="Toggle Route / Live Pin View" style="display: none;">
+            <i class="fas fa-route" style="color: #10b981;"></i>
+          </button>
+          <a id="btn-floating-navigate" class="btn-map-control" href="https://maps.google.com" target="_blank" title="Start Live Google Maps Navigation" style="text-decoration: none;">
+            <i class="fas fa-diamond-turn-right" style="color: #f59e0b;"></i>
+          </a>
+        </div>
+
         <!-- Active Walk Tracking Status Drawer -->
         <div id="walk-dock" class="walk-active-dock">
           <div class="dock-stat-row">
@@ -1425,6 +1530,28 @@
           <div class="dock-subtext" id="walk-dock-dest-text">
             Guarding route. An alert triggers if stationary or off-route for &gt; 3 mins.
           </div>
+
+          <!-- Live Telemetry Stats -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; font-size: 11px;">
+            <div style="background: rgba(255,255,255,0.04); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-quiet);">
+              <span style="color: var(--text-muted); font-size: 9.5px; display: block;">LIVE SPEED</span>
+              <strong id="dock-live-speed" style="color: #10b981; font-size: 12px;">0 km/h</strong>
+            </div>
+            <div style="background: rgba(255,255,255,0.04); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-quiet);">
+              <span style="color: var(--text-muted); font-size: 9.5px; display: block;">GPS TRACKING</span>
+              <strong id="dock-live-accuracy" style="color: #38bdf8; font-size: 12px;">Satellite Active</strong>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+            <button type="button" onclick="centerOnUserLiveLocation(true)" style="flex: 1; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; padding: 7px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
+              <i class="fas fa-crosshairs"></i> Track Live Pin
+            </button>
+            <a id="btn-dock-external-nav" href="https://maps.google.com" target="_blank" style="flex: 1; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #f59e0b; padding: 7px; border-radius: 8px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px;">
+              <i class="fas fa-diamond-turn-right"></i> Live Google Nav
+            </a>
+          </div>
+
           <button class="dock-finish-btn" onclick="finishWalkWithMe()">
             <i class="fas fa-check"></i> I Have Arrived Safely
           </button>
@@ -2051,6 +2178,11 @@
     let isRouteCalculating = false;
     let currentMapFrameSrc = "";
 
+    // Live Movement & Tracking State
+    let currentSpeedKmh = 0;
+    let lastGpsTimestamp = 0;
+    let mapTrackingViewMode = 'route'; // 'route' | 'live_location'
+
     function computeGeoDistanceMeters(lat1, lon1, lat2, lon2) {
       if (!lat1 || !lon1 || !lat2 || !lon2) return null;
       const R = 6371000; // Earth radius in meters
@@ -2070,6 +2202,46 @@
       if (currentMapFrameSrc === targetUrl) return;
       currentMapFrameSrc = targetUrl;
       mapFrame.src = targetUrl;
+    }
+
+    function centerOnUserLiveLocation(focusZoom = true) {
+      mapTrackingViewMode = 'live_location';
+      const toggleBtn = document.getElementById('btn-toggle-route-view');
+      if (toggleBtn) {
+        toggleBtn.style.display = currentDestinationQuery ? 'flex' : 'none';
+        toggleBtn.innerHTML = '<i class="fas fa-route" style="color: #10b981;"></i>';
+        toggleBtn.title = 'Switch to Full Route Overview';
+      }
+
+      if (currentCoords.lat && currentCoords.lon) {
+        const zoom = focusZoom ? 17 : 16;
+        const gmapsLiveUrl = `https://maps.google.com/maps?q=${currentCoords.lat},${currentCoords.lon}&t=&z=${zoom}&ie=UTF8&iwloc=B&output=embed`;
+        safelyUpdateMapFrame(gmapsLiveUrl);
+      }
+    }
+
+    function toggleMapOverviewRoute() {
+      if (mapTrackingViewMode === 'live_location' && currentDestinationQuery) {
+        mapTrackingViewMode = 'route';
+        const toggleBtn = document.getElementById('btn-toggle-route-view');
+        if (toggleBtn) {
+          toggleBtn.innerHTML = '<i class="fas fa-crosshairs" style="color: #38bdf8;"></i>';
+          toggleBtn.title = 'Track My Live Location Pin';
+        }
+        computeLiveGoogleMapsRoute(currentDestinationQuery, selectedDestCoords, true);
+      } else {
+        centerOnUserLiveLocation(true);
+      }
+    }
+
+    function editWalkDestination() {
+      const overlay = document.getElementById('walk-overlay-panel');
+      const hud = document.getElementById('transit-live-hud');
+      if (overlay && hud) {
+        const isEditing = overlay.style.display === 'block';
+        overlay.style.display = isEditing ? 'none' : 'block';
+        hud.style.display = isEditing ? 'block' : 'none';
+      }
     }
 
     try {
@@ -2144,8 +2316,54 @@
       const isFirstFix = (lastProcessedGpsCoords.lat === 0 && lastProcessedGpsCoords.lon === 0);
       const movedMeters = isFirstFix ? 999999 : computeGeoDistanceMeters(lastProcessedGpsCoords.lat, lastProcessedGpsCoords.lon, lat, lon);
 
-      // STABILIZER: If user moved less than 40 meters (and not forced alert), suppress heavy re-render to eliminate flickering
-      if (!isFirstFix && movedMeters !== null && movedMeters < 40 && !showAlert) {
+      // Real-time speed calculation from GPS sensor or delta movement
+      if (position.coords.speed !== null && position.coords.speed !== undefined && position.coords.speed > 0) {
+        currentSpeedKmh = Math.round(position.coords.speed * 3.6);
+      } else if (lastGpsTimestamp && lastProcessedGpsCoords.lat && movedMeters !== null) {
+        const timeDiffSec = (Date.now() - lastGpsTimestamp) / 1000;
+        if (timeDiffSec > 0 && movedMeters > 0 && timeDiffSec < 120) {
+          currentSpeedKmh = Math.round((movedMeters / timeDiffSec) * 3.6);
+        }
+      }
+      lastGpsTimestamp = Date.now();
+
+      // Format live speed indicator
+      let speedText = `${currentSpeedKmh} km/h`;
+      if (currentSpeedKmh === 0) {
+        if (selectedTravelMode === 'walking') speedText = 'Walking (~4 km/h)';
+        else if (selectedTravelMode === 'bicycling') speedText = 'Bike transit';
+        else speedText = 'In Vehicle';
+      }
+
+      // Update telemetry badges and active HUD in real time
+      const speedBadge = document.getElementById('transit-speed-badge');
+      if (speedBadge) speedBadge.innerHTML = `⚡ ${speedText}`;
+
+      const dockSpeed = document.getElementById('dock-live-speed');
+      if (dockSpeed) dockSpeed.innerText = speedText;
+
+      const dockAcc = document.getElementById('dock-live-accuracy');
+      if (dockAcc) dockAcc.innerText = `GPS ±${acc}m (${currentCoords.address ? currentCoords.address.split(',')[0] : 'Active'})`;
+
+      const transitStreet = document.getElementById('transit-current-street');
+      if (transitStreet && currentCoords.address) {
+        transitStreet.innerText = `${currentCoords.address} (GPS ±${acc}m)`;
+      }
+
+      // Update external Google Maps live navigation URLs (turn-by-turn navigation)
+      const destParam = currentDestinationQuery ? encodeURIComponent(currentDestinationQuery) : '';
+      const modeParam = selectedTravelMode === 'driving' ? 'driving' : (selectedTravelMode === 'bicycling' ? 'bicycling' : 'walking');
+      const liveNavUrl = destParam 
+        ? `https://www.google.com/maps/dir/?api=1&origin=${lat},${lon}&destination=${destParam}&travelmode=${modeParam}&dir_action=navigate`
+        : `https://www.google.com/maps?q=${lat},${lon}`;
+
+      ['btn-external-gmaps', 'btn-floating-navigate', 'btn-dock-external-nav'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.href = liveNavUrl;
+      });
+
+      // STABILIZER: If user moved less than 35 meters (and not forced alert), suppress heavy re-render
+      if (!isFirstFix && movedMeters !== null && movedMeters < 35 && !showAlert) {
         updateTelemetryUI(currentCoords.address, `Coordinates: ${lat.toFixed(5)}, ${lon.toFixed(5)}`, `GPS Live (±${acc}m)`, "#10b981");
 
         // Sync coordinates silently if on an active journey
@@ -2202,17 +2420,18 @@
       const walkStartEl = document.getElementById('walk-start');
       if (walkStartEl) walkStartEl.value = `📍 ${locName}`;
 
-      // Center Google Maps safely without blanking/reloading if no destination selected
-      if (!currentDestinationQuery) {
-        const gmapsUrl = `https://maps.google.com/maps?q=${lat},${lon}&t=&z=16&ie=UTF8&iwloc=B&output=embed`;
-        safelyUpdateMapFrame(gmapsUrl);
+      const transitStreet = document.getElementById('transit-current-street');
+      if (transitStreet) transitStreet.innerText = `${locName} (GPS ±${currentCoords.accuracy}m)`;
 
-        const extGmaps = document.getElementById('btn-external-gmaps');
-        if (extGmaps) extGmaps.href = `https://www.google.com/maps?q=${lat},${lon}`;
+      // If user is tracking their live pin, center Google Maps on moving coordinates
+      if (mapTrackingViewMode === 'live_location' || !currentDestinationQuery) {
+        const zoom = (activeJourneySessionId || mapTrackingViewMode === 'live_location') ? 17 : 16;
+        const gmapsLiveUrl = `https://maps.google.com/maps?q=${lat},${lon}&t=&z=${zoom}&ie=UTF8&iwloc=B&output=embed`;
+        safelyUpdateMapFrame(gmapsLiveUrl);
       }
 
-      // If destination is selected, only recompute route if user physically moved > 150 meters or > 60 seconds have passed
-      if (currentDestinationQuery) {
+      // If destination is selected and user is in 'route' view mode, recompute route only after significant movement (>150m)
+      if (currentDestinationQuery && mapTrackingViewMode === 'route') {
         const routeMovedMeters = computeGeoDistanceMeters(lastRouteCalculatedCoords.lat, lastRouteCalculatedCoords.lon, lat, lon);
         const timeSinceLastRoute = Date.now() - lastRouteCalculatedTime;
         if (lastRouteCalculatedCoords.lat === 0 || (routeMovedMeters !== null && routeMovedMeters >= 150) || timeSinceLastRoute > 60000) {
@@ -3299,6 +3518,31 @@
         `${modeTitle} active to ${destination} (${calculatedRouteDistanceKm} km). Dynamic safety timer set to ${calculatedDurationMinutes} mins.`;
       document.getElementById('walk-dock').style.display = 'block';
 
+      // Switch top header from heavy input panel to Sleek Live Transit HUD
+      const overlay = document.getElementById('walk-overlay-panel');
+      if (overlay) overlay.style.display = 'none';
+
+      const hud = document.getElementById('transit-live-hud');
+      if (hud) hud.style.display = 'block';
+
+      const toggleBtn = document.getElementById('btn-toggle-route-view');
+      if (toggleBtn) toggleBtn.style.display = 'flex';
+
+      const destTargetEl = document.getElementById('transit-target-dest');
+      if (destTargetEl) destTargetEl.innerText = destination;
+
+      const modeBadge = document.getElementById('transit-mode-badge');
+      if (modeBadge) {
+        const modeIcon = selectedTravelMode === 'driving' ? 'fa-car-side' : (selectedTravelMode === 'bicycling' ? 'fa-motorcycle' : 'fa-person-walking');
+        modeBadge.innerHTML = `<i class="fas ${modeIcon}"></i> ${modeTitle}`;
+      }
+
+      const etaMetric = document.getElementById('transit-eta-metric');
+      if (etaMetric) etaMetric.innerText = `Remaining: ~${calculatedDurationMinutes} mins (${calculatedRouteDistanceKm} km)`;
+
+      // Immediately focus Google Maps on user's live moving location
+      centerOnUserLiveLocation(true);
+
       if (walkTimerInterval) clearInterval(walkTimerInterval);
       walkTimerInterval = setInterval(() => {
         handleJourneyTimerTick(destination);
@@ -3370,12 +3614,22 @@
       if (walkTimerInterval) clearInterval(walkTimerInterval);
       document.getElementById('walk-dock').style.display = 'none';
 
+      const overlay = document.getElementById('walk-overlay-panel');
+      if (overlay) overlay.style.display = 'block';
+
+      const hud = document.getElementById('transit-live-hud');
+      if (hud) hud.style.display = 'none';
+
+      const toggleBtn = document.getElementById('btn-toggle-route-view');
+      if (toggleBtn) toggleBtn.style.display = 'none';
+
       if (activeJourneySessionId) {
         fetch(`${API_BASE}/api/walk/finish`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId: activeJourneySessionId })
         }).catch(() => {});
+        activeJourneySessionId = null;
       }
 
       alert("✅ Glad you arrived safely! Your journey companion session has ended.");
