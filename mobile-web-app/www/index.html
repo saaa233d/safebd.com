@@ -1374,7 +1374,10 @@
             <label class="form-label">Bangladeshi Mobile Number</label>
             <div class="input-field-wrap">
               <span class="prefix-bd">+880</span>
-              <input type="tel" class="form-input" id="edit-contact-phone" placeholder="17XXXXXXXX" pattern="[0-9]{10}" required>
+              <input type="tel" class="form-input" id="edit-contact-phone" placeholder="017XXXXXXXX">
+            </div>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
+              Supported operators: 013-019. If unconfigured, shows as 01XXXXXXXXX.
             </div>
           </div>
 
@@ -1686,18 +1689,30 @@
       { name: "Jessore (Chowrasta)", area: "Khulna Division", query: "Jessore, Bangladesh", lat: 23.1664, lon: 89.2081 }
     ];
 
-    let defaultContacts = [
-      { id: "c1", name: "Mother", phone: "1711000001", initial: "M" },
-      { id: "c2", name: "Father", phone: "1811000002", initial: "F" },
-      { id: "c3", name: "Guardian", phone: "1911000003", initial: "G" }
-    ];
+    function getDefaultContacts() {
+      return [
+        { id: "c1", name: "Father", phone: "", initial: "F" },
+        { id: "c2", name: "Mother", phone: "", initial: "M" },
+        { id: "c3", name: "Guardian", phone: "", initial: "G" }
+      ];
+    }
 
-    let contacts = [];
-    try {
-      const savedContacts = localStorage.getItem('safe_bd_contacts');
-      contacts = savedContacts ? JSON.parse(savedContacts) : defaultContacts;
-    } catch(e) {
-      contacts = defaultContacts;
+    let defaultContacts = getDefaultContacts();
+    let contacts = getDefaultContacts();
+
+    function loadUserContacts(user) {
+      if (user && Array.isArray(user.contacts) && user.contacts.length) {
+        contacts = user.contacts;
+      } else if (user) {
+        const userKey = user && user.phone ? String(user.phone).replace(/\D/g, '').slice(-10) : '';
+        const cached = userKey ? localStorage.getItem('safe_bd_contacts_' + userKey) : null;
+        contacts = cached ? JSON.parse(cached) : getDefaultContacts();
+      } else {
+        contacts = getDefaultContacts();
+      }
+      if (typeof renderContactsList === 'function') {
+        renderContactsList();
+      }
     }
 
     let activeContact = null;
@@ -1801,10 +1816,13 @@
       if (saved) {
         currentUser = JSON.parse(saved);
         setLoggedInState();
+        loadUserContacts(currentUser);
+      } else {
+        loadUserContacts(null);
       }
-    } catch(e) {}
-
-    renderContactsList();
+    } catch(e) {
+      loadUserContacts(null);
+    }
     renderCommunityPosts();
 
     // =========================================================================
@@ -2151,17 +2169,24 @@
     ---------------------------------------------------- */
     function renderContactsList() {
       const container = document.getElementById('contacts-container');
+      if (!container) return;
       container.innerHTML = '';
 
       contacts.forEach(c => {
         const card = document.createElement('div');
         card.className = 'contact-item-card';
+
+        // Check if phone number is configured or shows placeholder 01XXXXXXXXX
+        const isConfigured = c.phone && String(c.phone).trim() !== '' && c.phone !== '01XXXXXXXXX';
+        const displayPhone = isConfigured ? `+880 ${String(c.phone).replace(/\D/g, '').slice(-10)}` : '01XXXXXXXXX';
+        const phoneStyle = isConfigured ? '' : 'color: #94a3b8; font-family: monospace; letter-spacing: 0.5px;';
+
         card.innerHTML = `
           <div class="contact-info" onclick="openContactSheet('${c.id}')">
-            <div class="contact-avatar online">${c.initial}</div>
+            <div class="contact-avatar online">${c.initial || (c.name ? c.name.charAt(0).toUpperCase() : '?')}</div>
             <div>
               <div class="contact-name">${c.name}</div>
-              <div class="contact-num">+880 ${c.phone}</div>
+              <div class="contact-num" style="${phoneStyle}">${displayPhone}</div>
             </div>
           </div>
           <div class="contact-action-group">
@@ -2182,8 +2207,10 @@
       if (!c) return;
 
       document.getElementById('edit-contact-name').value = c.name;
-      document.getElementById('edit-contact-phone').value = c.phone.replace(/[^0-9]/g, '').slice(-10);
+      const isConfigured = c.phone && String(c.phone).trim() !== '' && c.phone !== '01XXXXXXXXX';
+      document.getElementById('edit-contact-phone').value = isConfigured ? String(c.phone).replace(/\D/g, '').slice(-10) : '';
       document.getElementById('edit-contact-modal').classList.add('open');
+      document.getElementById('edit-contact-name').focus();
     }
 
     function closeEditContactModal(e) {
@@ -2195,16 +2222,69 @@
     function saveContactChanges(e) {
       e.preventDefault();
       const newName = document.getElementById('edit-contact-name').value.trim();
-      const newPhone = document.getElementById('edit-contact-phone').value.trim();
+      const rawPhone = document.getElementById('edit-contact-phone').value.trim();
+
+      if (!newName) {
+        alert("Please enter a contact label or relation name.");
+        document.getElementById('edit-contact-name').focus();
+        return;
+      }
+
+      let cleanPhone = "";
+      if (rawPhone && rawPhone !== '01XXXXXXXXX') {
+        const phoneCheck = validateBangladeshiPhone(rawPhone);
+        if (!phoneCheck.valid) {
+          alert("⚠️ " + phoneCheck.message);
+          document.getElementById('edit-contact-phone').focus();
+          return;
+        }
+        cleanPhone = phoneCheck.cleanPhone;
+      }
 
       const c = contacts.find(item => item.id === editingContactId);
       if (c) {
         c.name = newName;
-        c.phone = newPhone;
+        c.phone = cleanPhone; // Empty string displays as 01XXXXXXXXX
         c.initial = newName.charAt(0).toUpperCase();
-        localStorage.setItem('safe_bd_contacts', JSON.stringify(contacts));
+
         renderContactsList();
-        alert(`✅ Contact updated successfully!\n${c.name}: +880 ${c.phone}`);
+
+        // If user is logged in, upload and save to their profile database!
+        if (currentUser) {
+          const userKey = (currentUser.phone || '').replace(/\D/g, '').slice(-10);
+          localStorage.setItem('safe_bd_contacts_' + userKey, JSON.stringify(contacts));
+          currentUser.contacts = contacts;
+          localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+
+          const token = localStorage.getItem('safe_bd_token');
+          fetch(`${API_BASE}/api/user/contacts`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token ? `Bearer ${token}` : ''
+            },
+            body: JSON.stringify({
+              phone: userKey,
+              token: token,
+              contacts: contacts
+            })
+          })
+          .then(r => r.json())
+          .then(data => {
+            if (data.success && data.contacts) {
+              currentUser.contacts = data.contacts;
+              localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+            }
+          })
+          .catch(err => {
+            console.warn("Could not sync contacts to profile database:", err);
+          });
+
+          const phoneNotice = cleanPhone ? `+880 ${cleanPhone}` : '01XXXXXXXXX';
+          alert(`✅ Emergency contact "${newName}" updated!\nNumber: ${phoneNotice}\n\nSaved to your verified profile database.`);
+        } else {
+          alert(`✅ Contact "${newName}" updated for this session!\nNumber: ${cleanPhone ? '+880 ' + cleanPhone : '01XXXXXXXXX'}\n\nTip: Sign in or create an account to permanently sync and protect your contacts in the cloud.`);
+        }
       }
       closeEditContactModal();
     }
@@ -2214,9 +2294,12 @@
       if (!c) return;
       activeContact = c;
 
-      document.getElementById('sheet-avatar-initial').innerText = c.initial;
+      const isConfigured = c.phone && String(c.phone).trim() !== '' && c.phone !== '01XXXXXXXXX';
+      const displayPhone = isConfigured ? `+880 ${String(c.phone).replace(/\D/g, '').slice(-10)}` : '01XXXXXXXXX';
+
+      document.getElementById('sheet-avatar-initial').innerText = c.initial || (c.name ? c.name.charAt(0).toUpperCase() : '?');
       document.getElementById('sheet-contact-name').innerText = c.name;
-      document.getElementById('sheet-contact-phone').innerText = "+880 " + c.phone;
+      document.getElementById('sheet-contact-phone').innerText = displayPhone;
       document.getElementById('contact-action-sheet').classList.add('open');
     }
 
@@ -2229,7 +2312,13 @@
     function sendWhatsAppLocation(e) {
       e.preventDefault();
       if (!activeContact) return;
-      const rawPhone = "880" + activeContact.phone.replace(/[^0-9]/g, '').slice(-10);
+      const isConfigured = activeContact.phone && String(activeContact.phone).trim() !== '' && activeContact.phone !== '01XXXXXXXXX';
+      if (!isConfigured) {
+        alert(`⚠️ No phone number configured for ${activeContact.name} yet (currently 01XXXXXXXXX).\n\nPlease tap the edit button (pencil icon) to enter their real Bangladeshi mobile number.`);
+        return;
+      }
+
+      const rawPhone = "880" + String(activeContact.phone).replace(/\D/g, '').slice(-10);
       const lat = currentCoords.lat;
       const lon = currentCoords.lon;
       const mapUrl = `https://maps.google.com/?q=${lat},${lon}`;
@@ -2246,7 +2335,13 @@
     function dialSIMCall(e) {
       e.preventDefault();
       if (!activeContact) return;
-      const telUrl = `tel:+880${activeContact.phone}`;
+      const isConfigured = activeContact.phone && String(activeContact.phone).trim() !== '' && activeContact.phone !== '01XXXXXXXXX';
+      if (!isConfigured) {
+        alert(`⚠️ No phone number configured for ${activeContact.name} yet (currently 01XXXXXXXXX).\n\nPlease tap the edit button (pencil icon) to enter their real mobile number.`);
+        return;
+      }
+
+      const telUrl = `tel:+880${String(activeContact.phone).replace(/\D/g, '').slice(-10)}`;
       window.location.href = telUrl;
       closeContactSheet();
     }
@@ -2885,6 +2980,7 @@
           currentUser = data.user;
           localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
           if (data.token) localStorage.setItem('safe_bd_token', data.token);
+          loadUserContacts(currentUser);
           setLoggedInState();
           closeAuthModal();
 
@@ -2939,6 +3035,7 @@
         currentUser = data.user;
         localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
         if (data.token) localStorage.setItem('safe_bd_token', data.token);
+        loadUserContacts(currentUser);
         setLoggedInState();
         alert(`✅ Welcome back, ${currentUser.name}!\nSigned in as ${currentUser.displayPhone || '+880 ' + currentUser.phone}`);
         closeAuthModal();
@@ -3076,6 +3173,7 @@
         currentUser = data.user;
         localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
         if (data.token) localStorage.setItem('safe_bd_token', data.token);
+        loadUserContacts(currentUser);
         setLoggedInState();
         alert(`🎉 Password Reset Successful!\n\nWelcome back, ${currentUser.name}! You are now securely logged in.`);
         closeAuthModal();
@@ -3339,6 +3437,7 @@
 
         if (data.token) localStorage.setItem('safe_bd_token', data.token);
         localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+        loadUserContacts(currentUser);
         setLoggedInState();
         closeAuthModal();
 
@@ -3394,6 +3493,9 @@
       localStorage.removeItem('safe_bd_token');
       document.getElementById('top-profile-btn').classList.remove('logged-in');
       document.getElementById('profile-icon').className = "far fa-user";
+
+      // Revert contacts to Father, Mother, Guardian with 01XXXXXXXXX
+      loadUserContacts(null);
 
       const adminNavBtn = document.getElementById('nav-btn-admin');
       const adminProfileBtn = document.getElementById('admin-portal-profile-btn');
