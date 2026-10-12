@@ -4,7 +4,7 @@
   "description": "SAFE BD - National Digital Safety & Civic Emergency Ecosystem",
   "main": "backend/server.js",
   "scripts": {
-    "start": "node backend/server.js",
+    "start": "node --max-old-space-size=384 backend/server.js",
     "build": "echo 'Build complete'"
   },
   "dependencies": {
