@@ -4855,7 +4855,7 @@
 
     let adminEmergencyEvidenceList = loadCachedEvidenceMeta();
 
-    // Fast synchronous Base64 to Blob conversion (Safe on all mobile browsers)
+    // Fast synchronous Base64 to Blob conversion (Safe on all mobile browsers with chunked arrays)
     function base64ToBlobSync(dataUri, fallbackMime) {
       if (!dataUri || typeof dataUri !== 'string') return null;
       try {
@@ -4865,11 +4865,17 @@
         const cleanB64 = (parts[1] || parts[0]).replace(/[\s\r\n]/g, '');
         const byteChars = atob(cleanB64);
         const len = byteChars.length;
-        const u8 = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-          u8[i] = byteChars.charCodeAt(i);
+        const sliceSize = 1024 * 64;
+        const byteArrays = [];
+        for (let offset = 0; offset < len; offset += sliceSize) {
+          const slice = byteChars.slice(offset, offset + sliceSize);
+          const byteNumbers = new Array(slice.length);
+          for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+          }
+          byteArrays.push(new Uint8Array(byteNumbers));
         }
-        return new Blob([u8], { type: mime });
+        return new Blob(byteArrays, { type: mime });
       } catch (err) {
         console.warn("[BASE64 CONVERSION WARN]:", err);
         return null;
@@ -5010,30 +5016,6 @@
 
         adminEmergencyEvidenceList = Array.from(map.values()).sort((a, b) => new Date(b.recordedAt || 0) - new Date(a.recordedAt || 0));
 
-        // Auto-heal / sync missing items back to server if server restarted
-        for (const item of map.values()) {
-          const onServer = serverList.some(s => s.id === item.id);
-          if (!onServer && item.videoData) {
-            try {
-              fetch(`${API_BASE}/api/emergency/covert-recording`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  id: item.id,
-                  fileName: item.fileName,
-                  userId: item.userId || item.userPhone,
-                  userName: item.userName,
-                  userPhone: item.userPhone,
-                  location: item.location,
-                  videoData: item.videoData,
-                  mimeType: item.mimeType || 'video/webm',
-                  durationSeconds: item.durationSeconds || 15
-                })
-              }).catch(() => {});
-            } catch(e) {}
-          }
-        }
-
         // Save lightweight metadata to localStorage
         try {
           const metadataOnly = adminEmergencyEvidenceList.map(e => ({
@@ -5093,6 +5075,9 @@
       const mp4Url = (item.videoUrl && item.videoUrl.endsWith('.mp4'))
         ? ((item.videoUrl.startsWith('http')) ? item.videoUrl : `${API_BASE}${item.videoUrl}`)
         : `${API_BASE}/api/emergency/evidence/${mp4ServerName}`;
+      const serverDirectUrl = (item.videoUrl && item.videoUrl.startsWith('http'))
+        ? item.videoUrl
+        : `${API_BASE}${item.videoUrl || ('/api/emergency/evidence/' + (item.fileName || ''))}`;
 
       body.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -5100,21 +5085,21 @@
             <i class="fas fa-video"></i> 🚨 COVERT SOS EVIDENCE ARCHIVE (MP4)
           </div>
           <span style="font-size: 10px; color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 3px 8px; border-radius: 6px; font-weight: 700;">
-            <i class="fas fa-mobile-screen"></i> MOBILE MP4 READY
+            <i class="fas fa-mobile-screen"></i> MOBILE READY
           </span>
         </div>
         <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; background: rgba(0,0,0,0.5); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(239,68,68,0.3);">
           <strong>Citizen:</strong> <span style="color:#fff;">${item.userName}</span> (${item.userPhone})<br>
           <strong>Captured:</strong> <span style="color:#fff;">${formatEvidenceTime(item.recordedAt)}</span> • <strong>Clip:</strong> <span style="color:#ef4444;">${item.durationSeconds || 15}s</span> • ${item.fileSizeKb || '--'} KB<br>
-          <strong>Format:</strong> <span style="color:#38bdf8;">Universal MP4 (H.264 / AAC)</span><br>
+          <strong>Format:</strong> <span style="color:#38bdf8;">Universal MP4 / WebM</span><br>
           <strong>Location:</strong> <span style="color:#10b981;">${item.location ? item.location.address : 'Bangladesh'}</span>
         </div>
         <div style="border-radius: 12px; overflow: hidden; background: #000; border: 1.5px solid rgba(239, 68, 68, 0.45); margin-bottom: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.8);">
-          <video id="evidence-modal-video" controls autoplay playsinline preload="auto" style="width: 100%; max-height: 380px; display: block; object-fit: contain; background: #000;" src="${mp4Url}">
+          <video id="evidence-modal-video" controls autoplay playsinline preload="auto" style="width: 100%; max-height: 380px; display: block; object-fit: contain; background: #000;">
+            ${blobUrl ? `<source src="${blobUrl}" type="${item.mimeType || 'video/mp4'}">` : ''}
             <source src="${mp4Url}" type="video/mp4">
-            <source src="${blobUrl}" type="video/mp4">
-            <source src="${blobUrl}" type="video/webm">
-            Your browser does not support inline video playback. Click Download Video Recording (MP4) below.
+            <source src="${serverDirectUrl}" type="${item.mimeType || 'video/webm'}">
+            Your browser does not support inline video playback. Click Download Video Recording below.
           </video>
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -5122,7 +5107,7 @@
             <i class="fas fa-download"></i> ⬇ Save Recording (MP4)
           </button>
           <button type="button" onclick="openEvidenceStandaloneWindow('${item.id}')" style="background: rgba(255,255,255,0.1); border: 1px solid var(--border-quiet); color: #fff; padding: 11px 14px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-            <i class="fas fa-arrow-up-right-from-square"></i> Open Tab (MP4)
+            <i class="fas fa-arrow-up-right-from-square"></i> Open Tab
           </button>
           <a href="https://www.google.com/maps?q=${item.location ? item.location.lat : 23.8103},${item.location ? item.location.lon : 90.4125}" target="_blank" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: #fff; padding: 11px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 5px;">
             <i class="fas fa-location-crosshairs"></i> Maps Pin
@@ -5136,8 +5121,24 @@
       modal.classList.add('open');
       setTimeout(() => {
         const v = document.getElementById('evidence-modal-video');
-        if (v && v.paused) v.play().catch(() => {});
-      }, 100);
+        if (!v) return;
+        const initialSrc = blobUrl || mp4Url || serverDirectUrl;
+        v.src = initialSrc;
+        v.onerror = function() {
+          console.warn("[Video Player Fallback] Error playing:", v.src);
+          if (blobUrl && v.src !== blobUrl) {
+            v.src = blobUrl;
+            v.load();
+            v.play().catch(() => {});
+          } else if (v.src !== serverDirectUrl && serverDirectUrl) {
+            v.src = serverDirectUrl;
+            v.load();
+            v.play().catch(() => {});
+          }
+        };
+        v.load();
+        v.play().catch(() => {});
+      }, 50);
     }
 
     function openEvidenceStandaloneWindow(id) {
@@ -5166,34 +5167,28 @@
       const cleanName = (item.userName || 'citizen').replace(/[^a-zA-Z0-9_-]/g, '_');
       const filename = `safe_bd_evidence_${item.id}_${cleanName}.mp4`;
 
-      // 1. If item already has MP4 blob in vault:
-      if (item.mimeType && item.mimeType.includes('mp4')) {
-        try {
-          let blob = item.videoBlob;
-          if (!blob && item.videoData && item.videoData.startsWith('data:video/mp4')) {
-            blob = base64ToBlobSync(item.videoData, 'video/mp4');
-            if (!blob) {
-              const res = await fetch(item.videoData);
-              blob = await res.blob();
-            }
-            item.videoBlob = blob;
-          }
+      // 1. If item has binary blob or base64 in local vault
+      let blob = item.videoBlob;
+      if (!blob && item.videoData && item.videoData.startsWith('data:')) {
+        blob = base64ToBlobSync(item.videoData, item.mimeType || 'video/mp4');
+        if (blob) item.videoBlob = blob;
+      }
 
-          if (blob) {
-            const blobUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = blobUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-              if (document.body.contains(a)) document.body.removeChild(a);
-              URL.revokeObjectURL(blobUrl);
-            }, 5000);
-            console.log(`[DOWNLOAD SUCCESS] Downloaded MP4 directly from vault.`);
-            return;
-          }
+      if (blob) {
+        try {
+          const blobUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = blobUrl;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            if (document.body.contains(a)) document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
+          }, 4000);
+          console.log(`[DOWNLOAD SUCCESS] Downloaded directly from vault.`);
+          return;
         } catch (e) {
           console.warn("Direct blob download error, requesting MP4 from server:", e);
         }
@@ -5202,15 +5197,7 @@
       // 2. Direct MP4 stream & download from server (Server converts WebM -> MP4 with H.264/AAC for mobile)
       const mp4ServerName = (item.fileName || '').replace(/\.webm$/i, '.mp4');
       const serverDlUrl = `${API_BASE}/api/emergency/evidence/${mp4ServerName}?download=1`;
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = serverDlUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        if (document.body.contains(a)) document.body.removeChild(a);
-      }, 4000);
+      window.location.href = serverDlUrl;
     }
 
     let lastRenderedEvidenceSignature = '';
@@ -5245,7 +5232,9 @@
             const mp4Url = (item.videoUrl && item.videoUrl.endsWith('.mp4'))
               ? ((item.videoUrl.startsWith('http')) ? item.videoUrl : `${API_BASE}${item.videoUrl}`)
               : `${API_BASE}/api/emergency/evidence/${mp4ServerName}`;
-            const blobSrc = getEvidenceBlobUrl(item);
+            const serverDirectUrl = (item.videoUrl && item.videoUrl.startsWith('http'))
+              ? item.videoUrl
+              : `${API_BASE}${item.videoUrl || ('/api/emergency/evidence/' + (item.fileName || ''))}`;
 
             clipsMarkup += `
               <div style="background: rgba(15, 2, 5, 0.7); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 12px; margin-top: ${idx > 0 ? '12px' : '8px'};">
@@ -5266,10 +5255,10 @@
 
                 <!-- Native Video Player (Mobile MP4 First) -->
                 <div style="border-radius: 10px; overflow: hidden; background: #000; border: 1px solid rgba(255,255,255,0.18); margin-bottom: 8px; cursor: pointer;" onclick="openEvidenceInModal('${item.id}')">
-                  <video controls playsinline preload="auto" style="width: 100%; max-height: 260px; display: block; object-fit: contain; background: #000;" src="${mp4Url}">
+                  <video controls playsinline preload="metadata" style="width: 100%; max-height: 260px; display: block; object-fit: contain; background: #000;">
+                    ${blobSrc ? `<source src="${blobSrc}" type="${item.mimeType || 'video/mp4'}">` : ''}
                     <source src="${mp4Url}" type="video/mp4">
-                    <source src="${blobSrc}" type="video/mp4">
-                    <source src="${blobSrc}" type="video/webm">
+                    <source src="${serverDirectUrl}" type="${item.mimeType || 'video/webm'}">
                     Your browser does not support inline video playback. Click Watch in Player or Save Recording (MP4) below.
                   </video>
                 </div>
@@ -5336,6 +5325,9 @@
         const mp4Url = (item.videoUrl && item.videoUrl.endsWith('.mp4'))
           ? ((item.videoUrl.startsWith('http')) ? item.videoUrl : `${API_BASE}${item.videoUrl}`)
           : `${API_BASE}/api/emergency/evidence/${mp4ServerName}`;
+        const serverDirectUrl = (item.videoUrl && item.videoUrl.startsWith('http'))
+          ? item.videoUrl
+          : `${API_BASE}${item.videoUrl || ('/api/emergency/evidence/' + (item.fileName || ''))}`;
         const blobSrc = getEvidenceBlobUrl(item);
 
         const card = document.createElement('div');
@@ -5366,10 +5358,10 @@
 
           <!-- Video & Audio Evidence Player (Native Mobile MP4 First) -->
           <div style="margin: 10px 0; border-radius: 12px; overflow: hidden; background: #000; border: 1px solid rgba(255,255,255,0.18); cursor: pointer;" onclick="openEvidenceInModal('${item.id}')">
-            <video controls playsinline preload="auto" style="width: 100%; max-height: 280px; display: block; object-fit: contain; background: #000;" src="${mp4Url}">
+            <video controls playsinline preload="metadata" style="width: 100%; max-height: 280px; display: block; object-fit: contain; background: #000;">
+              ${blobSrc ? `<source src="${blobSrc}" type="${item.mimeType || 'video/mp4'}">` : ''}
               <source src="${mp4Url}" type="video/mp4">
-              <source src="${blobSrc}" type="video/mp4">
-              <source src="${blobSrc}" type="video/webm">
+              <source src="${serverDirectUrl}" type="${item.mimeType || 'video/webm'}">
               Your browser does not support inline video playback. Click Watch in Player or Save Recording (MP4) below.
             </video>
           </div>
