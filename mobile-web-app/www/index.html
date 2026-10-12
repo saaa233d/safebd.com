@@ -930,11 +930,74 @@
     }
     .post-media-attachment {
       width: 100%;
-      max-height: 220px;
-      object-fit: cover;
+      max-height: 380px;
+      object-fit: contain;
       border-radius: 10px;
-      margin-bottom: 10px;
+      background: #000;
       border: 1px solid var(--border-quiet);
+    }
+    .post-media-container {
+      width: 100%;
+      margin: 10px 0 12px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+    }
+    .post-media-container video {
+      width: 100%;
+      max-height: 380px;
+      display: block;
+      object-fit: contain;
+      background: #000;
+      outline: none;
+    }
+    .post-media-container img {
+      width: 100%;
+      max-height: 380px;
+      display: block;
+      object-fit: contain;
+      background: #000;
+      margin: 0;
+      border: none;
+    }
+    .post-media-meta-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: rgba(18, 20, 26, 0.95);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      gap: 10px;
+    }
+    .btn-media-dl {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .btn-media-dl:hover {
+      background: rgba(239, 68, 68, 0.35);
+      border-color: #ef4444;
+      transform: translateY(-1px);
+    }
+    .btn-media-dl.btn-media-dl-photo {
+      background: rgba(56, 189, 248, 0.18);
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+    .btn-media-dl.btn-media-dl-photo:hover {
+      background: rgba(56, 189, 248, 0.32);
+      border-color: #38bdf8;
     }
     
     /* Author & Founder Profile Modal */
@@ -1617,17 +1680,18 @@
       <div class="create-post-card">
         <textarea class="post-composer-input" id="composer-text" placeholder="Share safety awareness, road hazard, or community advisory..."></textarea>
         
-        <!-- Attached Media Preview -->
+        <!-- Attached Media Preview (Photos & Videos) -->
         <div class="media-preview-container" id="media-preview-box">
-          <img id="media-preview-img" class="media-preview-img" src="" alt="Media Preview">
-          <button class="btn-remove-media" onclick="removeAttachedMedia()"><i class="fas fa-xmark"></i></button>
+          <img id="media-preview-img" class="media-preview-img" src="" alt="Media Preview" style="display: none;">
+          <video id="media-preview-video" class="media-preview-img" controls playsinline style="display: none; width: 100%; max-height: 220px; object-fit: contain; background: #000; border-radius: 10px;"></video>
+          <button class="btn-remove-media" onclick="removeAttachedMedia()" title="Remove Attachment"><i class="fas fa-xmark"></i></button>
         </div>
 
         <div class="composer-toolbar">
           <div class="composer-media-icons">
-            <label class="media-btn-label" title="Attach Photo">
-              <i class="fas fa-image" style="color: #38bdf8;"></i>
-              <span style="font-size: 11px;">Photo</span>
+            <label class="media-btn-label" title="Attach Photo or Video">
+              <i class="fas fa-photo-film" style="color: #38bdf8;"></i>
+              <span style="font-size: 11px;">Photo / Video</span>
               <input type="file" id="media-file-input" accept="image/*,video/*" style="display: none;" onchange="handleMediaSelected(event)">
             </label>
             <label class="media-btn-label" title="Category Tag" onclick="selectPostCategory()">
@@ -2532,24 +2596,45 @@
     /* ----------------------------------------------------
        COMMUNITY & SOCIAL MEDIA POSTING PIPELINE
     ---------------------------------------------------- */
+    function closeCreatePostModal() {
+      const modal = document.getElementById('modal-composer');
+      if (modal) modal.classList.remove('open');
+    }
+
     function handleMediaSelected(event) {
-      const file = event.target.files[0];
+      const file = event.target.files && event.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
       reader.onload = function(e) {
         attachedMediaBase64 = e.target.result;
-        document.getElementById('media-preview-img').src = attachedMediaBase64;
-        document.getElementById('media-preview-box').style.display = 'block';
+        const isVid = (file.type && file.type.startsWith('video/')) || isVideoMedia(attachedMediaBase64);
+        const imgEl = document.getElementById('media-preview-img');
+        const vidEl = document.getElementById('media-preview-video');
+        const box = document.getElementById('media-preview-box');
+
+        if (isVid) {
+          if (imgEl) { imgEl.style.display = 'none'; imgEl.src = ''; }
+          if (vidEl) { vidEl.style.display = 'block'; vidEl.src = attachedMediaBase64; }
+        } else {
+          if (vidEl) { vidEl.style.display = 'none'; vidEl.src = ''; }
+          if (imgEl) { imgEl.style.display = 'block'; imgEl.src = attachedMediaBase64; }
+        }
+        if (box) box.style.display = 'block';
       };
       reader.readAsDataURL(file);
     }
 
     function removeAttachedMedia() {
       attachedMediaBase64 = null;
-      document.getElementById('media-preview-img').src = '';
-      document.getElementById('media-preview-box').style.display = 'none';
-      document.getElementById('media-file-input').value = '';
+      const imgEl = document.getElementById('media-preview-img');
+      const vidEl = document.getElementById('media-preview-video');
+      const box = document.getElementById('media-preview-box');
+      if (imgEl) { imgEl.src = ''; imgEl.style.display = 'none'; }
+      if (vidEl) { vidEl.src = ''; vidEl.style.display = 'none'; }
+      if (box) box.style.display = 'none';
+      const fileInp = document.getElementById('media-file-input');
+      if (fileInp) fileInp.value = '';
     }
 
     function selectPostCategory() {
@@ -2568,20 +2653,23 @@
         return;
       }
 
+      const isSaad = !!(currentUser && (currentUser.phone === '01316750712' || (currentUser.name && currentUser.name.toUpperCase().includes('SAAD RIZWAN'))));
       const authorName = currentUser ? currentUser.name : "Citizen Reporter";
       const authorPhone = currentUser ? currentUser.phone : "";
-      const isVerified = !!(currentUser && currentUser.nidVerified);
+      const isVerified = isSaad || !!(currentUser && currentUser.nidVerified);
+      const authorRole = isSaad ? "Founder & CEO, SAFE bd" : "";
 
       const postPayload = {
         author: authorName,
         authorPhone: authorPhone,
+        authorRole: authorRole,
         verified: isVerified,
         category: selectedCategory,
         content: text,
         media: attachedMediaBase64
       };
 
-      const submitBtn = document.querySelector('#modal-composer .btn-action-primary');
+      const submitBtn = document.querySelector('.btn-publish-post') || document.querySelector('#modal-composer .btn-action-primary');
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
@@ -2596,7 +2684,7 @@
       .then(res => {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit for Review';
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post';
         }
 
         if (!res.success) {
@@ -2608,7 +2696,11 @@
         removeAttachedMedia();
         closeCreatePostModal();
 
-        alert("📋 Report Submitted for Moderation!\n\nYour awareness post has been recorded and submitted to the Chief Administrator.\nIt will permanently appear on the live feed once officially approved.");
+        if (res.post && res.post.approved) {
+          alert("✅ Announcement Live on Feed!\n\nYour post has been published to the community feed with official verified credentials.");
+        } else {
+          alert("📋 Report Submitted for Moderation!\n\nYour awareness post has been recorded and submitted to the Chief Administrator.\nIt will permanently appear on the live feed once officially approved.");
+        }
 
         // Refresh moderation queue and live feed
         fetchAdminPendingPosts();
@@ -2617,7 +2709,7 @@
       .catch(err => {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit for Review';
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post';
         }
         alert("⚠️ Post submission error: " + err.message);
       });
@@ -2733,6 +2825,143 @@
 
     const BLUE_TICK_SVG = `<svg viewBox="0 0 24 24" style="width: 17px; height: 17px; vertical-align: -3px; display: inline-block; margin-left: 5px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));" aria-label="Verified Tick"><path fill="#1d9bf0" d="M22.25 12c0-1.43-.88-2.67-2.19-3.15.2-1.4-.64-2.67-1.99-3.08-.34-1.37-1.57-2.3-2.99-2.22-1.07-.89-2.6-.89-3.67 0-1.42-.08-2.65.85-2.99 2.22-1.35.41-2.19 1.68-1.99 3.08-1.31.48-2.19 1.72-2.19 3.15s.88 2.67 2.19 3.15c-.2 1.4.64 2.67 1.99 3.08.34 1.37 1.57 2.3 2.99 2.22 1.07.89 2.6.89 3.67 0 1.42.08 2.65-.85 2.99-2.22 1.35-.41 2.19-1.68 1.99-3.08 1.31-.48 2.19-1.72 2.19-3.15z"/><path fill="#ffffff" d="M10.25 15.6l-3.2-3.2 1.4-1.4 1.8 1.8 5.6-5.6 1.4 1.4-7 7z"/></svg>`;
 
+    function isVideoMedia(mediaStr) {
+      if (!mediaStr || typeof mediaStr !== 'string') return false;
+      const s = mediaStr.trim();
+      if (s.startsWith('data:video/')) return true;
+      if (/\.(mp4|webm|mov|m4v|ogg|ogv|mkv|3gp)($|\?|#)/i.test(s)) return true;
+      return false;
+    }
+
+    function renderPostMediaHtml(p) {
+      if (!p || !p.media) return '';
+      const isVid = isVideoMedia(p.media);
+      const safePostId = escapeHtml(p.id || '');
+      const mediaSrc = p.media;
+
+      if (isVid) {
+        return `
+          <div class="post-media-container video-container">
+            <video controls playsinline preload="metadata" controlsList="nodownload" src="${mediaSrc}">
+              <source src="${mediaSrc}">
+              Your browser does not support video playback.
+            </video>
+            <div class="post-media-meta-bar">
+              <span style="font-size: 11px; font-weight: 700; color: #f87171; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fas fa-video"></i> Video Evidence / Recording
+              </span>
+              <button type="button" onclick="downloadPostMedia('${safePostId}', event)" class="btn-media-dl" title="Download Video Recording">
+                <i class="fas fa-download"></i> Download Video
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="post-media-container image-container">
+          <img src="${mediaSrc}" class="post-media-attachment" alt="Post Photo Attachment" loading="lazy">
+          <div class="post-media-meta-bar">
+            <span style="font-size: 11px; font-weight: 700; color: #38bdf8; display: inline-flex; align-items: center; gap: 5px;">
+              <i class="fas fa-image"></i> Photo Attachment
+            </span>
+            <button type="button" onclick="downloadPostMedia('${safePostId}', event)" class="btn-media-dl btn-media-dl-photo" title="Download Photo">
+              <i class="fas fa-download"></i> Download Photo
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // 1-Click Bulletproof Post Media Downloader (Instant Binary Blob + API Fallback)
+    function downloadPostMedia(postId, event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      let post = liveApprovedPosts.find(p => p.id === postId);
+      if (!post) {
+        post = adminPendingPostsList.find(p => p.id === postId);
+      }
+      if (!post || !post.media) {
+        alert("⚠️ No media attachment found for this report.");
+        return;
+      }
+
+      const media = post.media;
+      const isVid = isVideoMedia(media);
+
+      let ext = isVid ? 'mp4' : 'jpg';
+      let mimeType = isVid ? 'video/mp4' : 'image/jpeg';
+
+      if (media.startsWith('data:')) {
+        const mimeMatch = media.match(/^data:([^;]+);base64,/);
+        if (mimeMatch && mimeMatch[1]) {
+          mimeType = mimeMatch[1];
+          if (mimeType.includes('webm')) ext = 'webm';
+          else if (mimeType.includes('mp4')) ext = 'mp4';
+          else if (mimeType.includes('quicktime') || mimeType.includes('mov')) ext = 'mov';
+          else if (mimeType.includes('ogg')) ext = 'ogg';
+          else if (mimeType.includes('png')) ext = 'png';
+          else if (mimeType.includes('jpeg') || mimeType.includes('jpg')) ext = 'jpg';
+          else if (mimeType.includes('webp')) ext = 'webp';
+        }
+      } else {
+        const extMatch = media.match(/\.([a-zA-Z0-9]+)($|\?|#)/);
+        if (extMatch && extMatch[1]) {
+          ext = extMatch[1].toLowerCase();
+        }
+      }
+
+      const cleanAuthor = (post.author || 'report').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const filename = `safebd_${isVid ? 'video' : 'photo'}_${post.id}_${cleanAuthor}.${ext}`;
+
+      // 1. Direct Base64 to Blob download (Zero latency, reliable across browsers)
+      if (media.startsWith('data:')) {
+        try {
+          const parts = media.split(',');
+          const byteCharacters = atob(parts[1]);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: mimeType });
+          const blobUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = blobUrl;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            if (document.body.contains(a)) document.body.removeChild(a);
+            window.URL.revokeObjectURL(blobUrl);
+          }, 4000);
+          return;
+        } catch (blobErr) {
+          console.warn("[POST MEDIA BLOB DOWNLOAD FALLBACK]:", blobErr);
+          const a = document.createElement('a');
+          a.href = media;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => { if (document.body.contains(a)) document.body.removeChild(a); }, 2000);
+          return;
+        }
+      }
+
+      // 2. Regular HTTP/HTTPS URL
+      const directDlUrl = `${API_BASE}/api/feed/posts/${post.id}/media?download=1`;
+      const a = document.createElement('a');
+      a.href = directDlUrl;
+      a.download = filename;
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { if (document.body.contains(a)) document.body.removeChild(a); }, 2000);
+    }
+
     function renderCommunityPosts() {
       const container = document.getElementById('posts-container');
       if (!container) return;
@@ -2793,11 +3022,15 @@
             </div>` : ''}
           </div>
           <div class="post-text">${escapeHtml(p.content || '')}</div>
-          ${p.media ? `<img src="${p.media}" class="post-media-attachment" alt="Post Media" loading="lazy">` : ''}
+          ${renderPostMediaHtml(p)}
           <div class="post-actions-row">
             <div class="post-action-btn ${isLikedByMe ? 'liked' : ''}" onclick="likePost('${p.id}', this)" title="${isLikedByMe ? 'Unlike (1 like per citizen)' : 'Like'}">
               <i class="${isLikedByMe ? 'fas fa-heart' : 'far fa-heart'}" style="${isLikedByMe ? 'color: #ef4444;' : ''}"></i> <span>${currentLikesCount}</span>
             </div>
+            ${p.media ? `
+            <div class="post-action-btn" onclick="downloadPostMedia('${p.id}', event)" title="Download ${isVideoMedia(p.media) ? 'Video' : 'Photo'}">
+              <i class="fas fa-download"></i> ${isVideoMedia(p.media) ? 'Download Video' : 'Download Photo'}
+            </div>` : ''}
             <div class="post-action-btn" onclick="sharePost('${p.id}')">
               <i class="fas fa-share-nodes"></i> Share
             </div>
@@ -4876,11 +5109,15 @@
             </div>
           </div>
           <div class="post-text">${escapeHtml(p.content || '')}</div>
-          ${p.media ? `<img src="${p.media}" class="post-media-attachment" alt="Post Media Attachment" loading="lazy">` : ''}
-          <div style="display: flex; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-quiet);">
-            <button onclick="approvePost('${p.id}')" style="flex: 1; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #fff; border: none; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          ${renderPostMediaHtml(p)}
+          <div style="display: flex; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-quiet); flex-wrap: wrap;">
+            <button onclick="approvePost('${p.id}')" style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #fff; border: none; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
               <i class="fas fa-check"></i> Approve & Publish to Feed
             </button>
+            ${p.media ? `
+            <button type="button" onclick="downloadPostMedia('${p.id}', event)" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #f59e0b; padding: 10px 14px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+              <i class="fas fa-download"></i> Save ${isVideoMedia(p.media) ? 'Video' : 'Media'}
+            </button>` : ''}
             <button onclick="rejectPost('${p.id}')" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; padding: 10px 16px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
               <i class="fas fa-trash"></i> Decline
             </button>
