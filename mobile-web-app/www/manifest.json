@@ -1,0 +1,23 @@
+{
+  "short_name": "SAFE BD",
+  "name": "SAFE Bangladesh - Safety • Awareness • Fast Response",
+  "icons": [
+    {
+      "src": "app-icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "app-icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192",
+      "purpose": "any"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#050507",
+  "theme_color": "#780016",
+  "display": "standalone",
+  "orientation": "portrait"
+}
