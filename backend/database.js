@@ -19,12 +19,14 @@ const crypto = require('crypto');
 
 const DATA_DIR = path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'safe_bd_database.json');
+const EVIDENCE_FILE = path.join(DATA_DIR, 'safe_bd_evidence.json');
 
 // In-Memory Indexed Stores for sub-millisecond retrieval
 let dbState = {
-  users: {},      // cleanPhone -> User Record
-  sessions: {},   // sessionToken -> Session Record
-  otpCodes: {},   // cleanPhone -> { code, purpose, expiresAt, attempts }
+  users: {},            // cleanPhone -> User Record
+  sessions: {},         // sessionToken -> Session Record
+  emergencyEvidence: [],// List of all covert SOS video evidence records
+  otpCodes: {},         // cleanPhone -> { code, purpose, expiresAt, attempts }
   stats: {
     totalLogins: 0,
     totalRegistrations: 0,
@@ -40,14 +42,32 @@ function initDatabase() {
     fs.mkdirSync(DATA_DIR, { recursive: true });
   }
 
+  let loadedEvidence = [];
+  if (fs.existsSync(EVIDENCE_FILE)) {
+    try {
+      const evRaw = fs.readFileSync(EVIDENCE_FILE, 'utf8');
+      loadedEvidence = JSON.parse(evRaw) || [];
+    } catch (evErr) {
+      console.warn('[⚠️ EVIDENCE FILE READ WARNING]:', evErr.message);
+    }
+  }
+
   if (fs.existsSync(DB_FILE)) {
     try {
       const raw = fs.readFileSync(DB_FILE, 'utf8');
       const parsed = JSON.parse(raw);
+      
+      const dbEvidence = parsed.emergencyEvidence || [];
+      // Merge and deduplicate evidence by id
+      const evidenceMap = new Map();
+      (loadedEvidence || []).forEach(item => { if (item && item.id) evidenceMap.set(item.id, item); });
+      (dbEvidence || []).forEach(item => { if (item && item.id) evidenceMap.set(item.id, item); });
+      const combinedEvidence = Array.from(evidenceMap.values()).sort((a, b) => new Date(b.recordedAt || 0) - new Date(a.recordedAt || 0));
+
       dbState = {
         users: parsed.users || {},
         sessions: parsed.sessions || {},
-        emergencyEvidence: parsed.emergencyEvidence || [],
+        emergencyEvidence: combinedEvidence,
         otpCodes: {}, // OTPs are ephemeral and cleared on startup
         stats: parsed.stats || { totalLogins: 0, totalRegistrations: 0, lastSaved: null }
       };
@@ -57,7 +77,7 @@ function initDatabase() {
           u.contacts = getDefaultUserContacts();
         }
       });
-      console.log(`[📦 DATABASE LOADED] Loaded ${Object.keys(dbState.users).length} citizen accounts from persistent storage.`);
+      console.log(`[📦 DATABASE LOADED] Loaded ${Object.keys(dbState.users).length} citizen accounts & ${dbState.emergencyEvidence.length} stored covert SOS clips.`);
     } catch (err) {
       console.error('[⚠️ DATABASE WARNING] Error reading database file, starting clean:', err.message);
     }
@@ -142,12 +162,23 @@ function persistToDisk() {
       const payload = JSON.stringify({
         users: dbState.users,
         sessions: dbState.sessions,
+        emergencyEvidence: dbState.emergencyEvidence || [],
         stats: dbState.stats
       }, null, 2);
 
       const tempFile = `${DB_FILE}.tmp.${Date.now()}`;
       fs.writeFileSync(tempFile, payload, 'utf8');
       fs.renameSync(tempFile, DB_FILE);
+
+      // Also persist dedicated evidence file for independent durability
+      try {
+        const evPayload = JSON.stringify(dbState.emergencyEvidence || [], null, 2);
+        const evTemp = `${EVIDENCE_FILE}.tmp.${Date.now()}`;
+        fs.writeFileSync(evTemp, evPayload, 'utf8');
+        fs.renameSync(evTemp, EVIDENCE_FILE);
+      } catch (evErr) {
+        console.error('[❌ EVIDENCE ATOMIC PERSISTENCE ERROR]:', evErr.message);
+      }
     } catch (err) {
       console.error('[❌ DATABASE PERSISTENCE ERROR]:', err.message);
     }
