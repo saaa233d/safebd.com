@@ -117,35 +117,7 @@ const activeSessions = new Map();    // token -> user
 const otpStore = new Map();          // phone -> { code, expiresAt }
 const liveIncidents = new Map();     // incidentId -> details
 const activeWalkSessions = new Map();// userId -> walkSession
-const civicPosts = [
-  {
-    id: "post-1",
-    author: "Dhaka Traffic Command",
-    verified: true,
-    category: "Civic Transit",
-    time: "45m ago",
-    content: "Temporary waterlogging reported along Kazipara. Recommended alternate route for late-night commuters: Rokeya Sarani bypass.",
-    likes: 184
-  },
-  {
-    id: "post-2",
-    author: "Dhaka Traffic Command",
-    verified: true,
-    category: "Civic Transit",
-    time: "45m ago",
-    content: "Temporary waterlogging reported along Kazipara. Recommended alternate route for late-night commuters: Rokeya Sarani bypass.",
-    likes: 184
-  },
-  {
-    id: "post-3",
-    author: "Safe Commuter Guild",
-    verified: true,
-    category: "Safety Education",
-    time: "2h ago",
-    content: "When traveling late via CNG or bus, activate the 'Walk With Me' companion check-in timer on SAFE BD to notify parents if delayed.",
-    likes: 95
-  }
-];
+const postCreateLimiter = createSlidingRateLimiter('post_create', 60 * 1000, 15, "Post submission rate limit reached. Please wait a minute before publishing again.");
 
 // Helper: Generate 4-digit OTP
 function generateOTP() {
@@ -953,26 +925,93 @@ app.get('/api/routing/directions', async (req, res) => {
 
 
 /* ==========================================================
-   4. CIVIC SAFETY & AWARENESS FEED
+   4. HIGH-THROUGHPUT CIVIC SAFETY & MODERATION FEED
+   Scales to millions of citizen posts with O(1) in-memory indexing,
+   O(limit) pagination, rate limiting, and strict Admin moderation.
 ========================================================== */
 
+// 4.1 Live Public Citizen Feed (STRICT: ONLY ADMIN-APPROVED POSTS)
 app.get('/api/feed/posts', (req, res) => {
-  return res.json({ success: true, posts: civicPosts });
+  const { page, limit, category } = req.query;
+  const result = db.getApprovedPosts({ page, limit, category });
+  return res.json({ success: true, ...result });
 });
 
-app.post('/api/feed/posts', (req, res) => {
-  const { author, content, category } = req.body;
-  const newPost = {
-    id: "post-" + (civicPosts.length + 1),
-    author: author || "Citizen Reporter",
-    verified: false,
-    category: category || "Civic Hazard",
-    time: "Just now",
-    content,
-    likes: 0
-  };
-  civicPosts.unshift(newPost);
-  return res.json({ success: true, post: newPost });
+// 4.2 Citizen Submits Post for Review (Starts as pending, awaits Chief Admin approval)
+app.post('/api/feed/posts', postCreateLimiter, (req, res) => {
+  try {
+    const { author, authorPhone, content, category, media, verified } = req.body;
+    if (!content && !media) {
+      return res.status(400).json({ error: "MISSING_CONTENT", message: "Please enter report content or attach media." });
+    }
+
+    const newPost = db.createPost({
+      author: author || "Citizen Reporter",
+      authorPhone: authorPhone || "",
+      content,
+      category: category || "General Safety",
+      media,
+      verified: !!verified
+    });
+
+    // Notify any active admin WebSocket listeners in real-time
+    broadcastLocationUpdate({
+      type: "NEW_PENDING_CIVIC_POST",
+      post: newPost
+    });
+
+    return res.json({
+      success: true,
+      message: "Report submitted to Admin Moderation Queue. It will go live once officially approved by Chief Administrator.",
+      post: newPost
+    });
+  } catch (err) {
+    return res.status(400).json({ error: "POST_FAILED", message: err.message });
+  }
+});
+
+// 4.3 Admin Post Moderation Queue (Pending Citizen Reports)
+app.get('/api/admin/posts/pending', (req, res) => {
+  const { page, limit } = req.query;
+  const result = db.getPendingPosts({ page, limit });
+  return res.json({ success: true, ...result });
+});
+
+// 4.4 Admin Approves Post (Publish live to citizen feed permanently)
+app.post('/api/admin/posts/:id/approve', (req, res) => {
+  const adminName = (req.body && req.body.adminName) || "Chief Administrator";
+  const approved = db.approvePost(req.params.id, adminName);
+  if (!approved) {
+    return res.status(404).json({ error: "NOT_FOUND", message: "Post not found or already processed." });
+  }
+
+  // Broadcast to all active citizens via WebSocket
+  broadcastLocationUpdate({
+    type: "CIVIC_POST_APPROVED_LIVE",
+    post: approved
+  });
+
+  return res.json({
+    success: true,
+    message: "Post officially approved and published to live citizen feed.",
+    post: approved
+  });
+});
+
+// 4.5 Admin Declines / Removes Post
+app.post('/api/admin/posts/:id/reject', (req, res) => {
+  const adminName = (req.body && req.body.adminName) || "Chief Administrator";
+  const success = db.rejectPost(req.params.id, adminName);
+  if (!success) {
+    return res.status(404).json({ error: "NOT_FOUND", message: "Post not found or already processed." });
+  }
+  return res.json({ success: true, message: "Submission declined and removed from moderation queue." });
+});
+
+// 4.6 Like Post
+app.post('/api/feed/posts/:id/like', (req, res) => {
+  const likes = db.likePost(req.params.id);
+  return res.json({ success: true, likes });
 });
 
 /* ==========================================================
