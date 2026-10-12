@@ -1281,19 +1281,26 @@
     }
     .auth-toggle-tab {
       flex: 1;
-      padding: 8px;
-      border: none;
+      padding: 8px 12px;
+      border: 1px solid transparent;
       background: transparent;
       color: var(--text-muted);
       font-size: 12px;
       font-weight: 600;
       border-radius: 9px;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.18s ease;
+      white-space: nowrap;
     }
     .auth-toggle-tab.active {
       background: var(--burgundy-deep);
       color: #fff;
       border: 1px solid var(--burgundy-border);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
     }
     .otp-digits-row {
       display: flex;
@@ -1592,9 +1599,13 @@
       </div>
 
       <!-- Feed Category Filter Bar -->
-      <div style="display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; align-items: center;">
-        <button class="auth-toggle-tab active" style="padding: 6px 14px; font-size: 11.5px; white-space: nowrap;" onclick="filterFeed('all', this)">All Feeds</button>
-        <button class="auth-toggle-tab" style="padding: 6px 14px; font-size: 11.5px; white-space: nowrap;" onclick="filterFeed('community', this)">Citizen Reports</button>
+      <div class="auth-toggle-bar" style="margin-bottom: 16px; padding: 4px;">
+        <button type="button" class="auth-toggle-tab active" onclick="filterFeed('all', this)">
+          <i class="fas fa-globe" style="font-size: 11px;"></i> All Feeds
+        </button>
+        <button type="button" class="auth-toggle-tab" onclick="filterFeed('community', this)">
+          <i class="fas fa-bullhorn" style="font-size: 11px;"></i> Citizen Reports
+        </button>
       </div>
 
       <!-- Feed Posts Container -->
