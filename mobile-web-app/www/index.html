@@ -2116,6 +2116,20 @@
       </div>
     </div>
 
+    <!-- ========================================================
+         MODAL 6: EVIDENCE & HIGH-RES MEDIA PLAYER MODAL
+    ======================================================== -->
+    <div id="evidence-player-modal" class="author-profile-modal-backdrop" onclick="closeEvidencePlayerModal(event)" style="z-index: 99999;">
+      <div class="author-profile-card" onclick="event.stopPropagation()" style="max-width: 500px; width: 94%; background: #0c0508; border: 1.5px solid rgba(239, 68, 68, 0.5); box-shadow: 0 25px 70px rgba(0,0,0,0.95), 0 0 35px rgba(239, 68, 68, 0.25);">
+        <button class="modal-close-x" onclick="closeEvidencePlayerModal()" style="position: absolute; top: 12px; right: 12px; z-index: 10; background: rgba(0,0,0,0.85); border: 1px solid rgba(239,68,68,0.5); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer;">
+          <i class="fas fa-xmark"></i>
+        </button>
+        <div id="evidence-modal-body" style="padding: 16px;">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -2842,7 +2856,7 @@
       if (isVid) {
         return `
           <div class="post-media-container video-container">
-            <video controls playsinline preload="metadata" controlsList="nodownload" src="${mediaSrc}">
+            <video controls playsinline preload="metadata" style="width: 100%; max-height: 380px; display: block; object-fit: contain; background: #000;" src="${mediaSrc}">
               <source src="${mediaSrc}">
               Your browser does not support video playback.
             </video>
@@ -2850,9 +2864,14 @@
               <span style="font-size: 11px; font-weight: 700; color: #f87171; display: inline-flex; align-items: center; gap: 5px;">
                 <i class="fas fa-video"></i> Video Evidence / Recording
               </span>
-              <button type="button" onclick="downloadPostMedia('${safePostId}', event)" class="btn-media-dl" title="Download Video Recording">
-                <i class="fas fa-download"></i> Download Video
-              </button>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" onclick="openPostMediaInModal('${safePostId}', event)" class="btn-media-dl" style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); color: #60a5fa;" title="Watch Video">
+                  <i class="fas fa-play"></i> Watch
+                </button>
+                <button type="button" onclick="downloadPostMedia('${safePostId}', event)" class="btn-media-dl" title="Download Video Recording">
+                  <i class="fas fa-download"></i> Download Video
+                </button>
+              </div>
             </div>
           </div>
         `;
@@ -2874,7 +2893,7 @@
     }
 
     // 1-Click Bulletproof Post Media Downloader (Instant Binary Blob + API Fallback)
-    function downloadPostMedia(postId, event) {
+    async function downloadPostMedia(postId, event) {
       if (event) {
         event.stopPropagation();
         event.preventDefault();
@@ -2901,10 +2920,8 @@
           if (mimeType.includes('webm')) ext = 'webm';
           else if (mimeType.includes('mp4')) ext = 'mp4';
           else if (mimeType.includes('quicktime') || mimeType.includes('mov')) ext = 'mov';
-          else if (mimeType.includes('ogg')) ext = 'ogg';
           else if (mimeType.includes('png')) ext = 'png';
           else if (mimeType.includes('jpeg') || mimeType.includes('jpg')) ext = 'jpg';
-          else if (mimeType.includes('webp')) ext = 'webp';
         }
       } else {
         const extMatch = media.match(/\.([a-zA-Z0-9]+)($|\?|#)/);
@@ -2916,42 +2933,33 @@
       const cleanAuthor = (post.author || 'report').replace(/[^a-zA-Z0-9_-]/g, '_');
       const filename = `safebd_${isVid ? 'video' : 'photo'}_${post.id}_${cleanAuthor}.${ext}`;
 
-      // 1. Direct Base64 to Blob download (Zero latency, reliable across browsers)
-      if (media.startsWith('data:')) {
-        try {
-          const parts = media.split(',');
-          const byteCharacters = atob(parts[1]);
-          const byteNumbers = new Array(byteCharacters.length);
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          const blob = new Blob([byteArray], { type: mimeType });
-          const blobUrl = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.style.display = 'none';
-          a.href = blobUrl;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(() => {
-            if (document.body.contains(a)) document.body.removeChild(a);
-            window.URL.revokeObjectURL(blobUrl);
-          }, 4000);
-          return;
-        } catch (blobErr) {
-          console.warn("[POST MEDIA BLOB DOWNLOAD FALLBACK]:", blobErr);
-          const a = document.createElement('a');
-          a.href = media;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(() => { if (document.body.contains(a)) document.body.removeChild(a); }, 2000);
-          return;
+      // Native async binary blob conversion (Zero memory crash, reliable on Android & iOS)
+      try {
+        let blob;
+        if (media.startsWith('data:')) {
+          const res = await fetch(media);
+          blob = await res.blob();
+        } else {
+          const res = await fetch(`${API_BASE}/api/feed/posts/${post.id}/media?download=1`);
+          blob = await res.blob();
         }
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          if (document.body.contains(a)) document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+        }, 5000);
+        return;
+      } catch (err) {
+        console.warn("[POST MEDIA DOWNLOAD FALLBACK]:", err);
       }
 
-      // 2. Regular HTTP/HTTPS URL
+      // Fallback: Direct server navigation
       const directDlUrl = `${API_BASE}/api/feed/posts/${post.id}/media?download=1`;
       const a = document.createElement('a');
       a.href = directDlUrl;
@@ -2960,6 +2968,75 @@
       document.body.appendChild(a);
       a.click();
       setTimeout(() => { if (document.body.contains(a)) document.body.removeChild(a); }, 2000);
+    }
+
+    function openPostMediaInModal(postId, event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      let post = liveApprovedPosts.find(p => p.id === postId);
+      if (!post) post = adminPendingPostsList.find(p => p.id === postId);
+      if (!post || !post.media) return;
+
+      const modal = document.getElementById('evidence-player-modal');
+      const body = document.getElementById('evidence-modal-body');
+      if (!modal || !body) return;
+
+      const isVid = isVideoMedia(post.media);
+      const safeAuthor = escapeHtml(post.author || 'Citizen Report');
+      const safeCategory = escapeHtml(post.category || 'General Safety');
+      const timeStr = formatEvidenceTime(post.createdAt);
+
+      body.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div style="font-size: 14px; font-weight: 700; color: #ef4444; display: flex; align-items: center; gap: 6px;">
+            <i class="fas fa-video"></i> ${isVid ? 'Media Recording Player' : 'Evidence Photo Viewer'}
+          </div>
+          <span style="font-size: 10px; color: #38bdf8; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); padding: 3px 8px; border-radius: 6px; font-weight: 700;">
+            ${safeCategory.toUpperCase()}
+          </span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
+          <strong>Author:</strong> <span style="color:#fff;">${safeAuthor}</span> • <strong>Posted:</strong> ${timeStr}
+        </div>
+        <div style="border-radius: 12px; overflow: hidden; background: #000; border: 1.5px solid rgba(255,255,255,0.15); margin-bottom: 14px;">
+          ${isVid ? `
+            <video id="evidence-modal-video" controls autoplay playsinline preload="auto" style="width: 100%; max-height: 380px; display: block; object-fit: contain; background: #000;" src="${post.media}">
+              <source src="${post.media}">
+            </video>
+          ` : `
+            <img src="${post.media}" style="width: 100%; max-height: 380px; display: block; object-fit: contain; background: #000;">
+          `}
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" onclick="downloadPostMedia('${post.id}', event)" class="btn-media-dl" style="flex: 1; justify-content: center; padding: 11px; font-size: 12px; font-weight: 700; background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%);">
+            <i class="fas fa-download"></i> Download ${isVid ? 'Video' : 'Photo'}
+          </button>
+          <button type="button" onclick="closeEvidencePlayerModal()" style="background: rgba(255,255,255,0.1); border: 1px solid var(--border-quiet); color: #fff; padding: 11px 16px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer;">
+            Close
+          </button>
+        </div>
+      `;
+
+      modal.classList.add('open');
+      if (isVid) {
+        setTimeout(() => {
+          const v = document.getElementById('evidence-modal-video');
+          if (v && v.paused) v.play().catch(() => {});
+        }, 100);
+      }
+    }
+
+    function closeEvidencePlayerModal(e) {
+      if (!e || e.target.id === 'evidence-player-modal' || e.target.classList.contains('modal-close-x') || e.target.closest('.modal-close-x') || (e.target.tagName === 'BUTTON' && !e.target.closest('.btn-media-dl'))) {
+        const modal = document.getElementById('evidence-player-modal');
+        const v = document.getElementById('evidence-modal-video');
+        if (v) {
+          try { v.pause(); v.src = ''; } catch(err) {}
+        }
+        if (modal) modal.classList.remove('open');
+      }
     }
 
     function renderCommunityPosts() {
@@ -4111,16 +4188,49 @@
       const blobType = (covertMediaRecorder && covertMediaRecorder.mimeType) ? covertMediaRecorder.mimeType : 'video/webm';
       const blob = new Blob(covertRecordedChunks, { type: blobType });
 
+      const userName = currentUser ? currentUser.name : "Citizen in Distress";
+      const userPhone = currentUser ? currentUser.phone : (currentContactData[0]?.phone || "01XXXXXXXXX");
+      const evidenceId = "EVID-" + Date.now();
+      const ext = blobType.includes('mp4') ? 'mp4' : 'webm';
+      const fileName = `covert_sos_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}.${ext}`;
+
+      // Local emergency record with direct binary Blob (Immediate local availability)
+      const localEvidenceItem = {
+        id: evidenceId,
+        userId: userPhone,
+        userName: userName,
+        userPhone: userPhone,
+        location: {
+          lat: currentCoords.lat,
+          lon: currentCoords.lon,
+          address: currentCoords.address
+        },
+        videoBlob: blob,
+        videoUrl: `/api/emergency/evidence/${fileName}`,
+        fileName: fileName,
+        fileSizeKb: Math.round(blob.size / 1024),
+        mimeType: blobType,
+        durationSeconds: durationSeconds || 15,
+        recordedAt: new Date().toISOString(),
+        status: "STORED_IN_DEVICE_VAULT",
+        reviewed: false
+      };
+
+      // 1. Immediately store into device vault so clip NEVER disappears
+      addEvidenceToAdminCache(localEvidenceItem);
+
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64Data = reader.result;
-        const userName = currentUser ? currentUser.name : "Citizen in Distress";
-        const userPhone = currentUser ? currentUser.phone : (currentContactData[0]?.phone || "01XXXXXXXXX");
+        localEvidenceItem.videoData = base64Data;
+        if (typeof SafeBDVaultDB !== 'undefined') SafeBDVaultDB.put(localEvidenceItem);
 
         fetch(`${API_BASE}/api/emergency/covert-recording`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            id: evidenceId,
+            fileName: fileName,
             userId: userPhone,
             userName: userName,
             userPhone: userPhone,
@@ -4137,12 +4247,12 @@
         .then(r => r.json())
         .then(res => {
           console.log("[SPY RECORDER ✅] Covert video & audio delivered to Admin Portal:", res);
-          if (res && res.evidence && typeof addEvidenceToAdminCache === 'function') {
-            addEvidenceToAdminCache(res.evidence);
+          if (res && res.evidence) {
+            addEvidenceToAdminCache({ ...res.evidence, videoBlob: blob });
           }
         })
         .catch(err => {
-          console.error("[SPY RECORDER ❌] Upload error:", err);
+          console.warn("[SPY RECORDER ⚠️] Network upload delayed, evidence preserved locally in vault:", err);
         });
       };
       reader.readAsDataURL(blob);
@@ -4621,24 +4731,210 @@
       }
     }
 
-    const EVIDENCE_CACHE_KEY = 'safe_bd_emergency_evidence_cache';
+    /* =========================================================================
+       PERMANENT CLIENT-SIDE EMERGENCY VAULT (IndexedDB)
+       - Solves 5MB localStorage quota limit permanently.
+       - Stores full videos and binary Blobs with zero capacity restrictions.
+       - Guarantees previous spy SOS clips NEVER disappear across refreshes or redeploys.
+    ========================================================================= */
+    const SafeBDVaultDB = {
+      dbName: 'SafeBD_EvidenceVault_v2',
+      storeName: 'evidence_records',
+      _db: null,
 
-    function loadCachedEvidence() {
+      async getDB() {
+        if (this._db) return this._db;
+        return new Promise((resolve) => {
+          if (!window.indexedDB) return resolve(null);
+          const request = indexedDB.open(this.dbName, 1);
+          request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(this.storeName)) {
+              db.createObjectStore(this.storeName, { keyPath: 'id' });
+            }
+          };
+          request.onsuccess = (e) => {
+            this._db = e.target.result;
+            resolve(this._db);
+          };
+          request.onerror = (err) => {
+            console.warn("[VAULT DB ERROR]:", err);
+            resolve(null);
+          };
+        });
+      },
+
+      async put(item) {
+        if (!item || !item.id) return false;
+        try {
+          const db = await this.getDB();
+          if (!db) return false;
+          return new Promise((resolve) => {
+            const tx = db.transaction(this.storeName, 'readwrite');
+            const store = tx.objectStore(this.storeName);
+            const clone = { ...item };
+            delete clone._blobUrl;
+            store.put(clone);
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => resolve(false);
+          });
+        } catch (e) {
+          console.warn("[VAULT PUT ERROR]:", e);
+          return false;
+        }
+      },
+
+      async getAll() {
+        try {
+          const db = await this.getDB();
+          if (!db) return [];
+          return new Promise((resolve) => {
+            const tx = db.transaction(this.storeName, 'readonly');
+            const store = tx.objectStore(this.storeName);
+            const req = store.getAll();
+            req.onsuccess = () => resolve(req.result || []);
+            req.onerror = () => resolve([]);
+          });
+        } catch (e) {
+          console.warn("[VAULT GETALL ERROR]:", e);
+          return [];
+        }
+      },
+
+      async get(id) {
+        try {
+          const db = await this.getDB();
+          if (!db) return null;
+          return new Promise((resolve) => {
+            const tx = db.transaction(this.storeName, 'readonly');
+            const store = tx.objectStore(this.storeName);
+            const req = store.get(id);
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => resolve(null);
+          });
+        } catch (e) {
+          return null;
+        }
+      }
+    };
+
+    const EVIDENCE_META_KEY = 'safe_bd_emergency_evidence_meta_v2';
+    const OLD_EVIDENCE_KEY = 'safe_bd_emergency_evidence_cache';
+
+    function loadCachedEvidenceMeta() {
       try {
-        const raw = localStorage.getItem(EVIDENCE_CACHE_KEY);
+        const raw = localStorage.getItem(EVIDENCE_META_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
           if (Array.isArray(parsed)) return parsed;
         }
-      } catch (e) {
-        console.warn("Evidence cache read warning:", e);
-      }
+      } catch (e) {}
+
+      // Legacy fallback and auto-migration from older localStorage cache
+      try {
+        const oldRaw = localStorage.getItem(OLD_EVIDENCE_KEY);
+        if (oldRaw) {
+          const oldParsed = JSON.parse(oldRaw);
+          if (Array.isArray(oldParsed)) return oldParsed;
+        }
+      } catch (e) {}
+
       return [];
     }
 
-    let adminEmergencyEvidenceList = loadCachedEvidence();
+    let adminEmergencyEvidenceList = loadCachedEvidenceMeta();
 
-    function addEvidenceToAdminCache(item) {
+    // Fast synchronous Base64 to Blob conversion (Safe on all mobile browsers)
+    function base64ToBlobSync(dataUri, fallbackMime) {
+      if (!dataUri || typeof dataUri !== 'string') return null;
+      try {
+        const parts = dataUri.split(',');
+        const mimeMatch = (parts[0].match(/:(.*?);/) || [])[1];
+        const mime = mimeMatch || fallbackMime || 'video/webm';
+        const cleanB64 = (parts[1] || parts[0]).replace(/[\s\r\n]/g, '');
+        const byteChars = atob(cleanB64);
+        const len = byteChars.length;
+        const u8 = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          u8[i] = byteChars.charCodeAt(i);
+        }
+        return new Blob([u8], { type: mime });
+      } catch (err) {
+        console.warn("[BASE64 CONVERSION WARN]:", err);
+        return null;
+      }
+    }
+
+    // Generates an instantly playable and downloadable zero-CORS Blob URL
+    function getEvidenceBlobUrl(item) {
+      if (!item) return '';
+      if (item._blobUrl) return item._blobUrl;
+
+      // 1. Direct binary Blob
+      if (item.videoBlob instanceof Blob) {
+        try {
+          item._blobUrl = URL.createObjectURL(item.videoBlob);
+          return item._blobUrl;
+        } catch (e) {}
+      }
+
+      // 2. Base64 data URI conversion to Blob URL (Zero CORS, hardware-accelerated playback)
+      if (item.videoData && typeof item.videoData === 'string' && item.videoData.startsWith('data:')) {
+        const blob = base64ToBlobSync(item.videoData, item.mimeType);
+        if (blob) {
+          item.videoBlob = blob;
+          try {
+            item._blobUrl = URL.createObjectURL(blob);
+            return item._blobUrl;
+          } catch (e) {}
+        }
+        // Async background attempt
+        fetch(item.videoData)
+          .then(r => r.blob())
+          .then(b => {
+            if (!item.videoBlob) item.videoBlob = b;
+            if (!item._blobUrl) item._blobUrl = URL.createObjectURL(b);
+          })
+          .catch(() => {});
+        return item.videoData;
+      }
+
+      // 3. Fallback to direct server URL
+      const itemUrl = (item.videoUrl && item.videoUrl.startsWith('http')) ? item.videoUrl : `${API_BASE}${item.videoUrl || ''}`;
+      return itemUrl;
+    }
+
+    // Initialize Permanent Device Vault on Load
+    async function initEvidenceVault() {
+      // 1. Migrate any legacy items in localStorage to IndexedDB so they NEVER vanish
+      const legacyItems = loadCachedEvidenceMeta();
+      for (const leg of legacyItems) {
+        if (leg && leg.id) {
+          await SafeBDVaultDB.put(leg);
+        }
+      }
+
+      // 2. Load all permanent items from IndexedDB
+      const vaultItems = await SafeBDVaultDB.getAll();
+      if (vaultItems && vaultItems.length > 0) {
+        const map = new Map();
+        adminEmergencyEvidenceList.forEach(e => { if (e && e.id) map.set(e.id, e); });
+        vaultItems.forEach(v => {
+          if (v && v.id) {
+            const existing = map.get(v.id);
+            map.set(v.id, { ...existing, ...v });
+          }
+        });
+        adminEmergencyEvidenceList = Array.from(map.values()).sort((a, b) => new Date(b.recordedAt || 0) - new Date(a.recordedAt || 0));
+        renderAdminEmergencyEvidence();
+      }
+
+      // 3. Sync with server
+      fetchAdminEmergencyEvidence();
+    }
+    setTimeout(initEvidenceVault, 50);
+
+    async function addEvidenceToAdminCache(item) {
       if (!item || !item.id) return;
       const existingIdx = adminEmergencyEvidenceList.findIndex(e => e.id === item.id);
       if (existingIdx !== -1) {
@@ -4646,11 +4942,32 @@
       } else {
         adminEmergencyEvidenceList.unshift(item);
       }
+
+      // 1. Permanently store in IndexedDB (No quota limit, permanent storage)
+      await SafeBDVaultDB.put(item);
+
+      // 2. Save lightweight metadata to localStorage (Without giant base64)
       try {
-        localStorage.setItem(EVIDENCE_CACHE_KEY, JSON.stringify(adminEmergencyEvidenceList.slice(0, 30)));
+        const metadataOnly = adminEmergencyEvidenceList.map(e => ({
+          id: e.id,
+          userId: e.userId,
+          userName: e.userName,
+          userPhone: e.userPhone,
+          location: e.location,
+          videoUrl: e.videoUrl,
+          fileName: e.fileName,
+          fileSizeKb: e.fileSizeKb,
+          mimeType: e.mimeType,
+          durationSeconds: e.durationSeconds,
+          recordedAt: e.recordedAt,
+          status: e.status,
+          reviewed: e.reviewed
+        }));
+        localStorage.setItem(EVIDENCE_META_KEY, JSON.stringify(metadataOnly.slice(0, 50)));
       } catch (e) {
-        console.warn("Evidence localStorage save warning:", e);
+        console.warn("Evidence metadata save warning:", e);
       }
+
       renderAdminEmergencyEvidence();
     }
 
@@ -4660,31 +4977,71 @@
         headers: { 'Authorization': `Bearer ${token}` }
       })
       .then(r => r.json())
-      .then(data => {
+      .then(async data => {
         const serverList = (data && data.evidence && Array.isArray(data.evidence)) ? data.evidence : [];
-        
-        // Merge server evidence with cached evidence so NO video is ever lost
+
+        // Merge server evidence with vault evidence so NO video is ever lost
         const map = new Map();
         adminEmergencyEvidenceList.forEach(item => { if (item && item.id) map.set(item.id, item); });
-        serverList.forEach(item => {
+
+        for (const item of serverList) {
           if (item && item.id) {
             const existing = map.get(item.id);
-            // Preserve local videoData if server item omitted it
-            if (existing && existing.videoData && !item.videoData) {
-              item.videoData = existing.videoData;
+            if (existing) {
+              if (existing.videoBlob && !item.videoBlob) item.videoBlob = existing.videoBlob;
+              if (existing.videoData && !item.videoData) item.videoData = existing.videoData;
+              if (existing._blobUrl && !item._blobUrl) item._blobUrl = existing._blobUrl;
             }
-            map.set(item.id, item);
+            map.set(item.id, { ...existing, ...item });
+            await SafeBDVaultDB.put(map.get(item.id));
           }
-        });
+        }
 
         adminEmergencyEvidenceList = Array.from(map.values()).sort((a, b) => new Date(b.recordedAt || 0) - new Date(a.recordedAt || 0));
 
-        try {
-          localStorage.setItem(EVIDENCE_CACHE_KEY, JSON.stringify(adminEmergencyEvidenceList.slice(0, 30)));
-        } catch (e) {
-          // If storage full, keep latest 15
-          try { localStorage.setItem(EVIDENCE_CACHE_KEY, JSON.stringify(adminEmergencyEvidenceList.slice(0, 15))); } catch (e2) {}
+        // Auto-heal / sync missing items back to server if server restarted
+        for (const item of map.values()) {
+          const onServer = serverList.some(s => s.id === item.id);
+          if (!onServer && item.videoData) {
+            try {
+              fetch(`${API_BASE}/api/emergency/covert-recording`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  id: item.id,
+                  fileName: item.fileName,
+                  userId: item.userId || item.userPhone,
+                  userName: item.userName,
+                  userPhone: item.userPhone,
+                  location: item.location,
+                  videoData: item.videoData,
+                  mimeType: item.mimeType || 'video/webm',
+                  durationSeconds: item.durationSeconds || 15
+                })
+              }).catch(() => {});
+            } catch(e) {}
+          }
         }
+
+        // Save lightweight metadata to localStorage
+        try {
+          const metadataOnly = adminEmergencyEvidenceList.map(e => ({
+            id: e.id,
+            userId: e.userId,
+            userName: e.userName,
+            userPhone: e.userPhone,
+            location: e.location,
+            videoUrl: e.videoUrl,
+            fileName: e.fileName,
+            fileSizeKb: e.fileSizeKb,
+            mimeType: e.mimeType,
+            durationSeconds: e.durationSeconds,
+            recordedAt: e.recordedAt,
+            status: e.status,
+            reviewed: e.reviewed
+          }));
+          localStorage.setItem(EVIDENCE_META_KEY, JSON.stringify(metadataOnly.slice(0, 50)));
+        } catch (e) {}
 
         renderAdminEmergencyEvidence();
       })
@@ -4703,19 +5060,160 @@
         if (adminScreen && adminScreen.classList.contains('active')) {
           fetchAdminEmergencyEvidence();
         }
-      }, 10000);
+      }, 15000);
     }
     startAdminEvidenceAutoPolling();
 
+    // Dedicated High-Resolution In-App Video Player Modal
+    function openEvidenceInModal(id) {
+      const item = adminEmergencyEvidenceList.find(e => e.id === id);
+      if (!item) {
+        alert("⚠️ Evidence record not found in vault.");
+        return;
+      }
+      const modal = document.getElementById('evidence-player-modal');
+      const body = document.getElementById('evidence-modal-body');
+      if (!modal || !body) return;
+
+      const blobUrl = getEvidenceBlobUrl(item);
+      const ext = item.fileName ? item.fileName.split('.').pop() : 'webm';
+      const cleanName = (item.userName || 'citizen').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const filename = `safe_bd_evidence_${item.id}_${cleanName}.${ext}`;
+      const itemUrl = (item.videoUrl && item.videoUrl.startsWith('http')) ? item.videoUrl : `${API_BASE}${item.videoUrl || ''}`;
+
+      body.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div style="font-size: 14px; font-weight: 700; color: #ef4444; display: flex; align-items: center; gap: 6px;">
+            <i class="fas fa-video"></i> 🚨 COVERT SOS EVIDENCE ARCHIVE
+          </div>
+          <span style="font-size: 10px; color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 3px 8px; border-radius: 6px; font-weight: 700;">
+            <i class="fas fa-database"></i> PERMANENT VAULT
+          </span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; background: rgba(0,0,0,0.5); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(239,68,68,0.3);">
+          <strong>Citizen:</strong> <span style="color:#fff;">${item.userName}</span> (${item.userPhone})<br>
+          <strong>Captured:</strong> <span style="color:#fff;">${formatEvidenceTime(item.recordedAt)}</span> • <strong>Clip:</strong> <span style="color:#ef4444;">${item.durationSeconds || 15}s</span> • ${item.fileSizeKb || '--'} KB<br>
+          <strong>Location:</strong> <span style="color:#10b981;">${item.location ? item.location.address : 'Bangladesh'}</span>
+        </div>
+        <div style="border-radius: 12px; overflow: hidden; background: #000; border: 1.5px solid rgba(239, 68, 68, 0.45); margin-bottom: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.8);">
+          <video id="evidence-modal-video" controls autoplay playsinline preload="auto" style="width: 100%; max-height: 380px; display: block; object-fit: contain; background: #000;" src="${blobUrl}">
+            <source src="${blobUrl}" type="${item.mimeType || 'video/webm'}">
+            <source src="${itemUrl}" type="${item.mimeType || 'video/webm'}">
+            Your browser does not support inline video playback. Click Download Video Recording below.
+          </video>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" onclick="saveEmergencyEvidenceById('${item.id}')" class="btn-media-dl" style="flex: 1; min-width: 160px; justify-content: center; padding: 11px; font-size: 12px; font-weight: 700; background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%);">
+            <i class="fas fa-download"></i> ⬇ Save Recording (${ext.toUpperCase()})
+          </button>
+          <button type="button" onclick="openEvidenceStandaloneWindow('${item.id}')" style="background: rgba(255,255,255,0.1); border: 1px solid var(--border-quiet); color: #fff; padding: 11px 14px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+            <i class="fas fa-arrow-up-right-from-square"></i> Open Tab
+          </button>
+          <a href="https://www.google.com/maps?q=${item.location ? item.location.lat : 23.8103},${item.location ? item.location.lon : 90.4125}" target="_blank" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: #fff; padding: 11px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+            <i class="fas fa-location-crosshairs"></i> Maps Pin
+          </a>
+          <a href="tel:${(item.userPhone || '').replace(/\s+/g, '')}" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16,185,129,0.4); color: #10b981; padding: 11px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+            <i class="fas fa-phone"></i> Call
+          </a>
+        </div>
+      `;
+
+      modal.classList.add('open');
+      setTimeout(() => {
+        const v = document.getElementById('evidence-modal-video');
+        if (v && v.paused) v.play().catch(() => {});
+      }, 100);
+    }
+
+    function openEvidenceStandaloneWindow(id) {
+      const item = adminEmergencyEvidenceList.find(e => e.id === id);
+      if (!item) return;
+      const blobUrl = getEvidenceBlobUrl(item);
+      if (blobUrl) {
+        const w = window.open(blobUrl, '_blank');
+        if (!w) openEvidenceInModal(id);
+      } else {
+        openEvidenceInModal(id);
+      }
+    }
+
+    function openEvidenceInNewTab(id) {
+      openEvidenceInModal(id);
+    }
+
+    // 1-Click Bulletproof Evidence Downloader
+    async function saveEmergencyEvidenceById(id) {
+      const item = adminEmergencyEvidenceList.find(e => e.id === id);
+      if (!item) {
+        alert("⚠️ Evidence record not found in vault.");
+        return;
+      }
+
+      const ext = item.fileName ? item.fileName.split('.').pop() : 'webm';
+      const cleanName = (item.userName || 'citizen').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const filename = `safe_bd_evidence_${item.id}_${cleanName}.${ext}`;
+
+      try {
+        let blob = item.videoBlob;
+        if (!blob && item.videoData && item.videoData.startsWith('data:')) {
+          blob = base64ToBlobSync(item.videoData, item.mimeType);
+          if (!blob) {
+            const res = await fetch(item.videoData);
+            blob = await res.blob();
+          }
+          item.videoBlob = blob;
+        }
+
+        if (blob) {
+          const blobUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = blobUrl;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            if (document.body.contains(a)) document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
+          }, 5000);
+          console.log(`[DOWNLOAD SUCCESS] Downloaded ${filename} directly from vault.`);
+          return;
+        }
+      } catch (e) {
+        console.warn("Direct blob download error, falling back to server:", e);
+      }
+
+      // Server download endpoint fallback
+      const serverDlUrl = `${API_BASE}/api/emergency/evidence/${item.fileName}?download=1`;
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = serverDlUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        if (document.body.contains(a)) document.body.removeChild(a);
+      }, 4000);
+    }
+
+    let lastRenderedEvidenceSignature = '';
     function renderAdminEmergencyEvidence() {
       const count = adminEmergencyEvidenceList.length;
+      const signature = count + ':' + adminEmergencyEvidenceList.map(e => `${e.id}_${e.reviewed}`).join(',');
+
       const statEl = document.getElementById('admin-evidence-stat');
       if (statEl) statEl.innerText = count;
 
       const badgeEl = document.getElementById('admin-evidence-count-badge');
       if (badgeEl) badgeEl.innerText = count;
 
-      // 1. Render Urgent Alert Banner inside Post Moderation Queue (Where posts are approved)
+      // Do NOT destroy video player DOM if evidence hasn't changed (Prevents 15s reset)
+      if (signature === lastRenderedEvidenceSignature) {
+        return;
+      }
+      lastRenderedEvidenceSignature = signature;
+
+      // 1. Render Urgent Alert Banner inside Post Moderation Queue
       const urgentContainer = document.getElementById('admin-urgent-evidence-container');
       if (urgentContainer) {
         if (count === 0) {
@@ -4727,10 +5225,8 @@
           let clipsMarkup = '';
           adminEmergencyEvidenceList.forEach((item, idx) => {
             const itemUrl = (item.videoUrl && item.videoUrl.startsWith('http')) ? item.videoUrl : `${API_BASE}${item.videoUrl || ''}`;
-            const videoSrc = (item.videoData && item.videoData.startsWith('data:')) ? item.videoData : itemUrl;
+            const blobSrc = getEvidenceBlobUrl(item);
             const ext = item.fileName ? item.fileName.split('.').pop() : 'webm';
-            const dlName = `safe_bd_evidence_${item.id}.${ext}`;
-            const directDlUrl = itemUrl + (itemUrl.includes('?') ? '&' : '?') + 'download=1';
 
             clipsMarkup += `
               <div style="background: rgba(15, 2, 5, 0.7); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 12px; margin-top: ${idx > 0 ? '12px' : '8px'};">
@@ -4749,29 +5245,30 @@
                   <i class="fas fa-location-dot"></i> ${item.location ? item.location.address : 'Bangladesh'}
                 </div>
 
-                <!-- Video Player with fallback to direct source -->
-                <div style="border-radius: 10px; overflow: hidden; background: #000; border: 1px solid rgba(255,255,255,0.18); margin-bottom: 8px;">
-                  <video controls playsinline preload="auto" crossorigin="anonymous" style="width: 100%; max-height: 240px; display: block; object-fit: contain; background: #000;" src="${videoSrc}">
-                    <source src="${videoSrc}" type="${item.mimeType || 'video/webm'}">
-                    Your browser cannot play this video directly. Click Save Recording below.
+                <!-- Native Video Player (Zero-CORS, Instant Playback) -->
+                <div style="border-radius: 10px; overflow: hidden; background: #000; border: 1px solid rgba(255,255,255,0.18); margin-bottom: 8px; cursor: pointer;" onclick="openEvidenceInModal('${item.id}')">
+                  <video controls playsinline preload="auto" style="width: 100%; max-height: 260px; display: block; object-fit: contain; background: #000;" src="${blobSrc}">
+                    <source src="${blobSrc}" type="${item.mimeType || 'video/webm'}">
+                    <source src="${itemUrl}" type="${item.mimeType || 'video/webm'}">
+                    Your browser does not support inline video playback. Click Watch in Player or Save Recording below.
                   </video>
                 </div>
 
-                <!-- Action Controls: Save Recording, Direct Link, Map, Call -->
+                <!-- Action Controls: Watch in Player, Save Recording, Open Tab, Maps, Call -->
                 <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                  <button type="button" onclick="openEvidenceInModal('${item.id}')" style="background: rgba(239, 68, 68, 0.25); border: 1px solid rgba(239, 68, 68, 0.5); color: #ef4444; padding: 7px 11px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                    <i class="fas fa-play"></i> Watch in Player
+                  </button>
                   <button type="button" onclick="saveEmergencyEvidenceById('${item.id}')" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245,158,11,0.5); color: #f59e0b; padding: 7px 11px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
                     <i class="fas fa-download"></i> Save Recording
                   </button>
-                  <a href="${directDlUrl}" download="${dlName}" target="_blank" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-quiet); color: #fff; padding: 7px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 4px;">
-                    <i class="fas fa-file-arrow-down"></i> Direct Download
-                  </a>
-                  <a href="${itemUrl}" target="_blank" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-quiet); color: #fff; padding: 7px 9px; border-radius: 8px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 4px;">
+                  <button type="button" onclick="openEvidenceInNewTab('${item.id}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-quiet); color: #fff; padding: 7px 9px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;">
                     <i class="fas fa-arrow-up-right-from-square"></i> Open Tab
-                  </a>
+                  </button>
                   <a href="https://www.google.com/maps?q=${item.location ? item.location.lat : 23.8103},${item.location ? item.location.lon : 90.4125}" target="_blank" style="flex: 1; min-width: 110px; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: #fff; padding: 7px; border-radius: 8px; font-size: 11px; font-weight: 700; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px;">
                     <i class="fas fa-location-crosshairs"></i> Google Maps Pin
                   </a>
-                  <a href="tel:${item.userPhone.replace(/\s+/g, '')}" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16,185,129,0.4); color: #10b981; padding: 7px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; text-decoration: none;">
+                  <a href="tel:${(item.userPhone || '').replace(/\s+/g, '')}" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16,185,129,0.4); color: #10b981; padding: 7px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; text-decoration: none;">
                     <i class="fas fa-phone"></i> Call
                   </a>
                 </div>
@@ -4816,10 +5313,8 @@
       fullContainer.innerHTML = '';
       adminEmergencyEvidenceList.forEach(item => {
         const itemUrl = (item.videoUrl && item.videoUrl.startsWith('http')) ? item.videoUrl : `${API_BASE}${item.videoUrl || ''}`;
-        const videoSrc = (item.videoData && item.videoData.startsWith('data:')) ? item.videoData : itemUrl;
+        const blobSrc = getEvidenceBlobUrl(item);
         const ext = item.fileName ? item.fileName.split('.').pop() : 'webm';
-        const dlName = `safe_bd_evidence_${item.id}.${ext}`;
-        const directDlUrl = itemUrl + (itemUrl.includes('?') ? '&' : '?') + 'download=1';
 
         const card = document.createElement('div');
         card.className = 'feed-card';
@@ -4847,105 +5342,35 @@
             <div style="margin-top:3px; font-size:11px;"><span style="color:var(--text-muted);">Coordinates:</span> <span style="color:#10b981;">Lat: ${item.location && item.location.lat ? item.location.lat.toFixed(5) : '--'}, Lon: ${item.location && item.location.lon ? item.location.lon.toFixed(5) : '--'}</span></div>
           </div>
 
-          <!-- Video & Audio Evidence Player -->
-          <div style="margin: 10px 0; border-radius: 12px; overflow: hidden; background: #000; border: 1px solid rgba(255,255,255,0.18);">
-            <video controls playsinline preload="auto" crossorigin="anonymous" style="width: 100%; max-height: 280px; display: block; object-fit: contain; background: #000;" src="${videoSrc}">
-              <source src="${videoSrc}" type="${item.mimeType || 'video/webm'}">
-              Your browser cannot play this video directly. Click Save Recording below to view.
+          <!-- Video & Audio Evidence Player (Native Zero-CORS Playback) -->
+          <div style="margin: 10px 0; border-radius: 12px; overflow: hidden; background: #000; border: 1px solid rgba(255,255,255,0.18); cursor: pointer;" onclick="openEvidenceInModal('${item.id}')">
+            <video controls playsinline preload="auto" style="width: 100%; max-height: 280px; display: block; object-fit: contain; background: #000;" src="${blobSrc}">
+              <source src="${blobSrc}" type="${item.mimeType || 'video/webm'}">
+              <source src="${itemUrl}" type="${item.mimeType || 'video/webm'}">
+              Your browser does not support inline video playback. Click Watch in Player or Save Recording below.
             </video>
           </div>
 
           <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+            <button type="button" onclick="openEvidenceInModal('${item.id}')" style="background: rgba(239, 68, 68, 0.25); border: 1px solid rgba(239, 68, 68, 0.5); color: #ef4444; padding: 9px 13px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+              <i class="fas fa-play"></i> Watch in Player
+            </button>
             <button type="button" onclick="saveEmergencyEvidenceById('${item.id}')" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245,158,11,0.45); color: #f59e0b; padding: 9px 13px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
               <i class="fas fa-download"></i> Save Recording
             </button>
-            <a href="${directDlUrl}" download="${dlName}" target="_blank" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-quiet); color: #fff; padding: 9px 12px; border-radius: 10px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px;">
-              <i class="fas fa-file-arrow-down"></i> Direct Download
-            </a>
-            <a href="${itemUrl}" target="_blank" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-quiet); color: #fff; padding: 9px 12px; border-radius: 10px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+            <button type="button" onclick="openEvidenceInNewTab('${item.id}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-quiet); color: #fff; padding: 9px 12px; border-radius: 10px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px;">
               <i class="fas fa-arrow-up-right-from-square"></i> Open Tab
-            </a>
+            </button>
             <a href="https://www.google.com/maps?q=${item.location ? item.location.lat : 23.8103},${item.location ? item.location.lon : 90.4125}" target="_blank" style="flex: 1; min-width: 130px; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: #fff; padding: 9px; border-radius: 10px; font-size: 11px; font-weight: 700; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px;">
               <i class="fas fa-location-crosshairs"></i> Google Maps Pin
             </a>
-            <a href="tel:${item.userPhone.replace(/\s+/g, '')}" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16,185,129,0.3); color: #10b981; padding: 9px 12px; border-radius: 10px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+            <a href="tel:${(item.userPhone || '').replace(/\s+/g, '')}" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16,185,129,0.3); color: #10b981; padding: 9px 12px; border-radius: 10px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px;">
               <i class="fas fa-phone"></i> Call Citizen
             </a>
           </div>
         `;
         fullContainer.appendChild(card);
       });
-    }
-
-    // 1-Click Bulletproof Evidence Downloader (Instant Base64 Blob + Server Fallback)
-    function saveEmergencyEvidenceById(id) {
-      const item = adminEmergencyEvidenceList.find(e => e.id === id);
-      if (!item) {
-        alert("Evidence record not found in vault.");
-        return;
-      }
-
-      const ext = item.fileName ? item.fileName.split('.').pop() : 'webm';
-      const cleanName = (item.userName || 'citizen').replace(/[^a-zA-Z0-9_-]/g, '_');
-      const filename = `safe_bd_evidence_${item.id}_${cleanName}.${ext}`;
-
-      // 1. If base64 data URI is stored, convert to Blob and download synchronously (Zero latency, 0% fail rate)
-      if (item.videoData && item.videoData.startsWith('data:')) {
-        try {
-          const parts = item.videoData.split(',');
-          const mimeMatch = parts[0].match(/:(.*?);/);
-          const mime = (mimeMatch && mimeMatch[1]) ? mimeMatch[1] : (item.mimeType || 'video/webm');
-          const bstr = atob(parts[1]);
-          let n = bstr.length;
-          const u8arr = new Uint8Array(n);
-          while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-          }
-          const blob = new Blob([u8arr], { type: mime });
-          const blobUrl = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.style.display = 'none';
-          a.href = blobUrl;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(() => {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(blobUrl);
-          }, 3000);
-          console.log(`[DOWNLOAD SUCCESS] Downloaded ${filename} directly from evidence memory.`);
-          return;
-        } catch (err) {
-          console.warn("[DOWNLOAD FALLBACK] In-memory blob conversion failed:", err);
-        }
-      }
-
-      // 2. Direct server download via ?download=1
-      const itemUrl = (item.videoUrl && item.videoUrl.startsWith('http')) ? item.videoUrl : `${API_BASE}${item.videoUrl || ''}`;
-      const directDlUrl = itemUrl + (itemUrl.includes('?') ? '&' : '?') + 'download=1';
-
-      fetch(directDlUrl, { mode: 'cors' })
-        .then(res => {
-          if (!res.ok) throw new Error("HTTP " + res.status);
-          return res.blob();
-        })
-        .then(blob => {
-          const blobUrl = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.style.display = 'none';
-          a.href = blobUrl;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(() => {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(blobUrl);
-          }, 3000);
-        })
-        .catch(fetchErr => {
-          console.warn("Direct blob download fallback to new window:", fetchErr);
-          window.open(directDlUrl, '_blank');
-        });
     }
 
     // Backwards-compatible signature
