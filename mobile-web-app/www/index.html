@@ -1457,9 +1457,9 @@
           <div class="strip-title"><i class="fas fa-shield-heart" style="color: #ef4444;"></i> National 999 Helpline</div>
           <div class="strip-sub">Police • Fire Service • Ambulance CAD</div>
         </div>
-        <button class="strip-btn" onclick="trigger999Call()">
+        <a href="tel:999" class="strip-btn" onclick="trigger999CallDirect(event)" style="text-decoration: none;">
           <i class="fas fa-phone"></i> Call 999
-        </button>
+        </a>
       </div>
 
       <!-- Emergency SOS Disc -->
@@ -1741,28 +1741,41 @@
       </div>
 
       <!-- Quick Metrics Strip -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px;">
-        <div style="background: var(--black-subtle); border: 1px solid var(--burgundy-border); border-radius: 14px; padding: 10px 12px;">
-          <div style="font-size: 10px; color: var(--text-muted);">Pending Posts</div>
-          <div style="font-size: 20px; font-weight: 800; color: #f59e0b; margin-top: 3px;" id="admin-pending-stat">0</div>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 16px;">
+        <div style="background: var(--black-subtle); border: 1px solid var(--burgundy-border); border-radius: 12px; padding: 8px 10px; cursor: pointer;" onclick="switchAdminSection('reports')">
+          <div style="font-size: 9.5px; color: var(--text-muted);">Pending</div>
+          <div style="font-size: 18px; font-weight: 800; color: #f59e0b; margin-top: 2px;" id="admin-pending-stat">0</div>
         </div>
-        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 14px; padding: 10px 12px; cursor: pointer;" onclick="switchAdminSection('evidence')">
-          <div style="font-size: 10px; color: #ef4444; font-weight: 700; display: flex; align-items: center; gap: 4px;"><i class="fas fa-video"></i> Spy SOS Clips</div>
-          <div style="font-size: 20px; font-weight: 800; color: #ef4444; margin-top: 3px;" id="admin-evidence-stat">0</div>
+        <div style="background: var(--black-subtle); border: 1px solid var(--border-quiet); border-radius: 12px; padding: 8px 10px; cursor: pointer;" onclick="switchAdminSection('allposts')">
+          <div style="font-size: 9.5px; color: var(--text-muted);">Total Posts</div>
+          <div style="font-size: 18px; font-weight: 800; color: #10b981; margin-top: 2px;" id="admin-total-posts-stat">0</div>
         </div>
-        <div style="background: var(--black-subtle); border: 1px solid var(--border-quiet); border-radius: 14px; padding: 10px 12px;">
-          <div style="font-size: 10px; color: var(--text-muted);">Live Published</div>
-          <div style="font-size: 20px; font-weight: 800; color: #10b981; margin-top: 3px;" id="admin-approved-stat">0</div>
+        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 12px; padding: 8px 10px; cursor: pointer;" onclick="switchAdminSection('admins')">
+          <div style="font-size: 9.5px; color: #f59e0b; font-weight: 700;">Admins</div>
+          <div style="font-size: 18px; font-weight: 800; color: #f59e0b; margin-top: 2px;" id="admin-admins-stat">1</div>
+        </div>
+        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 12px; padding: 8px 10px; cursor: pointer;" onclick="switchAdminSection('evidence')">
+          <div style="font-size: 9.5px; color: #ef4444; font-weight: 700;"><i class="fas fa-video"></i> SOS Clips</div>
+          <div style="font-size: 18px; font-weight: 800; color: #ef4444; margin-top: 2px;" id="admin-evidence-stat">0</div>
         </div>
       </div>
 
       <!-- Admin Sub-Navigation Tabs -->
-      <div style="display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 2px;">
+      <div style="display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;" class="admin-nav-scroll">
         <button type="button" class="auth-toggle-tab active" id="admin-tab-reports" style="padding: 7px 11px; font-size: 11px; white-space: nowrap;" onclick="switchAdminSection('reports')">
-          <i class="fas fa-file-shield"></i> Post Moderation
+          <i class="fas fa-inbox"></i> Pending Review (<span id="admin-pending-tab-badge">0</span>)
+        </button>
+        <button type="button" class="auth-toggle-tab" id="admin-tab-allposts" style="padding: 7px 11px; font-size: 11px; white-space: nowrap;" onclick="switchAdminSection('allposts')">
+          <i class="fas fa-layer-group"></i> All Posts (Delete)
+        </button>
+        <button type="button" class="auth-toggle-tab" id="admin-tab-admins" style="padding: 7px 11px; font-size: 11px; border-color: rgba(245, 158, 11, 0.4); color: #f59e0b; white-space: nowrap;" onclick="switchAdminSection('admins')">
+          <i class="fas fa-user-shield"></i> Admin Access & Roles
+        </button>
+        <button type="button" class="auth-toggle-tab" id="admin-tab-users" style="padding: 7px 11px; font-size: 11px; white-space: nowrap;" onclick="switchAdminSection('users')">
+          <i class="fas fa-users"></i> Citizens
         </button>
         <button type="button" class="auth-toggle-tab" id="admin-tab-evidence" style="padding: 7px 11px; font-size: 11px; border-color: rgba(239, 68, 68, 0.4); color: #ef4444; white-space: nowrap;" onclick="switchAdminSection('evidence')">
-          <i class="fas fa-video"></i> Covert SOS Clips <span id="admin-evidence-count-badge" style="background: #ef4444; color: #fff; padding: 1px 6px; border-radius: 10px; font-size: 9.5px; font-weight: 700; margin-left: 2px;">0</span>
+          <i class="fas fa-video"></i> SOS Clips <span id="admin-evidence-count-badge" style="background: #ef4444; color: #fff; padding: 1px 6px; border-radius: 10px; font-size: 9.5px; font-weight: 700; margin-left: 2px;">0</span>
         </button>
         <button type="button" class="auth-toggle-tab" id="admin-tab-journeys" style="padding: 7px 11px; font-size: 11px; border-color: rgba(245, 158, 11, 0.4); color: #f59e0b; white-space: nowrap;" onclick="switchAdminSection('journeys')">
           <i class="fas fa-satellite-dish"></i> Live Routes <span id="admin-overdue-count-badge" style="background: #ef4444; color: #fff; padding: 1px 6px; border-radius: 10px; font-size: 9.5px; font-weight: 700; margin-left: 2px;">0</span>
@@ -1783,7 +1796,118 @@
         </div>
       </div>
 
-      <!-- SECTION B: DEDICATED COVERT SPY SOS EVIDENCE QUEUE -->
+      <!-- SECTION B: ALL POSTS & UNRESTRICTED CONTENT CONTROL (DELETE POSTS) -->
+      <div id="admin-section-allposts" style="display: none;">
+        <div class="module-header" style="margin-bottom: 12px;">
+          <span><i class="fas fa-layer-group" style="color: #ef4444;"></i> All Posts & Content Governance</span>
+          <button class="btn-gps-refresh" onclick="fetchAdminAllPosts()" style="font-size: 11px;">
+            <i class="fas fa-arrows-rotate"></i> Refresh Posts
+          </button>
+        </div>
+        <!-- Post Search & Filters -->
+        <div style="display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
+          <input type="text" id="admin-posts-search" placeholder="Search posts by author, phone, or keyword..." style="flex: 2; min-width: 180px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-quiet); color: #fff; padding: 8px 12px; border-radius: 10px; font-size: 11.5px;" oninput="filterAdminAllPosts()">
+          <select id="admin-posts-filter-status" style="flex: 1; min-width: 110px; background: #150a0e; border: 1px solid var(--border-quiet); color: #fff; padding: 8px; border-radius: 10px; font-size: 11px;" onchange="filterAdminAllPosts()">
+            <option value="all">All Statuses</option>
+            <option value="approved">Live Published</option>
+            <option value="pending">Pending Review</option>
+            <option value="rejected">Declined</option>
+          </select>
+        </div>
+        <div id="admin-all-posts-container">
+          <!-- Rendered dynamically with red Delete button on every post -->
+        </div>
+      </div>
+
+      <!-- SECTION C: ADMIN ACCESS MANAGEMENT & ROLE DELEGATION -->
+      <div id="admin-section-admins" style="display: none;">
+        <div class="module-header" style="margin-bottom: 12px;">
+          <span style="color: #f59e0b;"><i class="fas fa-user-shield"></i> Admin Access Management</span>
+          <span style="font-size: 11px; color: var(--text-muted); text-transform: none;">Role Delegation</span>
+        </div>
+
+        <!-- Grant Access Form Card -->
+        <div style="background: rgba(20, 10, 14, 0.75); border: 1.5px solid rgba(245, 158, 11, 0.4); border-radius: 14px; padding: 14px; margin-bottom: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+          <div style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+            <i class="fas fa-key" style="color: #f59e0b;"></i> Grant New Administrator Clearance
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">
+            Authorize any citizen account with administrative power. Choose specific role and tailored permissions.
+          </div>
+          <form onsubmit="handleGrantAdminSubmit(event)" style="display: flex; flex-direction: column; gap: 10px;">
+            <div>
+              <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Bangladeshi Mobile Number *</label>
+              <div style="display: flex; align-items: center; background: rgba(0,0,0,0.5); border: 1px solid var(--border-quiet); border-radius: 10px; padding: 0 10px;">
+                <span style="font-size: 12px; color: #10b981; font-weight: 700; margin-right: 6px;">+880</span>
+                <input type="tel" id="grant-admin-phone" placeholder="17XXXXXXXX" required style="width: 100%; background: transparent; border: none; outline: none; color: #fff; padding: 9px 0; font-size: 13px; font-weight: 600;">
+              </div>
+            </div>
+            <div>
+              <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Admin Full Name</label>
+              <input type="text" id="grant-admin-name" placeholder="e.g. Farhan Ahmed (or leave blank if registered)" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.5); border: 1px solid var(--border-quiet); border-radius: 10px; color: #fff; padding: 9px 12px; font-size: 12px;">
+            </div>
+            <div>
+              <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Administrative Role Level</label>
+              <select id="grant-admin-role" style="width: 100%; box-sizing: border-box; background: #150a0e; border: 1px solid var(--border-quiet); border-radius: 10px; color: #fff; padding: 9px 12px; font-size: 12px;">
+                <option value="Moderator Admin">Moderator Admin (Approve & Delete Citizen Reports)</option>
+                <option value="Content & Media Officer">Content & Media Officer (Review, Feature & Delete Media)</option>
+                <option value="Emergency Dispatch Officer">Emergency Dispatch Officer (999 CAD, SOS Clips & Live Routes)</option>
+                <option value="Co-Administrator">Co-Administrator (Full Operational Clearance)</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 6px;">Assigned Permissions Checklist</label>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; color: #fff;">
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                  <input type="checkbox" id="perm-delete-posts" checked> Delete Any Post
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                  <input type="checkbox" id="perm-approve-posts" checked> Approve Civic Posts
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                  <input type="checkbox" id="perm-view-evidence" checked> View SOS Video Vault
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                  <input type="checkbox" id="perm-dispatch" checked> 999 CAD & Transit
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; grid-column: span 2;">
+                  <input type="checkbox" id="perm-manage-admins"> Grant / Revoke Other Admins
+                </label>
+              </div>
+            </div>
+            <button type="submit" style="background: linear-gradient(135deg, #b45309 0%, #f59e0b 100%); color: #000; font-weight: 800; border: none; padding: 11px; border-radius: 10px; font-size: 12.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 4px;">
+              <i class="fas fa-shield-check"></i> Grant Administrative Clearance
+            </button>
+          </form>
+        </div>
+
+        <!-- Active Administrators Roster -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 12px; font-weight: 700; color: #fff;">Active Administrative Personnel</span>
+          <span style="font-size: 11px; color: var(--text-muted);" id="admin-roster-count">1 Admin</span>
+        </div>
+        <div id="admin-roster-container">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- SECTION D: CITIZEN DIRECTORY -->
+      <div id="admin-section-users" style="display: none;">
+        <div class="module-header" style="margin-bottom: 12px;">
+          <span><i class="fas fa-users" style="color: #38bdf8;"></i> Registered Citizen Accounts</span>
+          <button class="btn-gps-refresh" onclick="fetchAdminUsersList()" style="font-size: 11px;">
+            <i class="fas fa-arrows-rotate"></i> Refresh Citizens
+          </button>
+        </div>
+        <div style="margin-bottom: 10px;">
+          <input type="text" id="admin-users-search" placeholder="Search citizens by phone or name..." style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.4); border: 1px solid var(--border-quiet); color: #fff; padding: 8px 12px; border-radius: 10px; font-size: 11.5px;" oninput="filterAdminUsers()">
+        </div>
+        <div id="admin-users-container">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- SECTION E: DEDICATED COVERT SPY SOS EVIDENCE QUEUE -->
       <div id="admin-section-evidence" style="display: none;">
         <div class="module-header" style="margin-bottom: 12px;">
           <span style="color: #ef4444;"><i class="fas fa-triangle-exclamation"></i> Covert SOS Video & Audio Evidence</span>
@@ -1796,7 +1920,7 @@
         </div>
       </div>
 
-      <!-- SECTION C: LIVE CITIZEN JOURNEYS & OVERDUE OBSERVATION QUEUE -->
+      <!-- SECTION F: LIVE CITIZEN JOURNEYS & OVERDUE OBSERVATION QUEUE -->
       <div id="admin-section-journeys" style="display: none;">
         <div class="module-header" style="margin-bottom: 12px;">
           <span>Live Citizen Journeys & Overdue Alerts</span>
@@ -3111,6 +3235,10 @@
             <div class="post-action-btn" onclick="sharePost('${p.id}')">
               <i class="fas fa-share-nodes"></i> Share
             </div>
+            ${(currentUser && currentUser.isAdmin) ? `
+            <div class="post-action-btn" onclick="deletePostAdmin('${p.id}', event)" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4); margin-left: auto;" title="Chief Admin: Permanently Delete Post">
+              <i class="fas fa-trash-can"></i> Delete
+            </div>` : ''}
           </div>
         `;
         container.appendChild(card);
@@ -4042,9 +4170,26 @@
       triggerSOS();
     }
 
+    function trigger999CallDirect(e) {
+      // Direct instant dial: zero pop-up, zero alert
+      try {
+        const userPhone = currentUser ? currentUser.phone : (currentContactData[0]?.phone || "01XXXXXXXXX");
+        fetch(`${API_BASE}/api/emergency/sos-trigger`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: userPhone,
+            emergencyType: "DIRECT_999_DIAL",
+            location: currentCoords
+          })
+        }).catch(() => {});
+      } catch(err) {}
+    }
+
     function trigger999Call() {
-      alert(`🚨 Dialing Bangladesh National Emergency 999 (Police / Fire / Ambulance)...\nCAD packet dispatched with real-time location: ${currentCoords.address}`);
+      // Instant native dial without ANY pop-up
       window.location.href = "tel:999";
+      trigger999CallDirect();
     }
 
     function triggerSOS() {
@@ -4335,6 +4480,9 @@
 
       if (id === 'screen-admin') {
         fetchAdminPendingPosts();
+        fetchAdminAllPosts();
+        fetchAdminList();
+        fetchAdminUsersList();
         fetchAdminEmergencyEvidence();
         fetchAdminActiveJourneys();
       } else if (id === 'screen-feed') {
@@ -4716,30 +4864,384 @@
     }
 
     function switchAdminSection(section) {
-      document.getElementById('admin-tab-reports').classList.remove('active');
-      const evTab = document.getElementById('admin-tab-evidence');
-      if (evTab) evTab.classList.remove('active');
-      document.getElementById('admin-tab-journeys').classList.remove('active');
+      ['reports', 'allposts', 'admins', 'users', 'evidence', 'journeys'].forEach(sec => {
+        const tab = document.getElementById(`admin-tab-${sec}`);
+        if (tab) tab.classList.remove('active');
+        const s = document.getElementById(`admin-section-${sec}`);
+        if (s) s.style.display = 'none';
+      });
 
-      document.getElementById('admin-section-reports').style.display = 'none';
-      const evSec = document.getElementById('admin-section-evidence');
-      if (evSec) evSec.style.display = 'none';
-      document.getElementById('admin-section-journeys').style.display = 'none';
+      const activeTab = document.getElementById(`admin-tab-${section}`);
+      if (activeTab) activeTab.classList.add('active');
+      const activeSec = document.getElementById(`admin-section-${section}`);
+      if (activeSec) activeSec.style.display = 'block';
 
       if (section === 'reports') {
-        document.getElementById('admin-tab-reports').classList.add('active');
-        document.getElementById('admin-section-reports').style.display = 'block';
         fetchAdminPendingPosts();
         fetchAdminEmergencyEvidence();
+      } else if (section === 'allposts') {
+        fetchAdminAllPosts();
+      } else if (section === 'admins') {
+        fetchAdminList();
+      } else if (section === 'users') {
+        fetchAdminUsersList();
       } else if (section === 'evidence') {
-        if (evTab) evTab.classList.add('active');
-        if (evSec) evSec.style.display = 'block';
         fetchAdminEmergencyEvidence();
-      } else {
-        document.getElementById('admin-tab-journeys').classList.add('active');
-        document.getElementById('admin-section-journeys').style.display = 'block';
+      } else if (section === 'journeys') {
         fetchAdminActiveJourneys();
       }
+    }
+
+    // 1. Delete Post Permanently (Unrestricted Admin Capability)
+    async function deletePostAdmin(id, event) {
+      if (event) event.stopPropagation();
+      if (!confirm("🚨 Are you sure you want to permanently delete this post?\n\nThis will remove it completely from the database and live awareness feeds.")) {
+        return;
+      }
+      const token = localStorage.getItem('safe_bd_token') || '';
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/posts/${id}/delete`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ adminName: currentUser ? currentUser.name : 'Administrator' })
+        });
+        const data = await res.json();
+        if (data && data.success) {
+          liveApprovedPosts = liveApprovedPosts.filter(p => p.id !== id);
+          adminPendingPostsList = adminPendingPostsList.filter(p => p.id !== id);
+          adminAllPostsList = adminAllPostsList.filter(p => p.id !== id);
+          renderFeedPosts();
+          renderAdminPendingPosts();
+          renderAdminAllPosts();
+          alert("✅ Post has been permanently deleted from the system.");
+        } else {
+          alert("⚠️ Failed to delete post: " + (data ? data.message : "Unknown error"));
+        }
+      } catch (err) {
+        alert("⚠️ Error deleting post: " + err.message);
+      }
+    }
+
+    // 2. All Posts Content Governance Controller
+    let adminAllPostsList = [];
+    async function fetchAdminAllPosts() {
+      const token = localStorage.getItem('safe_bd_token') || '';
+      const status = document.getElementById('admin-posts-filter-status')?.value || 'all';
+      const search = document.getElementById('admin-posts-search')?.value.trim() || '';
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/posts/all?status=${encodeURIComponent(status)}&search=${encodeURIComponent(search)}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data && data.success && Array.isArray(data.posts)) {
+          adminAllPostsList = data.posts;
+          const totalStat = document.getElementById('admin-total-posts-stat');
+          if (totalStat) totalStat.innerText = data.total || adminAllPostsList.length;
+          renderAdminAllPosts();
+        }
+      } catch(e) {
+        console.warn("Error fetching all posts:", e);
+      }
+    }
+
+    function filterAdminAllPosts() {
+      fetchAdminAllPosts();
+    }
+
+    function renderAdminAllPosts() {
+      const container = document.getElementById('admin-all-posts-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (adminAllPostsList.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; background: var(--black-subtle); border: 1px solid var(--border-quiet); border-radius: 16px;">
+            <i class="fas fa-folder-open" style="font-size: 36px; color: var(--text-muted); margin-bottom: 12px; display: block;"></i>
+            <h4 style="font-size: 14px; color: #fff; margin-bottom: 4px;">No Posts Found</h4>
+            <p style="font-size: 12px; color: var(--text-muted);">No reports match your current filter criteria.</p>
+          </div>
+        `;
+        return;
+      }
+
+      adminAllPostsList.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'feed-card';
+        const isSaad = (p.author && p.author.toUpperCase().includes('SAAD RIZWAN')) || p.isFounder;
+        const statusBadge = p.approved
+          ? `<span class="mod-pending-badge" style="color: #10b981; border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.15);"><i class="fas fa-check-circle"></i> Live Published</span>`
+          : (p.rejected
+            ? `<span class="mod-pending-badge" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.15);"><i class="fas fa-ban"></i> Declined</span>`
+            : `<span class="mod-pending-badge" style="color: #f59e0b; border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.15);"><i class="fas fa-clock"></i> Pending Review</span>`);
+
+        card.innerHTML = `
+          <div class="feed-card-header">
+            <div class="author-info">
+              <div class="author-avatar" style="background: ${isSaad ? 'linear-gradient(135deg, #b45309, #d97706)' : 'rgba(255,255,255,0.1)'}; color: #fff;">
+                ${isSaad ? 'SR' : (p.author || 'C').charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <div class="author-name">
+                  ${escapeHtml(p.author || 'Citizen')}
+                  ${isSaad ? '<span class="founder-title-pill"><i class="fas fa-crown"></i> Founder</span>' : ''}
+                  <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">(${p.authorPhone || 'No Phone'})</span>
+                </div>
+                <div style="font-size: 10px; color: var(--text-muted);">${p.time || 'Recently'} • <span style="color: #e57373;">${escapeHtml(p.category || 'General Safety')}</span></div>
+              </div>
+            </div>
+            <div>${statusBadge}</div>
+          </div>
+          <div class="post-text">${escapeHtml(p.content || '')}</div>
+          ${renderPostMediaHtml(p)}
+          <div style="display: flex; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-quiet); flex-wrap: wrap; align-items: center;">
+            <button onclick="deletePostAdmin('${p.id}', event)" style="background: linear-gradient(135deg, #991b1b 0%, #ef4444 100%); color: #fff; border: none; padding: 8px 14px; border-radius: 9px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+              <i class="fas fa-trash-can"></i> Delete Post (Permanent)
+            </button>
+            ${!p.approved ? `
+            <button onclick="approvePost('${p.id}')" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; padding: 8px 12px; border-radius: 9px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+              <i class="fas fa-check"></i> Approve
+            </button>` : ''}
+            ${p.media ? `
+            <button onclick="downloadPostMedia('${p.id}', event)" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-quiet); color: #fff; padding: 8px 12px; border-radius: 9px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+              <i class="fas fa-download"></i> Media
+            </button>` : ''}
+            <span style="font-size: 10.5px; color: var(--text-muted); margin-left: auto;">Likes: ${p.likes || 0}</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // 3. Admin Access & Role Delegation System Controller
+    let currentAdminRoster = [];
+    async function fetchAdminList() {
+      const token = localStorage.getItem('safe_bd_token') || '';
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/admins`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data && data.success && Array.isArray(data.admins)) {
+          currentAdminRoster = data.admins;
+          const stat = document.getElementById('admin-admins-stat');
+          if (stat) stat.innerText = currentAdminRoster.length;
+          const countBadge = document.getElementById('admin-roster-count');
+          if (countBadge) countBadge.innerText = `${currentAdminRoster.length} Active Admin${currentAdminRoster.length > 1 ? 's' : ''}`;
+          renderAdminList();
+        }
+      } catch(e) {
+        console.warn("Error fetching admin roster:", e);
+      }
+    }
+
+    function renderAdminList() {
+      const container = document.getElementById('admin-roster-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      currentAdminRoster.forEach(adm => {
+        const isFounder = adm.isFounder || adm.phone === '1316750712';
+        const card = document.createElement('div');
+        card.style.background = 'rgba(15, 8, 12, 0.7)';
+        card.style.border = isFounder ? '1.5px solid rgba(245, 158, 11, 0.6)' : '1px solid var(--border-quiet)';
+        card.style.borderRadius = '12px';
+        card.style.padding = '12px';
+        card.style.marginBottom = '10px';
+
+        const permsHtml = (adm.permissions || []).map(p => {
+          const label = p.replace(/_/g, ' ');
+          return `<span style="font-size: 9.5px; background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); padding: 2px 6px; border-radius: 6px; text-transform: capitalize;">${label}</span>`;
+        }).join(' ');
+
+        card.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 36px; height: 36px; border-radius: 50%; background: ${isFounder ? 'linear-gradient(135deg, #b45309, #f59e0b)' : 'rgba(239, 68, 68, 0.2)'}; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">
+                ${isFounder ? '<i class="fas fa-crown"></i>' : (adm.name || 'A').charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <div style="font-size: 13px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 6px;">
+                  ${escapeHtml(adm.name)}
+                  ${isFounder ? '<span style="font-size: 9.5px; color: #f59e0b; background: rgba(245,158,11,0.2); border: 1px solid rgba(245,158,11,0.5); padding: 1px 6px; border-radius: 6px; font-weight: 800;"><i class="fas fa-crown"></i> Founder & CEO</span>' : ''}
+                </div>
+                <div style="font-size: 11px; color: #10b981; font-weight: 600;">${adm.displayPhone || ('+880 ' + adm.phone)}</div>
+              </div>
+            </div>
+            <div>
+              ${!isFounder ? `
+              <button onclick="revokeAdminAccessAction('${adm.phone}', '${escapeHtml(adm.name)}')" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; padding: 5px 10px; border-radius: 8px; font-size: 10.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                <i class="fas fa-user-xmark"></i> Revoke
+              </button>` : `
+              <span style="font-size: 10px; color: #f59e0b; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245,158,11,0.3); padding: 3px 8px; border-radius: 6px; font-weight: 700;">
+                Chief Authority
+              </span>`}
+            </div>
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">
+            Role: <strong style="color: #fff;">${escapeHtml(adm.role)}</strong> • Added by: <span style="color: #38bdf8;">${escapeHtml(adm.adminAssignedBy || 'Chief Administrator')}</span>
+          </div>
+          <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+            ${permsHtml}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function handleGrantAdminSubmit(e) {
+      e.preventDefault();
+      const rawPhone = document.getElementById('grant-admin-phone').value.trim();
+      const phoneCheck = validateBangladeshiPhone(rawPhone);
+      if (!phoneCheck.valid) {
+        alert("⚠️ " + phoneCheck.message);
+        document.getElementById('grant-admin-phone').focus();
+        return;
+      }
+      const name = document.getElementById('grant-admin-name').value.trim();
+      const role = document.getElementById('grant-admin-role').value;
+
+      const permissions = [];
+      if (document.getElementById('perm-delete-posts').checked) permissions.push('delete_posts');
+      if (document.getElementById('perm-approve-posts').checked) permissions.push('approve_posts');
+      if (document.getElementById('perm-view-evidence').checked) permissions.push('view_evidence');
+      if (document.getElementById('perm-dispatch').checked) permissions.push('emergency_dispatch');
+      if (document.getElementById('perm-manage-admins').checked) permissions.push('manage_admins');
+
+      const token = localStorage.getItem('safe_bd_token') || '';
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/admins/grant`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            phone: phoneCheck.cleanPhone,
+            name: name,
+            role: role,
+            permissions: permissions,
+            assignedBy: currentUser ? currentUser.name : 'Chief Administrator'
+          })
+        });
+        const data = await res.json();
+        if (data && data.success) {
+          alert(`🎉 Administrative clearance granted successfully!\n\nUser: ${data.admin.name} (${data.admin.phone})\nRole: ${data.admin.role}`);
+          document.getElementById('grant-admin-phone').value = '';
+          document.getElementById('grant-admin-name').value = '';
+          fetchAdminList();
+        } else {
+          alert("⚠️ " + (data ? data.message : "Failed to grant admin access"));
+        }
+      } catch (err) {
+        alert("⚠️ Network error granting admin: " + err.message);
+      }
+    }
+
+    async function revokeAdminAccessAction(phone, name) {
+      if (!confirm(`Are you sure you want to revoke administrator access for:\n\n${name} (+880 ${phone})?\n\nThis will remove all moderation and admin capabilities for this account.`)) {
+        return;
+      }
+      const token = localStorage.getItem('safe_bd_token') || '';
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/admins/${phone}/revoke`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ revokedBy: currentUser ? currentUser.name : 'Chief Administrator' })
+        });
+        const data = await res.json();
+        if (data && data.success) {
+          alert("✅ Administrator access revoked.");
+          fetchAdminList();
+        } else {
+          alert("⚠️ " + (data ? data.message : "Failed to revoke access"));
+        }
+      } catch (err) {
+        alert("⚠️ Error: " + err.message);
+      }
+    }
+
+    // 4. Citizen User Directory Controller
+    let adminUsersList = [];
+    async function fetchAdminUsersList() {
+      const token = localStorage.getItem('safe_bd_token') || '';
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/users`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data && data.success && Array.isArray(data.users)) {
+          adminUsersList = data.users;
+          renderAdminUsersList(adminUsersList);
+        }
+      } catch(e) {
+        console.warn("Error fetching citizens list:", e);
+      }
+    }
+
+    function filterAdminUsers() {
+      const q = (document.getElementById('admin-users-search')?.value || '').toLowerCase().trim();
+      if (!q) return renderAdminUsersList(adminUsersList);
+      const filtered = adminUsersList.filter(u => 
+        (u.name || '').toLowerCase().includes(q) ||
+        (u.phone || '').includes(q) ||
+        (u.role || '').toLowerCase().includes(q)
+      );
+      renderAdminUsersList(filtered);
+    }
+
+    function renderAdminUsersList(users) {
+      const container = document.getElementById('admin-users-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (users.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 12px;">No citizens found.</div>`;
+        return;
+      }
+
+      users.forEach(u => {
+        const card = document.createElement('div');
+        card.style.background = 'rgba(15, 10, 14, 0.6)';
+        card.style.border = '1px solid var(--border-quiet)';
+        card.style.borderRadius = '12px';
+        card.style.padding = '10px 12px';
+        card.style.marginBottom = '8px';
+        card.style.display = 'flex';
+        card.style.justifyContent = 'space-between';
+        card.style.alignItems = 'center';
+
+        card.innerHTML = `
+          <div>
+            <div style="font-size: 12.5px; font-weight: 700; color: #fff;">
+              ${escapeHtml(u.name)}
+              ${u.isAdmin ? '<span style="font-size: 9px; color: #f59e0b; background: rgba(245,158,11,0.2); padding: 1px 5px; border-radius: 5px; margin-left: 4px;">Admin</span>' : ''}
+              ${u.nidVerified ? '<i class="fas fa-id-card" style="color: #10b981; font-size: 10px; margin-left: 4px;" title="NID Verified"></i>' : ''}
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted);">${u.displayPhone || ('+880 ' + u.phone)} • Logins: <span style="color:#fff;">${u.loginCount || 0}</span></div>
+          </div>
+          <div>
+            ${!u.isAdmin ? `
+            <button onclick="promoteCitizenToAdmin('${u.phone}', '${escapeHtml(u.name)}')" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); color: #f59e0b; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+              <i class="fas fa-shield"></i> Make Admin
+            </button>` : `
+            <span style="font-size: 10px; color: #10b981; font-weight: 700;"><i class="fas fa-check"></i> Active Admin</span>`}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function promoteCitizenToAdmin(phone, name) {
+      switchAdminSection('admins');
+      document.getElementById('grant-admin-phone').value = phone;
+      if (name) document.getElementById('grant-admin-name').value = name;
+      document.getElementById('grant-admin-phone').focus();
     }
 
     /* =========================================================================
@@ -5512,7 +6014,9 @@
 
       const pendingStat = document.getElementById('admin-pending-stat');
       const approvedStat = document.getElementById('admin-approved-stat');
+      const tabBadge = document.getElementById('admin-pending-tab-badge');
       if (pendingStat) pendingStat.innerText = pendingPosts.length;
+      if (tabBadge) tabBadge.innerText = pendingPosts.length;
       if (approvedStat) approvedStat.innerText = approvedPosts.length;
 
       if (pendingPosts.length === 0) {
@@ -5551,15 +6055,18 @@
           <div class="post-text">${escapeHtml(p.content || '')}</div>
           ${renderPostMediaHtml(p)}
           <div style="display: flex; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-quiet); flex-wrap: wrap;">
-            <button onclick="approvePost('${p.id}')" style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #fff; border: none; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-              <i class="fas fa-check"></i> Approve & Publish to Feed
+            <button onclick="approvePost('${p.id}')" style="flex: 1; min-width: 140px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #fff; border: none; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <i class="fas fa-check"></i> Approve & Publish
+            </button>
+            <button onclick="deletePostAdmin('${p.id}', event)" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); color: #ef4444; padding: 10px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+              <i class="fas fa-trash-can"></i> Delete Post
             </button>
             ${p.media ? `
             <button type="button" onclick="downloadPostMedia('${p.id}', event)" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #f59e0b; padding: 10px 14px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
               <i class="fas fa-download"></i> Save ${isVideoMedia(p.media) ? 'Video' : 'Media'}
             </button>` : ''}
-            <button onclick="rejectPost('${p.id}')" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; padding: 10px 16px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-              <i class="fas fa-trash"></i> Decline
+            <button onclick="rejectPost('${p.id}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-quiet); color: var(--text-muted); padding: 10px 14px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+              Decline
             </button>
           </div>
         `;
