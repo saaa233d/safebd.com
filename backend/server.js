@@ -955,7 +955,7 @@ app.get('/api/feed/posts', (req, res) => {
 // 4.2 Citizen Submits Post for Review (Starts as pending, awaits Chief Admin approval)
 app.post('/api/feed/posts', postCreateLimiter, (req, res) => {
   try {
-    const { author, authorPhone, content, category, media, verified } = req.body;
+    const { author, authorPhone, authorRole, content, category, media, verified } = req.body;
     if (!content && !media) {
       return res.status(400).json({ error: "MISSING_CONTENT", message: "Please enter report content or attach media." });
     }
@@ -963,6 +963,7 @@ app.post('/api/feed/posts', postCreateLimiter, (req, res) => {
     const newPost = db.createPost({
       author: author || "Citizen Reporter",
       authorPhone: authorPhone || "",
+      authorRole: authorRole || "",
       content,
       category: category || "General Safety",
       media,
@@ -971,13 +972,15 @@ app.post('/api/feed/posts', postCreateLimiter, (req, res) => {
 
     // Notify any active admin WebSocket listeners in real-time
     broadcastLocationUpdate({
-      type: "NEW_PENDING_CIVIC_POST",
+      type: newPost.approved ? "NEW_LIVE_CIVIC_POST" : "NEW_PENDING_CIVIC_POST",
       post: newPost
     });
 
     return res.json({
       success: true,
-      message: "Report submitted to Admin Moderation Queue. It will go live once officially approved by Chief Administrator.",
+      message: newPost.approved
+        ? "Official announcement published to live feed."
+        : "Report submitted to Admin Moderation Queue. It will go live once officially approved by Chief Administrator.",
       post: newPost
     });
   } catch (err) {
@@ -1029,6 +1032,42 @@ app.post('/api/feed/posts/:id/like', (req, res) => {
   const userId = (req.body && req.body.userId) || (req.query && req.query.userId) || `ip_${rawIp}`;
   const result = db.toggleLikePost(req.params.id, userId);
   return res.json({ success: true, ...result });
+});
+
+// 4.7 Direct Media Streaming & Single-Click Download Endpoint
+app.get('/api/feed/posts/:id/media', (req, res) => {
+  try {
+    const post = db.getPostById(req.params.id);
+    if (!post || !post.media) {
+      return res.status(404).json({ error: "NOT_FOUND", message: "Media attachment not found for this post." });
+    }
+    const media = post.media;
+    if (typeof media === 'string' && media.startsWith('data:')) {
+      const mimeMatch = media.match(/^data:([^;]+);base64,/);
+      const mime = (mimeMatch && mimeMatch[1]) ? mimeMatch[1] : 'application/octet-stream';
+      const base64Data = media.split(',')[1];
+      const buffer = Buffer.from(base64Data, 'base64');
+      const isVideo = mime.startsWith('video');
+      const ext = isVideo ? (mime.includes('webm') ? 'webm' : 'mp4') : (mime.includes('png') ? 'png' : 'jpg');
+      const filename = `safebd_post_${post.id}_${isVideo ? 'video' : 'photo'}.${ext}`;
+
+      res.setHeader('Content-Type', mime);
+      res.setHeader('Content-Length', buffer.length);
+      if (req.query.download === '1') {
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      } else {
+        res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      }
+      return res.send(buffer);
+    } else if (typeof media === 'string') {
+      return res.redirect(media);
+    } else {
+      return res.status(400).send("Invalid media format.");
+    }
+  } catch (err) {
+    console.error("Post media serve error:", err.message);
+    return res.status(500).send("Error retrieving media.");
+  }
 });
 
 /* ==========================================================
