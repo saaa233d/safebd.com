@@ -1089,7 +1089,12 @@
 
       <!-- Emergency SOS Disc -->
       <div class="sos-stage">
-        <div class="sos-button-disc" onclick="triggerSOS()">
+        <div class="sos-button-disc" 
+             onmousedown="handleSosPressStart(event)" 
+             onmouseup="handleSosPressEnd(event)" 
+             ontouchstart="handleSosPressStart(event)" 
+             ontouchend="handleSosPressEnd(event)" 
+             onclick="handleSosClick(event)">
           <span class="sos-text-label">SOS</span>
           <span class="sos-text-sub">Hold 3s</span>
         </div>
@@ -1295,29 +1300,39 @@
       </div>
 
       <!-- Quick Metrics Strip -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px;">
-        <div style="background: var(--black-subtle); border: 1px solid var(--burgundy-border); border-radius: 14px; padding: 12px 14px;">
-          <div style="font-size: 11px; color: var(--text-muted);">Pending Approvals</div>
-          <div style="font-size: 22px; font-weight: 800; color: #f59e0b; margin-top: 4px;" id="admin-pending-stat">0</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px;">
+        <div style="background: var(--black-subtle); border: 1px solid var(--burgundy-border); border-radius: 14px; padding: 10px 12px;">
+          <div style="font-size: 10px; color: var(--text-muted);">Pending Posts</div>
+          <div style="font-size: 20px; font-weight: 800; color: #f59e0b; margin-top: 3px;" id="admin-pending-stat">0</div>
         </div>
-        <div style="background: var(--black-subtle); border: 1px solid var(--border-quiet); border-radius: 14px; padding: 12px 14px;">
-          <div style="font-size: 11px; color: var(--text-muted);">Live Published</div>
-          <div style="font-size: 22px; font-weight: 800; color: #10b981; margin-top: 4px;" id="admin-approved-stat">0</div>
+        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 14px; padding: 10px 12px; cursor: pointer;" onclick="switchAdminSection('evidence')">
+          <div style="font-size: 10px; color: #ef4444; font-weight: 700; display: flex; align-items: center; gap: 4px;"><i class="fas fa-video"></i> Spy SOS Clips</div>
+          <div style="font-size: 20px; font-weight: 800; color: #ef4444; margin-top: 3px;" id="admin-evidence-stat">0</div>
+        </div>
+        <div style="background: var(--black-subtle); border: 1px solid var(--border-quiet); border-radius: 14px; padding: 10px 12px;">
+          <div style="font-size: 10px; color: var(--text-muted);">Live Published</div>
+          <div style="font-size: 20px; font-weight: 800; color: #10b981; margin-top: 3px;" id="admin-approved-stat">0</div>
         </div>
       </div>
 
       <!-- Admin Sub-Navigation Tabs -->
-      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-        <button type="button" class="auth-toggle-tab active" id="admin-tab-reports" style="padding: 7px 12px; font-size: 11.5px;" onclick="switchAdminSection('reports')">
+      <div style="display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 2px;">
+        <button type="button" class="auth-toggle-tab active" id="admin-tab-reports" style="padding: 7px 11px; font-size: 11px; white-space: nowrap;" onclick="switchAdminSection('reports')">
           <i class="fas fa-file-shield"></i> Post Moderation
         </button>
-        <button type="button" class="auth-toggle-tab" id="admin-tab-journeys" style="padding: 7px 12px; font-size: 11.5px; border-color: rgba(239, 68, 68, 0.4); color: #ef4444;" onclick="switchAdminSection('journeys')">
-          <i class="fas fa-satellite-dish"></i> Live Citizen Routes <span id="admin-overdue-count-badge" style="background: #ef4444; color: #fff; padding: 1px 6px; border-radius: 10px; font-size: 9.5px; font-weight: 700; margin-left: 3px;">0</span>
+        <button type="button" class="auth-toggle-tab" id="admin-tab-evidence" style="padding: 7px 11px; font-size: 11px; border-color: rgba(239, 68, 68, 0.4); color: #ef4444; white-space: nowrap;" onclick="switchAdminSection('evidence')">
+          <i class="fas fa-video"></i> Covert SOS Clips <span id="admin-evidence-count-badge" style="background: #ef4444; color: #fff; padding: 1px 6px; border-radius: 10px; font-size: 9.5px; font-weight: 700; margin-left: 2px;">0</span>
+        </button>
+        <button type="button" class="auth-toggle-tab" id="admin-tab-journeys" style="padding: 7px 11px; font-size: 11px; border-color: rgba(245, 158, 11, 0.4); color: #f59e0b; white-space: nowrap;" onclick="switchAdminSection('journeys')">
+          <i class="fas fa-satellite-dish"></i> Live Routes <span id="admin-overdue-count-badge" style="background: #ef4444; color: #fff; padding: 1px 6px; border-radius: 10px; font-size: 9.5px; font-weight: 700; margin-left: 2px;">0</span>
         </button>
       </div>
 
-      <!-- SECTION A: POST MODERATION QUEUE -->
+      <!-- SECTION A: POST MODERATION QUEUE (With Urgent SOS Evidence on top) -->
       <div id="admin-section-reports">
+        <!-- Urgent Covert SOS Video Evidence Alert directly above post moderation -->
+        <div id="admin-urgent-evidence-container" style="display: none; margin-bottom: 16px;"></div>
+
         <div class="module-header" style="margin-bottom: 12px;">
           <span>Citizen Reports Awaiting Moderation</span>
           <span style="font-size: 11px; color: var(--text-muted); text-transform: none;">Live Review Queue</span>
@@ -1327,7 +1342,20 @@
         </div>
       </div>
 
-      <!-- SECTION B: LIVE CITIZEN JOURNEYS & OVERDUE OBSERVATION QUEUE -->
+      <!-- SECTION B: DEDICATED COVERT SPY SOS EVIDENCE QUEUE -->
+      <div id="admin-section-evidence" style="display: none;">
+        <div class="module-header" style="margin-bottom: 12px;">
+          <span style="color: #ef4444;"><i class="fas fa-triangle-exclamation"></i> Covert SOS Video & Audio Evidence</span>
+          <button class="btn-gps-refresh" onclick="fetchAdminEmergencyEvidence()" style="font-size: 11px;">
+            <i class="fas fa-arrows-rotate"></i> Refresh Evidence
+          </button>
+        </div>
+        <div id="admin-evidence-full-container">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- SECTION C: LIVE CITIZEN JOURNEYS & OVERDUE OBSERVATION QUEUE -->
       <div id="admin-section-journeys" style="display: none;">
         <div class="module-header" style="margin-bottom: 12px;">
           <span>Live Citizen Journeys & Overdue Alerts</span>
@@ -2837,8 +2865,48 @@
     }
 
     /* ----------------------------------------------------
-       EMERGENCY 999 & SOS
+       EMERGENCY 999 & COVERT SPY BACKGROUND RECORDING (AUDIO + VIDEO)
     ---------------------------------------------------- */
+    let sosHoldTimer = null;
+    let sosHoldStartTime = 0;
+    let sosTriggeredByHold = false;
+    let isCovertRecording = false;
+    let covertMediaRecorder = null;
+    let covertMediaStream = null;
+    let covertRecordedChunks = [];
+
+    function handleSosPressStart(e) {
+      sosHoldStartTime = Date.now();
+      sosTriggeredByHold = false;
+      const disc = document.querySelector('.sos-button-disc');
+      if (disc) disc.style.transform = 'scale(1.06)';
+
+      if (sosHoldTimer) clearTimeout(sosHoldTimer);
+      // Press & Hold for 1.2s triggers SOS
+      sosHoldTimer = setTimeout(() => {
+        sosTriggeredByHold = true;
+        if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
+        triggerSOS();
+      }, 1200);
+    }
+
+    function handleSosPressEnd(e) {
+      const disc = document.querySelector('.sos-button-disc');
+      if (disc) disc.style.transform = '';
+      if (sosHoldTimer) {
+        clearTimeout(sosHoldTimer);
+        sosHoldTimer = null;
+      }
+    }
+
+    function handleSosClick(e) {
+      if (sosTriggeredByHold) {
+        sosTriggeredByHold = false;
+        return;
+      }
+      triggerSOS();
+    }
+
     function trigger999Call() {
       alert(`🚨 Dialing Bangladesh National Emergency 999 (Police / Fire / Ambulance)...\nCAD packet dispatched with real-time location: ${currentCoords.address}`);
       window.location.href = "tel:999";
@@ -2849,6 +2917,7 @@
       document.getElementById('sos-countdown-val').innerText = sosCount;
       document.getElementById('sos-modal').classList.add('open');
 
+      if (sosTimer) clearInterval(sosTimer);
       sosTimer = setInterval(() => {
         sosCount--;
         document.getElementById('sos-countdown-val').innerText = sosCount;
@@ -2868,18 +2937,205 @@
       clearInterval(sosTimer);
       document.getElementById('sos-modal').classList.remove('open');
 
+      // 1. Dispatch Emergency Signal & Live GPS to 999 CAD Dispatcher
+      const userName = currentUser ? currentUser.name : "Citizen in Distress";
+      const userPhone = currentUser ? currentUser.phone : (currentContactData[0]?.phone || "01XXXXXXXXX");
+
       fetch(`${API_BASE}/api/emergency/sos-trigger`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: currentUser ? currentUser.phone : "anonymous",
+          userId: userPhone,
+          userName: userName,
           emergencyType: "POLICE_THREAT",
           location: { lat: currentCoords.lat, lon: currentCoords.lon, address: currentCoords.address }
         })
       }).catch(() => {});
 
-      alert(`🚨 EMERGENCY CONFIRMED!\n\n1. Bangladesh 999 CAD Dispatch Center notified with real GPS coordinates (${currentCoords.address}).\n2. Curve25519 live stream link pushed to Family Circle.\n3. Automatic telecom SMS fallback activated.\n\nNow connecting to 999 voice line...`);
-      window.location.href = "tel:999";
+      // 2. Start Silent Covert Background Spy Camera & Audio Recording (No video portal or preview displayed)
+      startCovertEmergencyRecording();
+
+      // 3. Show discreet CAD dispatched alert
+      showDiscreetSosDispatchedBanner();
+    }
+
+    // Silent Covert Spy Camera & Audio Recorder (Runs completely in background)
+    async function startCovertEmergencyRecording() {
+      if (isCovertRecording) return;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.warn("[SPY RECORDER] MediaDevices not supported.");
+        return;
+      }
+
+      try {
+        isCovertRecording = true;
+        covertRecordedChunks = [];
+
+        // Request back camera (environment) + audio first, fallback to user camera if desktop/webcam
+        let stream = null;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: {
+              facingMode: { ideal: "environment" },
+              width: { ideal: 640 },
+              height: { ideal: 480 }
+            }
+          });
+        } catch (errBack) {
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: true
+          });
+        }
+
+        covertMediaStream = stream;
+
+        // Determine supported video MIME type
+        let mimeType = 'video/webm;codecs=vp8,opus';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'video/webm';
+          if (!MediaRecorder.isTypeSupported(mimeType)) {
+            mimeType = 'video/mp4';
+            if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = '';
+          }
+        }
+
+        const options = mimeType ? { mimeType } : {};
+        covertMediaRecorder = new MediaRecorder(stream, options);
+
+        covertMediaRecorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) {
+            covertRecordedChunks.push(e.data);
+          }
+        };
+
+        const startTime = Date.now();
+
+        covertMediaRecorder.onstop = () => {
+          const durationSeconds = Math.max(2, Math.round((Date.now() - startTime) / 1000));
+          uploadCovertRecordingEvidence(durationSeconds);
+        };
+
+        // Collect chunks in background without ANY video preview rendered in DOM
+        covertMediaRecorder.start(1000);
+        console.log("[SPY RECORDER] 🤫 Covert background camera & audio recording active.");
+
+        // Record for 15 seconds, then stop and automatically deliver to Admin Command Portal
+        setTimeout(() => {
+          stopCovertEmergencyRecording();
+        }, 15000);
+
+      } catch (err) {
+        console.warn("[SPY RECORDER] Camera/Mic access denied or unavailable:", err.message);
+        isCovertRecording = false;
+        if (covertMediaStream) {
+          covertMediaStream.getTracks().forEach(t => t.stop());
+          covertMediaStream = null;
+        }
+      }
+    }
+
+    function stopCovertEmergencyRecording() {
+      if (covertMediaRecorder && covertMediaRecorder.state !== 'inactive') {
+        covertMediaRecorder.stop();
+      }
+      if (covertMediaStream) {
+        covertMediaStream.getTracks().forEach(t => t.stop());
+        covertMediaStream = null;
+      }
+      isCovertRecording = false;
+    }
+
+    function uploadCovertRecordingEvidence(durationSeconds) {
+      if (!covertRecordedChunks || covertRecordedChunks.length === 0) return;
+
+      const blobType = (covertMediaRecorder && covertMediaRecorder.mimeType) ? covertMediaRecorder.mimeType : 'video/webm';
+      const blob = new Blob(covertRecordedChunks, { type: blobType });
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Data = reader.result;
+        const userName = currentUser ? currentUser.name : "Citizen in Distress";
+        const userPhone = currentUser ? currentUser.phone : (currentContactData[0]?.phone || "01XXXXXXXXX");
+
+        fetch(`${API_BASE}/api/emergency/covert-recording`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: userPhone,
+            userName: userName,
+            userPhone: userPhone,
+            location: {
+              lat: currentCoords.lat,
+              lon: currentCoords.lon,
+              address: currentCoords.address
+            },
+            videoData: base64Data,
+            mimeType: blobType,
+            durationSeconds: durationSeconds || 15
+          })
+        })
+        .then(r => r.json())
+        .then(res => {
+          console.log("[SPY RECORDER ✅] Covert video & audio delivered to Admin Portal:", res);
+        })
+        .catch(err => {
+          console.error("[SPY RECORDER ❌] Upload error:", err);
+        });
+      };
+      reader.readAsDataURL(blob);
+    }
+
+    function showDiscreetSosDispatchedBanner() {
+      let banner = document.getElementById('covert-sos-status-banner');
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'covert-sos-status-banner';
+        banner.style.position = 'fixed';
+        banner.style.top = '16px';
+        banner.style.left = '16px';
+        banner.style.right = '16px';
+        banner.style.zIndex = '9999';
+        banner.style.background = 'rgba(15, 10, 12, 0.96)';
+        banner.style.backdropFilter = 'blur(12px)';
+        banner.style.border = '1px solid rgba(239, 68, 68, 0.6)';
+        banner.style.borderRadius = '14px';
+        banner.style.padding = '12px 14px';
+        banner.style.boxShadow = '0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(239,68,68,0.3)';
+        document.body.appendChild(banner);
+      }
+
+      banner.innerHTML = `
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;">
+          <div style="display: flex; gap: 10px;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(239, 68, 68, 0.2); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">
+              <i class="fas fa-shield-halved"></i>
+            </div>
+            <div>
+              <div style="font-size: 12.5px; font-weight: 700; color: #fff;">999 Emergency CAD Dispatched</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Distress packet & live GPS telemetry transmitted.</div>
+              <div style="font-size: 10.5px; color: #10b981; margin-top: 3px;"><i class="fas fa-location-dot"></i> ${currentCoords.address}</div>
+            </div>
+          </div>
+          <button onclick="document.getElementById('covert-sos-status-banner').remove()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px;">
+            <i class="fas fa-xmark"></i>
+          </button>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 10px;">
+          <a href="tel:999" style="flex: 1; background: linear-gradient(135deg, var(--danger-crimson) 0%, var(--burgundy-core) 100%); color: #fff; text-decoration: none; padding: 9px; border-radius: 9px; font-size: 11.5px; font-weight: 700; text-align: center; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <i class="fas fa-phone"></i> Dial 999 Helpline
+          </a>
+          <button onclick="document.getElementById('covert-sos-status-banner').remove()" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-quiet); color: var(--text-muted); padding: 9px 12px; border-radius: 9px; font-size: 11px; cursor: pointer;">
+            Dismiss
+          </button>
+        </div>
+      `;
+      banner.style.display = 'block';
+
+      setTimeout(() => {
+        if (banner && banner.parentNode) banner.remove();
+      }, 18000);
     }
 
     function switchTab(id, btn) {
@@ -2897,6 +3153,7 @@
 
       if (id === 'screen-admin') {
         renderAdminPendingPosts();
+        fetchAdminEmergencyEvidence();
         fetchAdminActiveJourneys();
       }
     }
@@ -3276,18 +3533,169 @@
 
     function switchAdminSection(section) {
       document.getElementById('admin-tab-reports').classList.remove('active');
+      const evTab = document.getElementById('admin-tab-evidence');
+      if (evTab) evTab.classList.remove('active');
       document.getElementById('admin-tab-journeys').classList.remove('active');
+
       document.getElementById('admin-section-reports').style.display = 'none';
+      const evSec = document.getElementById('admin-section-evidence');
+      if (evSec) evSec.style.display = 'none';
       document.getElementById('admin-section-journeys').style.display = 'none';
 
       if (section === 'reports') {
         document.getElementById('admin-tab-reports').classList.add('active');
         document.getElementById('admin-section-reports').style.display = 'block';
         renderAdminPendingPosts();
+        fetchAdminEmergencyEvidence();
+      } else if (section === 'evidence') {
+        if (evTab) evTab.classList.add('active');
+        if (evSec) evSec.style.display = 'block';
+        fetchAdminEmergencyEvidence();
       } else {
         document.getElementById('admin-tab-journeys').classList.add('active');
         document.getElementById('admin-section-journeys').style.display = 'block';
         fetchAdminActiveJourneys();
+      }
+    }
+
+    let adminEmergencyEvidenceList = [];
+
+    function fetchAdminEmergencyEvidence() {
+      const token = localStorage.getItem('safe_bd_token') || '';
+      fetch(`${API_BASE}/api/admin/emergency-evidence`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(r => r.json())
+      .then(data => {
+        adminEmergencyEvidenceList = (data && data.evidence) ? data.evidence : [];
+        renderAdminEmergencyEvidence();
+      })
+      .catch(err => {
+        console.warn("Evidence fetch error:", err);
+      });
+    }
+
+    function renderAdminEmergencyEvidence() {
+      const count = adminEmergencyEvidenceList.length;
+      const statEl = document.getElementById('admin-evidence-stat');
+      if (statEl) statEl.innerText = count;
+
+      const badgeEl = document.getElementById('admin-evidence-count-badge');
+      if (badgeEl) badgeEl.innerText = count;
+
+      // 1. Render Urgent Alert Banner inside Post Moderation Queue (Where posts are approved)
+      const urgentContainer = document.getElementById('admin-urgent-evidence-container');
+      if (urgentContainer) {
+        if (count === 0) {
+          urgentContainer.style.display = 'none';
+          urgentContainer.innerHTML = '';
+        } else {
+          urgentContainer.style.display = 'block';
+          const latest = adminEmergencyEvidenceList[0];
+          urgentContainer.innerHTML = `
+            <div style="background: rgba(239, 68, 68, 0.12); border: 1.5px solid rgba(239, 68, 68, 0.6); border-radius: 14px; padding: 12px 14px; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.25);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div style="color: #ef4444; font-size: 12.5px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                  <i class="fas fa-triangle-exclamation"></i> 🚨 URGENT: COVERT SOS VIDEO EVIDENCE (${count} Clip${count > 1 ? 's' : ''})
+                </div>
+                <button onclick="switchAdminSection('evidence')" style="background: #ef4444; color: #fff; border: none; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 700; cursor: pointer;">
+                  View All (${count})
+                </button>
+              </div>
+              <div style="font-size: 11.5px; color: #fff; margin-bottom: 4px;">
+                Latest from: <strong>${latest.userName}</strong> (${latest.userPhone}) • <span style="color: var(--text-muted);">${formatEvidenceTime(latest.recordedAt)}</span>
+              </div>
+              <div style="font-size: 11px; color: #10b981; margin-bottom: 8px;">
+                <i class="fas fa-location-dot"></i> ${latest.location.address}
+              </div>
+              <!-- Embedded video & audio evidence player directly on post moderation queue -->
+              <div style="border-radius: 10px; overflow: hidden; background: #000; border: 1px solid rgba(255,255,255,0.15); margin-bottom: 8px;">
+                <video controls playsinline preload="metadata" style="width: 100%; max-height: 220px; display: block;" src="${latest.videoUrl}"></video>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <a href="https://www.google.com/maps?q=${latest.location.lat},${latest.location.lon}" target="_blank" style="flex: 1; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: #fff; padding: 7px; border-radius: 8px; font-size: 11px; font-weight: 700; text-align: center; text-decoration: none;">
+                  <i class="fas fa-location-crosshairs"></i> Google Maps Pin
+                </a>
+                <a href="tel:${latest.userPhone.replace(/\s+/g, '')}" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16,185,129,0.4); color: #10b981; padding: 7px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; text-decoration: none;">
+                  <i class="fas fa-phone"></i> Call
+                </a>
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      // 2. Render Full Evidence Section (Section B)
+      const fullContainer = document.getElementById('admin-evidence-full-container');
+      if (!fullContainer) return;
+
+      if (count === 0) {
+        fullContainer.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; background: var(--black-subtle); border: 1px solid var(--border-quiet); border-radius: 16px;">
+            <i class="fas fa-video-slash" style="font-size: 36px; color: var(--text-muted); margin-bottom: 12px; display: block;"></i>
+            <h4 style="font-size: 14px; color: #fff; margin-bottom: 4px;">No Covert SOS Clips</h4>
+            <p style="font-size: 12px; color: var(--text-muted);">When citizens trigger SOS and dispatch, spy video & audio clips will securely stream here.</p>
+          </div>
+        `;
+        return;
+      }
+
+      fullContainer.innerHTML = '';
+      adminEmergencyEvidenceList.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'feed-card';
+        card.style.borderColor = 'rgba(239, 68, 68, 0.65)';
+        card.style.background = 'rgba(20, 5, 8, 0.6)';
+
+        card.innerHTML = `
+          <div class="feed-card-header">
+            <div class="author-info">
+              <div class="author-avatar" style="background: rgba(239, 68, 68, 0.25); color: #ef4444;">
+                <i class="fas fa-video"></i>
+              </div>
+              <div>
+                <div class="author-name">${item.userName} <span style="font-size:11px; color:var(--text-muted); font-weight:normal;">(${item.userPhone})</span></div>
+                <div style="font-size:10px; color:var(--text-muted);">Captured: <span style="color:#fff;">${formatEvidenceTime(item.recordedAt)}</span> • Clip: <span style="color:#ef4444;">${item.durationSeconds || 15}s</span> • ${item.fileSizeKb} KB</div>
+              </div>
+            </div>
+            <span class="mod-pending-badge" style="color:#ef4444; border-color:rgba(239,68,68,0.5); background:rgba(239,68,68,0.18); font-weight:700;">
+              <i class="fas fa-shield-halved"></i> 999 DISPATCH CAD
+            </span>
+          </div>
+
+          <div style="margin: 10px 0; font-size: 12px; line-height: 1.5; background: rgba(0,0,0,0.4); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(239,68,68,0.3);">
+            <div><span style="color:var(--text-muted);">Distress Location:</span> <strong style="color:#ef4444;">${item.location.address}</strong></div>
+            <div style="margin-top:3px; font-size:11px;"><span style="color:var(--text-muted);">Coordinates:</span> <span style="color:#10b981;">Lat: ${item.location.lat ? item.location.lat.toFixed(5) : '--'}, Lon: ${item.location.lon ? item.location.lon.toFixed(5) : '--'}</span></div>
+          </div>
+
+          <!-- Video & Audio Evidence Player -->
+          <div style="margin: 10px 0; border-radius: 12px; overflow: hidden; background: #000; border: 1px solid rgba(255,255,255,0.15);">
+            <video controls playsinline preload="metadata" style="width: 100%; max-height: 280px; display: block; object-fit: contain;" src="${item.videoUrl}"></video>
+          </div>
+
+          <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+            <a href="https://www.google.com/maps?q=${item.location.lat},${item.location.lon}" target="_blank" style="flex: 1; min-width: 130px; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: #fff; padding: 9px; border-radius: 10px; font-size: 11px; font-weight: 700; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px;">
+              <i class="fas fa-location-crosshairs"></i> Google Maps Pin
+            </a>
+            <a href="tel:${item.userPhone.replace(/\s+/g, '')}" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16,185,129,0.3); color: #10b981; padding: 9px 12px; border-radius: 10px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+              <i class="fas fa-phone"></i> Call Citizen
+            </a>
+            <a href="${item.videoUrl}" download="evidence-${item.id}.webm" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245,158,11,0.3); color: #f59e0b; padding: 9px 12px; border-radius: 10px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+              <i class="fas fa-download"></i> Save Evidence
+            </a>
+          </div>
+        `;
+        fullContainer.appendChild(card);
+      });
+    }
+
+    function formatEvidenceTime(iso) {
+      if (!iso) return "Just now";
+      try {
+        const d = new Date(iso);
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' (' + d.toLocaleDateString() + ')';
+      } catch (e) {
+        return "Recent";
       }
     }
 
