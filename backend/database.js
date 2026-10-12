@@ -137,6 +137,9 @@ function initDatabase() {
   // Ensure Chief Administrator account is always seeded and verified
   seedChiefAdmin();
 
+  // Ensure Official Founder Announcement Post by SAAD RIZWAN is seeded & verified live
+  seedFounderPost();
+
   // Commit initial state
   persistToDisk();
 }
@@ -149,7 +152,7 @@ function getDefaultUserContacts() {
   ];
 }
 
-// Pre-seed Chief Administrator Account
+// Pre-seed Chief Administrator & Founder Account
 function seedChiefAdmin() {
   const adminPhone = '1316750712';
   const adminPassword = 'naxbagmo24';
@@ -162,7 +165,9 @@ function seedChiefAdmin() {
       id: 'usr_admin_1316750712',
       phone: adminPhone,
       displayPhone: '+880 1316-750712',
-      name: 'Chief Administrator',
+      name: 'SAAD RIZWAN',
+      role: 'Founder & CEO, SAFE bd',
+      isFounder: true,
       salt: salt,
       passwordHash: hash,
       nidVerified: true,
@@ -174,12 +179,71 @@ function seedChiefAdmin() {
       loginCount: 0,
       contacts: getDefaultUserContacts()
     };
-    console.log('[🛡️ ADMIN ACCOUNT SEEDED] Chief Administrator (+880 1316-750712) ready.');
+    console.log('[🛡️ ADMIN ACCOUNT SEEDED] SAAD RIZWAN (Founder & CEO) (+880 1316-750712) ready.');
   } else {
-    // Keep admin privileges guaranteed
+    // Keep founder and admin privileges guaranteed
+    dbState.users[adminPhone].name = 'SAAD RIZWAN';
+    dbState.users[adminPhone].role = 'Founder & CEO, SAFE bd';
+    dbState.users[adminPhone].isFounder = true;
     dbState.users[adminPhone].isAdmin = true;
     if (!dbState.users[adminPhone].contacts || !Array.isArray(dbState.users[adminPhone].contacts)) {
       dbState.users[adminPhone].contacts = getDefaultUserContacts();
+    }
+  }
+}
+
+// Pre-seed Official Announcement Post by SAAD RIZWAN (Founder & CEO)
+function seedFounderPost() {
+  const founderPostId = 'post_saad_rizwan_founder_01';
+  const founderContent = `In an emergency, every second counts. That is why I founded SAFE bd—a national digital safety and emergency response ecosystem designed to bridge the gap between citizens and rapid assistance.
+
+SAFE (Safety • Awareness • Fast Response • Emergency Assistance) brings critical tools right to your fingertips:
+
+Instant SOS: A simple, high-priority emergency button to summon help immediately.
+
+Live Location Sharing: Securely alerts your trusted contacts and authorities when you need it most.
+
+Community Awareness: Structured safety reporting and emergency preparedness tools for a safer society.
+
+We are building a future where trusted help is always within reach. Stay tuned for more updates on our journey!
+
+— Saad Rizwan
+
+Founder, SAFE bd.`;
+
+  if (!dbState.posts[founderPostId]) {
+    dbState.posts[founderPostId] = {
+      id: founderPostId,
+      author: "SAAD RIZWAN",
+      authorPhone: "01316750712",
+      authorRole: "Founder & CEO, SAFE bd",
+      isFounder: true,
+      verified: true,
+      type: "official",
+      category: "Official Announcement",
+      content: founderContent,
+      media: null,
+      likes: 142,
+      approved: true,
+      rejected: false,
+      createdAt: new Date().toISOString(),
+      approvedAt: new Date().toISOString(),
+      reviewedBy: "Founder & CEO"
+    };
+    if (!dbState.approvedPostIds.includes(founderPostId)) {
+      dbState.approvedPostIds.unshift(founderPostId);
+    }
+    console.log('[👑 FOUNDER POST SEEDED] Official Announcement by SAAD RIZWAN is verified and live on public feed.');
+  } else {
+    dbState.posts[founderPostId].author = "SAAD RIZWAN";
+    dbState.posts[founderPostId].authorRole = "Founder & CEO, SAFE bd";
+    dbState.posts[founderPostId].isFounder = true;
+    dbState.posts[founderPostId].verified = true;
+    dbState.posts[founderPostId].content = founderContent;
+    dbState.posts[founderPostId].approved = true;
+    dbState.posts[founderPostId].category = "Official Announcement";
+    if (!dbState.approvedPostIds.includes(founderPostId)) {
+      dbState.approvedPostIds.unshift(founderPostId);
     }
   }
 }
