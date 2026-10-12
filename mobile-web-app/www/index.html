@@ -2481,7 +2481,10 @@
       const activeBtn = document.getElementById(`mode-btn-${mode}`);
       if (activeBtn) activeBtn.classList.add('active');
 
-      if (currentDestinationQuery) {
+      const destInput = document.getElementById('walk-destination');
+      const destText = (currentDestinationQuery || (destInput ? destInput.value.trim() : '')).trim();
+      if (destText) {
+        currentDestinationQuery = destText;
         computeLiveGoogleMapsRoute(currentDestinationQuery, selectedDestCoords);
       }
     }
@@ -2551,8 +2554,10 @@
 
     // Live Distance & Travel Mode ETA Calculation from Device GPS to Destination
     function computeLiveGoogleMapsRoute(destQuery, explicitCoords = null) {
+      if (!destQuery || !destQuery.trim()) return;
+      const cleanDest = destQuery.trim();
       const originParam = `${currentCoords.lat},${currentCoords.lon}`;
-      const encodedDest = encodeURIComponent(destQuery);
+      const encodedDest = encodeURIComponent(cleanDest);
       const modeParam = selectedTravelMode === 'driving' ? 'driving' : (selectedTravelMode === 'bicycling' ? 'bicycling' : 'walking');
 
       // Update embedded map with real origin & destination route, opening popup on destination pin (iwloc=B)
@@ -2566,69 +2571,127 @@
         extGmaps.href = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originParam)}&destination=${encodedDest}&travelmode=${modeParam}`;
       }
 
-      // Resolve destination coordinates for realistic distance & duration computation
-      if (explicitCoords && explicitCoords.lat && explicitCoords.lon) {
-        calculateEtaMetrics(currentCoords.lat, currentCoords.lon, explicitCoords.lat, explicitCoords.lon);
-        return;
-      }
-
-      const match = BANGLADESH_LOCATIONS.find(l => l.name.toLowerCase() === destQuery.split(',')[0].trim().toLowerCase());
-      let destLat = match && match.lat ? match.lat : null;
-      let destLon = match && match.lon ? match.lon : null;
-
-      if (destLat && destLon) {
-        calculateEtaMetrics(currentCoords.lat, currentCoords.lon, destLat, destLon);
-      } else {
-        // Fetch coordinates dynamically via backend proxy
-        fetch(`${API_BASE}/api/places/search?q=${encodedDest}`)
-          .then(r => r.json())
-          .then(res => {
-            if (res && res.success && res.results && res.results.length > 0 && res.results[0].lat) {
-              selectedDestCoords = { lat: res.results[0].lat, lon: res.results[0].lon };
-              calculateEtaMetrics(currentCoords.lat, currentCoords.lon, res.results[0].lat, res.results[0].lon);
-            } else {
-              applyEstimatedMetrics(4.2);
-            }
-          })
-          .catch(() => applyEstimatedMetrics(4.2));
-      }
-    }
-
-    function calculateEtaMetrics(lat1, lon1, lat2, lon2) {
-      // Haversine formula for ground distance
-      const R = 6371; // Earth radius in km
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon/2) * Math.sin(dLon/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      const straightKm = R * c;
-      const routeKm = Math.max(0.5, Math.round(straightKm * 1.35 * 10) / 10); // Actual road winding multiplier
-      applyEstimatedMetrics(routeKm);
-    }
-
-    function applyEstimatedMetrics(km) {
-      calculatedRouteDistanceKm = km;
-      let speedKmh = 4.5; // Walking speed
-      let modeName = "Walking";
-
-      if (selectedTravelMode === 'driving') {
-        speedKmh = 22; // Average urban car / CNG speed in Bangladesh traffic
-        modeName = "Car / CNG";
-      } else if (selectedTravelMode === 'bicycling') {
-        speedKmh = 14; // Bike / Motorbike speed
-        modeName = "Bike";
-      }
-
-      calculatedDurationMinutes = Math.max(5, Math.round((km / speedKmh) * 60));
-      
+      // Show immediate loading feedback on estimate banner
       const banner = document.getElementById('route-estimate-banner');
       if (banner) {
         banner.style.display = 'flex';
-        document.getElementById('route-est-distance').innerText = `${km} km • ${modeName}`;
-        document.getElementById('route-est-time').innerText = `ETA ~${calculatedDurationMinutes} mins`;
+        const modeIcon = modeParam === 'driving' ? 'fa-car-side' : (modeParam === 'bicycling' ? 'fa-motorcycle' : 'fa-person-walking');
+        const modeTitle = modeParam === 'driving' ? 'Car / CNG' : (modeParam === 'bicycling' ? 'Bike' : 'Walk');
+        const distEl = document.getElementById('route-est-distance');
+        if (distEl) distEl.innerHTML = `<i class="fas ${modeIcon}" style="color: #10b981;"></i> <span>Fetching live Google Maps ${modeTitle} route...</span>`;
+        const timeEl = document.getElementById('route-est-time');
+        if (timeEl) timeEl.innerText = '-- mins';
       }
+
+      // Resolve destination coordinates
+      let dLat = explicitCoords && explicitCoords.lat ? explicitCoords.lat : (selectedDestCoords && selectedDestCoords.lat ? selectedDestCoords.lat : null);
+      let dLon = explicitCoords && explicitCoords.lon ? explicitCoords.lon : (selectedDestCoords && selectedDestCoords.lon ? selectedDestCoords.lon : null);
+
+      if (!dLat || !dLon) {
+        const match = BANGLADESH_LOCATIONS.find(l => l.name.toLowerCase() === cleanDest.split(',')[0].trim().toLowerCase());
+        if (match && match.lat) {
+          dLat = match.lat;
+          dLon = match.lon;
+          selectedDestCoords = { lat: dLat, lon: dLon };
+        }
+      }
+
+      // Request live routing, road network distance, and BD traffic index from backend
+      const queryParams = new URLSearchParams({
+        originLat: currentCoords.lat,
+        originLon: currentCoords.lon,
+        mode: modeParam,
+        destQuery: cleanDest
+      });
+      if (dLat && dLon) {
+        queryParams.append('destLat', dLat);
+        queryParams.append('destLon', dLon);
+      }
+
+      fetch(`${API_BASE}/api/routing/directions?${queryParams.toString()}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.success) {
+            calculatedRouteDistanceKm = data.distanceKm;
+            calculatedDurationMinutes = data.durationMinutes;
+            if (data.destination && data.destination.lat) {
+              selectedDestCoords = data.destination;
+            }
+
+            if (mapFrame && data.embedUrl) {
+              mapFrame.src = data.embedUrl;
+            }
+            if (extGmaps && data.googleMapsUrl) {
+              extGmaps.href = data.googleMapsUrl;
+            }
+
+            renderRouteEstimateBanner(data);
+          } else {
+            fallbackLocalEta(cleanDest, dLat, dLon, modeParam);
+          }
+        })
+        .catch(err => {
+          console.warn("[ROUTING] Live backend route fetch failed, using realistic fallback:", err);
+          fallbackLocalEta(cleanDest, dLat, dLon, modeParam);
+        });
+    }
+
+    function renderRouteEstimateBanner(data) {
+      const banner = document.getElementById('route-estimate-banner');
+      if (!banner) return;
+      banner.style.display = 'flex';
+
+      const modeIcon = data.mode === 'driving' ? 'fa-car-side' : (data.mode === 'bicycling' ? 'fa-motorcycle' : 'fa-person-walking');
+      const distEl = document.getElementById('route-est-distance');
+      if (distEl) {
+        distEl.innerHTML = `<i class="fas ${modeIcon}" style="color: #10b981; font-size: 13px;"></i> <span style="font-size: 11.5px; color: #e2e8f0;">${data.distanceKm} km • <strong style="color: #fff;">${data.modeLabel}</strong> <span style="font-size: 10px; color: #a1a1aa; margin-left: 3px;">(${data.trafficStatus || 'Live route'})</span></span>`;
+      }
+      const timeEl = document.getElementById('route-est-time');
+      if (timeEl) {
+        timeEl.innerHTML = `<span style="color: #10b981; font-weight: 800; font-size: 12px;">ETA ~${data.durationMinutes} mins</span>`;
+      }
+    }
+
+    function fallbackLocalEta(destQuery, dLat, dLon, modeParam) {
+      let km = 4.2;
+      if (dLat && dLon) {
+        km = computeHaversineKm(currentCoords.lat, currentCoords.lon, dLat, dLon) || 4.2;
+      }
+      calculatedRouteDistanceKm = km;
+
+      const now = new Date();
+      const bdHour = (now.getUTCHours() + 6) % 24;
+      const isPeak = (bdHour >= 8 && bdHour <= 11) || (bdHour >= 16 && bdHour <= 21);
+
+      let modeLabel = "Walk";
+      let durationMins = 0;
+      let trafficStatus = "";
+
+      if (modeParam === 'walking') {
+        modeLabel = "Walk";
+        durationMins = Math.max(3, Math.round((km / 4.5) * 60));
+        trafficStatus = "Pedestrian walkway";
+      } else if (modeParam === 'bicycling') {
+        modeLabel = "Bike";
+        // Motorcycles filter traffic rapidly in BD
+        durationMins = Math.max(3, Math.round((km / 28) * 60));
+        trafficStatus = "Rapid bike transit";
+      } else { // driving (Car / CNG)
+        modeLabel = "Car / CNG";
+        const speed = isPeak ? 15 : 22; // Inverted bug fixed: cars are slowed down by BD traffic
+        durationMins = Math.max(5, Math.round((km / speed) * 60));
+        trafficStatus = isPeak ? "Heavy Dhaka traffic" : "City traffic";
+      }
+
+      calculatedDurationMinutes = durationMins;
+
+      renderRouteEstimateBanner({
+        distanceKm: km,
+        durationMinutes: durationMins,
+        mode: modeParam,
+        modeLabel: modeLabel,
+        trafficStatus: trafficStatus
+      });
     }
 
     document.addEventListener('click', (e) => {
