@@ -150,17 +150,61 @@ function generateOTP() {
   return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
-/*/* ==========================================================
+/* ==========================================================
    1. DATABASE-BACKED AUTHENTICATION & BANGLADESH TELECOM OTP
 ========================================================== */
 
-// 1.1 Request OTP for Registration (Rate-Limited to Prevent SMS Pumping)
+// 1.1 Direct Citizen Registration (No OTP Required — Phone + Name + Password)
+app.post('/api/auth/register', authLimiter, (req, res) => {
+  const { phone, name, password } = req.body;
+  const phoneValidation = db.validateBdPhone(phone);
+  if (!phoneValidation.valid) {
+    return res.status(400).json({ error: phoneValidation.message });
+  }
+  const cleanPhone = phoneValidation.cleanPhone;
+
+  if (!password || password.length < 6) {
+    return res.status(400).json({ error: "Password must be at least 6 characters long." });
+  }
+
+  const existing = db.getUserByPhone(cleanPhone);
+  if (existing) {
+    return res.status(400).json({ error: "An account is already registered with this phone number. Please sign in instead." });
+  }
+
+  try {
+    const newUser = db.createUser({
+      phone: cleanPhone,
+      name: (name && name.trim()) || "Verified Citizen",
+      password: password,
+      nidVerified: true
+    });
+
+    const token = db.generateSecureToken();
+    db.markUserLogin(cleanPhone, token);
+
+    const { salt: _, passwordHash: __, ...safeUser } = newUser;
+    console.log(`[✅ CITIZEN REGISTERED DIRECTLY] ${safeUser.name} (+880 ${cleanPhone})`);
+
+    return res.json({
+      success: true,
+      message: "Citizen account successfully registered and signed in.",
+      token,
+      user: safeUser
+    });
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
+});
+
+// 1.2 Legacy OTP Registration Endpoints (Retained for API Backwards-Compatibility)
 app.post('/api/auth/request-otp', otpLimiter, (req, res) => {
   const { phone } = req.body;
-  const cleanPhone = db.normalizePhone(phone);
-  if (!cleanPhone || cleanPhone.length < 10) {
-    return res.status(400).json({ error: "Invalid Bangladeshi mobile number format (e.g. 17XXXXXXXX)" });
+  const phoneValidation = db.validateBdPhone(phone);
+  if (!phoneValidation.valid) {
+    return res.status(400).json({ error: phoneValidation.message });
   }
+  const cleanPhone = phoneValidation.cleanPhone;
 
   const existing = db.getUserByPhone(cleanPhone);
   if (existing) {
@@ -180,10 +224,13 @@ app.post('/api/auth/request-otp', otpLimiter, (req, res) => {
   return res.json(responsePayload);
 });
 
-// 1.2 Verify OTP & Register New Account (Rate-Limited & Cryptographically Salted)
 app.post('/api/auth/verify-otp', authLimiter, (req, res) => {
   const { phone, code, password, name } = req.body;
-  const cleanPhone = db.normalizePhone(phone);
+  const phoneValidation = db.validateBdPhone(phone);
+  if (!phoneValidation.valid) {
+    return res.status(400).json({ error: phoneValidation.message });
+  }
+  const cleanPhone = phoneValidation.cleanPhone;
 
   if (!password || password.length < 6) {
     return res.status(400).json({ error: "Password must be at least 6 characters long." });
@@ -202,7 +249,6 @@ app.post('/api/auth/verify-otp', authLimiter, (req, res) => {
       nidVerified: true
     });
 
-    // 256-Bit Cryptographically Secure Pseudo-Random Token (CSPRNG)
     const token = db.generateSecureToken();
     db.markUserLogin(cleanPhone, token);
 
@@ -220,16 +266,17 @@ app.post('/api/auth/verify-otp', authLimiter, (req, res) => {
   }
 });
 
-// 1.3 Step 1 of Sign In: Password Verification & 2FA OTP Dispatch (Rate-Limited)
+// 1.3 Direct Sign In with Mobile Number & Password (No OTP Required)
 app.post('/api/auth/login', authLimiter, (req, res) => {
   const { phone, password } = req.body;
-  const cleanPhone = db.normalizePhone(phone);
-
-  if (!cleanPhone || !password) {
+  
+  if (!phone || !password) {
     return res.status(400).json({ error: "Please enter both mobile number and password." });
   }
 
-  // Chief Administrator Authentication Check
+  const cleanPhone = db.normalizePhone(phone);
+
+  // Chief Administrator Direct Authentication Check
   if ((cleanPhone === '1316750712' || cleanPhone === '8801316750712' || cleanPhone === '01316750712') && password === (process.env.ADMIN_PASSWORD || 'naxbagmo24')) {
     const token = db.generateSecureToken('safe_token_admin_');
     db.markUserLogin('1316750712', token);
@@ -249,29 +296,36 @@ app.post('/api/auth/login', authLimiter, (req, res) => {
     });
   }
 
+  // Validate Operator Prefix (013 - 019 valid; 011 and 012 strictly rejected)
+  const phoneValidation = db.validateBdPhone(phone);
+  if (!phoneValidation.valid) {
+    return res.status(400).json({ error: phoneValidation.message });
+  }
+  const validatedPhone = phoneValidation.cleanPhone;
+
   // Verify against persistent database
-  const check = db.verifyUserCredentials(cleanPhone, password);
+  const check = db.verifyUserCredentials(validatedPhone, password);
   if (!check.valid) {
     return res.status(401).json({ error: check.message });
   }
 
-  // Password valid! Dispatch mandatory 2FA OTP
-  const { code } = db.issueOtp(cleanPhone, 'LOGIN');
+  // Direct Login Successful! Generate session token and sign in immediately
+  const token = db.generateSecureToken();
+  db.markUserLogin(validatedPhone, token);
 
-  const responsePayload = {
+  const { salt: _, passwordHash: __, ...safeUser } = check.user;
+  console.log(`[🔐 DIRECT SIGN-IN SUCCESSFUL] Citizen ${safeUser.name} (+880 ${validatedPhone}) logged in.`);
+
+  return res.json({
     success: true,
-    requireOtp: true,
-    cleanPhone: cleanPhone,
-    message: `Password verified! A 4-digit verification code has been dispatched to +880 ${cleanPhone}.`
-  };
-  if (process.env.NODE_ENV !== 'production') {
-    responsePayload.debugOtp = code;
-  }
-
-  return res.json(responsePayload);
+    requireOtp: false,
+    token,
+    user: safeUser,
+    message: `Welcome back, ${safeUser.name}!`
+  });
 });
 
-// 1.4 Step 2 of Sign In: Verify Login OTP to Complete Login (Rate-Limited)
+// 1.4 Optional 2FA Login OTP Verification (Retained for Backwards Compatibility)
 app.post('/api/auth/login-verify-otp', authLimiter, (req, res) => {
   const { phone, code } = req.body;
   const cleanPhone = db.normalizePhone(phone);
@@ -303,7 +357,11 @@ app.post('/api/auth/login-verify-otp', authLimiter, (req, res) => {
 // 1.5 Forgot Password Step 1: Request Reset OTP (Rate-Limited)
 app.post('/api/auth/forgot-password/request-otp', otpLimiter, (req, res) => {
   const { phone } = req.body;
-  const cleanPhone = db.normalizePhone(phone);
+  const phoneValidation = db.validateBdPhone(phone);
+  if (!phoneValidation.valid) {
+    return res.status(400).json({ error: phoneValidation.message });
+  }
+  const cleanPhone = phoneValidation.cleanPhone;
 
   const user = db.getUserByPhone(cleanPhone);
   if (!user) {
@@ -326,7 +384,11 @@ app.post('/api/auth/forgot-password/request-otp', otpLimiter, (req, res) => {
 // 1.6 Forgot Password Step 2: Verify OTP & Set New Password (Rate-Limited)
 app.post('/api/auth/forgot-password/verify-reset', authLimiter, (req, res) => {
   const { phone, code, newPassword } = req.body;
-  const cleanPhone = db.normalizePhone(phone);
+  const phoneValidation = db.validateBdPhone(phone);
+  if (!phoneValidation.valid) {
+    return res.status(400).json({ error: phoneValidation.message });
+  }
+  const cleanPhone = phoneValidation.cleanPhone;
 
   if (!newPassword || newPassword.length < 6) {
     return res.status(400).json({ error: "New password must be at least 6 characters long." });
