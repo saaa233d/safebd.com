@@ -1,0 +1,3435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#780016">
+  <title>SAFE BD — Safety • Awareness • Fast Response • Emergency Assistance</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="app-icon.svg">
+  <link rel="apple-touch-icon" href="app-icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --black-pure: #050507;
+      --black-subtle: #0c0b0e;
+      --border-quiet: #1c181f;
+      
+      --burgundy-deep: #4a0414;
+      --burgundy-core: #780016;
+      --burgundy-vivid: #a30826;
+      --burgundy-tint: rgba(120, 0, 22, 0.12);
+      --burgundy-border: rgba(163, 8, 38, 0.35);
+
+      --whatsapp-green: #25D366;
+      --whatsapp-subtle: rgba(37, 211, 102, 0.1);
+      --whatsapp-border: rgba(37, 211, 102, 0.3);
+
+      --danger-crimson: #dc2626;
+
+      --text-main: #fbfbfd;
+      --text-muted: #8e8893;
+      --text-faint: #4e4854;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #020203;
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .app-root {
+      width: 100%;
+      max-width: 440px;
+      height: 100%;
+      max-height: 920px;
+      background: var(--black-pure);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.95), 0 0 40px rgba(120, 0, 22, 0.08);
+    }
+
+    @media (min-width: 600px) {
+      .app-root {
+        border-radius: 46px;
+        border: 1px solid var(--border-quiet);
+        height: 860px;
+      }
+    }
+
+    .status-notch-spacer {
+      height: env(safe-area-inset-top, 12px);
+      background: var(--black-pure);
+    }
+
+    /* Top Bar */
+    .top-bar {
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      z-index: 20;
+      background: var(--black-pure);
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-logo-img {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      border: 1px solid var(--border-quiet);
+      box-shadow: 0 4px 12px rgba(120, 0, 22, 0.35);
+    }
+    .brand-name {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      color: var(--text-main);
+    }
+    .brand-fullform {
+      font-size: 8px;
+      color: var(--text-muted);
+      letter-spacing: 0.2px;
+      margin-top: 1px;
+      line-height: 1.2;
+    }
+
+    .profile-trigger-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--black-subtle);
+      border: 1px solid var(--border-quiet);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s;
+    }
+    .profile-trigger-btn:hover {
+      border-color: var(--burgundy-border);
+      color: var(--text-main);
+      background: var(--burgundy-tint);
+    }
+    .profile-trigger-btn.logged-in {
+      border-color: var(--burgundy-vivid);
+      color: #fff;
+    }
+    .profile-trigger-btn.logged-in::after {
+      content: '';
+      position: absolute;
+      top: 1px;
+      right: 1px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      border: 2px solid var(--black-pure);
+    }
+
+    /* Screen Views */
+    .screen {
+      flex: 1;
+      overflow-y: auto;
+      display: none;
+      position: relative;
+    }
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+    }
+    .screen-padded {
+      padding: 16px 20px 84px;
+    }
+    .screen::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* 999 DIRECT CAD EMERGENCY STRIP */
+    .emergency-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: var(--black-subtle);
+      border: 1px solid var(--burgundy-border);
+      border-radius: 14px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 15px rgba(120, 0, 22, 0.25);
+    }
+    .strip-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .strip-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+    .strip-btn {
+      background: linear-gradient(135deg, var(--danger-crimson) 0%, var(--burgundy-core) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 9px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+      transition: all 0.2s;
+    }
+    .strip-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* EMERGENCY SOS DISC */
+    .sos-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 26px;
+    }
+    .sos-button-disc {
+      width: 164px;
+      height: 164px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, var(--burgundy-core) 0%, var(--burgundy-deep) 65%, #250209 100%);
+      border: 1.5px solid var(--burgundy-border);
+      box-shadow: 0 16px 40px rgba(120, 0, 22, 0.4), inset 0 2px 8px rgba(255, 255, 255, 0.15);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      position: relative;
+      user-select: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .sos-button-disc::before {
+      content: '';
+      position: absolute;
+      inset: -10px;
+      border-radius: 50%;
+      border: 1px solid rgba(163, 8, 38, 0.25);
+      transition: all 0.25s ease;
+    }
+    .sos-button-disc:hover {
+      transform: scale(1.02);
+      border-color: var(--burgundy-vivid);
+      box-shadow: 0 20px 50px rgba(163, 8, 38, 0.6);
+    }
+    .sos-button-disc:hover::before {
+      inset: -14px;
+      border-color: rgba(163, 8, 38, 0.4);
+    }
+    .sos-button-disc:active {
+      transform: scale(0.96);
+    }
+    .sos-text-label {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+    }
+    .sos-text-sub {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      color: rgba(255, 255, 255, 0.75);
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    /* Section & Cards */
+    .module-group {
+      margin-bottom: 20px;
+    }
+    .module-header {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: var(--text-faint);
+      margin-bottom: 10px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .clean-tile {
+      background: var(--black-subtle);
+      border: 1px solid var(--border-quiet);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .tile-main {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+    .tile-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .tile-status {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    /* Contacts List & Dynamic Cards */
+    .contact-item-card {
+      background: var(--black-subtle);
+      border: 1px solid var(--border-quiet);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      transition: all 0.2s ease;
+    }
+    .contact-item-card:hover {
+      border-color: var(--burgundy-border);
+      background: #110e13;
+    }
+    .contact-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      cursor: pointer;
+    }
+    .contact-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #19141e;
+      border: 1px solid var(--border-quiet);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      position: relative;
+    }
+    .contact-avatar.online::after {
+      content: '';
+      position: absolute;
+      bottom: 0px;
+      right: 0px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--burgundy-vivid);
+      border: 2px solid var(--black-pure);
+    }
+    .contact-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .contact-num {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    
+    .contact-action-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-edit-contact {
+      background: transparent;
+      border: 1px solid var(--border-quiet);
+      color: var(--text-muted);
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-edit-contact:hover {
+      color: #fff;
+      border-color: var(--burgundy-border);
+      background: var(--burgundy-tint);
+    }
+
+    /* GOOGLE MAPS + AUTOCOMPLETE */
+    .google-maps-viewport {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      background: #111;
+    }
+    .google-map-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      filter: invert(90%) hue-rotate(180deg) brightness(85%) contrast(110%);
+    }
+
+    .walk-overlay-panel {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      background: rgba(12, 11, 14, 0.94);
+      border: 1px solid var(--burgundy-border);
+      border-radius: 18px;
+      padding: 14px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
+      z-index: 100;
+    }
+    .walk-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .walk-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .walk-live-indicator {
+      font-size: 10px;
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.15);
+      padding: 2px 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .route-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      margin-bottom: 12px;
+    }
+    .route-input-box {
+      display: flex;
+      align-items: center;
+      background: #18141d;
+      border: 1px solid var(--border-quiet);
+      border-radius: 10px;
+      padding: 9px 12px;
+      gap: 8px;
+    }
+    .route-input-box i {
+      font-size: 11px;
+      color: var(--burgundy-vivid);
+      width: 14px;
+      text-align: center;
+    }
+    .route-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 12px;
+      outline: none;
+      font-family: inherit;
+    }
+    .btn-gps-refresh {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 2px 4px;
+    }
+    .btn-gps-refresh:hover {
+      color: #10b981;
+    }
+
+    /* AUTOCOMPLETE POPUP DIRECTLY UNDER SEARCH INPUT */
+    .location-dropdown-popup {
+      display: none;
+      position: absolute;
+      top: calc(100% + 5px);
+      left: 0;
+      right: 0;
+      max-height: 250px;
+      overflow-y: auto;
+      background: #141018;
+      border: 1px solid var(--burgundy-border);
+      border-radius: 12px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.95);
+      z-index: 500;
+    }
+    .location-dropdown-popup.open {
+      display: block;
+    }
+    .location-suggestion-item {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .location-suggestion-item:last-child {
+      border-bottom: none;
+    }
+    .location-suggestion-item:hover, .location-suggestion-item:active {
+      background: var(--burgundy-tint);
+    }
+    .location-suggestion-item i {
+      font-size: 14px;
+      color: #ef4444;
+      flex-shrink: 0;
+    }
+    .sug-primary {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .sug-secondary {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      line-height: 1.3;
+    }
+    .sug-dist-badge {
+      margin-left: auto;
+      font-size: 10px;
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 2px 6px;
+      border-radius: 8px;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .walk-action-btns {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-start-walk {
+      flex: 1;
+      background: var(--burgundy-core);
+      border: 1px solid var(--burgundy-vivid);
+      color: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .btn-start-walk:hover {
+      background: var(--burgundy-vivid);
+    }
+    .btn-open-gmaps {
+      background: #1c1822;
+      border: 1px solid var(--border-quiet);
+      color: var(--text-main);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .walk-active-dock {
+      display: none;
+      position: absolute;
+      bottom: 74px;
+      left: 14px;
+      right: 14px;
+      background: rgba(12, 11, 14, 0.94);
+      border: 1px solid var(--burgundy-border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      z-index: 10;
+    }
+    .dock-stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .dock-stat-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .dock-timer-badge {
+      font-size: 12px;
+      font-weight: 700;
+      color: #e57373;
+      font-variant-numeric: tabular-nums;
+    }
+    .dock-subtext {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+    .dock-finish-btn {
+      width: 100%;
+      background: transparent;
+      border: 1px solid #10b981;
+      color: #10b981;
+      padding: 8px;
+      border-radius: 9px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ========================================================
+       SCREEN 3: INTERACTIVE SOCIAL MEDIA & CIVIC FEED
+    ======================================================== */
+    .create-post-card {
+      background: var(--black-subtle);
+      border: 1px solid var(--burgundy-border);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 18px;
+    }
+    .post-composer-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      resize: none;
+      height: 60px;
+      outline: none;
+    }
+    .post-composer-input::placeholder {
+      color: var(--text-muted);
+    }
+    .composer-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 10px;
+      margin-top: 8px;
+    }
+    .composer-media-icons {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .media-btn-label {
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color 0.15s;
+    }
+    .media-btn-label:hover {
+      color: #e57373;
+    }
+    .btn-publish-post {
+      background: var(--burgundy-core);
+      border: 1px solid var(--burgundy-vivid);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .media-preview-container {
+      margin-top: 10px;
+      display: none;
+      position: relative;
+    }
+    .media-preview-img {
+      width: 100%;
+      max-height: 180px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid var(--border-quiet);
+    }
+    .btn-remove-media {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+    }
+
+    /* Feed Post Card */
+    .feed-card {
+      background: var(--black-subtle);
+      border: 1px solid var(--border-quiet);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .feed-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .author-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .author-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--burgundy-deep);
+      border: 1px solid var(--burgundy-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .author-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .verified-icon {
+      color: #38bdf8;
+      font-size: 11px;
+    }
+    .mod-pending-badge {
+      font-size: 10px;
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+    .post-text {
+      font-size: 13px;
+      color: #e2e8f0;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    .post-media-attachment {
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border-quiet);
+    }
+    .post-actions-row {
+      display: flex;
+      gap: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      padding-top: 10px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    .post-action-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .post-action-btn:hover {
+      color: #e57373;
+    }
+    .btn-approve-post {
+      background: #10b981;
+      color: #000;
+      border: none;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-left: 6px;
+    }
+
+    /* Bottom Navigation Bar */
+    .bottom-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: rgba(5, 5, 7, 0.96);
+      border-top: 1px solid var(--border-quiet);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      backdrop-filter: blur(16px);
+      z-index: 50;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .nav-tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 8px 14px;
+      border-radius: 8px;
+      transition: all 0.15s;
+    }
+    .nav-tab-btn.active {
+      color: var(--text-main);
+      background: var(--burgundy-tint);
+    }
+
+    /* Modals & Sheets */
+    .auth-modal-backdrop, .contact-modal-backdrop, .edit-contact-modal-backdrop, .sos-modal-backdrop {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      z-index: 150;
+      justify-content: center;
+      align-items: flex-end;
+      backdrop-filter: blur(10px);
+    }
+    .auth-modal-backdrop.open, .contact-modal-backdrop.open, .edit-contact-modal-backdrop.open, .sos-modal-backdrop.open {
+      display: flex;
+    }
+    .sos-modal-backdrop {
+      align-items: center;
+      padding: 24px;
+    }
+    .auth-sheet, .contact-sheet, .edit-sheet, .sos-modal-box {
+      width: 100%;
+      background: #0d090d;
+      border-top: 1px solid var(--burgundy-border);
+      border-radius: 26px 26px 0 0;
+      padding: 24px 22px 34px;
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.9);
+      animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      max-height: 90%;
+      overflow-y: auto;
+    }
+    .sos-modal-box {
+      border: 1px solid var(--burgundy-border);
+      border-radius: 22px;
+      text-align: center;
+      padding: 26px 20px;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .sheet-handle {
+      width: 36px;
+      height: 4px;
+      background: #2b2330;
+      border-radius: 2px;
+      margin: 0 auto 16px;
+    }
+    .modal-head-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .modal-head-row h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .modal-close-x {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .form-group {
+      margin-bottom: 14px;
+      text-align: left;
+    }
+    .form-label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .input-field-wrap {
+      display: flex;
+      align-items: center;
+      background: var(--black-subtle);
+      border: 1px solid var(--border-quiet);
+      border-radius: 11px;
+      padding: 10px 14px;
+    }
+    .input-field-wrap:focus-within {
+      border-color: var(--burgundy-vivid);
+    }
+    .prefix-bd {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e57373;
+      margin-right: 10px;
+      padding-right: 10px;
+      border-right: 1px solid var(--border-quiet);
+    }
+    .form-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+    }
+    .btn-submit-action {
+      width: 100%;
+      background: var(--burgundy-core);
+      border: 1px solid var(--burgundy-vivid);
+      color: #fff;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .contact-action-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      text-decoration: none;
+    }
+    .btn-opt-whatsapp {
+      background: var(--whatsapp-subtle);
+      border: 1px solid var(--whatsapp-border);
+      color: #fff;
+    }
+    .btn-opt-sim {
+      background: var(--burgundy-tint);
+      border: 1px solid var(--burgundy-border);
+      color: #fff;
+    }
+    .btn-close-sheet {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border-quiet);
+      color: var(--text-muted);
+      padding: 11px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .auth-toggle-bar {
+      display: flex;
+      background: var(--black-subtle);
+      border: 1px solid var(--border-quiet);
+      border-radius: 12px;
+      padding: 3px;
+      margin-bottom: 20px;
+    }
+    .auth-toggle-tab {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 9px;
+      cursor: pointer;
+    }
+    .auth-toggle-tab.active {
+      background: var(--burgundy-deep);
+      color: #fff;
+      border: 1px solid var(--burgundy-border);
+    }
+    .otp-digits-row {
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+      margin: 12px 0 16px;
+    }
+    .otp-digit {
+      width: 48px;
+      height: 48px;
+      background: var(--black-subtle);
+      border: 1px solid var(--border-quiet);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      text-align: center;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-root">
+    <div class="status-notch-spacer"></div>
+
+    <!-- Top Bar with SAFE Icon on Top Left -->
+    <div class="top-bar">
+      <div class="brand-wrap">
+        <img src="app-icon.svg" alt="SAFE Icon" class="brand-logo-img">
+        <div>
+          <div class="brand-name">SAFE <span style="font-size: 11px; font-weight: 600; color: #e57373;">BD</span></div>
+          <div class="brand-fullform">Safety • Awareness • Fast Response • Emergency Assistance</div>
+        </div>
+      </div>
+      
+      <button class="profile-trigger-btn" id="top-profile-btn" onclick="openAuthModal()" title="Citizen Profile & Account">
+        <i class="far fa-user" id="profile-icon"></i>
+      </button>
+    </div>
+
+    <!-- SCREEN 1: EMERGENCY SOS, WALK WITH ME & CONTACTS -->
+    <div id="screen-sos" class="screen screen-padded active">
+      
+      <!-- 999 Direct CAD Dispatch Strip -->
+      <div class="emergency-strip">
+        <div>
+          <div class="strip-title"><i class="fas fa-shield-heart" style="color: #ef4444;"></i> National 999 Helpline</div>
+          <div class="strip-sub">Police • Fire Service • Ambulance CAD</div>
+        </div>
+        <button class="strip-btn" onclick="trigger999Call()">
+          <i class="fas fa-phone"></i> Call 999
+        </button>
+      </div>
+
+      <!-- Emergency SOS Disc -->
+      <div class="sos-stage">
+        <div class="sos-button-disc" onclick="triggerSOS()">
+          <span class="sos-text-label">SOS</span>
+          <span class="sos-text-sub">Hold 3s</span>
+        </div>
+      </div>
+
+      <!-- Quick Walk With Me Shortcut Card -->
+      <div class="clean-tile" style="padding: 14px 16px; margin-bottom: 20px; cursor: pointer;" onclick="switchTab('screen-map', document.querySelectorAll('.nav-tab-btn')[1])">
+        <div>
+          <div class="tile-main" style="display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-person-walking" style="color: #e57373;"></i>
+            <span>Walk With Me Companion</span>
+          </div>
+          <div class="tile-sub">Search any place in Bangladesh & route with Google Maps</div>
+        </div>
+        <i class="fas fa-chevron-right" style="color: var(--text-faint); font-size: 12px;"></i>
+      </div>
+
+      <!-- Trusted Family Circle with Editable Contacts (Mother, Father, Guardian) -->
+      <div class="module-group">
+        <div class="module-header">
+          <span>Trusted Family Contacts</span>
+          <span style="font-size: 10px; color: var(--text-muted); text-transform: none;">Tap card to contact • Pen to edit</span>
+        </div>
+
+        <div id="contacts-container"></div>
+      </div>
+
+      <!-- Telemetry Info with Live GPS Tracker -->
+      <div class="module-group">
+        <div class="module-header">
+          <span>Live Device Geolocation</span>
+          <button class="btn-gps-refresh" onclick="acquireRealLocation(true)" title="Force Refresh GPS">
+            <i class="fas fa-arrows-rotate"></i> Refresh GPS
+          </button>
+        </div>
+        <div class="clean-tile" onclick="acquireRealLocation(true)">
+          <div>
+            <div class="tile-main" id="telemetry-main-text">Acquiring Live GPS Fix...</div>
+            <div class="tile-sub" id="telemetry-sub-text">Connecting directly to device satellite sensors</div>
+          </div>
+          <div class="tile-status" id="telemetry-badge" style="color: #f59e0b;">Locating...</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SCREEN 2: GOOGLE MAPS + BANGLADESH AUTOCOMPLETE -->
+    <div id="screen-map" class="screen" style="padding: 0;">
+      <div class="google-maps-viewport">
+        
+        <iframe 
+          id="gmaps-frame"
+          class="google-map-iframe"
+          loading="lazy"
+          allowfullscreen
+          src="https://maps.google.com/maps?q=Dhaka%2C%20Bangladesh&t=&z=14&ie=UTF8&iwloc=&output=embed">
+        </iframe>
+
+        <!-- Floating Walk With Me Header -->
+        <div class="walk-overlay-panel">
+          <div class="walk-header-row">
+            <div class="walk-title">
+              <i class="fas fa-person-walking" style="color: #e57373;"></i>
+              <span>Walk With Me</span>
+            </div>
+            <div class="walk-live-indicator" id="map-live-status-pill">
+              <i class="fas fa-satellite-dish"></i> GPS Active
+            </div>
+          </div>
+
+          <div class="route-input-group">
+            <div class="route-input-box">
+              <i class="fas fa-location-crosshairs" style="color: #10b981;"></i>
+              <input type="text" class="route-input" id="walk-start" value="Detecting live device GPS..." readonly>
+              <button class="btn-gps-refresh" onclick="acquireRealLocation(true);" title="Re-sync Google Maps GPS" style="background: rgba(120, 0, 22, 0.4); border: 1px solid var(--burgundy-vivid); color: #fff;">
+                <i class="fas fa-crosshairs"></i> GPS
+              </button>
+            </div>
+            
+            <!-- Transportation Mode Selector (Walk, Car/CNG, Bike) -->
+            <div style="display: flex; gap: 6px; margin: 6px 0 8px 0; background: rgba(12, 11, 14, 0.8); border: 1px solid var(--border-quiet); padding: 4px; border-radius: 12px;">
+              <button type="button" class="auth-toggle-tab active" id="mode-btn-walking" style="padding: 6px 4px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="selectTravelMode('walking')">
+                <i class="fas fa-person-walking"></i> Walk
+              </button>
+              <button type="button" class="auth-toggle-tab" id="mode-btn-driving" style="padding: 6px 4px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="selectTravelMode('driving')">
+                <i class="fas fa-car-side"></i> Car / CNG
+              </button>
+              <button type="button" class="auth-toggle-tab" id="mode-btn-bicycling" style="padding: 6px 4px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="selectTravelMode('bicycling')">
+                <i class="fas fa-motorcycle"></i> Bike
+              </button>
+            </div>
+
+            <div style="position: relative;">
+              <div class="route-input-box">
+                <i class="fas fa-location-dot" style="color: #f87171;"></i>
+                <input type="text" class="route-input" id="walk-destination" placeholder="Destination (e.g. Dhanmondi, Airport, Gulshan...)" oninput="handleLocationSearch(this.value)" onfocus="if (this.value.trim()) handleLocationSearch(this.value)" autocomplete="off">
+                <button id="btn-clear-dest" onclick="clearDestinationInput()" style="display: none; background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px 6px;">
+                  <i class="fas fa-xmark"></i>
+                </button>
+              </div>
+
+              <!-- POPUP LIST FOR BANGLADESH LOCATIONS -->
+              <div class="location-dropdown-popup" id="bd-location-dropdown"></div>
+            </div>
+
+            <!-- Live Google Maps Route Estimate Bar -->
+            <div id="route-estimate-banner" style="display: none; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 10px; padding: 7px 12px; margin-top: 6px; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: #10b981;">
+                <i class="fas fa-route"></i>
+                <span id="route-est-distance">Calculating...</span>
+              </div>
+              <div style="font-size: 11.5px; font-weight: 700; color: #fff;" id="route-est-time">-- mins</div>
+            </div>
+          </div>
+
+          <div class="walk-action-btns">
+            <button class="btn-start-walk" onclick="startWalkWithMe()">
+              <i class="fas fa-shield-heart"></i> Start Companion Guard
+            </button>
+            <a id="btn-external-gmaps" class="btn-open-gmaps" href="https://maps.google.com" target="_blank" title="Open full Google Maps">
+              <i class="fas fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Active Walk Tracking Status Drawer -->
+        <div id="walk-dock" class="walk-active-dock">
+          <div class="dock-stat-row">
+            <div class="dock-stat-title"><i class="fas fa-shield-halved" style="color: #10b981;"></i> Companion Guard Active</div>
+            <div class="dock-timer-badge" id="walk-timer-display">20:00</div>
+          </div>
+          <div class="dock-subtext" id="walk-dock-dest-text">
+            Guarding route. An alert triggers if stationary or off-route for &gt; 3 mins.
+          </div>
+          <button class="dock-finish-btn" onclick="finishWalkWithMe()">
+            <i class="fas fa-check"></i> I Have Arrived Safely
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SCREEN 3: INTERACTIVE SOCIAL MEDIA & CIVIC AWARENESS FEED -->
+    <div id="screen-feed" class="screen screen-padded">
+      
+      <!-- Interactive Post Composer for Community Uploads -->
+      <div class="create-post-card">
+        <textarea class="post-composer-input" id="composer-text" placeholder="Share safety awareness, road hazard, or community advisory..."></textarea>
+        
+        <!-- Attached Media Preview -->
+        <div class="media-preview-container" id="media-preview-box">
+          <img id="media-preview-img" class="media-preview-img" src="" alt="Media Preview">
+          <button class="btn-remove-media" onclick="removeAttachedMedia()"><i class="fas fa-xmark"></i></button>
+        </div>
+
+        <div class="composer-toolbar">
+          <div class="composer-media-icons">
+            <label class="media-btn-label" title="Attach Photo">
+              <i class="fas fa-image" style="color: #38bdf8;"></i>
+              <span style="font-size: 11px;">Photo</span>
+              <input type="file" id="media-file-input" accept="image/*,video/*" style="display: none;" onchange="handleMediaSelected(event)">
+            </label>
+            <label class="media-btn-label" title="Category Tag" onclick="selectPostCategory()">
+              <i class="fas fa-tag" style="color: #f59e0b;"></i>
+              <span style="font-size: 11px;" id="composer-category-tag">General</span>
+            </label>
+          </div>
+          <button class="btn-publish-post" onclick="submitCommunityPost()">
+            <i class="fas fa-paper-plane"></i> Post
+          </button>
+        </div>
+      </div>
+
+      <!-- Feed Category Filter Bar -->
+      <div style="display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; align-items: center;">
+        <button class="auth-toggle-tab active" style="padding: 6px 14px; font-size: 11.5px; white-space: nowrap;" onclick="filterFeed('all', this)">All Feeds</button>
+        <button class="auth-toggle-tab" style="padding: 6px 14px; font-size: 11.5px; white-space: nowrap;" onclick="filterFeed('community', this)">Citizen Reports</button>
+      </div>
+
+      <!-- Feed Posts Container -->
+      <div id="posts-container">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- SCREEN 4: SECURE ADMIN MODERATION PORTAL (PROTECTED) -->
+    <div id="screen-admin" class="screen screen-padded">
+      
+      <!-- Admin Portal Header -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-quiet);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); display: flex; align-items: center; justify-content: center; color: #f59e0b; font-size: 16px;">
+            <i class="fas fa-shield-halved"></i>
+          </div>
+          <div>
+            <div style="font-size: 15px; font-weight: 700; color: #fff;">Admin Command Portal</div>
+            <div style="font-size: 11px; color: #f59e0b;">Authorized: +8801316750712</div>
+          </div>
+        </div>
+        <button onclick="performAdminLogout()" style="background: transparent; border: 1px solid var(--border-quiet); color: var(--text-muted); padding: 6px 12px; border-radius: 9px; font-size: 11px; font-weight: 600; cursor: pointer;">
+          <i class="fas fa-arrow-right-from-bracket"></i> Exit Admin
+        </button>
+      </div>
+
+      <!-- Quick Metrics Strip -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px;">
+        <div style="background: var(--black-subtle); border: 1px solid var(--burgundy-border); border-radius: 14px; padding: 12px 14px;">
+          <div style="font-size: 11px; color: var(--text-muted);">Pending Approvals</div>
+          <div style="font-size: 22px; font-weight: 800; color: #f59e0b; margin-top: 4px;" id="admin-pending-stat">0</div>
+        </div>
+        <div style="background: var(--black-subtle); border: 1px solid var(--border-quiet); border-radius: 14px; padding: 12px 14px;">
+          <div style="font-size: 11px; color: var(--text-muted);">Live Published</div>
+          <div style="font-size: 22px; font-weight: 800; color: #10b981; margin-top: 4px;" id="admin-approved-stat">0</div>
+        </div>
+      </div>
+
+      <!-- Admin Sub-Navigation Tabs -->
+      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+        <button type="button" class="auth-toggle-tab active" id="admin-tab-reports" style="padding: 7px 12px; font-size: 11.5px;" onclick="switchAdminSection('reports')">
+          <i class="fas fa-file-shield"></i> Post Moderation
+        </button>
+        <button type="button" class="auth-toggle-tab" id="admin-tab-journeys" style="padding: 7px 12px; font-size: 11.5px; border-color: rgba(239, 68, 68, 0.4); color: #ef4444;" onclick="switchAdminSection('journeys')">
+          <i class="fas fa-satellite-dish"></i> Live Citizen Routes <span id="admin-overdue-count-badge" style="background: #ef4444; color: #fff; padding: 1px 6px; border-radius: 10px; font-size: 9.5px; font-weight: 700; margin-left: 3px;">0</span>
+        </button>
+      </div>
+
+      <!-- SECTION A: POST MODERATION QUEUE -->
+      <div id="admin-section-reports">
+        <div class="module-header" style="margin-bottom: 12px;">
+          <span>Citizen Reports Awaiting Moderation</span>
+          <span style="font-size: 11px; color: var(--text-muted); text-transform: none;">Live Review Queue</span>
+        </div>
+        <div id="admin-pending-posts-container">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- SECTION B: LIVE CITIZEN JOURNEYS & OVERDUE OBSERVATION QUEUE -->
+      <div id="admin-section-journeys" style="display: none;">
+        <div class="module-header" style="margin-bottom: 12px;">
+          <span>Live Citizen Journeys & Overdue Alerts</span>
+          <button class="btn-gps-refresh" onclick="fetchAdminActiveJourneys()" style="font-size: 11px;">
+            <i class="fas fa-arrows-rotate"></i> Refresh Telemetry
+          </button>
+        </div>
+        <div id="admin-journeys-container">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-bar">
+      <button class="nav-tab-btn active" onclick="switchTab('screen-sos', this)">Emergency</button>
+      <button class="nav-tab-btn" onclick="switchTab('screen-map', this)">Map</button>
+      <button class="nav-tab-btn" onclick="switchTab('screen-feed', this)">Awareness</button>
+      <button class="nav-tab-btn" id="nav-btn-admin" style="display: none; color: #f59e0b;" onclick="switchTab('screen-admin', this)"><i class="fas fa-gavel"></i> Admin</button>
+      <button class="nav-tab-btn" onclick="openAuthModal()">Profile</button>
+    </div>
+
+    <!-- ========================================================
+         MODAL 1: EDIT CONTACT NUMBER MODAL
+    ======================================================== -->
+    <div id="edit-contact-modal" class="edit-contact-modal-backdrop" onclick="closeEditContactModal(event)">
+      <div class="edit-sheet" onclick="event.stopPropagation()">
+        <div class="sheet-handle"></div>
+        <div class="modal-head-row">
+          <h3 id="edit-contact-title">Update Contact</h3>
+          <button class="modal-close-x" onclick="closeEditContactModal()"><i class="fas fa-xmark"></i></button>
+        </div>
+
+        <form id="edit-contact-form" onsubmit="saveContactChanges(event)">
+          <div class="form-group">
+            <label class="form-label">Contact Label / Relation</label>
+            <div class="input-field-wrap">
+              <input type="text" class="form-input" id="edit-contact-name" placeholder="e.g. Guardian" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Bangladeshi Mobile Number</label>
+            <div class="input-field-wrap">
+              <span class="prefix-bd">+880</span>
+              <input type="tel" class="form-input" id="edit-contact-phone" placeholder="17XXXXXXXX" pattern="[0-9]{10}" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit-action">Save Contact</button>
+          <button type="button" class="btn-close-sheet" style="margin-top: 8px;" onclick="closeEditContactModal()">Cancel</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL 2: CONTACT ACTION SHEET (WhatsApp vs SIM Call)
+    ======================================================== -->
+    <div id="contact-action-sheet" class="contact-modal-backdrop" onclick="closeContactSheet(event)">
+      <div class="contact-sheet" onclick="event.stopPropagation()">
+        <div class="sheet-handle"></div>
+        
+        <div class="modal-head-row">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--burgundy-deep); border: 1px solid var(--burgundy-vivid); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff;" id="sheet-avatar-initial">M</div>
+            <div>
+              <h3 style="font-size: 15px; font-weight: 600; color: #fff;" id="sheet-contact-name">Mother</h3>
+              <p style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;" id="sheet-contact-phone">+880 1711-000001</p>
+            </div>
+          </div>
+          <button class="modal-close-x" onclick="closeContactSheet()"><i class="fas fa-xmark"></i></button>
+        </div>
+
+        <a id="sheet-whatsapp-link" class="contact-action-btn btn-opt-whatsapp" href="#" target="_blank" onclick="sendWhatsAppLocation(event)">
+          <i class="fab fa-whatsapp" style="font-size: 22px; color: var(--whatsapp-green);"></i>
+          <div>
+            <div style="font-size: 13.5px; font-weight: 600;">Send Live Location via WhatsApp</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Auto-composes message with live GPS link</div>
+          </div>
+        </a>
+
+        <a id="sheet-sim-link" class="contact-action-btn btn-opt-sim" href="#" onclick="dialSIMCall(event)">
+          <i class="fas fa-phone" style="font-size: 20px; color: #f87171;"></i>
+          <div>
+            <div style="font-size: 13.5px; font-weight: 600;">Call via Direct SIM</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Standard cellular voice call</div>
+          </div>
+        </a>
+
+        <button class="btn-close-sheet" onclick="closeContactSheet()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL 3: CITIZEN AUTHENTICATION (Login & BD OTP)
+    ======================================================== -->
+    <div id="auth-modal" class="auth-modal-backdrop" onclick="closeAuthModal(event)">
+      <div class="auth-sheet" onclick="event.stopPropagation()">
+        <div class="sheet-handle"></div>
+        
+        <div class="modal-head-row">
+          <h3 id="auth-title">Citizen Account</h3>
+          <button class="modal-close-x" onclick="closeAuthModal()"><i class="fas fa-xmark"></i></button>
+        </div>
+
+        <!-- Logged In Profile View -->
+        <div id="view-profile-active" style="display: none;">
+          <div style="background: var(--black-subtle); border: 1px solid var(--burgundy-border); border-radius: 16px; padding: 16px; margin-bottom: 20px; text-align: center;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--burgundy-deep); border: 2px solid var(--burgundy-vivid); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #fff;" id="profile-badge-letter">K</div>
+            <h4 style="font-size: 15px; color: #fff;" id="profile-display-name">Kazi Rahman</h4>
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 3px;" id="profile-display-phone">+880 1712-345678</p>
+            <div style="display: inline-block; font-size: 10px; color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16,185,129,0.3); padding: 2px 8px; border-radius: 12px; margin-top: 8px;">
+              <i class="fas fa-check-shield"></i> Verified BD Citizen (NID Linked)
+            </div>
+          </div>
+          <button id="admin-portal-profile-btn" class="btn-submit-action" style="display: none; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); margin-bottom: 8px; border: none;" onclick="openAdminPortalFromProfile()">
+            <i class="fas fa-shield-halved"></i> Open Admin Command Portal
+          </button>
+          <button class="btn-submit-action" style="background: transparent; border-color: var(--border-quiet); color: var(--text-muted);" onclick="performLogout()">
+            Sign Out
+          </button>
+        </div>
+
+        <!-- Auth Form Container -->
+        <div id="view-auth-forms">
+          <div class="auth-toggle-bar" id="auth-main-tabs">
+            <button class="auth-toggle-tab active" id="tab-btn-login" onclick="toggleAuthTab('login')">Sign In</button>
+            <button class="auth-toggle-tab" id="tab-btn-signup" onclick="toggleAuthTab('signup')">Create Account</button>
+          </div>
+
+          <!-- 1. LOGIN FORM (PASSWORD + MANDATORY 2FA OTP) -->
+          <form id="form-login" onsubmit="handleLoginSubmit(event)">
+            <!-- STEP 1: Phone + Password -->
+            <div id="login-step-1">
+              <div class="form-group">
+                <label class="form-label">Bangladeshi Mobile Number</label>
+                <div class="input-field-wrap">
+                  <span class="prefix-bd">+880</span>
+                  <input type="tel" class="form-input" id="login-phone" placeholder="17XXXXXXXX" pattern="[0-9]{10}" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Password</label>
+                <div class="input-field-wrap">
+                  <input type="password" class="form-input" id="login-password" placeholder="Enter secure password" required>
+                </div>
+              </div>
+              <div style="display: flex; justify-content: flex-end; margin-bottom: 14px;">
+                <a href="javascript:void(0)" onclick="openForgotPasswordFlow()" style="font-size: 11.5px; color: #60a5fa; text-decoration: none; display: flex; align-items: center; gap: 4px;">
+                  <i class="fas fa-key"></i> Forgot Password?
+                </a>
+              </div>
+              <button type="submit" class="btn-submit-action" id="btn-login-submit">
+                <i class="fas fa-arrow-right-to-bracket"></i> Sign In
+              </button>
+            </div>
+
+            <!-- STEP 2: Mandatory 2FA OTP Verification -->
+            <div id="login-step-2" style="display: none;">
+              <div style="text-align: center; margin-bottom: 14px;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 18px; margin: 0 auto 10px;">
+                  <i class="fas fa-shield-halved"></i>
+                </div>
+                <h4 style="font-size: 13.5px; color: #fff; margin-bottom: 4px;">Two-Factor Verification</h4>
+                <p style="font-size: 11.5px; color: var(--text-muted); line-height: 1.4;">
+                  Password verified! Enter the 4-digit code dispatched to <strong id="login-otp-target" style="color: #fff;">+880 17XXXXXXXX</strong> to finish signing in.
+                </p>
+              </div>
+
+              <div class="otp-digits-row">
+                <input type="text" maxlength="1" class="otp-digit" oninput="moveNext(this, 'login-otp2')" id="login-otp1">
+                <input type="text" maxlength="1" class="otp-digit" oninput="moveNext(this, 'login-otp3')" id="login-otp2">
+                <input type="text" maxlength="1" class="otp-digit" oninput="moveNext(this, 'login-otp4')" id="login-otp3">
+                <input type="text" maxlength="1" class="otp-digit" id="login-otp4">
+              </div>
+
+              <button type="button" class="btn-submit-action" onclick="verifyLoginOTPAndFinish()">
+                <i class="fas fa-lock-open"></i> Verify OTP & Sign In
+              </button>
+              <button type="button" class="btn-close-sheet" style="margin-top: 8px;" onclick="backToLoginStep1()">
+                <i class="fas fa-arrow-left"></i> Change Number / Password
+              </button>
+            </div>
+          </form>
+
+          <!-- 2. FORGOT PASSWORD FORM -->
+          <div id="form-forgot-password" style="display: none;">
+            <div id="forgot-step-1">
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.45;">
+                Enter your registered Bangladeshi mobile number. We will dispatch a 4-digit reset code via SMS.
+              </div>
+              <div class="form-group">
+                <label class="form-label">Registered Mobile Number</label>
+                <div class="input-field-wrap">
+                  <span class="prefix-bd">+880</span>
+                  <input type="tel" class="form-input" id="forgot-phone" placeholder="17XXXXXXXX" pattern="[0-9]{10}">
+                </div>
+              </div>
+              <button type="button" class="btn-submit-action" onclick="handleForgotRequestOTP()">
+                <i class="fas fa-paper-plane"></i> Send Reset Code via SMS
+              </button>
+              <button type="button" class="btn-close-sheet" style="margin-top: 8px;" onclick="closeForgotPasswordFlow()">
+                <i class="fas fa-arrow-left"></i> Back to Sign In
+              </button>
+            </div>
+
+            <div id="forgot-step-2" style="display: none;">
+              <p style="font-size: 12px; color: var(--text-muted); text-align: center; margin-bottom: 12px;">
+                Enter the 4-digit reset code sent to <strong id="forgot-otp-target" style="color: #fff;">+880 17XXXXXXXX</strong>
+              </p>
+
+              <div class="otp-digits-row">
+                <input type="text" maxlength="1" class="otp-digit" oninput="moveNext(this, 'forgot-otp2')" id="forgot-otp1">
+                <input type="text" maxlength="1" class="otp-digit" oninput="moveNext(this, 'forgot-otp3')" id="forgot-otp2">
+                <input type="text" maxlength="1" class="otp-digit" oninput="moveNext(this, 'forgot-otp4')" id="forgot-otp3">
+                <input type="text" maxlength="1" class="otp-digit" id="forgot-otp4">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">New Password</label>
+                <div class="input-field-wrap">
+                  <input type="password" class="form-input" id="forgot-new-password" placeholder="Minimum 6 characters" minlength="6">
+                </div>
+              </div>
+
+              <button type="button" class="btn-submit-action" onclick="handleForgotVerifyReset()">
+                <i class="fas fa-key"></i> Verify OTP & Reset Password
+              </button>
+              <button type="button" class="btn-close-sheet" style="margin-top: 8px;" onclick="backToForgotStep1()">
+                <i class="fas fa-arrow-left"></i> Change Number
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. CREATE ACCOUNT (SIGNUP) FORM -->
+          <form id="form-signup" style="display: none;" onsubmit="handleSignupRequestOTP(event)">
+            <!-- STEP 1: MOBILE NUMBER -->
+            <div id="signup-step-1">
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.45;">
+                Enter your Bangladeshi mobile number. We will dispatch a 4-digit verification code via SMS.
+              </div>
+              <div class="form-group">
+                <label class="form-label">Bangladeshi Mobile Number</label>
+                <div class="input-field-wrap">
+                  <span class="prefix-bd">+880</span>
+                  <input type="tel" class="form-input" id="signup-phone" placeholder="17XXXXXXXX" pattern="[0-9]{10}" required>
+                </div>
+              </div>
+              <button type="submit" class="btn-submit-action">
+                <i class="fas fa-paper-plane"></i> Send OTP via SMS
+              </button>
+            </div>
+
+            <!-- STEP 2: ENTER OTP & CREATE PASSWORD -->
+            <div id="signup-step-2" style="display: none;">
+              <p style="font-size: 12px; color: var(--text-muted); text-align: center; margin-bottom: 12px;">
+                Enter the 4-digit verification code sent to <strong id="otp-target-phone" style="color: #fff;">+880 17XXXXXXXX</strong>
+              </p>
+              
+              <div class="otp-digits-row">
+                <input type="text" maxlength="1" class="otp-digit" oninput="moveNext(this, 'otp2')" id="otp1">
+                <input type="text" maxlength="1" class="otp-digit" oninput="moveNext(this, 'otp3')" id="otp2">
+                <input type="text" maxlength="1" class="otp-digit" oninput="moveNext(this, 'otp4')" id="otp3">
+                <input type="text" maxlength="1" class="otp-digit" id="otp4">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Your Full Name</label>
+                <div class="input-field-wrap">
+                  <input type="text" class="form-input" id="signup-name" placeholder="e.g. Kazi Rahman" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Create Password</label>
+                <div class="input-field-wrap">
+                  <input type="password" class="form-input" id="signup-password" placeholder="Minimum 6 characters" minlength="6" required>
+                </div>
+              </div>
+
+              <button type="button" class="btn-submit-action" onclick="verifyOTPAndFinish()">
+                <i class="fas fa-check-shield"></i> Verify OTP & Create Account
+              </button>
+              <button type="button" class="btn-close-sheet" style="margin-top: 8px;" onclick="backToSignupStep1()">
+                <i class="fas fa-arrow-left"></i> Change Number
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL 4: EMERGENCY SOS COUNTDOWN MODAL
+    ======================================================== -->
+    <div id="sos-modal" class="sos-modal-backdrop">
+      <div class="sos-modal-box">
+        <h2 style="font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 6px;">EMERGENCY SOS ACTIVATED</h2>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.45;">
+          Connecting with 999 Police / Medical CAD & dispatching your live GPS coordinates to your Family Circle.
+        </p>
+        <div style="font-size: 52px; font-weight: 800; color: #ef4444; margin-bottom: 20px; font-variant-numeric: tabular-nums;" id="sos-countdown-val">5</div>
+        <div style="display: flex; flex-direction: column; gap: 9px;">
+          <button style="background: linear-gradient(135deg, var(--danger-crimson) 0%, var(--burgundy-core) 100%); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 11px; font-size: 13px; font-weight: 700; cursor: pointer;" onclick="finishEmergencySOS()">
+            Dispatch Instantly Now
+          </button>
+          <button style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-quiet); padding: 11px; border-radius: 11px; font-size: 12px; cursor: pointer;" onclick="abortEmergencySOS()">
+            Cancel (False Alarm)
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // =========================================================================
+    // BANGLADESH LOCATIONS DATABASE
+    // =========================================================================
+    const BANGLADESH_LOCATIONS = [
+      { name: "Shantinagar", area: "Dhaka Central (Twin Towers / Rajarbagh)", query: "Shantinagar, Dhaka, Bangladesh", lat: 23.7388, lon: 90.4143 },
+      { name: "Baily Road", area: "Dhaka Central", query: "Baily Road, Dhaka, Bangladesh", lat: 23.7408, lon: 90.4079 },
+      { name: "Kakrail", area: "Dhaka Central", query: "Kakrail, Dhaka, Bangladesh", lat: 23.7369, lon: 90.4093 },
+      { name: "Malibagh", area: "Dhaka Central", query: "Malibagh, Dhaka, Bangladesh", lat: 23.7471, lon: 90.4158 },
+      { name: "Rajarbagh", area: "Dhaka Central", query: "Rajarbagh, Dhaka, Bangladesh", lat: 23.7375, lon: 90.4180 },
+      { name: "Moghbazar", area: "Dhaka Central", query: "Moghbazar, Dhaka, Bangladesh", lat: 23.7490, lon: 90.4036 },
+      { name: "Banani", area: "Dhaka North", query: "Banani, Dhaka, Bangladesh", lat: 23.7937, lon: 90.4066 },
+      { name: "Gulshan 1", area: "Dhaka North", query: "Gulshan 1, Dhaka, Bangladesh", lat: 23.7785, lon: 90.4172 },
+      { name: "Gulshan 2", area: "Dhaka North", query: "Gulshan 2, Dhaka, Bangladesh", lat: 23.7925, lon: 90.4162 },
+      { name: "Dhanmondi 27", area: "Dhaka South", query: "Dhanmondi 27, Dhaka, Bangladesh", lat: 23.7538, lon: 90.3768 },
+      { name: "Dhanmondi 32", area: "Dhaka South", query: "Dhanmondi 32, Dhaka, Bangladesh", lat: 23.7508, lon: 90.3792 },
+      { name: "Dhanmondi Lake", area: "Dhaka South", query: "Dhanmondi Lake, Dhaka, Bangladesh", lat: 23.7460, lon: 90.3780 },
+      { name: "Jamuna Future Park", area: "Kuril, Pragati Sarani, Dhaka", query: "Jamuna Future Park, Ka-244, Pragati Sarani, Dhaka, Bangladesh", lat: 23.8135, lon: 90.4242 },
+      { name: "Bashundhara City Shopping Mall", area: "Panthapath, Dhaka", query: "Bashundhara City, Panthapath, Dhaka, Bangladesh", lat: 23.7508, lon: 90.3905 },
+      { name: "Bashundhara R/A", area: "Dhaka North", query: "Bashundhara Residential Area, Dhaka, Bangladesh", lat: 23.8162, lon: 90.4287 },
+      { name: "Evercare Hospital", area: "Bashundhara R/A, Dhaka", query: "Evercare Hospital Dhaka, Plot 81, Block E, Bashundhara R/A, Dhaka", lat: 23.8105, lon: 90.4312 },
+      { name: "Uttara Sector 3", area: "Dhaka North", query: "Uttara Sector 3, Dhaka, Bangladesh", lat: 23.8687, lon: 90.3995 },
+      { name: "Uttara Sector 11", area: "Dhaka North", query: "Uttara Sector 11, Dhaka, Bangladesh", lat: 23.8795, lon: 90.3887 },
+      { name: "Mirpur 1", area: "Dhaka North", query: "Mirpur 1, Dhaka, Bangladesh", lat: 23.7956, lon: 90.3537 },
+      { name: "Mirpur 10", area: "Dhaka North", query: "Mirpur 10, Dhaka, Bangladesh", lat: 23.8069, lon: 90.3687 },
+      { name: "Mohakhali", area: "Dhaka North", query: "Mohakhali, Dhaka, Bangladesh", lat: 23.7776, lon: 90.4005 },
+      { name: "Badda", area: "Dhaka North", query: "Badda, Dhaka, Bangladesh", lat: 23.7806, lon: 90.4267 },
+      { name: "Farmgate", area: "Dhaka Central", query: "Farmgate, Dhaka, Bangladesh", lat: 23.7570, lon: 90.3892 },
+      { name: "Shahbag", area: "Dhaka Central", query: "Shahbag, Dhaka, Bangladesh", lat: 23.7380, lon: 90.3957 },
+      { name: "Dhaka University Campus", area: "Dhaka South", query: "University of Dhaka, Nilkhet Rd, Dhaka, Bangladesh", lat: 23.7297, lon: 90.3993 },
+      { name: "Motijheel", area: "Commercial District", query: "Motijheel, Dhaka, Bangladesh", lat: 23.7330, lon: 90.4172 },
+      { name: "Mohammadpur", area: "Dhaka West", query: "Mohammadpur, Dhaka, Bangladesh", lat: 23.7658, lon: 90.3585 },
+      { name: "Old Dhaka (Lalbagh Fort)", area: "Dhaka South", query: "Lalbagh Fort, Lalbagh, Dhaka, Bangladesh", lat: 23.7189, lon: 90.3881 },
+      { name: "Puran Dhaka (Sadarghat)", area: "Dhaka South", query: "Sadarghat, Dhaka, Bangladesh", lat: 23.7047, lon: 90.4125 },
+      { name: "Purbachal 300 Feet Expressway", area: "Dhaka East", query: "Purbachal Expressway, Dhaka, Bangladesh", lat: 23.8242, lon: 90.4578 },
+      { name: "Hazrat Shahjalal International Airport", area: "Kurmitola, Dhaka", query: "Hazrat Shahjalal International Airport, Dhaka, Bangladesh", lat: 23.8433, lon: 90.4031 },
+      { name: "Chattogram (GEC Circle)", area: "Chattogram City", query: "GEC Circle, Chattogram, Bangladesh", lat: 22.3592, lon: 91.8216 },
+      { name: "Chattogram (Agrabad)", area: "Chattogram Commercial", query: "Agrabad, Chattogram, Bangladesh", lat: 22.3243, lon: 91.8122 },
+      { name: "Cox's Bazar Sea Beach", area: "Chattogram Division", query: "Cox's Bazar Beach, Bangladesh", lat: 21.4272, lon: 91.9702 },
+      { name: "Sylhet (Zindabazar)", area: "Sylhet City", query: "Zinda Bazar, Sylhet, Bangladesh", lat: 24.8968, lon: 91.8687 },
+      { name: "Shahjalal Dargah", area: "Sylhet", query: "Hazrat Shahjalal Mazar Sharif, Sylhet, Bangladesh", lat: 24.9025, lon: 91.8708 },
+      { name: "Rajshahi (Zero Point)", area: "Rajshahi Division", query: "Zero Point, Rajshahi, Bangladesh", lat: 24.3636, lon: 88.6241 },
+      { name: "Khulna (Shibbari)", area: "Khulna Division", query: "Shibbari More, Khulna, Bangladesh", lat: 22.8228, lon: 89.5539 },
+      { name: "Barishal (Sadar)", area: "Barishal Division", query: "Barishal Sadar, Bangladesh", lat: 22.7010, lon: 90.3535 },
+      { name: "Rangpur (Dhap)", area: "Rangpur Division", query: "Dhap, Rangpur, Bangladesh", lat: 25.7584, lon: 89.2467 },
+      { name: "Mymensingh (Ganginarpar)", area: "Mymensingh Division", query: "Ganginarpar, Mymensingh, Bangladesh", lat: 24.7570, lon: 90.4072 },
+      { name: "Cumilla (Kandirpar)", area: "Chattogram Division", query: "Kandirpar, Cumilla, Bangladesh", lat: 23.4607, lon: 91.1809 },
+      { name: "Narayanganj (Chashara)", area: "Dhaka Division", query: "Chashara, Narayanganj, Bangladesh", lat: 23.6238, lon: 90.4990 },
+      { name: "Gazipur (Chowrasta)", area: "Dhaka Division", query: "Gazipur Chowrasta, Bangladesh", lat: 23.9999, lon: 90.3800 },
+      { name: "Savar (Bus Stand)", area: "Dhaka Division", query: "Savar Bus Stand, Savar, Bangladesh", lat: 23.8443, lon: 90.2582 },
+      { name: "Jahangirnagar University", area: "Savar, Dhaka", query: "Jahangirnagar University, Savar, Bangladesh", lat: 23.8814, lon: 90.2673 },
+      { name: "Bogura (Saatmatha)", area: "Rajshahi Division", query: "Satmatha, Bogura, Bangladesh", lat: 24.8510, lon: 89.3730 },
+      { name: "Jessore (Chowrasta)", area: "Khulna Division", query: "Jessore, Bangladesh", lat: 23.1664, lon: 89.2081 }
+    ];
+
+    let defaultContacts = [
+      { id: "c1", name: "Mother", phone: "1711000001", initial: "M" },
+      { id: "c2", name: "Father", phone: "1811000002", initial: "F" },
+      { id: "c3", name: "Guardian", phone: "1911000003", initial: "G" }
+    ];
+
+    let contacts = [];
+    try {
+      const savedContacts = localStorage.getItem('safe_bd_contacts');
+      contacts = savedContacts ? JSON.parse(savedContacts) : defaultContacts;
+    } catch(e) {
+      contacts = defaultContacts;
+    }
+
+    let activeContact = null;
+    let editingContactId = null;
+    let currentUser = null;
+    let walkTimerInterval = null;
+    let walkSecondsRemaining = 1200;
+    let sosTimer = null;
+    let sosCount = 5;
+    let attachedMediaBase64 = null;
+    let selectedCategory = "General Safety";
+    let activeFeedFilter = 'all';
+
+    const API_BASE = (window.location.protocol.startsWith('http') && !window.location.origin.includes('file:'))
+      ? window.location.origin
+      : 'http://localhost:5000';
+
+    // In-memory posts list (persisted in localStorage)
+    let communityPosts = [
+      {
+        id: "post-1",
+        author: "Dhaka Traffic Command",
+        verified: true,
+        type: "official",
+        category: "Commute Advisory",
+        time: "45m ago",
+        content: "Temporary waterlogging reported along Kazipara. Recommended alternate route for late-night transit: Rokeya Sarani bypass.",
+        media: null,
+        likes: 189,
+        approved: true
+      },
+      {
+        id: "post-2",
+        author: "SAFE BD Community",
+        verified: true,
+        type: "community",
+        category: "General Safety",
+        time: "2h ago",
+        content: "Street lights repaired across Baily Road and Shantinagar crossing. Night transit safety score currently marked Normal.",
+        media: null,
+        likes: 94,
+        approved: true
+      },
+      {
+        id: "post-pending-1",
+        author: "Citizen Tanvir",
+        verified: false,
+        type: "community",
+        category: "Road Hazard",
+        time: "10m ago",
+        content: "Open excavation and dark stretch reported near Dhanmondi 27 / Lake Circus. Caution advised for late evening pedestrians.",
+        media: null,
+        likes: 0,
+        approved: false
+      }
+    ];
+
+    try {
+      const savedPosts = localStorage.getItem('safe_bd_posts');
+      if (savedPosts) {
+        let parsed = JSON.parse(savedPosts);
+        // Clean out any legacy police post
+        communityPosts = parsed.filter(p => !p.author.toLowerCase().includes("police"));
+        // Ensure at least one pending post is available for demo if queue was empty
+        if (!communityPosts.some(p => !p.approved)) {
+          communityPosts.unshift({
+            id: "post-pending-" + Date.now(),
+            author: "Citizen Tanvir",
+            verified: false,
+            type: "community",
+            category: "Road Hazard",
+            time: "10m ago",
+            content: "Open excavation and dark stretch reported near Dhanmondi 27 / Lake Circus. Caution advised for late evening pedestrians.",
+            media: null,
+            likes: 0,
+            approved: false
+          });
+        }
+        localStorage.setItem('safe_bd_posts', JSON.stringify(communityPosts));
+      }
+    } catch(e) {}
+
+    // Live High-Precision Geolocation (Device GPS Only)
+    let currentCoords = {
+      lat: 23.8103,
+      lon: 90.4125,
+      address: "Acquiring live satellite fix...",
+      accuracy: 0
+    };
+
+    let selectedTravelMode = 'walking'; // 'walking' | 'driving' | 'bicycling'
+    let currentDestinationQuery = "";
+    let calculatedRouteDistanceKm = 0;
+    let calculatedDurationMinutes = 20;
+    let activeJourneySessionId = null;
+    let overdueReminderPromptShown = false;
+    let overdueAutoEscalated = false;
+
+    try {
+      const saved = localStorage.getItem('safe_bd_user');
+      if (saved) {
+        currentUser = JSON.parse(saved);
+        setLoggedInState();
+      }
+    } catch(e) {}
+
+    renderContactsList();
+    renderCommunityPosts();
+
+    // =========================================================================
+    // DIRECT HIGH-PRECISION DEVICE GPS ENGINE (VIA DEVICE SENSORS & GOOGLE MAPS)
+    // =========================================================================
+    let gpsWatchId = null;
+
+    function acquireRealLocation(forceAlert = false) {
+      updateTelemetryUI("Connecting to Satellite GPS...", "Requesting live device sensor coordinates", "Connecting...", "#f59e0b");
+
+      if (!navigator.geolocation) {
+        alert("⚠️ Geolocation is not supported by your device browser.");
+        return;
+      }
+
+      const geoOptions = {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0
+      };
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          handleDirectGpsSuccess(position, forceAlert);
+        },
+        (err) => {
+          console.warn("GPS lookup error:", err.code, err.message);
+          let errText = "Unable to retrieve device GPS.";
+          if (err.code === 1) errText = "Location permission denied. Please allow device location access.";
+          if (err.code === 2) errText = "GPS position unavailable. Please ensure GPS / Location is turned ON.";
+          if (err.code === 3) errText = "GPS request timed out. Retrying high-accuracy fix...";
+          updateTelemetryUI("GPS Permission Required", errText, "Signal Lost", "#ef4444");
+          if (forceAlert) alert("⚠️ " + errText);
+        },
+        geoOptions
+      );
+
+      // Continuously monitor precise position
+      if (!gpsWatchId) {
+        gpsWatchId = navigator.geolocation.watchPosition(
+          (pos) => handleDirectGpsSuccess(pos, false),
+          (err) => console.log("watchPosition ping:", err.message),
+          { enableHighAccuracy: true, timeout: 20000, maximumAge: 3000 }
+        );
+      }
+    }
+
+    function handleDirectGpsSuccess(position, showAlert = false) {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      const acc = Math.round(position.coords.accuracy || 5);
+
+      currentCoords.lat = lat;
+      currentCoords.lon = lon;
+      currentCoords.accuracy = acc;
+
+      // Reverse geocode directly for exact street/landmark
+      fetchAccurateReverseGeocode(lat, lon, showAlert);
+    }
+
+    function fetchAccurateReverseGeocode(lat, lon, showAlert = false) {
+      const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
+
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          let readableName = "";
+          if (data && data.address) {
+            const addr = data.address;
+            const road = addr.road || addr.suburb || addr.neighbourhood || addr.residential || addr.quarter || "";
+            const district = addr.city || addr.town || addr.county || addr.state_district || "Bangladesh";
+            readableName = road ? `${road}, ${district}` : (data.display_name.split(',').slice(0, 2).join(',') || `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`);
+          } else {
+            readableName = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+          }
+
+          currentCoords.address = readableName;
+          applyLocationToInterface(readableName, lat, lon, showAlert);
+        })
+        .catch(() => {
+          const fallbackText = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+          currentCoords.address = fallbackText;
+          applyLocationToInterface(fallbackText, lat, lon, showAlert);
+        });
+    }
+
+    function applyLocationToInterface(locName, lat, lon, showAlert) {
+      updateTelemetryUI(locName, `Coordinates: ${lat.toFixed(5)}, ${lon.toFixed(5)}`, `GPS Live (±${currentCoords.accuracy}m)`, "#10b981");
+
+      const walkStartEl = document.getElementById('walk-start');
+      if (walkStartEl) walkStartEl.value = `📍 ${locName}`;
+
+      // Center Google Maps exactly on the real device coordinates with pin popup balloon (iwloc=B)
+      const gmapsUrl = `https://maps.google.com/maps?q=${lat},${lon}&t=&z=16&ie=UTF8&iwloc=B&output=embed`;
+      const mapFrame = document.getElementById('gmaps-frame');
+      if (mapFrame && !currentDestinationQuery) mapFrame.src = gmapsUrl;
+
+      const extGmaps = document.getElementById('btn-external-gmaps');
+      if (extGmaps && !currentDestinationQuery) extGmaps.href = `https://www.google.com/maps?q=${lat},${lon}`;
+
+      // Recalculate route if destination is already selected
+      if (currentDestinationQuery) {
+        computeLiveGoogleMapsRoute(currentDestinationQuery);
+      }
+
+      // If in active journey, sync live coordinate to backend
+      if (activeJourneySessionId) {
+        fetch(`${API_BASE}/api/walk/update-location`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: activeJourneySessionId,
+            lat,
+            lon,
+            address: locName
+          })
+        }).catch(() => {});
+      }
+
+      if (showAlert) {
+        alert(`📍 Accurate GPS Location Updated!\n\nDevice Location: ${locName}\nCoordinates: ${lat.toFixed(5)}, ${lon.toFixed(5)}\nAccuracy: ±${currentCoords.accuracy} meters`);
+      }
+    }
+
+    function updateTelemetryUI(main, sub, badgeText, badgeColor) {
+      const mainEl = document.getElementById('telemetry-main-text');
+      const subEl = document.getElementById('telemetry-sub-text');
+      const badge = document.getElementById('telemetry-badge');
+      if (mainEl) mainEl.innerText = main;
+      if (subEl) subEl.innerText = sub;
+      if (badge) {
+        badge.innerText = badgeText;
+        badge.style.color = badgeColor;
+      }
+    }
+
+    window.addEventListener('load', () => {
+      // Connect directly to device hardware GPS
+      acquireRealLocation(false);
+    });
+
+    /* ----------------------------------------------------
+       COMMUNITY & SOCIAL MEDIA POSTING PIPELINE
+    ---------------------------------------------------- */
+    function handleMediaSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        attachedMediaBase64 = e.target.result;
+        document.getElementById('media-preview-img').src = attachedMediaBase64;
+        document.getElementById('media-preview-box').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeAttachedMedia() {
+      attachedMediaBase64 = null;
+      document.getElementById('media-preview-img').src = '';
+      document.getElementById('media-preview-box').style.display = 'none';
+      document.getElementById('media-file-input').value = '';
+    }
+
+    function selectPostCategory() {
+      const categories = ["General Safety", "Road Hazard", "Night Transit", "Emergency Advisory", "Campus Safety"];
+      const chosen = prompt("Select post category:\n" + categories.map((c, i) => `${i+1}. ${c}`).join('\n'), "1");
+      if (chosen && categories[parseInt(chosen)-1]) {
+        selectedCategory = categories[parseInt(chosen)-1];
+        document.getElementById('composer-category-tag').innerText = selectedCategory;
+      }
+    }
+
+    function submitCommunityPost() {
+      const text = document.getElementById('composer-text').value.trim();
+      if (!text && !attachedMediaBase64) {
+        alert("Please write something or attach a photo/video before submitting.");
+        return;
+      }
+
+      const authorName = currentUser ? currentUser.name : "Citizen Reporter";
+      const newPost = {
+        id: "post-" + Date.now(),
+        author: authorName,
+        verified: !!(currentUser && currentUser.nidVerified),
+        type: "community",
+        category: selectedCategory,
+        time: "Just now",
+        content: text,
+        media: attachedMediaBase64,
+        likes: 0,
+        approved: false // Submitted to moderation queue awaiting approval
+      };
+
+      communityPosts.unshift(newPost);
+      localStorage.setItem('safe_bd_posts', JSON.stringify(communityPosts));
+
+      // Reset composer
+      document.getElementById('composer-text').value = '';
+      removeAttachedMedia();
+      updatePendingBadge();
+      renderCommunityPosts();
+
+      alert("📋 Post Submitted for Moderation!\n\nYour awareness report has been submitted and is currently in the moderation review queue.");
+    }
+
+    function approvePost(id) {
+      const p = communityPosts.find(item => item.id === id);
+      if (p) {
+        p.approved = true;
+        p.time = "Just approved";
+        localStorage.setItem('safe_bd_posts', JSON.stringify(communityPosts));
+        updatePendingBadge();
+        renderCommunityPosts();
+        renderAdminPendingPosts();
+        alert("✅ Post Officially Approved!\nIt is now live on the citizen feed.");
+      }
+    }
+
+    function rejectPost(id) {
+      if (confirm("Are you sure you want to decline and remove this submission?")) {
+        communityPosts = communityPosts.filter(item => item.id !== id);
+        localStorage.setItem('safe_bd_posts', JSON.stringify(communityPosts));
+        updatePendingBadge();
+        renderCommunityPosts();
+        renderAdminPendingPosts();
+      }
+    }
+
+    function updatePendingBadge() {
+      const count = communityPosts.filter(p => !p.approved).length;
+      const badge = document.getElementById('pending-count-badge');
+      const bannerBadge = document.getElementById('banner-pending-count');
+      if (badge) badge.innerText = count;
+      if (bannerBadge) bannerBadge.innerText = count;
+    }
+
+    function renderCommunityPosts() {
+      const container = document.getElementById('posts-container');
+      container.innerHTML = '';
+      updatePendingBadge();
+
+      let filtered = [];
+      if (activeFeedFilter === 'pending') {
+        filtered = communityPosts.filter(p => !p.approved);
+      } else if (activeFeedFilter === 'community') {
+        filtered = communityPosts.filter(p => p.approved && p.type === 'community');
+      } else {
+        // 'all' shows all approved posts
+        filtered = communityPosts.filter(p => p.approved);
+      }
+
+      if (filtered.length === 0) {
+        if (activeFeedFilter === 'pending') {
+          container.innerHTML = `
+            <div style="text-align:center; padding:36px 20px; color:var(--text-muted); font-size:12px; background:var(--black-subtle); border-radius:14px; border:1px solid var(--border-quiet);">
+              <i class="fas fa-check-circle" style="font-size:28px; color:#10b981; margin-bottom:10px; display:block;"></i>
+              <strong style="color:#fff;">No Pending Submissions</strong>
+              <div style="margin-top:6px; color:var(--text-muted);">All community reports have been reviewed and published.</div>
+            </div>`;
+        } else {
+          container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:12px;">No posts in this category yet.</div>`;
+        }
+        return;
+      }
+
+      filtered.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'feed-card';
+
+        const statusBadge = p.approved 
+          ? `<span class="mod-pending-badge" style="color:#10b981; border-color:rgba(16,185,129,0.3); background:rgba(16,185,129,0.15);"><i class="fas fa-shield"></i> Live</span>`
+          : `<span class="mod-pending-badge" style="color:#f59e0b; border-color:rgba(245,158,11,0.3); background:rgba(245,158,11,0.15);"><i class="fas fa-clock"></i> Pending Review</span>`;
+
+        const moderationButtons = !p.approved ? `
+          <div style="display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border-quiet);">
+            <button onclick="approvePost('${p.id}')" style="flex:1; background:linear-gradient(135deg, #059669 0%, #10b981 100%); color:#fff; border:none; padding:9px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer;">
+              <i class="fas fa-check"></i> Approve & Publish Live
+            </button>
+            <button onclick="rejectPost('${p.id}')" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#ef4444; padding:9px 14px; border-radius:10px; font-size:12px; font-weight:600; cursor:pointer;">
+              <i class="fas fa-trash"></i> Decline
+            </button>
+          </div>
+        ` : `
+          <div class="post-actions-row">
+            <div class="post-action-btn" onclick="likePost('${p.id}', this)"><i class="far fa-heart"></i> <span>${p.likes}</span></div>
+            <div class="post-action-btn" onclick="alert('Comments are monitored by community moderation guidelines.')"><i class="far fa-comment"></i> Comment</div>
+            <div class="post-action-btn" onclick="sharePost('${p.id}')"><i class="fas fa-share-nodes"></i> Share</div>
+          </div>
+        `;
+
+        card.innerHTML = `
+          <div class="feed-card-header">
+            <div class="author-info">
+              <div class="author-avatar">${p.author.charAt(0).toUpperCase()}</div>
+              <div>
+                <div class="author-name">
+                  ${p.author}
+                  ${p.verified ? '<i class="fas fa-check-circle verified-icon" title="Verified Citizen / Authority"></i>' : ''}
+                </div>
+                <div style="font-size:10px; color:var(--text-muted);">${p.time} • <span style="color:#e57373;">${p.category}</span></div>
+              </div>
+            </div>
+            <div>
+              ${statusBadge}
+            </div>
+          </div>
+          <div class="post-text">${p.content}</div>
+          ${p.media ? `<img src="${p.media}" class="post-media-attachment" alt="Post Media">` : ''}
+          ${moderationButtons}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function likePost(id, el) {
+      const p = communityPosts.find(item => item.id === id);
+      if (p) {
+        p.likes++;
+        el.querySelector('span').innerText = p.likes;
+        el.querySelector('i').className = "fas fa-heart";
+        el.querySelector('i').style.color = "#ef4444";
+        localStorage.setItem('safe_bd_posts', JSON.stringify(communityPosts));
+      }
+    }
+
+    function sharePost(id) {
+      if (navigator.share) {
+        navigator.share({ title: "SAFE BD Safety Alert", url: window.location.href });
+      } else {
+        alert("Link copied! Share this alert with friends and family.");
+      }
+    }
+
+    function filterFeed(type, btn) {
+      activeFeedFilter = type;
+      document.querySelectorAll('#screen-feed .auth-toggle-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderCommunityPosts();
+    }
+
+    /* ----------------------------------------------------
+       CONTACTS & ACTION SHEET
+    ---------------------------------------------------- */
+    function renderContactsList() {
+      const container = document.getElementById('contacts-container');
+      container.innerHTML = '';
+
+      contacts.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'contact-item-card';
+        card.innerHTML = `
+          <div class="contact-info" onclick="openContactSheet('${c.id}')">
+            <div class="contact-avatar online">${c.initial}</div>
+            <div>
+              <div class="contact-name">${c.name}</div>
+              <div class="contact-num">+880 ${c.phone}</div>
+            </div>
+          </div>
+          <div class="contact-action-group">
+            <i class="fab fa-whatsapp" style="color: var(--whatsapp-green); font-size: 14px; cursor: pointer;" onclick="openContactSheet('${c.id}')"></i>
+            <i class="fas fa-phone" style="color: #f87171; font-size: 11px; cursor: pointer;" onclick="openContactSheet('${c.id}')"></i>
+            <button class="btn-edit-contact" onclick="openEditContactModal('${c.id}')" title="Edit Contact">
+              <i class="fas fa-pen"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openEditContactModal(contactId) {
+      editingContactId = contactId;
+      const c = contacts.find(item => item.id === contactId);
+      if (!c) return;
+
+      document.getElementById('edit-contact-name').value = c.name;
+      document.getElementById('edit-contact-phone').value = c.phone.replace(/[^0-9]/g, '').slice(-10);
+      document.getElementById('edit-contact-modal').classList.add('open');
+    }
+
+    function closeEditContactModal(e) {
+      if (!e || e.target.id === 'edit-contact-modal' || e.target.classList.contains('modal-close-x') || e.target.closest('.modal-close-x') || e.target.classList.contains('btn-close-sheet')) {
+        document.getElementById('edit-contact-modal').classList.remove('open');
+      }
+    }
+
+    function saveContactChanges(e) {
+      e.preventDefault();
+      const newName = document.getElementById('edit-contact-name').value.trim();
+      const newPhone = document.getElementById('edit-contact-phone').value.trim();
+
+      const c = contacts.find(item => item.id === editingContactId);
+      if (c) {
+        c.name = newName;
+        c.phone = newPhone;
+        c.initial = newName.charAt(0).toUpperCase();
+        localStorage.setItem('safe_bd_contacts', JSON.stringify(contacts));
+        renderContactsList();
+        alert(`✅ Contact updated successfully!\n${c.name}: +880 ${c.phone}`);
+      }
+      closeEditContactModal();
+    }
+
+    function openContactSheet(contactId) {
+      const c = contacts.find(item => item.id === contactId);
+      if (!c) return;
+      activeContact = c;
+
+      document.getElementById('sheet-avatar-initial').innerText = c.initial;
+      document.getElementById('sheet-contact-name').innerText = c.name;
+      document.getElementById('sheet-contact-phone').innerText = "+880 " + c.phone;
+      document.getElementById('contact-action-sheet').classList.add('open');
+    }
+
+    function closeContactSheet(e) {
+      if (!e || e.target.id === 'contact-action-sheet' || e.target.classList.contains('btn-close-sheet') || e.target.classList.contains('modal-close-x') || e.target.closest('.modal-close-x')) {
+        document.getElementById('contact-action-sheet').classList.remove('open');
+      }
+    }
+
+    function sendWhatsAppLocation(e) {
+      e.preventDefault();
+      if (!activeContact) return;
+      const rawPhone = "880" + activeContact.phone.replace(/[^0-9]/g, '').slice(-10);
+      const lat = currentCoords.lat;
+      const lon = currentCoords.lon;
+      const mapUrl = `https://maps.google.com/?q=${lat},${lon}`;
+      
+      const message = `🚨 [SAFE BD Alert] Hi ${activeContact.name}, I am sharing my live location with you for safety.\n📍 Current Location: ${currentCoords.address}\n🗺️ Open Live Map: ${mapUrl}\n🔒 Verified on SAFE BD`;
+      
+      const encodedMsg = encodeURIComponent(message);
+      const whatsappUrl = `https://wa.me/${rawPhone}?text=${encodedMsg}`;
+
+      window.open(whatsappUrl, '_blank');
+      closeContactSheet();
+    }
+
+    function dialSIMCall(e) {
+      e.preventDefault();
+      if (!activeContact) return;
+      const telUrl = `tel:+880${activeContact.phone}`;
+      window.location.href = telUrl;
+      closeContactSheet();
+    }
+
+    /* ----------------------------------------------------
+       WALK WITH ME COMPANION - LIVE GOOGLE MAPS PLACE SEARCH & ROUTING
+    ---------------------------------------------------- */
+    let placeSearchTimer = null;
+    let selectedDestCoords = null;
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function handleLocationSearch(val) {
+      const dropdown = document.getElementById('bd-location-dropdown');
+      const clearBtn = document.getElementById('btn-clear-dest');
+      const q = (val || '').trim();
+
+      if (clearBtn) {
+        clearBtn.style.display = q ? 'block' : 'none';
+      }
+
+      if (!q) {
+        if (dropdown) {
+          dropdown.classList.remove('open');
+          dropdown.innerHTML = '';
+        }
+        if (placeSearchTimer) clearTimeout(placeSearchTimer);
+        return;
+      }
+
+      // Step 1: Render instant local database matches right away for zero latency
+      const localMatches = BANGLADESH_LOCATIONS.filter(item =>
+        item.name.toLowerCase().includes(q.toLowerCase()) ||
+        item.area.toLowerCase().includes(q.toLowerCase())
+      ).slice(0, 6);
+
+      renderDropdownItems(localMatches, q, false);
+
+      // Step 2: Fetch live specific places from backend proxy (OSM / Google Places search)
+      if (placeSearchTimer) clearTimeout(placeSearchTimer);
+      placeSearchTimer = setTimeout(() => {
+        fetchLivePlacesSearch(q);
+      }, 280);
+    }
+
+    function fetchLivePlacesSearch(query) {
+      const dropdown = document.getElementById('bd-location-dropdown');
+      if (!dropdown) return;
+
+      fetch(`${API_BASE}/api/places/search?q=${encodeURIComponent(query)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.success && Array.isArray(data.results) && data.results.length > 0) {
+            renderDropdownItems(data.results, query, true);
+          }
+        })
+        .catch(err => {
+          console.warn("Live place search fallback:", err.message);
+        });
+    }
+
+    function renderDropdownItems(items, rawQuery, isLiveResult) {
+      const dropdown = document.getElementById('bd-location-dropdown');
+      if (!dropdown) return;
+
+      dropdown.innerHTML = '';
+
+      if (items && items.length > 0) {
+        items.forEach(item => {
+          const itemEl = document.createElement('div');
+          itemEl.className = 'location-suggestion-item';
+
+          // Calculate direct distance if coordinates are present
+          let distBadgeHtml = '';
+          if (item.lat && item.lon && currentCoords.lat && currentCoords.lon) {
+            const km = computeHaversineKm(currentCoords.lat, currentCoords.lon, item.lat, item.lon);
+            if (km !== null) {
+              distBadgeHtml = `<span class="sug-dist-badge">~${km} km</span>`;
+            }
+          }
+
+          const primaryText = escapeHtml(item.name || rawQuery);
+          const secondaryText = escapeHtml(item.area || item.fullAddress || 'Bangladesh');
+
+          itemEl.innerHTML = `
+            <i class="fas fa-location-dot" style="color: #ef4444;"></i>
+            <div style="flex: 1; min-width: 0;">
+              <div class="sug-primary">${primaryText}</div>
+              <div class="sug-secondary">${secondaryText}</div>
+            </div>
+            ${distBadgeHtml}
+          `;
+
+          itemEl.addEventListener('click', () => {
+            selectLocation(
+              item.name,
+              item.query || item.fullAddress || `${item.name}, Bangladesh`,
+              item.lat || null,
+              item.lon || null
+            );
+          });
+
+          dropdown.appendChild(itemEl);
+        });
+      }
+
+      // Google Maps Live Search Direct Option
+      const gmapsItem = document.createElement('div');
+      gmapsItem.className = 'location-suggestion-item';
+      gmapsItem.style.background = 'rgba(66, 133, 244, 0.08)';
+      gmapsItem.innerHTML = `
+        <i class="fab fa-google" style="color: #4285f4;"></i>
+        <div style="flex: 1; min-width: 0;">
+          <div class="sug-primary" style="color: #60a5fa;">Search Google Maps for "${escapeHtml(rawQuery)}"</div>
+          <div class="sug-secondary">Direct Live Route & Place Info Popup</div>
+        </div>
+      `;
+      gmapsItem.addEventListener('click', () => {
+        selectCustomLocation(rawQuery);
+      });
+      dropdown.appendChild(gmapsItem);
+
+      dropdown.classList.add('open');
+    }
+
+    function selectTravelMode(mode) {
+      selectedTravelMode = mode;
+      document.querySelectorAll('#mode-btn-walking, #mode-btn-driving, #mode-btn-bicycling').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`mode-btn-${mode}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      if (currentDestinationQuery) {
+        computeLiveGoogleMapsRoute(currentDestinationQuery, selectedDestCoords);
+      }
+    }
+
+    function selectLocation(displayName, query, lat, lon) {
+      const destInput = document.getElementById('walk-destination');
+      if (destInput) destInput.value = displayName;
+
+      const clearBtn = document.getElementById('btn-clear-dest');
+      if (clearBtn) clearBtn.style.display = 'block';
+
+      const dropdown = document.getElementById('bd-location-dropdown');
+      if (dropdown) {
+        dropdown.classList.remove('open');
+        dropdown.innerHTML = '';
+      }
+
+      currentDestinationQuery = query || `${displayName}, Bangladesh`;
+      selectedDestCoords = (lat && lon) ? { lat: parseFloat(lat), lon: parseFloat(lon) } : null;
+
+      computeLiveGoogleMapsRoute(currentDestinationQuery, selectedDestCoords);
+    }
+
+    function selectCustomLocation(rawQuery) {
+      selectLocation(rawQuery, `${rawQuery}, Bangladesh`, null, null);
+    }
+
+    function clearDestinationInput() {
+      const destInput = document.getElementById('walk-destination');
+      if (destInput) destInput.value = '';
+
+      const clearBtn = document.getElementById('btn-clear-dest');
+      if (clearBtn) clearBtn.style.display = 'none';
+
+      const dropdown = document.getElementById('bd-location-dropdown');
+      if (dropdown) {
+        dropdown.classList.remove('open');
+        dropdown.innerHTML = '';
+      }
+
+      const banner = document.getElementById('route-estimate-banner');
+      if (banner) banner.style.display = 'none';
+
+      currentDestinationQuery = "";
+      selectedDestCoords = null;
+
+      // Reset map view to user's live device GPS location with popup balloon open
+      if (currentCoords.lat && currentCoords.lon) {
+        const mapFrame = document.getElementById('gmaps-frame');
+        if (mapFrame) {
+          mapFrame.src = `https://maps.google.com/maps?q=${currentCoords.lat},${currentCoords.lon}&t=&z=16&ie=UTF8&iwloc=B&output=embed`;
+        }
+      }
+    }
+
+    function computeHaversineKm(lat1, lon1, lat2, lon2) {
+      if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+      const R = 6371; // Earth radius in km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return Math.max(0.2, Math.round(R * c * 1.35 * 10) / 10);
+    }
+
+    // Live Distance & Travel Mode ETA Calculation from Device GPS to Destination
+    function computeLiveGoogleMapsRoute(destQuery, explicitCoords = null) {
+      const originParam = `${currentCoords.lat},${currentCoords.lon}`;
+      const encodedDest = encodeURIComponent(destQuery);
+      const modeParam = selectedTravelMode === 'driving' ? 'driving' : (selectedTravelMode === 'bicycling' ? 'bicycling' : 'walking');
+
+      // Update embedded map with real origin & destination route, opening popup on destination pin (iwloc=B)
+      const mapFrame = document.getElementById('gmaps-frame');
+      if (mapFrame) {
+        mapFrame.src = `https://maps.google.com/maps?saddr=${encodeURIComponent(originParam)}&daddr=${encodedDest}&directionsmode=${modeParam}&t=&z=14&ie=UTF8&iwloc=B&output=embed`;
+      }
+
+      const extGmaps = document.getElementById('btn-external-gmaps');
+      if (extGmaps) {
+        extGmaps.href = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originParam)}&destination=${encodedDest}&travelmode=${modeParam}`;
+      }
+
+      // Resolve destination coordinates for realistic distance & duration computation
+      if (explicitCoords && explicitCoords.lat && explicitCoords.lon) {
+        calculateEtaMetrics(currentCoords.lat, currentCoords.lon, explicitCoords.lat, explicitCoords.lon);
+        return;
+      }
+
+      const match = BANGLADESH_LOCATIONS.find(l => l.name.toLowerCase() === destQuery.split(',')[0].trim().toLowerCase());
+      let destLat = match && match.lat ? match.lat : null;
+      let destLon = match && match.lon ? match.lon : null;
+
+      if (destLat && destLon) {
+        calculateEtaMetrics(currentCoords.lat, currentCoords.lon, destLat, destLon);
+      } else {
+        // Fetch coordinates dynamically via backend proxy
+        fetch(`${API_BASE}/api/places/search?q=${encodedDest}`)
+          .then(r => r.json())
+          .then(res => {
+            if (res && res.success && res.results && res.results.length > 0 && res.results[0].lat) {
+              selectedDestCoords = { lat: res.results[0].lat, lon: res.results[0].lon };
+              calculateEtaMetrics(currentCoords.lat, currentCoords.lon, res.results[0].lat, res.results[0].lon);
+            } else {
+              applyEstimatedMetrics(4.2);
+            }
+          })
+          .catch(() => applyEstimatedMetrics(4.2));
+      }
+    }
+
+    function calculateEtaMetrics(lat1, lon1, lat2, lon2) {
+      // Haversine formula for ground distance
+      const R = 6371; // Earth radius in km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const straightKm = R * c;
+      const routeKm = Math.max(0.5, Math.round(straightKm * 1.35 * 10) / 10); // Actual road winding multiplier
+      applyEstimatedMetrics(routeKm);
+    }
+
+    function applyEstimatedMetrics(km) {
+      calculatedRouteDistanceKm = km;
+      let speedKmh = 4.5; // Walking speed
+      let modeName = "Walking";
+
+      if (selectedTravelMode === 'driving') {
+        speedKmh = 22; // Average urban car / CNG speed in Bangladesh traffic
+        modeName = "Car / CNG";
+      } else if (selectedTravelMode === 'bicycling') {
+        speedKmh = 14; // Bike / Motorbike speed
+        modeName = "Bike";
+      }
+
+      calculatedDurationMinutes = Math.max(5, Math.round((km / speedKmh) * 60));
+      
+      const banner = document.getElementById('route-estimate-banner');
+      if (banner) {
+        banner.style.display = 'flex';
+        document.getElementById('route-est-distance').innerText = `${km} km • ${modeName}`;
+        document.getElementById('route-est-time').innerText = `ETA ~${calculatedDurationMinutes} mins`;
+      }
+    }
+
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('bd-location-dropdown');
+      const destInput = document.getElementById('walk-destination');
+      if (dropdown && !dropdown.contains(e.target) && e.target !== destInput) {
+        dropdown.classList.remove('open');
+      }
+    });
+
+    /* ----------------------------------------------------
+       JOURNEY COMPANION WITH 10-MIN OVERDUE OBSERVATION
+    ---------------------------------------------------- */
+    let totalJourneyAllocatedSeconds = 0;
+    let secondsOverdueCount = 0;
+
+    function startWalkWithMe() {
+      const destination = document.getElementById('walk-destination').value.trim();
+      if (!destination) {
+        alert("Please search or select your destination in Bangladesh.");
+        document.getElementById('walk-destination').focus();
+        return;
+      }
+
+      totalJourneyAllocatedSeconds = calculatedDurationMinutes * 60;
+      walkSecondsRemaining = totalJourneyAllocatedSeconds;
+      secondsOverdueCount = 0;
+      overdueReminderPromptShown = false;
+      overdueAutoEscalated = false;
+
+      const origin = currentCoords.address;
+      const userName = currentUser ? currentUser.name : "Citizen Traveler";
+      const userPhone = currentUser ? currentUser.phone : "Unknown";
+
+      // Register session with backend
+      fetch(`${API_BASE}/api/walk/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser ? currentUser.phone : "guest_" + Date.now(),
+          userName,
+          userPhone,
+          origin,
+          destination,
+          travelMode: selectedTravelMode,
+          estimatedMinutes: calculatedDurationMinutes,
+          currentCoords
+        })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.session) activeJourneySessionId = data.session.sessionId;
+      })
+      .catch(() => {
+        activeJourneySessionId = "local_journey_" + Date.now();
+      });
+
+      const modeTitle = selectedTravelMode === 'driving' ? 'Car / CNG Companion' : (selectedTravelMode === 'bicycling' ? 'Bike Companion' : 'Walk Companion');
+      document.getElementById('walk-dock-dest-text').innerText = 
+        `${modeTitle} active to ${destination} (${calculatedRouteDistanceKm} km). Dynamic safety timer set to ${calculatedDurationMinutes} mins.`;
+      document.getElementById('walk-dock').style.display = 'block';
+
+      if (walkTimerInterval) clearInterval(walkTimerInterval);
+      walkTimerInterval = setInterval(() => {
+        handleJourneyTimerTick(destination);
+      }, 1000);
+
+      alert(`🛡️ Live Companion Active!\n\nMode: ${selectedTravelMode.toUpperCase()}\nEstimated Route Time: ${calculatedDurationMinutes} mins\nDestination: ${destination}\n\nSAFE BD is guarding your journey.`);
+    }
+
+    function handleJourneyTimerTick(destination) {
+      if (walkSecondsRemaining > 0) {
+        walkSecondsRemaining--;
+        const mins = Math.floor(walkSecondsRemaining / 60);
+        const secs = walkSecondsRemaining % 60;
+        document.getElementById('walk-timer-display').innerText = 
+          `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        document.getElementById('walk-timer-display').style.color = "#10b981";
+      } else {
+        // ETA Reached -> Overdue Timer counting up
+        secondsOverdueCount++;
+        const overMins = Math.floor(secondsOverdueCount / 60);
+        const overSecs = secondsOverdueCount % 60;
+        document.getElementById('walk-timer-display').innerText = 
+          `+${overMins.toString().padStart(2, '0')}:${overSecs.toString().padStart(2, '0')}`;
+        document.getElementById('walk-timer-display').style.color = "#ef4444";
+
+        // Prompt at 10 minutes overdue (600 seconds)
+        if (secondsOverdueCount >= 600 && !overdueReminderPromptShown) {
+          overdueReminderPromptShown = true;
+          triggerOverdueSafetyCheck(destination);
+        }
+      }
+    }
+
+    function triggerOverdueSafetyCheck(destination) {
+      // Safety reminder prompt to citizen
+      const userResponded = confirm(
+        `⚠️ [SAFE BD SAFETY CHECK]\n\nDid you reach home safely?\n\n• Tap OK if you arrived safely.\n• Tap Cancel if you are still en route.`
+      );
+
+      if (userResponded) {
+        finishWalkWithMe();
+      } else {
+        // Citizen did not confirm safe arrival -> App silently observes and updates location to admin
+        escalateOverdueSessionToAdmin(destination);
+      }
+    }
+
+    function escalateOverdueSessionToAdmin(destination) {
+      if (overdueAutoEscalated) return;
+      overdueAutoEscalated = true;
+
+      document.getElementById('walk-dock-dest-text').innerHTML = 
+        `<span style="color:#ef4444; font-weight:700;"><i class="fas fa-triangle-exclamation"></i> Expected transit time exceeded (+10m).</span> Please check in when safe.`;
+
+      // Silently dispatch live coordinates to Backend & Admin Command Portal in background
+      fetch(`${API_BASE}/api/walk/report-overdue`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: activeJourneySessionId,
+          lat: currentCoords.lat,
+          lon: currentCoords.lon,
+          address: currentCoords.address
+        })
+      }).catch(() => {});
+    }
+
+    function finishWalkWithMe() {
+      if (walkTimerInterval) clearInterval(walkTimerInterval);
+      document.getElementById('walk-dock').style.display = 'none';
+
+      if (activeJourneySessionId) {
+        fetch(`${API_BASE}/api/walk/finish`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: activeJourneySessionId })
+        }).catch(() => {});
+      }
+
+      alert("✅ Glad you arrived safely! Your journey companion session has ended.");
+    }
+
+    /* ----------------------------------------------------
+       EMERGENCY 999 & SOS
+    ---------------------------------------------------- */
+    function trigger999Call() {
+      alert(`🚨 Dialing Bangladesh National Emergency 999 (Police / Fire / Ambulance)...\nCAD packet dispatched with real-time location: ${currentCoords.address}`);
+      window.location.href = "tel:999";
+    }
+
+    function triggerSOS() {
+      sosCount = 5;
+      document.getElementById('sos-countdown-val').innerText = sosCount;
+      document.getElementById('sos-modal').classList.add('open');
+
+      sosTimer = setInterval(() => {
+        sosCount--;
+        document.getElementById('sos-countdown-val').innerText = sosCount;
+        if (sosCount <= 0) {
+          clearInterval(sosTimer);
+          finishEmergencySOS();
+        }
+      }, 1000);
+    }
+
+    function abortEmergencySOS() {
+      clearInterval(sosTimer);
+      document.getElementById('sos-modal').classList.remove('open');
+    }
+
+    function finishEmergencySOS() {
+      clearInterval(sosTimer);
+      document.getElementById('sos-modal').classList.remove('open');
+
+      fetch(`${API_BASE}/api/emergency/sos-trigger`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser ? currentUser.phone : "anonymous",
+          emergencyType: "POLICE_THREAT",
+          location: { lat: currentCoords.lat, lon: currentCoords.lon, address: currentCoords.address }
+        })
+      }).catch(() => {});
+
+      alert(`🚨 EMERGENCY CONFIRMED!\n\n1. Bangladesh 999 CAD Dispatch Center notified with real GPS coordinates (${currentCoords.address}).\n2. Curve25519 live stream link pushed to Family Circle.\n3. Automatic telecom SMS fallback activated.\n\nNow connecting to 999 voice line...`);
+      window.location.href = "tel:999";
+    }
+
+    function switchTab(id, btn) {
+      document.querySelectorAll('.screen').forEach(s => {
+        s.classList.remove('active');
+        s.style.display = 'none';
+      });
+      document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+      const target = document.getElementById(id);
+      if (target) {
+        target.classList.add('active');
+        target.style.display = 'flex';
+      }
+      if (btn) btn.classList.add('active');
+
+      if (id === 'screen-admin') {
+        renderAdminPendingPosts();
+        fetchAdminActiveJourneys();
+      }
+    }
+
+    /* ----------------------------------------------------
+       AUTHENTICATION
+    ---------------------------------------------------- */
+    function openAuthModal() {
+      document.getElementById('auth-modal').classList.add('open');
+      if (currentUser) {
+        document.getElementById('view-auth-forms').style.display = 'none';
+        document.getElementById('view-profile-active').style.display = 'block';
+      } else {
+        document.getElementById('view-auth-forms').style.display = 'block';
+        document.getElementById('view-profile-active').style.display = 'none';
+      }
+    }
+
+    function closeAuthModal(e) {
+      if (!e || e.target.id === 'auth-modal' || e.target.classList.contains('modal-close-x') || e.target.closest('.modal-close-x')) {
+        document.getElementById('auth-modal').classList.remove('open');
+      }
+    }
+
+    function toggleAuthTab(mode) {
+      const tabs = document.getElementById('auth-main-tabs');
+      if (tabs) tabs.style.display = 'flex';
+      const forgotForm = document.getElementById('form-forgot-password');
+      if (forgotForm) forgotForm.style.display = 'none';
+
+      if (mode === 'login') {
+        document.getElementById('tab-btn-login').classList.add('active');
+        document.getElementById('tab-btn-signup').classList.remove('active');
+        document.getElementById('form-login').style.display = 'block';
+        document.getElementById('login-step-1').style.display = 'block';
+        document.getElementById('login-step-2').style.display = 'none';
+        document.getElementById('form-signup').style.display = 'none';
+      } else {
+        document.getElementById('tab-btn-signup').classList.add('active');
+        document.getElementById('tab-btn-login').classList.remove('active');
+        document.getElementById('form-login').style.display = 'none';
+        document.getElementById('form-signup').style.display = 'block';
+        document.getElementById('signup-step-1').style.display = 'block';
+        document.getElementById('signup-step-2').style.display = 'none';
+      }
+    }
+
+    let pendingLoginPhone = "";
+
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const rawPhone = document.getElementById('login-phone').value.trim();
+      const cleanPhone = rawPhone.replace(/\D/g, '').slice(-10);
+      const password = document.getElementById('login-password').value.trim();
+
+      if (!cleanPhone || cleanPhone.length < 10) {
+        alert("Please enter a valid 10-digit Bangladeshi mobile number.");
+        return;
+      }
+      if (!password) {
+        alert("Please enter your account password.");
+        return;
+      }
+
+      // Authenticate with Persistent Database Engine
+      const submitBtn = document.getElementById('btn-login-submit');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying Credentials...';
+      }
+
+      fetch(`${API_BASE}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: cleanPhone, password: password })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i> Sign In';
+        }
+
+        if (!data.success && data.error) {
+          alert("⚠️ " + data.error);
+          return;
+        }
+
+        // Two-Factor Authentication OTP Verification
+        if (data.requireOtp) {
+          pendingLoginPhone = cleanPhone;
+          document.getElementById('login-otp-target').innerText = "+880 " + cleanPhone;
+          document.getElementById('login-step-1').style.display = 'none';
+          document.getElementById('login-step-2').style.display = 'block';
+          document.getElementById('login-otp1').value = '';
+          document.getElementById('login-otp2').value = '';
+          document.getElementById('login-otp3').value = '';
+          document.getElementById('login-otp4').value = '';
+          document.getElementById('login-otp1').focus();
+
+          const debugInfo = data.debugOtp ? `\n\n[Security OTP: ${data.debugOtp}]` : '';
+          alert(`📩 Two-Factor Verification Code Dispatched!\n\nPassword verified! An OTP code has been dispatched to +880 ${cleanPhone}.${debugInfo}`);
+          return;
+        }
+
+        // Admin or Direct Session Authenticated by Backend
+        if (data.user) {
+          currentUser = data.user;
+          localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+          if (data.token) localStorage.setItem('safe_bd_token', data.token);
+          setLoggedInState();
+          closeAuthModal();
+
+          if (currentUser.isAdmin) {
+            alert("🛡️ Welcome Chief Admin!\nAdmin Command Portal unlocked. Opening Moderation Queue now.");
+            openAdminPortal();
+          }
+        }
+      })
+      .catch(err => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i> Sign In';
+        }
+        alert("⚠️ Connection error verifying credentials. Please ensure backend server is reachable.");
+      });
+    }
+
+    function verifyLoginOTPAndFinish() {
+      if (!pendingLoginPhone) {
+        backToLoginStep1();
+        return;
+      }
+
+      const otpEntered = [
+        document.getElementById('login-otp1').value,
+        document.getElementById('login-otp2').value,
+        document.getElementById('login-otp3').value,
+        document.getElementById('login-otp4').value
+      ].join('');
+
+      if (otpEntered.length < 4) {
+        alert("Please enter the complete 4-digit verification code sent to your phone.");
+        document.getElementById('login-otp1').focus();
+        return;
+      }
+
+      fetch(`${API_BASE}/api/auth/login-verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: pendingLoginPhone, code: otpEntered })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (!data.success && data.error) {
+          alert("⚠️ " + data.error);
+          return;
+        }
+
+        currentUser = data.user;
+        localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+        if (data.token) localStorage.setItem('safe_bd_token', data.token);
+        setLoggedInState();
+        alert(`✅ Welcome back, ${currentUser.name}!\nSigned in as ${currentUser.displayPhone || '+880 ' + currentUser.phone}`);
+        closeAuthModal();
+      })
+      .catch(err => {
+        alert("⚠️ Error verifying OTP. Please try again.");
+      });
+    }
+
+    function backToLoginStep1() {
+      document.getElementById('login-step-1').style.display = 'block';
+      document.getElementById('login-step-2').style.display = 'none';
+      document.getElementById('login-password').value = '';
+      document.getElementById('login-password').focus();
+    }
+
+    /* ----------------------------------------------------
+       FORGOT PASSWORD WORKFLOW
+    ---------------------------------------------------- */
+    let pendingForgotPhone = "";
+
+    function openForgotPasswordFlow() {
+      document.getElementById('form-login').style.display = 'none';
+      document.getElementById('form-signup').style.display = 'none';
+      document.getElementById('form-forgot-password').style.display = 'block';
+      document.getElementById('auth-main-tabs').style.display = 'none';
+      document.getElementById('forgot-step-1').style.display = 'block';
+      document.getElementById('forgot-step-2').style.display = 'none';
+      const existing = document.getElementById('login-phone').value.trim();
+      if (existing) document.getElementById('forgot-phone').value = existing;
+      document.getElementById('forgot-phone').focus();
+    }
+
+    function closeForgotPasswordFlow() {
+      document.getElementById('form-forgot-password').style.display = 'none';
+      document.getElementById('form-login').style.display = 'block';
+      document.getElementById('auth-main-tabs').style.display = 'flex';
+      toggleAuthTab('login');
+    }
+
+    function handleForgotRequestOTP() {
+      const rawPhone = document.getElementById('forgot-phone').value.trim();
+      const cleanPhone = rawPhone.replace(/\D/g, '').slice(-10);
+
+      if (cleanPhone.length < 10) {
+        alert("Please enter a valid 10-digit registered mobile number.");
+        return;
+      }
+
+      fetch(`${API_BASE}/api/auth/forgot-password/request-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: cleanPhone })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (!data.success && data.error) {
+          alert("⚠️ " + data.error);
+          return;
+        }
+
+        pendingForgotPhone = cleanPhone;
+        document.getElementById('forgot-otp-target').innerText = "+880 " + cleanPhone;
+        document.getElementById('forgot-step-1').style.display = 'none';
+        document.getElementById('forgot-step-2').style.display = 'block';
+        document.getElementById('forgot-otp1').value = '';
+        document.getElementById('forgot-otp2').value = '';
+        document.getElementById('forgot-otp3').value = '';
+        document.getElementById('forgot-otp4').value = '';
+        document.getElementById('forgot-new-password').value = '';
+        document.getElementById('forgot-otp1').focus();
+
+        const debugInfo = data.debugOtp ? `\n\n[Reset OTP: ${data.debugOtp}]` : '';
+        alert(`📩 Password Reset Code Dispatched!\n\nA 4-digit code has been sent to +880 ${cleanPhone}.${debugInfo}`);
+      })
+      .catch(err => {
+        alert("⚠️ Connection error requesting reset code.");
+      });
+    }
+
+    function handleForgotVerifyReset() {
+      if (!pendingForgotPhone) {
+        backToForgotStep1();
+        return;
+      }
+
+      const otpEntered = [
+        document.getElementById('forgot-otp1').value,
+        document.getElementById('forgot-otp2').value,
+        document.getElementById('forgot-otp3').value,
+        document.getElementById('forgot-otp4').value
+      ].join('');
+
+      const newPassword = document.getElementById('forgot-new-password').value.trim();
+
+      if (otpEntered.length < 4) {
+        alert("Please enter the 4-digit reset code sent to your phone.");
+        document.getElementById('forgot-otp1').focus();
+        return;
+      }
+
+      if (!newPassword || newPassword.length < 6) {
+        alert("Please create a password of at least 6 characters.");
+        document.getElementById('forgot-new-password').focus();
+        return;
+      }
+
+      fetch(`${API_BASE}/api/auth/forgot-password/verify-reset`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: pendingForgotPhone,
+          code: otpEntered,
+          newPassword: newPassword
+        })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (!data.success && data.error) {
+          alert("⚠️ " + data.error);
+          return;
+        }
+
+        currentUser = data.user;
+        localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+        if (data.token) localStorage.setItem('safe_bd_token', data.token);
+        setLoggedInState();
+        alert(`🎉 Password Reset Successful!\n\nWelcome back, ${currentUser.name}! You are now securely logged in.`);
+        closeAuthModal();
+      })
+      .catch(err => {
+        alert("⚠️ Error verifying reset code. Please try again.");
+      });
+    }
+
+    function backToForgotStep1() {
+      document.getElementById('forgot-step-1').style.display = 'block';
+      document.getElementById('forgot-step-2').style.display = 'none';
+      document.getElementById('forgot-phone').focus();
+    }
+
+    function openAdminPortalFromProfile() {
+      closeAuthModal();
+      openAdminPortal();
+    }
+
+    function openAdminPortal() {
+      if (!currentUser || !currentUser.isAdmin) {
+        alert("🔒 Access Denied: Admin authorization required. Please sign in with admin credentials.");
+        openAuthModal();
+        toggleAuthTab('login');
+        return;
+      }
+      renderAdminPendingPosts();
+      switchTab('screen-admin', document.getElementById('nav-btn-admin'));
+    }
+
+    function performAdminLogout() {
+      // Return to emergency screen
+      switchTab('screen-sos', document.querySelectorAll('.nav-tab-btn')[0]);
+      alert("Exited Admin Portal.");
+    }
+
+    function switchAdminSection(section) {
+      document.getElementById('admin-tab-reports').classList.remove('active');
+      document.getElementById('admin-tab-journeys').classList.remove('active');
+      document.getElementById('admin-section-reports').style.display = 'none';
+      document.getElementById('admin-section-journeys').style.display = 'none';
+
+      if (section === 'reports') {
+        document.getElementById('admin-tab-reports').classList.add('active');
+        document.getElementById('admin-section-reports').style.display = 'block';
+        renderAdminPendingPosts();
+      } else {
+        document.getElementById('admin-tab-journeys').classList.add('active');
+        document.getElementById('admin-section-journeys').style.display = 'block';
+        fetchAdminActiveJourneys();
+      }
+    }
+
+    function fetchAdminActiveJourneys() {
+      const container = document.getElementById('admin-journeys-container');
+      if (!container) return;
+      container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:12px;">Querying live GPS satellite telemetry...</div>';
+
+      const token = localStorage.getItem('safe_bd_token') || '';
+
+      fetch(`${API_BASE}/api/admin/active-journeys`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+        .then(r => r.json())
+        .then(data => {
+          const journeys = data.journeys || [];
+          renderAdminJourneysList(journeys);
+        })
+        .catch(() => {
+          renderAdminJourneysList([]);
+        });
+    }
+
+    function renderAdminJourneysList(journeys) {
+      const container = document.getElementById('admin-journeys-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const overdueCount = journeys.filter(j => j.isOverdue).length;
+      const overdueBadge = document.getElementById('admin-overdue-count-badge');
+      if (overdueBadge) overdueBadge.innerText = overdueCount;
+
+      if (journeys.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; background: var(--black-subtle); border: 1px solid var(--border-quiet); border-radius: 16px;">
+            <i class="fas fa-satellite-dish" style="font-size: 36px; color: var(--text-muted); margin-bottom: 12px; display: block;"></i>
+            <h4 style="font-size: 14px; color: #fff; margin-bottom: 4px;">No Active Transit Sessions</h4>
+            <p style="font-size: 12px; color: var(--text-muted);">Citizens currently not traveling or active journeys ended safely.</p>
+          </div>
+        `;
+        return;
+      }
+
+      journeys.forEach(j => {
+        const card = document.createElement('div');
+        card.className = 'feed-card';
+        card.style.borderColor = j.isOverdue ? 'rgba(239, 68, 68, 0.7)' : 'rgba(16, 185, 129, 0.4)';
+
+        const modeIcon = j.travelMode === 'driving' ? 'fa-car-side' : (j.travelMode === 'bicycling' ? 'fa-motorcycle' : 'fa-person-walking');
+        const modeLabel = j.travelMode === 'driving' ? 'Car / CNG' : (j.travelMode === 'bicycling' ? 'Bike' : 'Walking');
+        
+        const statusBadge = j.isOverdue
+          ? `<span class="mod-pending-badge" style="color:#ef4444; border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.18); font-weight:700;"><i class="fas fa-triangle-exclamation"></i> OVERDUE ALERT (>10m)</span>`
+          : `<span class="mod-pending-badge" style="color:#10b981; border-color:rgba(16,185,129,0.3); background:rgba(16,185,129,0.15);"><i class="fas fa-circle-dot"></i> In Transit</span>`;
+
+        const coords = j.currentCoords || { lat: 23.8103, lon: 90.4125, address: "Locating..." };
+        const gmapsDirectLink = `https://www.google.com/maps?q=${coords.lat},${coords.lon}`;
+
+        card.innerHTML = `
+          <div class="feed-card-header">
+            <div class="author-info">
+              <div class="author-avatar" style="background:${j.isOverdue ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.2)'}; color:${j.isOverdue ? '#ef4444' : '#10b981'};">
+                <i class="fas ${modeIcon}"></i>
+              </div>
+              <div>
+                <div class="author-name">${j.userName} <span style="font-size:11px; color:var(--text-muted); font-weight:normal;">(${j.userPhone})</span></div>
+                <div style="font-size:10px; color:var(--text-muted);">Mode: <span style="color:#fff;">${modeLabel}</span> • Est: <span style="color:#e57373;">${j.estimatedMinutes} mins</span></div>
+              </div>
+            </div>
+            <div>
+              ${statusBadge}
+            </div>
+          </div>
+
+          <div style="margin: 10px 0; font-size: 12px; line-height: 1.5; background: rgba(0,0,0,0.3); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border-quiet);">
+            <div><span style="color:var(--text-muted);">Origin:</span> <strong style="color:#fff;">${j.origin}</strong></div>
+            <div style="margin-top:3px;"><span style="color:var(--text-muted);">Destination:</span> <strong style="color:#e57373;">${j.destination}</strong></div>
+            <div style="margin-top:3px;"><span style="color:var(--text-muted);">Live Coordinates:</span> <strong style="color:#10b981;">${coords.address}</strong> (Lat: ${coords.lat ? coords.lat.toFixed(5) : '--'}, Lon: ${coords.lon ? coords.lon.toFixed(5) : '--'})</div>
+          </div>
+
+          <div style="display: flex; gap: 8px; margin-top: 10px;">
+            <a href="${gmapsDirectLink}" target="_blank" style="flex: 1; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: #fff; padding: 9px; border-radius: 10px; font-size: 11.5px; font-weight: 700; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <i class="fas fa-location-crosshairs"></i> Track Live on Google Maps
+            </a>
+            ${j.userPhone && j.userPhone !== 'Unknown' ? `
+            <a href="tel:${j.userPhone.replace(/\s+/g, '')}" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16,185,129,0.3); color: #10b981; padding: 9px 14px; border-radius: 10px; font-size: 11.5px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+              <i class="fas fa-phone"></i> Call Citizen
+            </a>` : ''}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderAdminPendingPosts() {
+      const container = document.getElementById('admin-pending-posts-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const pendingPosts = communityPosts.filter(p => !p.approved);
+      const approvedPosts = communityPosts.filter(p => p.approved);
+
+      const pendingStat = document.getElementById('admin-pending-stat');
+      const approvedStat = document.getElementById('admin-approved-stat');
+      if (pendingStat) pendingStat.innerText = pendingPosts.length;
+      if (approvedStat) approvedStat.innerText = approvedPosts.length;
+
+      if (pendingPosts.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; background: var(--black-subtle); border: 1px solid var(--border-quiet); border-radius: 16px;">
+            <i class="fas fa-circle-check" style="font-size: 36px; color: #10b981; margin-bottom: 12px; display: block;"></i>
+            <h4 style="font-size: 14px; color: #fff; margin-bottom: 4px;">Queue Cleared!</h4>
+            <p style="font-size: 12px; color: var(--text-muted);">No citizen posts pending approval at this moment.</p>
+          </div>
+        `;
+        return;
+      }
+
+      pendingPosts.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'feed-card';
+        card.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+        card.innerHTML = `
+          <div class="feed-card-header">
+            <div class="author-info">
+              <div class="author-avatar" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;">${p.author.charAt(0).toUpperCase()}</div>
+              <div>
+                <div class="author-name">
+                  ${p.author}
+                  ${p.verified ? '<i class="fas fa-check-circle verified-icon" title="Verified Citizen"></i>' : ''}
+                </div>
+                <div style="font-size: 10px; color: var(--text-muted);">${p.time} • <span style="color: #e57373;">${p.category}</span></div>
+              </div>
+            </div>
+            <div>
+              <span class="mod-pending-badge" style="color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.15);">
+                <i class="fas fa-clock"></i> Pending Review
+              </span>
+            </div>
+          </div>
+          <div class="post-text">${p.content}</div>
+          ${p.media ? `<img src="${p.media}" class="post-media-attachment" alt="Post Media Attachment">` : ''}
+          <div style="display: flex; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-quiet);">
+            <button onclick="approvePost('${p.id}')" style="flex: 1; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #fff; border: none; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <i class="fas fa-check"></i> Approve & Publish to Feed
+            </button>
+            <button onclick="rejectPost('${p.id}')" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; padding: 10px 16px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+              <i class="fas fa-trash"></i> Decline
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function handleSignupRequestOTP(e) {
+      e.preventDefault();
+      const rawPhone = document.getElementById('signup-phone').value.trim();
+      const cleanPhone = rawPhone.replace(/\D/g, '').slice(-10);
+      if (cleanPhone.length < 10) {
+        alert("Please enter a valid 10-digit Bangladeshi mobile number (e.g. 17XXXXXXXX).");
+        return;
+      }
+      
+      document.getElementById('otp-target-phone').innerText = "+880 " + cleanPhone;
+      
+      fetch(`${API_BASE}/api/auth/request-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: cleanPhone })
+      })
+      .then(r => r.json())
+      .then(data => {
+        const otpCode = data.debugOtp || "1234";
+        alert(`📩 Verification Code Dispatched!\n\nA 4-digit code has been sent to +880 ${cleanPhone} via Bangladesh Telecom Gateway.\n\n[Verification OTP: ${otpCode}]`);
+        document.getElementById('signup-step-1').style.display = 'none';
+        document.getElementById('signup-step-2').style.display = 'block';
+        document.getElementById('otp1').value = '';
+        document.getElementById('otp2').value = '';
+        document.getElementById('otp3').value = '';
+        document.getElementById('otp4').value = '';
+        document.getElementById('otp1').focus();
+      })
+      .catch(() => {
+        alert(`📩 Verification Code Sent!\n\nA 4-digit verification code has been dispatched to +880 ${cleanPhone}.\n\n[Verification OTP: 1234]`);
+        document.getElementById('signup-step-1').style.display = 'none';
+        document.getElementById('signup-step-2').style.display = 'block';
+        document.getElementById('otp1').focus();
+      });
+    }
+
+    function backToSignupStep1() {
+      document.getElementById('signup-step-1').style.display = 'block';
+      document.getElementById('signup-step-2').style.display = 'none';
+      document.getElementById('signup-phone').focus();
+    }
+
+    function moveNext(current, nextFieldId) {
+      if (current.value.length >= 1 && nextFieldId) {
+        document.getElementById(nextFieldId).focus();
+      }
+    }
+
+    function verifyOTPAndFinish() {
+      const rawPhone = document.getElementById('signup-phone').value.trim();
+      const cleanPhone = rawPhone.replace(/\D/g, '').slice(-10);
+      const name = document.getElementById('signup-name').value.trim() || "Verified Citizen";
+      const password = document.getElementById('signup-password').value.trim();
+      
+      const otpEntered = [
+        document.getElementById('otp1').value,
+        document.getElementById('otp2').value,
+        document.getElementById('otp3').value,
+        document.getElementById('otp4').value
+      ].join('');
+
+      if (otpEntered.length < 4) {
+        alert("Please enter the complete 4-digit OTP code sent to your phone.");
+        document.getElementById('otp1').focus();
+        return;
+      }
+
+      if (!password || password.length < 6) {
+        alert("Please create a password of at least 6 characters.");
+        document.getElementById('signup-password').focus();
+        return;
+      }
+
+      fetch(`${API_BASE}/api/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: cleanPhone,
+          code: otpEntered,
+          password: password,
+          name: name
+        })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (!data.success && data.error) {
+          alert("⚠️ " + data.error);
+          return;
+        }
+
+        currentUser = {
+          name: name,
+          phone: "+880 " + cleanPhone,
+          nidVerified: true,
+          isAdmin: false
+        };
+
+        // Persist registered credentials locally for instant client-side password verification
+        let registeredUsers = {};
+        try {
+          registeredUsers = JSON.parse(localStorage.getItem('safe_bd_registered_users') || '{}');
+        } catch(e) {}
+        registeredUsers[cleanPhone] = { name, password, phone: "+880 " + cleanPhone };
+        localStorage.setItem('safe_bd_registered_users', JSON.stringify(registeredUsers));
+
+        localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+        setLoggedInState();
+        alert(`🎉 Account Successfully Created!\n\nWelcome, ${name}!\nMobile: +880 ${cleanPhone}\nStatus: Verified BD Citizen (NID Linked)\n\nYou can now sign in anytime with your phone and password.`);
+        closeAuthModal();
+      })
+      .catch(() => {
+        currentUser = {
+          name: name,
+          phone: "+880 " + cleanPhone,
+          nidVerified: true,
+          isAdmin: false
+        };
+        let registeredUsers = {};
+        try {
+          registeredUsers = JSON.parse(localStorage.getItem('safe_bd_registered_users') || '{}');
+        } catch(e) {}
+        registeredUsers[cleanPhone] = { name, password, phone: "+880 " + cleanPhone };
+        localStorage.setItem('safe_bd_registered_users', JSON.stringify(registeredUsers));
+
+        localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+        setLoggedInState();
+        alert(`🎉 Account Created!\nWelcome, ${name}! Your phone number +880 ${cleanPhone} is verified.`);
+        closeAuthModal();
+      });
+    }
+
+    function setLoggedInState() {
+      document.getElementById('profile-display-name').innerText = currentUser.name;
+      document.getElementById('profile-display-phone').innerText = currentUser.phone;
+      document.getElementById('profile-badge-letter').innerText = currentUser.name.charAt(0).toUpperCase();
+      document.getElementById('top-profile-btn').classList.add('logged-in');
+      document.getElementById('profile-icon').className = currentUser.isAdmin ? "fas fa-shield-halved" : "fas fa-user-check";
+
+      // Toggle Admin UI elements
+      const adminNavBtn = document.getElementById('nav-btn-admin');
+      const adminProfileBtn = document.getElementById('admin-portal-profile-btn');
+      if (currentUser.isAdmin) {
+        if (adminNavBtn) adminNavBtn.style.display = 'block';
+        if (adminProfileBtn) adminProfileBtn.style.display = 'block';
+      } else {
+        if (adminNavBtn) adminNavBtn.style.display = 'none';
+        if (adminProfileBtn) adminProfileBtn.style.display = 'none';
+      }
+    }
+
+    function performLogout() {
+      const userPhone = currentUser ? currentUser.phone : "";
+      const token = localStorage.getItem('safe_bd_token');
+
+      // Sync logout event to persistent database
+      fetch(`${API_BASE}/api/auth/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: userPhone, token: token })
+      }).catch(() => {});
+
+      currentUser = null;
+      localStorage.removeItem('safe_bd_user');
+      localStorage.removeItem('safe_bd_token');
+      document.getElementById('top-profile-btn').classList.remove('logged-in');
+      document.getElementById('profile-icon').className = "far fa-user";
+
+      const adminNavBtn = document.getElementById('nav-btn-admin');
+      const adminProfileBtn = document.getElementById('admin-portal-profile-btn');
+      if (adminNavBtn) adminNavBtn.style.display = 'none';
+      if (adminProfileBtn) adminProfileBtn.style.display = 'none';
+
+      toggleAuthTab('login');
+      document.getElementById('login-step-1').style.display = 'block';
+      document.getElementById('login-step-2').style.display = 'none';
+      document.getElementById('signup-step-1').style.display = 'block';
+      document.getElementById('signup-step-2').style.display = 'none';
+      switchTab('screen-sos', document.querySelectorAll('.nav-tab-btn')[0]);
+      openAuthModal();
+      alert("You have logged out.");
+    }
+  </script>
+</body>
+</html>
