@@ -4,7 +4,7 @@
       "id": "usr_admin_1316750712",
       "phone": "1316750712",
       "displayPhone": "+880 1316-750712",
-      "name": "Chief Administrator",
+      "name": "SAAD RIZWAN",
       "salt": "0d91c77c61dfcdb45ce178bd7fd06152",
       "passwordHash": "9f740be637941f990f63af1755b3d18e26a8100ff4eb311a7345bbd2741eb4f28d69834f6849eb55ac48b245ab3425d511144d107f706780f4b071f26cee04d4",
       "nidVerified": true,
@@ -33,7 +33,9 @@
           "phone": "",
           "initial": "G"
         }
-      ]
+      ],
+      "role": "Founder & CEO, SAFE bd",
+      "isFounder": true
     },
     "1711223344": {
       "id": "usr_1711223344",
@@ -295,11 +297,30 @@
     }
   },
   "emergencyEvidence": [],
-  "posts": {},
+  "posts": {
+    "post_saad_rizwan_founder_01": {
+      "id": "post_saad_rizwan_founder_01",
+      "author": "SAAD RIZWAN",
+      "authorPhone": "01316750712",
+      "authorRole": "Founder & CEO, SAFE bd",
+      "isFounder": true,
+      "verified": true,
+      "type": "official",
+      "category": "Official Announcement",
+      "content": "In an emergency, every second counts. That is why I founded SAFE bd—a national digital safety and emergency response ecosystem designed to bridge the gap between citizens and rapid assistance.\n\nSAFE (Safety • Awareness • Fast Response • Emergency Assistance) brings critical tools right to your fingertips:\n\nInstant SOS: A simple, high-priority emergency button to summon help immediately.\n\nLive Location Sharing: Securely alerts your trusted contacts and authorities when you need it most.\n\nCommunity Awareness: Structured safety reporting and emergency preparedness tools for a safer society.\n\nWe are building a future where trusted help is always within reach. Stay tuned for more updates on our journey!\n\n— Saad Rizwan\n\nFounder, SAFE bd.",
+      "media": null,
+      "likes": 142,
+      "approved": true,
+      "rejected": false,
+      "createdAt": "2026-10-12T13:30:00.000Z",
+      "approvedAt": "2026-10-12T13:30:00.000Z",
+      "reviewedBy": "Founder & CEO"
+    }
+  },
   "stats": {
     "totalLogins": 18,
     "totalRegistrations": 4,
-    "lastSaved": "2026-10-12T13:34:49.693Z",
+    "lastSaved": "2026-10-12T13:45:03.386Z",
     "totalPosts": 1
   }
 }
