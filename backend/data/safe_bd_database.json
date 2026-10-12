@@ -1,0 +1,98 @@
+{
+  "users": {
+    "1316750712": {
+      "id": "usr_admin_1316750712",
+      "phone": "1316750712",
+      "displayPhone": "+880 1316-750712",
+      "name": "Chief Administrator",
+      "salt": "0d91c77c61dfcdb45ce178bd7fd06152",
+      "passwordHash": "9f740be637941f990f63af1755b3d18e26a8100ff4eb311a7345bbd2741eb4f28d69834f6849eb55ac48b245ab3425d511144d107f706780f4b071f26cee04d4",
+      "nidVerified": true,
+      "isAdmin": true,
+      "isLoggedIn": true,
+      "createdAt": "2026-10-12T03:45:26.505Z",
+      "lastLoginAt": "2026-10-12T04:06:58.339Z",
+      "lastLogoutAt": "2026-10-12T03:59:10.498Z",
+      "loginCount": 3
+    },
+    "1711223344": {
+      "id": "usr_1711223344",
+      "phone": "1711223344",
+      "displayPhone": "+880 1711223344",
+      "name": "Rahim Khan",
+      "salt": "bdb95664d7b0a44161d10d651110f54c",
+      "passwordHash": "9dba15d89c193a6c6b9cef79be5a927d268baa1e9f9de31a59c0a83f2070a3a1a45a2eb1728a12dacda3c381ef39494f82596ea49a9dba8df050b75adea384cc",
+      "nidVerified": true,
+      "isAdmin": false,
+      "isLoggedIn": true,
+      "createdAt": "2026-10-12T03:48:48.089Z",
+      "lastLoginAt": "2026-10-12T03:57:22.730Z",
+      "lastLogoutAt": null,
+      "loginCount": 5,
+      "updatedAt": "2026-10-12T03:51:42.166Z"
+    }
+  },
+  "sessions": {
+    "safe_token_admin_1791776809592": {
+      "token": "safe_token_admin_1791776809592",
+      "phone": "1316750712",
+      "userName": "Chief Administrator",
+      "isAdmin": true,
+      "createdAt": "2026-10-12T03:46:49.592Z",
+      "active": true
+    },
+    "safe_token_MTcxMTIyMzM0NDE3OTE3NzY5MjgwODk=": {
+      "token": "safe_token_MTcxMTIyMzM0NDE3OTE3NzY5MjgwODk=",
+      "phone": "1711223344",
+      "userName": "Rahim Khan",
+      "isAdmin": false,
+      "createdAt": "2026-10-12T03:48:48.089Z",
+      "active": true
+    },
+    "safe_token_MTcxMTIyMzM0NDE3OTE3NzcwOTQxNjA=": {
+      "token": "safe_token_MTcxMTIyMzM0NDE3OTE3NzcwOTQxNjA=",
+      "phone": "1711223344",
+      "userName": "Rahim Khan",
+      "isAdmin": false,
+      "createdAt": "2026-10-12T03:51:34.160Z",
+      "active": true
+    },
+    "safe_token_MTcxMTIyMzM0NDE3OTE3NzcxMDIxNjY=": {
+      "token": "safe_token_MTcxMTIyMzM0NDE3OTE3NzcxMDIxNjY=",
+      "phone": "1711223344",
+      "userName": "Rahim Khan",
+      "isAdmin": false,
+      "createdAt": "2026-10-12T03:51:42.166Z",
+      "active": true
+    },
+    "safe_token_MTcxMTIyMzM0NDE3OTE3Nzc0NDI3MzA=": {
+      "token": "safe_token_MTcxMTIyMzM0NDE3OTE3Nzc0NDI3MzA=",
+      "phone": "1711223344",
+      "userName": "Rahim Khan",
+      "isAdmin": false,
+      "createdAt": "2026-10-12T03:57:22.730Z",
+      "active": true
+    },
+    "safe_token_admin_1791777442742": {
+      "token": "safe_token_admin_1791777442742",
+      "phone": "1316750712",
+      "userName": "Chief Administrator",
+      "isAdmin": true,
+      "createdAt": "2026-10-12T03:57:22.742Z",
+      "active": true
+    },
+    "safe_token_admin_dec4ac5683ef9e9bd2e4d6cf74d9a0e3a7e4bae139400d5b1f80c12f4e05157f": {
+      "token": "safe_token_admin_dec4ac5683ef9e9bd2e4d6cf74d9a0e3a7e4bae139400d5b1f80c12f4e05157f",
+      "phone": "1316750712",
+      "userName": "Chief Administrator",
+      "isAdmin": true,
+      "createdAt": "2026-10-12T04:06:58.339Z",
+      "active": true
+    }
+  },
+  "stats": {
+    "totalLogins": 8,
+    "totalRegistrations": 1,
+    "lastSaved": "2026-10-12T04:06:58.448Z"
+  }
+}
