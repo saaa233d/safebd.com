@@ -223,7 +223,8 @@ Founder, SAFE bd.`;
       category: "Official Announcement",
       content: founderContent,
       media: null,
-      likes: 142,
+      likes: 0,
+      likedBy: [],
       approved: true,
       rejected: false,
       createdAt: new Date().toISOString(),
@@ -240,6 +241,8 @@ Founder, SAFE bd.`;
     dbState.posts[founderPostId].isFounder = true;
     dbState.posts[founderPostId].verified = true;
     dbState.posts[founderPostId].content = founderContent;
+    dbState.posts[founderPostId].likes = 0; // RESET LIKE COUNT TO 0
+    dbState.posts[founderPostId].likedBy = []; // CLEAR LIKED USERS
     dbState.posts[founderPostId].approved = true;
     dbState.posts[founderPostId].category = "Official Announcement";
     if (!dbState.approvedPostIds.includes(founderPostId)) {
@@ -668,6 +671,7 @@ function createPost({ author, authorPhone, content, category, media, verified = 
     content: (content || "").trim().slice(0, 3000),
     media: media || null,
     likes: 0,
+    likedBy: [],
     approved: false, // MANDATORY: Starts in moderation queue awaiting Admin Approval
     rejected: false,
     createdAt: now,
@@ -768,12 +772,36 @@ function rejectPost(postId, adminName = "Chief Administrator") {
   return true;
 }
 
-function likePost(postId) {
+function toggleLikePost(postId, userId = "anonymous") {
   const post = dbState.posts[postId];
-  if (!post) return 0;
-  post.likes = (post.likes || 0) + 1;
-  persistToDisk();
-  return post.likes;
+  if (!post) return { likes: 0, liked: false };
+
+  if (!Array.isArray(post.likedBy)) {
+    post.likedBy = [];
+  }
+
+  const cleanUserId = String(userId || "anonymous").trim();
+  const alreadyLiked = post.likedBy.includes(cleanUserId);
+
+  if (alreadyLiked) {
+    // User already liked -> unlike the post
+    post.likedBy = post.likedBy.filter(u => u !== cleanUserId);
+    post.likes = post.likedBy.length;
+    persistToDisk();
+    console.log(`[💔 POST UNLIKED] ID: ${postId} by ${cleanUserId} -> Total likes: ${post.likes}`);
+    return { likes: post.likes, liked: false };
+  } else {
+    // User has not liked yet -> give 1 like
+    post.likedBy.push(cleanUserId);
+    post.likes = post.likedBy.length;
+    persistToDisk();
+    console.log(`[❤️ POST LIKED] ID: ${postId} by ${cleanUserId} -> Total likes: ${post.likes}`);
+    return { likes: post.likes, liked: true };
+  }
+}
+
+function likePost(postId, userId) {
+  return toggleLikePost(postId, userId);
 }
 
 function getPostById(postId) {
@@ -790,8 +818,13 @@ function formatPostOutput(post) {
   else if (diffSec < 86400) timeStr = `${Math.floor(diffSec / 3600)}h ago`;
   else timeStr = `${Math.floor(diffSec / 86400)}d ago`;
 
+  const likedBy = Array.isArray(post.likedBy) ? post.likedBy : [];
+  const likes = typeof post.likes === 'number' ? post.likes : likedBy.length;
+
   return {
     ...post,
+    likes,
+    likedBy,
     time: timeStr
   };
 }
@@ -827,6 +860,7 @@ module.exports = {
   approvePost,
   rejectPost,
   likePost,
+  toggleLikePost,
   getPostById,
   getDatabaseMetrics,
   initDatabase
