@@ -142,6 +142,52 @@ function normalizePhone(phone) {
   return digits.slice(-10);
 }
 
+// Valid Bangladeshi Mobile Operator Prefixes
+// 013: Grameenphone, 014: Banglalink, 015: Teletalk, 016: Airtel, 017: Grameenphone, 018: Robi, 019: Banglalink
+const VALID_OPERATOR_PREFIXES = ['13', '14', '15', '16', '17', '18', '19'];
+
+/**
+ * Validates Bangladeshi mobile number according to national telecom numbering plan:
+ * - Must be a 10-digit number (excluding +880 or leading 0).
+ * - Must start with 13, 14, 15, 16, 17, 18, or 19 (corresponding to 013, 014, 015, 016, 017, 018, 019).
+ * - 011 (Citycell - obsolete) and 012 (unallocated) are strictly rejected.
+ */
+function validateBdPhone(phone) {
+  if (!phone) {
+    return { valid: false, error: 'MISSING_PHONE', message: 'Bangladeshi mobile number is required.' };
+  }
+  const digits = String(phone).replace(/\D/g, '');
+  const cleanPhone = digits.slice(-10);
+
+  if (cleanPhone.length !== 10) {
+    return {
+      valid: false,
+      error: 'INVALID_LENGTH',
+      message: 'Invalid mobile number length. Please enter a valid 11-digit Bangladeshi number (e.g. 017XXXXXXXX).'
+    };
+  }
+
+  const prefix = cleanPhone.slice(0, 2);
+
+  if (prefix === '11' || prefix === '12') {
+    return {
+      valid: false,
+      error: 'DISCONTINUED_OPERATOR',
+      message: 'Mobile numbers starting with 011 or 012 are not applicable in Bangladesh. Only 013, 014, 015, 016, 017, 018, and 019 are supported.'
+    };
+  }
+
+  if (!VALID_OPERATOR_PREFIXES.includes(prefix)) {
+    return {
+      valid: false,
+      error: 'INVALID_OPERATOR',
+      message: 'Invalid Bangladeshi mobile operator prefix. Mobile number must start with 013, 014, 015, 016, 017, 018, or 019.'
+    };
+  }
+
+  return { valid: true, cleanPhone, formatted: `+880 ${cleanPhone}` };
+}
+
 /* =========================================================================
    USER & AUTHENTICATION CRUD API
 ========================================================================= */
@@ -152,9 +198,14 @@ function getUserByPhone(phone) {
 }
 
 function createUser({ phone, name, password, nidVerified = true }) {
-  const cleanPhone = normalizePhone(phone);
-  if (!cleanPhone || cleanPhone.length < 10) {
-    throw new Error('Valid 10-digit Bangladeshi mobile number required.');
+  const phoneValidation = validateBdPhone(phone);
+  if (!phoneValidation.valid) {
+    throw new Error(phoneValidation.message);
+  }
+  const cleanPhone = phoneValidation.cleanPhone;
+
+  if (!password || password.length < 6) {
+    throw new Error('Password must be at least 6 characters long.');
   }
 
   if (dbState.users[cleanPhone]) {
@@ -356,6 +407,8 @@ module.exports = {
   issueOtp,
   verifyOtp,
   normalizePhone,
+  validateBdPhone,
+  VALID_OPERATOR_PREFIXES,
   getDatabaseMetrics,
   initDatabase
 };
