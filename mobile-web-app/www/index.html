@@ -2400,6 +2400,8 @@
       if (adminPendingStat) adminPendingStat.innerText = count;
     }
 
+    const BLUE_TICK_SVG = `<svg viewBox="0 0 24 24" style="width: 17px; height: 17px; vertical-align: -3px; display: inline-block; margin-left: 5px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));" aria-label="Verified Tick"><path fill="#1d9bf0" d="M22.25 12c0-1.43-.88-2.67-2.19-3.15.2-1.4-.64-2.67-1.99-3.08-.34-1.37-1.57-2.3-2.99-2.22-1.07-.89-2.6-.89-3.67 0-1.42-.08-2.65.85-2.99 2.22-1.35.41-2.19 1.68-1.99 3.08-1.31.48-2.19 1.72-2.19 3.15s.88 2.67 2.19 3.15c-.2 1.4.64 2.67 1.99 3.08.34 1.37 1.57 2.3 2.99 2.22 1.07.89 2.6.89 3.67 0 1.42.08 2.65-.85 2.99-2.22 1.35-.41 2.19-1.68 1.99-3.08 1.31-.48 2.19-1.72 2.19-3.15z"/><path fill="#ffffff" d="M10.25 15.6l-3.2-3.2 1.4-1.4 1.8 1.8 5.6-5.6 1.4 1.4-7 7z"/></svg>`;
+
     function renderCommunityPosts() {
       const container = document.getElementById('posts-container');
       if (!container) return;
@@ -2442,11 +2444,7 @@
               <div>
                 <div class="author-name">
                   <span>${escapeHtml(authorNameClean)}</span>
-                  ${(p.verified || isSaadRizwan) ? `
-                    <span title="${isSaadRizwan ? 'Verified Founder & CEO' : 'Verified Citizen'}">
-                      <i class="fas fa-certificate verified-icon" style="color: #38bdf8; font-size: 13px;"></i>
-                    </span>
-                  ` : ''}
+                  ${(p.verified || isSaadRizwan) ? BLUE_TICK_SVG : ''}
                   ${isSaadRizwan ? `
                     <span class="founder-title-pill">
                       <i class="fas fa-crown"></i> Founder &amp; CEO
@@ -2456,26 +2454,18 @@
                 <div style="font-size: 10px; color: var(--text-muted);">${p.time || 'Just now'} • <span style="color: ${isSaadRizwan ? '#d4af37' : '#e57373'}; font-weight: ${isSaadRizwan ? '700' : 'normal'};">${escapeHtml(p.category || 'General Safety')}</span></div>
               </div>
             </div>
+            ${!isSaadRizwan ? `
             <div>
-              ${isSaadRizwan ? `
-                <span class="mod-pending-badge" style="color: #d4af37; border-color: rgba(212, 175, 55, 0.4); background: rgba(212, 175, 55, 0.15); font-weight: 700;">
-                  <i class="fas fa-certificate"></i> Official Release
-                </span>
-              ` : `
-                <span class="mod-pending-badge" style="color: #10b981; border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.15);">
-                  <i class="fas fa-shield-check"></i> Verified Live
-                </span>
-              `}
-            </div>
+              <span class="mod-pending-badge" style="color: #10b981; border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.15);">
+                <i class="fas fa-shield-check"></i> Verified Live
+              </span>
+            </div>` : ''}
           </div>
           <div class="post-text">${escapeHtml(p.content || '')}</div>
           ${p.media ? `<img src="${p.media}" class="post-media-attachment" alt="Post Media" loading="lazy">` : ''}
           <div class="post-actions-row">
             <div class="post-action-btn ${isLikedByMe ? 'liked' : ''}" onclick="likePost('${p.id}', this)" title="${isLikedByMe ? 'Unlike (1 like per citizen)' : 'Like'}">
               <i class="${isLikedByMe ? 'fas fa-heart' : 'far fa-heart'}" style="${isLikedByMe ? 'color: #ef4444;' : ''}"></i> <span>${currentLikesCount}</span>
-            </div>
-            <div class="post-action-btn" onclick="alert('Community safety discussions are monitored under Bangladesh cybersecurity guidelines.')">
-              <i class="far fa-comment"></i> Comment
             </div>
             <div class="post-action-btn" onclick="sharePost('${p.id}')">
               <i class="fas fa-share-nodes"></i> Share
@@ -2509,8 +2499,8 @@
           <div class="founder-card-header">
             <div class="founder-avatar-lg">
               <span>SR</span>
-              <div class="founder-verified-crest" title="Verified Founder &amp; CEO">
-                <i class="fas fa-check"></i>
+              <div class="founder-verified-crest" title="Verified Founder &amp; CEO" style="background: #1d9bf0; color: #fff; border-color: #0a090d;">
+                <i class="fas fa-check" style="font-size: 11px; font-weight: 900;"></i>
               </div>
             </div>
           </div>
@@ -2518,9 +2508,7 @@
           <div class="founder-card-body">
             <div class="founder-name-row">
               <h2 class="founder-name">SAAD RIZWAN</h2>
-              <span class="founder-official-chip">
-                <i class="fas fa-certificate" style="color: #38bdf8;"></i> Verified Official
-              </span>
+              ${BLUE_TICK_SVG}
             </div>
 
             <div class="founder-designation">
@@ -2535,38 +2523,7 @@
               “In an emergency, every second counts. That is why I founded SAFE bd—a national digital safety and emergency response ecosystem designed to bridge the gap between citizens and rapid assistance.”
             </div>
 
-            <div class="founder-credentials-grid">
-              <div class="credential-item">
-                <i class="fas fa-shield-halved" style="color: #ef4444;"></i>
-                <div>
-                  <div class="cred-title">National 999 Integration</div>
-                  <div class="cred-desc">Police • Fire • Ambulance CAD</div>
-                </div>
-              </div>
-              <div class="credential-item">
-                <i class="fas fa-lock" style="color: #10b981;"></i>
-                <div>
-                  <div class="cred-title">E2E Spatial Encryption</div>
-                  <div class="cred-desc">Zero-Knowledge GPS Relay</div>
-                </div>
-              </div>
-              <div class="credential-item">
-                <i class="fas fa-users-viewfinder" style="color: #38bdf8;"></i>
-                <div>
-                  <div class="cred-title">Civic Awareness Network</div>
-                  <div class="cred-desc">Verified Public Safety Feed</div>
-                </div>
-              </div>
-              <div class="credential-item">
-                <i class="fas fa-building-columns" style="color: #f59e0b;"></i>
-                <div>
-                  <div class="cred-title">Jurisdiction &amp; Base</div>
-                  <div class="cred-desc">Dhaka, Bangladesh</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="founder-footer-actions">
+            <div class="founder-footer-actions" style="margin-top: 22px;">
               <button type="button" class="btn-founder-action" onclick="closeAuthorProfileModal()">
                 <i class="fas fa-check"></i> Close Profile
               </button>
@@ -2584,9 +2541,7 @@
           <div class="founder-card-body" style="padding-top: 32px;">
             <div class="founder-name-row">
               <h2 class="founder-name" style="font-size: 16px;">${escapeHtml(authorName || 'Citizen Reporter')}</h2>
-              <span class="founder-official-chip">
-                <i class="fas fa-check-circle" style="color: #38bdf8;"></i> Verified Citizen
-              </span>
+              ${BLUE_TICK_SVG}
             </div>
             <div class="founder-designation" style="color: var(--text-muted); font-size: 12px; margin-top: 3px;">
               <i class="fas fa-user-shield"></i> Community Safety Reporter
@@ -2602,7 +2557,6 @@
           </div>
         `;
       }
-
       modal.classList.add('open');
     }
 
