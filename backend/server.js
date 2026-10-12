@@ -1117,6 +1117,101 @@ app.post('/api/admin/posts/:id/reject', (req, res) => {
   return res.json({ success: true, message: "Submission declined and removed from moderation queue." });
 });
 
+// 4.5.1 Admin Deletes Post Permanently (Unrestricted Post Deletion)
+app.all(['/api/admin/posts/:id/delete', '/api/posts/:id/delete'], (req, res) => {
+  const adminName = (req.body && req.body.adminName) || "Administrator";
+  const success = db.deletePost(req.params.id, adminName);
+  if (!success) {
+    return res.status(404).json({ error: "NOT_FOUND", message: "Post not found or already deleted." });
+  }
+  // Broadcast deletion to all live feeds
+  broadcastLocationUpdate({
+    type: "CIVIC_POST_DELETED",
+    postId: req.params.id
+  });
+  return res.json({ success: true, message: "Post permanently deleted from system." });
+});
+
+app.delete('/api/admin/posts/:id', (req, res) => {
+  const adminName = (req.body && req.body.adminName) || "Administrator";
+  const success = db.deletePost(req.params.id, adminName);
+  if (!success) {
+    return res.status(404).json({ error: "NOT_FOUND", message: "Post not found or already deleted." });
+  }
+  broadcastLocationUpdate({
+    type: "CIVIC_POST_DELETED",
+    postId: req.params.id
+  });
+  return res.json({ success: true, message: "Post permanently deleted from system." });
+});
+
+// 4.5.2 Admin All Posts View (Search, Filter, Moderate & Delete)
+app.get('/api/admin/posts/all', (req, res) => {
+  const { page, limit, status, category, search } = req.query;
+  const result = db.getAllPostsAdmin({ page, limit, status, category, search });
+  return res.json({ success: true, ...result });
+});
+
+// =========================================================================
+// 5. ADMIN MANAGEMENT & ROLE DELEGATION SYSTEM
+// =========================================================================
+
+// 5.1 List All Active Administrators
+app.get('/api/admin/admins', (req, res) => {
+  const admins = db.getAllAdmins();
+  return res.json({ success: true, admins });
+});
+
+// 5.2 Grant Admin Access to Citizen by Phone Number
+app.post('/api/admin/admins/grant', (req, res) => {
+  try {
+    const { phone, name, role, permissions, assignedBy } = req.body;
+    if (!phone) {
+      return res.status(400).json({ error: "MISSING_PHONE", message: "Mobile number required to grant admin access." });
+    }
+    const result = db.grantAdminAccess(phone, {
+      name,
+      role: role || 'Moderator Admin',
+      permissions: permissions || ['manage_posts', 'delete_posts', 'approve_posts', 'view_evidence'],
+      assignedBy: assignedBy || 'Chief Administrator'
+    });
+    return res.json({
+      success: true,
+      message: `Admin clearance granted to ${result.name} (${result.phone}) as ${result.role}.`,
+      admin: result
+    });
+  } catch (err) {
+    return res.status(400).json({ error: "GRANT_FAILED", message: err.message });
+  }
+});
+
+// 5.3 Revoke Admin Access
+app.post('/api/admin/admins/:phone/revoke', (req, res) => {
+  try {
+    const revokedBy = (req.body && req.body.revokedBy) || 'Chief Administrator';
+    db.revokeAdminAccess(req.params.phone, revokedBy);
+    return res.json({ success: true, message: `Admin access revoked for ${req.params.phone}.` });
+  } catch (err) {
+    return res.status(400).json({ error: "REVOKE_FAILED", message: err.message });
+  }
+});
+
+// 5.4 List All Registered Citizen Accounts
+app.get('/api/admin/users', (req, res) => {
+  const { page, limit } = req.query;
+  const users = db.getAllUsersAdmin({ page, limit });
+  return res.json({ success: true, users });
+});
+
+// 5.5 Delete Emergency SOS Evidence Record
+app.delete('/api/admin/emergency-evidence/:id', (req, res) => {
+  const success = db.deleteEmergencyEvidence(req.params.id);
+  if (success) {
+    return res.json({ success: true, message: "Evidence record removed from archive." });
+  }
+  return res.status(404).json({ error: "NOT_FOUND", message: "Evidence record not found." });
+});
+
 // 4.6 Single Like per User (Toggle Like / Unlike)
 app.post('/api/feed/posts/:id/like', (req, res) => {
   const rawIp = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : (req.socket.remoteAddress || '127.0.0.1');
