@@ -871,6 +871,208 @@ function formatPostOutput(post) {
   };
 }
 
+function deletePost(postId, adminName = "Administrator") {
+  const post = dbState.posts[postId];
+  if (!post) return false;
+
+  delete dbState.posts[postId];
+  dbState.approvedPostIds = dbState.approvedPostIds.filter(id => id !== postId);
+  dbState.pendingPostIds = dbState.pendingPostIds.filter(id => id !== postId);
+  dbState.stats.totalPosts = Object.keys(dbState.posts).length;
+
+  persistToDisk();
+  console.log(`[🗑️ POST DELETED BY ADMIN] Post ID: ${postId} removed by ${adminName}`);
+  return true;
+}
+
+function getAllPostsAdmin({ search = '', status = 'all', category = 'all', page = 1, limit = 50 } = {}) {
+  const p = Math.max(1, parseInt(page, 10) || 1);
+  const lim = Math.min(100, Math.max(1, parseInt(limit, 10) || 50));
+
+  let allList = Object.values(dbState.posts).map(post => formatPostOutput(post)).filter(Boolean);
+
+  if (status === 'approved') {
+    allList = allList.filter(post => post.approved);
+  } else if (status === 'pending') {
+    allList = allList.filter(post => !post.approved && !post.rejected);
+  } else if (status === 'rejected') {
+    allList = allList.filter(post => post.rejected);
+  }
+
+  if (category && category !== 'all') {
+    allList = allList.filter(post => (post.category || '').toLowerCase() === category.toLowerCase());
+  }
+
+  if (search) {
+    const q = search.toLowerCase();
+    allList = allList.filter(post => 
+      (post.content || '').toLowerCase().includes(q) ||
+      (post.author || '').toLowerCase().includes(q) ||
+      (post.authorPhone || '').includes(q)
+    );
+  }
+
+  allList.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+  const total = allList.length;
+  const startIndex = (p - 1) * lim;
+  const posts = allList.slice(startIndex, startIndex + lim);
+
+  return {
+    posts,
+    total,
+    page: p,
+    limit: lim,
+    totalPages: Math.ceil(total / lim) || 1,
+    hasMore: (startIndex + lim) < total
+  };
+}
+
+function getAllAdmins() {
+  const admins = [];
+  for (const [phone, user] of Object.entries(dbState.users)) {
+    if (user.isAdmin) {
+      admins.push({
+        id: user.id,
+        phone: user.phone,
+        displayPhone: user.displayPhone || `+880 ${user.phone}`,
+        name: user.name,
+        role: user.role || 'System Administrator',
+        isFounder: !!user.isFounder,
+        permissions: user.permissions || [
+          'manage_posts',
+          'delete_posts',
+          'approve_posts',
+          'view_evidence',
+          'emergency_dispatch',
+          'manage_admins'
+        ],
+        adminAssignedAt: user.adminAssignedAt || user.createdAt,
+        adminAssignedBy: user.adminAssignedBy || (user.isFounder ? 'System (Founder)' : 'Chief Administrator'),
+        nidVerified: !!user.nidVerified,
+        createdAt: user.createdAt,
+        lastLoginAt: user.lastLoginAt
+      });
+    }
+  }
+  admins.sort((a, b) => (b.isFounder ? 1 : 0) - (a.isFounder ? 1 : 0));
+  return admins;
+}
+
+function grantAdminAccess(phone, { name = '', role = 'Moderator Admin', permissions = [], assignedBy = 'Chief Administrator' } = {}) {
+  const cleanPhone = normalizePhone(phone);
+  if (!cleanPhone || cleanPhone.length !== 10) {
+    throw new Error('Valid 10-digit Bangladeshi mobile number required.');
+  }
+
+  let user = dbState.users[cleanPhone];
+  if (!user) {
+    const salt = crypto.randomBytes(16).toString('hex');
+    const defaultPassword = 'SafeBD@' + cleanPhone.slice(-4);
+    const hash = hashPassword(defaultPassword, salt);
+    user = {
+      id: `usr_admin_${cleanPhone}`,
+      phone: cleanPhone,
+      displayPhone: `+880 ${cleanPhone}`,
+      name: (name && name.trim()) || `Admin (${cleanPhone})`,
+      role: role || 'Moderator Admin',
+      isFounder: false,
+      salt: salt,
+      passwordHash: hash,
+      nidVerified: true,
+      isAdmin: true,
+      permissions: permissions && permissions.length ? permissions : [
+        'manage_posts',
+        'delete_posts',
+        'approve_posts',
+        'view_evidence'
+      ],
+      adminAssignedAt: new Date().toISOString(),
+      adminAssignedBy: assignedBy,
+      isLoggedIn: false,
+      createdAt: new Date().toISOString(),
+      lastLoginAt: null,
+      lastLogoutAt: null,
+      loginCount: 0,
+      contacts: getDefaultUserContacts()
+    };
+    dbState.users[cleanPhone] = user;
+  } else {
+    user.isAdmin = true;
+    if (name && name.trim()) user.name = name.trim();
+    user.role = role || user.role || 'Moderator Admin';
+    user.permissions = permissions && permissions.length ? permissions : (user.permissions || [
+      'manage_posts',
+      'delete_posts',
+      'approve_posts',
+      'view_evidence'
+    ]);
+    user.adminAssignedAt = new Date().toISOString();
+    user.adminAssignedBy = assignedBy;
+  }
+
+  persistToDisk();
+  console.log(`[🛡️ ADMIN CLEARANCE GRANTED] Phone: ${cleanPhone} | Name: ${user.name} | Role: ${user.role} | By: ${assignedBy}`);
+  return {
+    phone: user.phone,
+    name: user.name,
+    role: user.role,
+    isAdmin: user.isAdmin,
+    permissions: user.permissions
+  };
+}
+
+function revokeAdminAccess(phone, revokedBy = 'Chief Administrator') {
+  const cleanPhone = normalizePhone(phone);
+  const user = dbState.users[cleanPhone];
+  if (!user) throw new Error('User account not found.');
+
+  if (user.isFounder || cleanPhone === '1316750712') {
+    throw new Error('Founder & CEO account clearance cannot be revoked.');
+  }
+
+  user.isAdmin = false;
+  user.role = 'Citizen Reporter';
+  user.permissions = [];
+  user.adminRevokedAt = new Date().toISOString();
+  user.adminRevokedBy = revokedBy;
+
+  persistToDisk();
+  console.log(`[🚫 ADMIN CLEARANCE REVOKED] Phone: ${cleanPhone} | By: ${revokedBy}`);
+  return true;
+}
+
+function getAllUsersAdmin({ page = 1, limit = 100 } = {}) {
+  const userList = Object.values(dbState.users).map(u => ({
+    id: u.id,
+    phone: u.phone,
+    displayPhone: u.displayPhone || `+880 ${u.phone}`,
+    name: u.name,
+    role: u.role || (u.isAdmin ? 'Administrator' : 'Citizen'),
+    isAdmin: !!u.isAdmin,
+    isFounder: !!u.isFounder,
+    nidVerified: !!u.nidVerified,
+    isLoggedIn: !!u.isLoggedIn,
+    loginCount: u.loginCount || 0,
+    createdAt: u.createdAt,
+    lastLoginAt: u.lastLoginAt
+  }));
+
+  userList.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  return userList;
+}
+
+function deleteEmergencyEvidence(id) {
+  if (!dbState.emergencyEvidence) return false;
+  const initialLen = dbState.emergencyEvidence.length;
+  dbState.emergencyEvidence = dbState.emergencyEvidence.filter(e => e.id !== id);
+  if (dbState.emergencyEvidence.length !== initialLen) {
+    persistToDisk();
+    return true;
+  }
+  return false;
+}
+
 // Initialize on module load
 initDatabase();
 
@@ -896,14 +1098,21 @@ module.exports = {
   getAllEmergencyEvidence,
   getEmergencyEvidenceById,
   markEmergencyEvidenceReviewed,
+  deleteEmergencyEvidence,
   createPost,
   getApprovedPosts,
   getPendingPosts,
+  getAllPostsAdmin,
   approvePost,
   rejectPost,
+  deletePost,
   likePost,
   toggleLikePost,
   getPostById,
+  getAllAdmins,
+  grantAdminAccess,
+  revokeAdminAccess,
+  getAllUsersAdmin,
   getDatabaseMetrics,
   initDatabase
 };
