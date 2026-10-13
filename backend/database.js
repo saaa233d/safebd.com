@@ -537,6 +537,32 @@ function resetPassword(phone, newPassword) {
   return user;
 }
 
+function changeUserPassword(phone, oldPassword, newPassword) {
+  const cleanPhone = normalizePhone(phone);
+  const user = dbState.users[cleanPhone];
+  if (!user) {
+    throw new Error('No account found with this mobile number.');
+  }
+
+  const isMatch = verifyPasswordSafe(oldPassword, user.salt, user.passwordHash);
+  if (!isMatch) {
+    throw new Error('Current password is incorrect. Profile security maintained.');
+  }
+
+  if (!newPassword || newPassword.length < 6) {
+    throw new Error('New password must be at least 6 characters long.');
+  }
+
+  const newSalt = crypto.randomBytes(16).toString('hex');
+  user.salt = newSalt;
+  user.passwordHash = hashPassword(newPassword, newSalt);
+  user.updatedAt = new Date().toISOString();
+
+  persistToDisk();
+  console.log(`[🔑 PASSWORD CHANGED] User +880 ${cleanPhone} updated their password.`);
+  return true;
+}
+
 function markUserLogin(phone, sessionToken) {
   const cleanPhone = normalizePhone(phone);
   const user = dbState.users[cleanPhone];
@@ -1522,9 +1548,11 @@ initDatabase();
 
 module.exports = {
   getUserByPhone,
+  findUserByPhone: getUserByPhone,
   createUser,
   verifyUserCredentials,
   resetPassword,
+  changeUserPassword,
   markUserLogin,
   markUserLogout,
   getSession,
