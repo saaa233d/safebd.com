@@ -1,0 +1,7 @@
+
+The command exited with code 0.
+Output:
+C:\Program Files\nodejs\node.exe
+INFO: Could not find files for the given pattern(s).
+C:\Users\B\AppData\Local\Microsoft\WindowsApps\python.exe
+
