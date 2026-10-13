@@ -11,9 +11,9 @@
       "isAdmin": true,
       "isLoggedIn": true,
       "createdAt": "2026-10-12T03:45:26.505Z",
-      "lastLoginAt": "2026-10-13T10:33:35.905Z",
+      "lastLoginAt": "2026-10-13T13:03:58.342Z",
       "lastLogoutAt": "2026-10-12T03:59:10.498Z",
-      "loginCount": 6,
+      "loginCount": 7,
       "contacts": [
         {
           "id": "c1",
@@ -352,6 +352,14 @@
       "isAdmin": true,
       "createdAt": "2026-10-13T10:33:35.905Z",
       "active": true
+    },
+    "safe_token_admin_feba8c7c7416fd1d70d34e83b6981209f8690921b6624aa03f043387faf5ef1b": {
+      "token": "safe_token_admin_feba8c7c7416fd1d70d34e83b6981209f8690921b6624aa03f043387faf5ef1b",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-13T13:03:58.342Z",
+      "active": true
     }
   },
   "emergencyEvidence": [
@@ -421,13 +429,13 @@
     "secretKey": "SAFEBD_PRIVATE_VAULT_2026",
     "enabled": true,
     "folderName": "SAFE_BD_VAULT",
-    "lastSyncedAt": "2026-10-13T10:33:11.744Z",
-    "stateFileId": "1dMLFkMcz7YfZnYqrmGU_mOPaHKBbiPJM"
+    "lastSyncedAt": "2026-10-13T13:04:20.581Z",
+    "stateFileId": "128XKqD8I5h_AtnTPJtoAMpaeYofbPjh5"
   },
   "stats": {
-    "totalLogins": 20,
+    "totalLogins": 21,
     "totalRegistrations": 4,
-    "lastSaved": "2026-10-13T10:33:36.007Z",
+    "lastSaved": "2026-10-13T13:04:20.741Z",
     "totalPosts": 2
   }
 }
