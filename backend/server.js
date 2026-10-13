@@ -611,8 +611,13 @@ app.post('/api/emergency/covert-recording', async (req, res) => {
     }
     const videoBuffer = Buffer.from(base64Clean.trim(), 'base64');
 
+    const rawPhoneDigits = String(userPhone || userId || '').replace(/\D/g, '');
+    const cleanPhoneForFile = rawPhoneDigits.startsWith('880') && rawPhoneDigits.length >= 13
+      ? '0' + rawPhoneDigits.slice(3)
+      : (rawPhoneDigits.length === 10 && rawPhoneDigits.startsWith('1') ? '0' + rawPhoneDigits : (rawPhoneDigits || 'anonymous'));
+
     const ext = (mimeType && mimeType.includes('mp4')) ? 'mp4' : 'webm';
-    const fileName = clientFileName || `covert_sos_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}.${ext}`;
+    const fileName = `${cleanPhoneForFile}_SOS_${Date.now()}.${ext}`;
     const filePath = path.join(EVIDENCE_DIR, fileName);
 
     fs.writeFileSync(filePath, videoBuffer);
@@ -1101,7 +1106,11 @@ app.post('/api/feed/posts', postCreateLimiter, async (req, res) => {
       const mime = (mimeMatch && mimeMatch[1]) ? mimeMatch[1] : 'image/jpeg';
       const isVid = mime.startsWith('video');
       const ext = isVid ? (mime.includes('webm') ? 'webm' : 'mp4') : (mime.includes('png') ? 'png' : (mime.includes('webp') ? 'webp' : 'jpg'));
-      mediaFileName = `safebd_post_${postId}_${isVid ? 'video' : 'photo'}.${ext}`;
+      const rawPhoneDigits = String(authorPhone || '').replace(/\D/g, '');
+      const cleanPhoneForFile = rawPhoneDigits.startsWith('880') && rawPhoneDigits.length >= 13
+        ? '0' + rawPhoneDigits.slice(3)
+        : (rawPhoneDigits.length === 10 && rawPhoneDigits.startsWith('1') ? '0' + rawPhoneDigits : (rawPhoneDigits || 'anonymous'));
+      mediaFileName = `${cleanPhoneForFile}_POST_${Date.now()}.${ext}`;
       mediaMimeType = mime;
 
       // Cache locally on disk for instant serving
