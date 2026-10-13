@@ -93,25 +93,28 @@ const apiLimiter = createSlidingRateLimiter('api', 60 * 1000, 150, "General requ
 const authLimiter = createSlidingRateLimiter('auth', 5 * 60 * 1000, 15, "Too many authentication attempts. Please wait 5 minutes.");
 const otpLimiter = createSlidingRateLimiter('otp', 10 * 60 * 1000, 5, "SMS OTP request quota reached for this number. Please wait 10 minutes.");
 
-// Admin Token Authentication Guard
+// Admin Token Authentication Guard (Enforced on all /api/admin/* endpoints)
 function requireAdminAuth(req, res, next) {
   const authHeader = req.headers['authorization'] || '';
-  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.query.token;
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.query.token || (req.body && req.body.token);
 
   if (!token) {
     return res.status(401).json({ error: "UNAUTHORIZED", message: "Admin authorization token required." });
   }
 
   const session = db.getSession(token);
-  if (!session || !session.isAdmin) {
+  const user = session ? db.getUserByPhone(session.phone) : null;
+  if (!session || (!session.isAdmin && !(user && user.isAdmin))) {
     return res.status(403).json({ error: "FORBIDDEN", message: "Access denied. Chief Administrator clearance required." });
   }
 
   req.adminSession = session;
+  req.adminUser = user;
   next();
 }
 
 app.use('/api/', apiLimiter);
+app.use('/api/admin', requireAdminAuth);
 
 // Serve the Cross-Platform Web & Mobile App to any connected phone, iPad, or desktop
 app.use(express.static(path.join(__dirname, '../mobile-web-app/www')));
@@ -486,7 +489,7 @@ app.post('/api/user/contacts', authLimiter, (req, res) => {
 });
 
 // 1.9 Database Scale & Health Metrics (Protected by Admin Auth)
-app.get('/api/database/metrics', (req, res) => {
+app.get('/api/database/metrics', requireAdminAuth, (req, res) => {
   const metrics = db.getDatabaseMetrics();
   return res.json({ success: true, metrics });
 });
@@ -1208,7 +1211,7 @@ app.post('/api/admin/posts/:id/reject', (req, res) => {
 });
 
 // 4.5.1 Admin Deletes Post Permanently (Unrestricted Post Deletion)
-app.all(['/api/admin/posts/:id/delete', '/api/posts/:id/delete'], (req, res) => {
+app.all(['/api/admin/posts/:id/delete', '/api/posts/:id/delete'], requireAdminAuth, (req, res) => {
   const adminName = (req.body && req.body.adminName) || "Administrator";
   const success = db.deletePost(req.params.id, adminName);
   if (!success) {
@@ -1222,7 +1225,7 @@ app.all(['/api/admin/posts/:id/delete', '/api/posts/:id/delete'], (req, res) => 
   return res.json({ success: true, message: "Post permanently deleted from system." });
 });
 
-app.delete('/api/admin/posts/:id', (req, res) => {
+app.delete('/api/admin/posts/:id', requireAdminAuth, (req, res) => {
   const adminName = (req.body && req.body.adminName) || "Administrator";
   const success = db.deletePost(req.params.id, adminName);
   if (!success) {
@@ -1245,6 +1248,228 @@ app.get('/api/admin/posts/all', (req, res) => {
 // =========================================================================
 // 5. ADMIN MANAGEMENT & ROLE DELEGATION SYSTEM
 // =========================================================================
+
+// 5.0 Serve Protected Admin Portal HTML Template Only to Authenticated Admins
+app.get('/api/admin/portal-template', requireAdminAuth, (req, res) => {
+  const authPhone = req.adminUser ? (req.adminUser.displayPhone || ('+880 ' + req.adminUser.phone)) : 'Authorized Administrator';
+  const html = `
+      <!-- Admin Portal Header -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-quiet);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); display: flex; align-items: center; justify-content: center; color: #f59e0b; font-size: 16px;">
+            <i class="fas fa-shield-halved"></i>
+          </div>
+          <div>
+            <div style="font-size: 15px; font-weight: 700; color: #fff;">Admin Command Portal</div>
+            <div style="font-size: 11px; color: #f59e0b;" id="admin-authorized-phone">Authorized: ${authPhone}</div>
+          </div>
+        </div>
+        <button onclick="performAdminLogout()" style="background: transparent; border: 1px solid var(--border-quiet); color: var(--text-muted); padding: 6px 12px; border-radius: 9px; font-size: 11px; font-weight: 600; cursor: pointer;">
+          <i class="fas fa-arrow-right-from-bracket"></i> Exit Admin
+        </button>
+      </div>
+
+      <!-- Quick Metrics Strip -->
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 16px;">
+        <div style="background: var(--black-subtle); border: 1px solid var(--burgundy-border); border-radius: 12px; padding: 8px 10px; cursor: pointer;" onclick="switchAdminSection('reports')">
+          <div style="font-size: 9.5px; color: var(--text-muted);">Pending</div>
+          <div style="font-size: 18px; font-weight: 800; color: #f59e0b; margin-top: 2px;" id="admin-pending-stat">0</div>
+        </div>
+        <div style="background: var(--black-subtle); border: 1px solid var(--border-quiet); border-radius: 12px; padding: 8px 10px; cursor: pointer;" onclick="switchAdminSection('allposts')">
+          <div style="font-size: 9.5px; color: var(--text-muted);">Total Posts</div>
+          <div style="font-size: 18px; font-weight: 800; color: #10b981; margin-top: 2px;" id="admin-total-posts-stat">0</div>
+        </div>
+        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 12px; padding: 8px 10px; cursor: pointer;" onclick="switchAdminSection('admins')">
+          <div style="font-size: 9.5px; color: #f59e0b; font-weight: 700;">Admins</div>
+          <div style="font-size: 18px; font-weight: 800; color: #f59e0b; margin-top: 2px;" id="admin-admins-stat">1</div>
+        </div>
+        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 12px; padding: 8px 10px; cursor: pointer;" onclick="switchAdminSection('evidence')">
+          <div style="font-size: 9.5px; color: #ef4444; font-weight: 700;"><i class="fas fa-video"></i> SOS Clips</div>
+          <div style="font-size: 18px; font-weight: 800; color: #ef4444; margin-top: 2px;" id="admin-evidence-stat">0</div>
+        </div>
+      </div>
+
+      <!-- Admin Sub-Navigation Tabs -->
+      <div style="display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;" class="admin-nav-scroll">
+        <button type="button" class="auth-toggle-tab active" id="admin-tab-reports" style="padding: 7px 11px; font-size: 11px; white-space: nowrap;" onclick="switchAdminSection('reports')">
+          <i class="fas fa-inbox"></i> Pending Review (<span id="admin-pending-tab-badge">0</span>)
+        </button>
+        <button type="button" class="auth-toggle-tab" id="admin-tab-allposts" style="padding: 7px 11px; font-size: 11px; white-space: nowrap;" onclick="switchAdminSection('allposts')">
+          <i class="fas fa-layer-group"></i> All Posts (Delete)
+        </button>
+        <button type="button" class="auth-toggle-tab" id="admin-tab-admins" style="padding: 7px 11px; font-size: 11px; border-color: rgba(245, 158, 11, 0.4); color: #f59e0b; white-space: nowrap;" onclick="switchAdminSection('admins')">
+          <i class="fas fa-user-shield"></i> Admin Access & Roles
+        </button>
+        <button type="button" class="auth-toggle-tab" id="admin-tab-users" style="padding: 7px 11px; font-size: 11px; white-space: nowrap;" onclick="switchAdminSection('users')">
+          <i class="fas fa-users"></i> Citizens
+        </button>
+        <button type="button" class="auth-toggle-tab" id="admin-tab-evidence" style="padding: 7px 11px; font-size: 11px; border-color: rgba(239, 68, 68, 0.4); color: #ef4444; white-space: nowrap;" onclick="switchAdminSection('evidence')">
+          <i class="fas fa-video"></i> SOS Clips <span id="admin-evidence-count-badge" style="background: #ef4444; color: #fff; padding: 1px 6px; border-radius: 10px; font-size: 9.5px; font-weight: 700; margin-left: 2px;">0</span>
+        </button>
+        <button type="button" class="auth-toggle-tab" id="admin-tab-journeys" style="padding: 7px 11px; font-size: 11px; border-color: rgba(245, 158, 11, 0.4); color: #f59e0b; white-space: nowrap;" onclick="switchAdminSection('journeys')">
+          <i class="fas fa-satellite-dish"></i> Live Routes <span id="admin-overdue-count-badge" style="background: #ef4444; color: #fff; padding: 1px 6px; border-radius: 10px; font-size: 9.5px; font-weight: 700; margin-left: 2px;">0</span>
+        </button>
+      </div>
+
+      <!-- SECTION A: POST MODERATION QUEUE (With Urgent SOS Evidence on top) -->
+      <div id="admin-section-reports">
+        <div id="admin-urgent-evidence-container" style="display: none; margin-bottom: 16px;"></div>
+        <div class="module-header" style="margin-bottom: 12px;">
+          <span>Citizen Reports Awaiting Moderation</span>
+          <span style="font-size: 11px; color: var(--text-muted); text-transform: none;">Live Review Queue</span>
+        </div>
+        <div id="admin-pending-posts-container"></div>
+      </div>
+
+      <!-- SECTION B: ALL POSTS & UNRESTRICTED CONTENT CONTROL (DELETE POSTS) -->
+      <div id="admin-section-allposts" style="display: none;">
+        <div class="module-header" style="margin-bottom: 12px;">
+          <span><i class="fas fa-layer-group" style="color: #ef4444;"></i> All Posts & Content Governance</span>
+          <button class="btn-gps-refresh" onclick="fetchAdminAllPosts()" style="font-size: 11px;">
+            <i class="fas fa-arrows-rotate"></i> Refresh Posts
+          </button>
+        </div>
+        <div style="display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
+          <input type="text" id="admin-posts-search" placeholder="Search posts by author, phone, or keyword..." style="flex: 2; min-width: 180px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-quiet); color: #fff; padding: 8px 12px; border-radius: 10px; font-size: 11.5px;" oninput="filterAdminAllPosts()">
+          <select id="admin-posts-filter-status" style="flex: 1; min-width: 110px; background: #150a0e; border: 1px solid var(--border-quiet); color: #fff; padding: 8px; border-radius: 10px; font-size: 11px;" onchange="filterAdminAllPosts()">
+            <option value="all">All Statuses</option>
+            <option value="approved">Live Published</option>
+            <option value="pending">Pending Review</option>
+            <option value="rejected">Declined</option>
+          </select>
+        </div>
+        <div id="admin-all-posts-container"></div>
+      </div>
+
+      <!-- SECTION C: ADMIN ACCESS MANAGEMENT & ROLE DELEGATION -->
+      <div id="admin-section-admins" style="display: none;">
+        <div class="module-header" style="margin-bottom: 12px;">
+          <span style="color: #f59e0b;"><i class="fas fa-user-shield"></i> Admin Access Management</span>
+          <span style="font-size: 11px; color: var(--text-muted); text-transform: none;">Role Delegation</span>
+        </div>
+
+        <div style="background: rgba(20, 10, 14, 0.75); border: 1.5px solid rgba(245, 158, 11, 0.4); border-radius: 14px; padding: 14px; margin-bottom: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+          <div style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+            <i class="fas fa-key" style="color: #f59e0b;"></i> Grant New Administrator Clearance
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">
+            Authorize any citizen account with administrative power. Choose specific role and tailored permissions.
+          </div>
+          <form onsubmit="handleGrantAdminSubmit(event)" style="display: flex; flex-direction: column; gap: 10px;">
+            <div>
+              <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Bangladeshi Mobile Number *</label>
+              <div style="display: flex; align-items: center; background: rgba(0,0,0,0.5); border: 1px solid var(--border-quiet); border-radius: 10px; padding: 0 10px;">
+                <span style="font-size: 12px; color: #10b981; font-weight: 700; margin-right: 6px;">+880</span>
+                <input type="tel" id="grant-admin-phone" placeholder="17XXXXXXXX" required style="width: 100%; background: transparent; border: none; outline: none; color: #fff; padding: 9px 0; font-size: 13px; font-weight: 600;">
+              </div>
+            </div>
+            <div>
+              <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Admin Full Name</label>
+              <input type="text" id="grant-admin-name" placeholder="e.g. Farhan Ahmed (or leave blank if registered)" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.5); border: 1px solid var(--border-quiet); border-radius: 10px; color: #fff; padding: 9px 12px; font-size: 12px;">
+            </div>
+            <div>
+              <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Administrative Role Level</label>
+              <select id="grant-admin-role" style="width: 100%; box-sizing: border-box; background: #150a0e; border: 1px solid var(--border-quiet); color: #fff; padding: 9px 12px; font-size: 12px;">
+                <option value="Moderator Admin">Moderator Admin (Approve & Delete Citizen Reports)</option>
+                <option value="Content & Media Officer">Content & Media Officer (Review, Feature & Delete Media)</option>
+                <option value="Emergency Dispatch Officer">Emergency Dispatch Officer (999 CAD, SOS Clips & Live Routes)</option>
+                <option value="Co-Administrator">Co-Administrator (Full Operational Clearance)</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 6px;">Assigned Permissions Checklist</label>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; color: #fff;">
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                  <input type="checkbox" id="perm-delete-posts" checked> Delete Any Post
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                  <input type="checkbox" id="perm-approve-posts" checked> Approve Civic Posts
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                  <input type="checkbox" id="perm-view-evidence" checked> View SOS Video Vault
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                  <input type="checkbox" id="perm-dispatch" checked> 999 CAD & Transit
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; grid-column: span 2;">
+                  <input type="checkbox" id="perm-manage-admins"> Grant / Revoke Other Admins
+                </label>
+              </div>
+            </div>
+            <button type="submit" style="background: linear-gradient(135deg, #b45309 0%, #f59e0b 100%); color: #000; font-weight: 800; border: none; padding: 11px; border-radius: 10px; font-size: 12.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 4px;">
+              <i class="fas fa-shield-check"></i> Grant Administrative Clearance
+            </button>
+          </form>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 12px; font-weight: 700; color: #fff;">Active Administrative Personnel</span>
+          <span style="font-size: 11px; color: var(--text-muted);" id="admin-roster-count">1 Admin</span>
+        </div>
+        <div id="admin-roster-container"></div>
+      </div>
+
+      <!-- SECTION D: CITIZEN DIRECTORY -->
+      <div id="admin-section-users" style="display: none;">
+        <div class="module-header" style="margin-bottom: 12px;">
+          <span><i class="fas fa-users" style="color: #38bdf8;"></i> Registered Citizen Accounts</span>
+          <button class="btn-gps-refresh" onclick="fetchAdminUsersList()" style="font-size: 11px;">
+            <i class="fas fa-arrows-rotate"></i> Refresh Citizens
+          </button>
+        </div>
+        <div style="margin-bottom: 10px;">
+          <input type="text" id="admin-users-search" placeholder="Search citizens by phone or name..." style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.4); border: 1px solid var(--border-quiet); color: #fff; padding: 8px 12px; border-radius: 10px; font-size: 11.5px;" oninput="filterAdminUsers()">
+        </div>
+        <div id="admin-users-container"></div>
+      </div>
+
+      <!-- SECTION E: DEDICATED COVERT SPY SOS EVIDENCE QUEUE -->
+      <div id="admin-section-evidence" style="display: none;">
+        <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <i class="fab fa-google-drive" style="color: #10b981; font-size: 16px;"></i>
+            <div>
+              <div style="font-size: 11.5px; font-weight: 700; color: #fff;">5TB Google Drive Private Vault (<span style="color: #10b981;">SAFE_BD_VAULT</span>)</div>
+              <div style="font-size: 10px; color: var(--text-muted);" id="admin-gdrive-vault-status">Encrypted &amp; isolated folder • Zero Render RAM usage</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button type="button" onclick="verifyGoogleDriveVaultConnection()" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.45); color: #10b981; padding: 5px 10px; border-radius: 8px; font-size: 10.5px; font-weight: 700; cursor: pointer;">
+              <i class="fas fa-cloud-check"></i> Verify 5TB Vault
+            </button>
+            <button type="button" onclick="clearStaleLocalEvidenceClips()" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; padding: 5px 10px; border-radius: 8px; font-size: 10.5px; font-weight: 700; cursor: pointer;" title="Remove old dead test clips from browser cache">
+              <i class="fas fa-broom"></i> Clear Old Cache
+            </button>
+          </div>
+        </div>
+
+        <div class="module-header" style="margin-bottom: 12px;">
+          <span style="color: #ef4444;"><i class="fas fa-triangle-exclamation"></i> Covert SOS Video &amp; Audio Evidence</span>
+          <button class="btn-gps-refresh" onclick="fetchAdminEmergencyEvidence()" style="font-size: 11px;">
+            <i class="fas fa-arrows-rotate"></i> Refresh Evidence
+          </button>
+        </div>
+        <div id="admin-evidence-full-container">
+          <div id="admin-evidence-loading" style="text-align: center; padding: 50px 20px; color: var(--text-muted); font-size: 13px;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 28px; color: #ef4444; display: block; margin-bottom: 12px;"></i>
+            Loading SOS evidence vault...
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION F: LIVE CITIZEN JOURNEYS & OVERDUE OBSERVATION QUEUE -->
+      <div id="admin-section-journeys" style="display: none;">
+        <div class="module-header" style="margin-bottom: 12px;">
+          <span>Live Citizen Journeys & Overdue Alerts</span>
+          <button class="btn-gps-refresh" onclick="fetchAdminActiveJourneys()" style="font-size: 11px;">
+            <i class="fas fa-arrows-rotate"></i> Refresh Telemetry
+          </button>
+        </div>
+        <div id="admin-journeys-container"></div>
+      </div>
+  `;
+  return res.json({ success: true, html });
+});
 
 // 5.1 List All Active Administrators
 app.get('/api/admin/admins', (req, res) => {
