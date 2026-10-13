@@ -2960,17 +2960,36 @@
       return false;
     }
 
+    function sanitizeMediaUrl(url) {
+      if (!url || typeof url !== 'string') return '';
+      const trimmed = url.trim();
+      // Allow data URLs for images/videos
+      if (/^data:(image\/(png|jpe?g|gif|webp|svg\+xml)|video\/(mp4|webm|ogg));base64,[a-z0-9+/=]+$/i.test(trimmed)) {
+        return trimmed;
+      }
+      // Allow relative API routes
+      if (/^\/api\/(feed\/posts\/[a-zA-Z0-9_\-\.]+\/media|emergency\/evidence\/[a-zA-Z0-9_\-\.]+)/i.test(trimmed)) {
+        return encodeURI(trimmed);
+      }
+      // Allow standard absolute http/https URLs with escaped characters
+      if (/^https?:\/\/[^\s"'<>]+$/i.test(trimmed)) {
+        return escapeHtml(trimmed);
+      }
+      return '';
+    }
+
     function renderPostMediaHtml(p) {
       if (!p || !p.media) return '';
+      const safeMediaSrc = sanitizeMediaUrl(p.media);
+      if (!safeMediaSrc) return '';
       const isVid = isVideoMedia(p.media);
       const safePostId = escapeHtml(p.id || '');
-      const mediaSrc = p.media;
 
       if (isVid) {
         return `
           <div class="post-media-container video-container">
-            <video controls playsinline preload="metadata" style="width: 100%; max-height: 380px; display: block; object-fit: contain; background: #000;" src="${mediaSrc}">
-              <source src="${mediaSrc}">
+            <video controls playsinline preload="metadata" style="width: 100%; max-height: 380px; display: block; object-fit: contain; background: #000;" src="${safeMediaSrc}">
+              <source src="${safeMediaSrc}">
               Your browser does not support video playback.
             </video>
             <div class="post-media-meta-bar">
@@ -2992,7 +3011,7 @@
 
       return `
         <div class="post-media-container image-container">
-          <img src="${mediaSrc}" class="post-media-attachment" alt="Post Photo Attachment" loading="lazy">
+          <img src="${safeMediaSrc}" class="post-media-attachment" alt="Post Photo Attachment" loading="lazy">
           <div class="post-media-meta-bar">
             <span style="font-size: 11px; font-weight: 700; color: #38bdf8; display: inline-flex; align-items: center; gap: 5px;">
               <i class="fas fa-image"></i> Photo Attachment
@@ -3096,6 +3115,9 @@
       const body = document.getElementById('evidence-modal-body');
       if (!modal || !body) return;
 
+      const safeMediaSrc = sanitizeMediaUrl(post.media);
+      if (!safeMediaSrc) return;
+
       const isVid = isVideoMedia(post.media);
       const safeAuthor = escapeHtml(post.author || 'Citizen Report');
       const safeCategory = escapeHtml(post.category || 'General Safety');
@@ -3115,11 +3137,11 @@
         </div>
         <div style="border-radius: 12px; overflow: hidden; background: #000; border: 1.5px solid rgba(255,255,255,0.15); margin-bottom: 14px;">
           ${isVid ? `
-            <video id="evidence-modal-video" controls autoplay playsinline preload="auto" style="width: 100%; max-height: 380px; display: block; object-fit: contain; background: #000;" src="${post.media}">
-              <source src="${post.media}">
+            <video id="evidence-modal-video" controls autoplay playsinline preload="auto" style="width: 100%; max-height: 380px; display: block; object-fit: contain; background: #000;" src="${safeMediaSrc}">
+              <source src="${safeMediaSrc}">
             </video>
           ` : `
-            <img src="${post.media}" style="width: 100%; max-height: 380px; display: block; object-fit: contain; background: #000;">
+            <img src="${safeMediaSrc}" style="width: 100%; max-height: 380px; display: block; object-fit: contain; background: #000;">
           `}
         </div>
         <div style="display: flex; gap: 8px;">
