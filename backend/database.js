@@ -120,9 +120,10 @@ function initDatabase() {
           return;
         }
         cleanPosts[post.id] = post;
-        if (post.approved) {
+        if (!post.rejected) {
+          post.approved = true;
           approvedIds.push(post.id);
-        } else if (!post.rejected) {
+        } else {
           pendingIds.push(post.id);
         }
       });
@@ -742,23 +743,19 @@ function createPost({ id, author, authorPhone, content, category, media, gdriveF
     mediaMimeType: mediaMimeType || null,
     likes: 0,
     likedBy: [],
-    approved: isChiefAdmin ? true : false,
+    approved: true, // Direct live publish like Facebook!
     rejected: false,
     createdAt: now,
-    approvedAt: isChiefAdmin ? now : null,
-    reviewedBy: isChiefAdmin ? "Chief Administrator (Official)" : null
+    approvedAt: now,
+    reviewedBy: isChiefAdmin ? "Chief Administrator (Official)" : "Instant Community Feed"
   };
 
   dbState.posts[postId] = newPost;
-  if (isChiefAdmin) {
-    dbState.approvedPostIds.unshift(postId);
-  } else {
-    dbState.pendingPostIds.unshift(postId);
-  }
+  dbState.approvedPostIds.unshift(postId);
   dbState.stats.totalPosts = Object.keys(dbState.posts).length;
 
   persistToDisk();
-  console.log(`[📝 ${isChiefAdmin ? 'OFFICIAL FOUNDER POST' : 'CITIZEN POST SUBMITTED'}] ID: ${postId} by ${newPost.author} (${cleanCategory}) -> ${isChiefAdmin ? 'LIVE APPROVED' : 'PENDING ADMIN APPROVAL'}`);
+  console.log(`[📝 ${isChiefAdmin ? 'OFFICIAL FOUNDER POST' : 'COMMUNITY POST PUBLISHED'}] ID: ${postId} by ${newPost.author} (${cleanCategory}) -> LIVE ON AWARENESS FEED`);
   return formatPostOutput(newPost);
 }
 
@@ -1498,7 +1495,8 @@ async function restoreDatabaseFromGoogleDriveVault() {
     // Rebuild sorted approvedPostIds and pendingPostIds
     const allPosts = Object.values(dbState.posts);
     dbState.approvedPostIds = allPosts
-      .filter(p => p && p.id && p.approved && !p.rejected)
+      .filter(p => p && p.id && !p.rejected)
+      .map(p => { p.approved = true; return p; })
       .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
       .map(p => p.id);
     dbState.pendingPostIds = allPosts
