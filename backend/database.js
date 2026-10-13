@@ -31,6 +31,13 @@ let dbState = {
   approvedPostIds: [],  // Array of approved post IDs sorted newest first (O(limit) pagination for live feed)
   pendingPostIds: [],   // Array of pending post IDs awaiting admin moderation
   otpCodes: {},         // cleanPhone -> { code, purpose, expiresAt, attempts }
+  cloudVault: {
+    scriptUrl: process.env.GDRIVE_VAULT_URL || 'https://script.google.com/macros/s/AKfycby3O-1dfJeGE5DJ8dDrhBHtkdgnk-IKSXFRtUswiTblka1M3GoC8uxGHfOM2kvyOVmq/exec',
+    secretKey: process.env.GDRIVE_SECRET_KEY || 'SAFEBD_PRIVATE_VAULT_2026',
+    enabled: true,
+    folderName: 'SAFE_BD_VAULT',
+    lastSyncedAt: null
+  },
   stats: {
     totalLogins: 0,
     totalRegistrations: 0,
@@ -124,6 +131,10 @@ function initDatabase() {
       approvedIds.sort((a, b) => new Date(cleanPosts[b]?.createdAt || 0) - new Date(cleanPosts[a]?.createdAt || 0));
       pendingIds.sort((a, b) => new Date(cleanPosts[b]?.createdAt || 0) - new Date(cleanPosts[a]?.createdAt || 0));
 
+      const savedCloudVault = parsed.cloudVault || {};
+      const scriptUrl = process.env.GDRIVE_VAULT_URL || savedCloudVault.scriptUrl || 'https://script.google.com/macros/s/AKfycby3O-1dfJeGE5DJ8dDrhBHtkdgnk-IKSXFRtUswiTblka1M3GoC8uxGHfOM2kvyOVmq/exec';
+      const secretKey = process.env.GDRIVE_SECRET_KEY || savedCloudVault.secretKey || 'SAFEBD_PRIVATE_VAULT_2026';
+
       dbState = {
         users: parsed.users || {},
         sessions: parsed.sessions || {},
@@ -132,6 +143,13 @@ function initDatabase() {
         approvedPostIds: approvedIds,
         pendingPostIds: pendingIds,
         otpCodes: {}, // OTPs are ephemeral and cleared on startup
+        cloudVault: {
+          scriptUrl: scriptUrl,
+          secretKey: secretKey,
+          enabled: !!scriptUrl,
+          folderName: savedCloudVault.folderName || 'SAFE_BD_VAULT',
+          lastSyncedAt: savedCloudVault.lastSyncedAt || null
+        },
         stats: parsed.stats || { totalLogins: 0, totalRegistrations: 0, totalPosts: Object.keys(cleanPosts).length, lastSaved: null }
       };
       // Ensure all loaded citizen accounts have default contacts structure if not present
@@ -156,6 +174,13 @@ function initDatabase() {
 
   // Commit initial state
   persistToDisk();
+
+  // If 5TB Google Drive Vault is configured, asynchronously pull and merge any newer records from cloud vault
+  if (dbState.cloudVault && dbState.cloudVault.enabled && dbState.cloudVault.scriptUrl) {
+    setTimeout(() => {
+      restoreDatabaseFromGoogleDriveVault().catch(() => {});
+    }, 1000);
+  }
 }
 
 function getDefaultUserContacts() {
@@ -294,6 +319,7 @@ function persistToDisk() {
         sessions: dbState.sessions,
         emergencyEvidence: dbState.emergencyEvidence || [],
         posts: dbState.posts || {},
+        cloudVault: dbState.cloudVault || {},
         stats: dbState.stats
       }, null, 2);
 
@@ -320,6 +346,9 @@ function persistToDisk() {
       } catch (pErr) {
         console.error('[❌ POSTS ATOMIC PERSISTENCE ERROR]:', pErr.message);
       }
+
+      // Schedule non-blocking backup of metadata state to Private 5TB Google Drive Vault if connected
+      scheduleCloudStateBackup();
     } catch (err) {
       console.error('[❌ DATABASE PERSISTENCE ERROR]:', err.message);
     }
@@ -1064,13 +1093,263 @@ function getAllUsersAdmin({ page = 1, limit = 100 } = {}) {
 
 function deleteEmergencyEvidence(id) {
   if (!dbState.emergencyEvidence) return false;
+  const target = dbState.emergencyEvidence.find(e => e.id === id);
   const initialLen = dbState.emergencyEvidence.length;
   dbState.emergencyEvidence = dbState.emergencyEvidence.filter(e => e.id !== id);
   if (dbState.emergencyEvidence.length !== initialLen) {
+    if (target && (target.gdriveFileId || target.fileName)) {
+      deleteFromGoogleDriveVault({ fileId: target.gdriveFileId, fileName: target.fileName }).catch(() => {});
+    }
     persistToDisk();
     return true;
   }
   return false;
+}
+
+/* =========================================================================
+   PRIVATE 5TB GOOGLE DRIVE VAULT ENGINE (ZERO SERVER RAM / PERMANENT STORAGE)
+   Strictly isolated to the "SAFE_BD_VAULT" folder + Secret Key authenticated.
+========================================================================= */
+
+let cloudBackupDebounceTimer = null;
+
+function getCloudVaultConfig() {
+  if (!dbState.cloudVault) {
+    dbState.cloudVault = {
+      scriptUrl: process.env.GDRIVE_VAULT_URL || 'https://script.google.com/macros/s/AKfycby3O-1dfJeGE5DJ8dDrhBHtkdgnk-IKSXFRtUswiTblka1M3GoC8uxGHfOM2kvyOVmq/exec',
+      secretKey: process.env.GDRIVE_SECRET_KEY || 'SAFEBD_PRIVATE_VAULT_2026',
+      enabled: true,
+      folderName: 'SAFE_BD_VAULT',
+      lastSyncedAt: null
+    };
+  }
+  return {
+    scriptUrl: dbState.cloudVault.scriptUrl || '',
+    enabled: !!(dbState.cloudVault.enabled && dbState.cloudVault.scriptUrl),
+    folderName: dbState.cloudVault.folderName || 'SAFE_BD_VAULT',
+    lastSyncedAt: dbState.cloudVault.lastSyncedAt || null,
+    hasSecretKey: !!dbState.cloudVault.secretKey
+  };
+}
+
+function setCloudVaultConfig({ scriptUrl, secretKey, enabled }) {
+  if (!dbState.cloudVault) dbState.cloudVault = {};
+  if (typeof scriptUrl === 'string') {
+    dbState.cloudVault.scriptUrl = scriptUrl.trim();
+  }
+  if (typeof secretKey === 'string' && secretKey.trim()) {
+    dbState.cloudVault.secretKey = secretKey.trim();
+  }
+  if (typeof enabled === 'boolean') {
+    dbState.cloudVault.enabled = enabled;
+  } else {
+    dbState.cloudVault.enabled = !!dbState.cloudVault.scriptUrl;
+  }
+  dbState.cloudVault.folderName = 'SAFE_BD_VAULT';
+  persistToDisk();
+  return getCloudVaultConfig();
+}
+
+async function uploadToGoogleDriveVault({ fileName, mimeType = 'video/mp4', base64, overwrite = false }) {
+  const vault = dbState.cloudVault || {};
+  const scriptUrl = vault.scriptUrl || process.env.GDRIVE_VAULT_URL;
+  if (!scriptUrl || !vault.enabled || !base64) {
+    return { success: false, skipped: true };
+  }
+
+  try {
+    const cleanBase64 = base64.includes(',') ? base64.split(',')[1] : base64;
+    const res = await fetch(scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      redirect: 'follow',
+      body: JSON.stringify({
+        secret: vault.secretKey || 'SAFEBD_PRIVATE_VAULT_2026',
+        action: 'upload',
+        fileName: fileName || `safe_bd_${Date.now()}.mp4`,
+        mimeType: mimeType || 'video/mp4',
+        base64: cleanBase64,
+        overwrite: !!overwrite
+      })
+    });
+
+    const text = await res.text();
+    let data = null;
+    try {
+      data = JSON.parse(text);
+    } catch (parseErr) {
+      // Returned HTML login screen if "Who has access" is set to "Only myself" instead of "Anyone"
+      if (text && (text.includes('accounts.google.com') || text.includes('request-access-icon') || text.includes('ServiceLogin'))) {
+        return {
+          success: false,
+          error: 'Google Script deployment access is set to "Only myself". Please change "Who has access" to "Anyone" in Google Apps Script -> Manage deployments.'
+        };
+      }
+      return { success: false, error: 'Invalid response from Google Drive script.' };
+    }
+
+    if (data && data.success) {
+      dbState.cloudVault.lastSyncedAt = new Date().toISOString();
+      console.log(`[☁️ 5TB GOOGLE DRIVE VAULT] Uploaded ${fileName} -> File ID: ${data.fileId}`);
+      return {
+        success: true,
+        fileId: data.fileId,
+        fileName: data.fileName || fileName,
+        viewUrl: data.viewUrl || null
+      };
+    }
+    return { success: false, error: (data && data.error) || 'Upload failed' };
+  } catch (err) {
+    console.warn('[⚠️ GOOGLE DRIVE VAULT UPLOAD WARN]:', err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+async function fetchFromGoogleDriveVault({ fileId, fileName }) {
+  const vault = dbState.cloudVault || {};
+  const scriptUrl = vault.scriptUrl || process.env.GDRIVE_VAULT_URL;
+  if (!scriptUrl || !vault.enabled) {
+    return null;
+  }
+
+  // 1. Try Private Vault API action="get"
+  try {
+    const res = await fetch(scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      redirect: 'follow',
+      body: JSON.stringify({
+        secret: vault.secretKey || 'SAFEBD_PRIVATE_VAULT_2026',
+        action: 'get',
+        fileId: fileId || '',
+        fileName: fileName || ''
+      })
+    });
+    const text = await res.text();
+    const data = JSON.parse(text);
+    if (data && data.success && data.base64) {
+      return Buffer.from(data.base64, 'base64');
+    }
+  } catch (e) {}
+
+  // 2. Fallback: If fileId exists and script #1 was used, fetch direct download stream from Google Drive
+  if (fileId) {
+    try {
+      const directUrl = `https://drive.google.com/uc?export=download&id=${encodeURIComponent(fileId)}`;
+      const dlRes = await fetch(directUrl, { redirect: 'follow' });
+      if (dlRes.ok) {
+        const cType = dlRes.headers.get('content-type') || '';
+        if (!cType.includes('text/html')) {
+          const arrBuf = await dlRes.arrayBuffer();
+          return Buffer.from(arrBuf);
+        }
+      }
+    } catch (e) {}
+  }
+
+  return null;
+}
+
+async function deleteFromGoogleDriveVault({ fileId, fileName }) {
+  const vault = dbState.cloudVault || {};
+  const scriptUrl = vault.scriptUrl || process.env.GDRIVE_VAULT_URL;
+  if (!scriptUrl || !vault.enabled) return false;
+
+  try {
+    await fetch(scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      redirect: 'follow',
+      body: JSON.stringify({
+        secret: vault.secretKey || 'SAFEBD_PRIVATE_VAULT_2026',
+        action: 'delete',
+        fileId: fileId || '',
+        fileName: fileName || ''
+      })
+    });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function scheduleCloudStateBackup() {
+  const vault = dbState.cloudVault || {};
+  if (!vault.enabled || !vault.scriptUrl) return;
+  if (cloudBackupDebounceTimer) clearTimeout(cloudBackupDebounceTimer);
+  cloudBackupDebounceTimer = setTimeout(() => {
+    const stateSnapshot = JSON.stringify({
+      users: dbState.users,
+      emergencyEvidence: dbState.emergencyEvidence || [],
+      posts: dbState.posts || {},
+      stats: dbState.stats,
+      backedUpAt: new Date().toISOString()
+    });
+    const b64 = Buffer.from(stateSnapshot, 'utf8').toString('base64');
+    uploadToGoogleDriveVault({
+      fileName: 'safe_bd_cloud_state.json',
+      mimeType: 'application/json',
+      base64: b64,
+      overwrite: true
+    }).catch(() => {});
+  }, 2500);
+}
+
+async function restoreDatabaseFromGoogleDriveVault() {
+  const buf = await fetchFromGoogleDriveVault({ fileName: 'safe_bd_cloud_state.json' });
+  if (!buf) return false;
+  try {
+    const cloudData = JSON.parse(buf.toString('utf8'));
+    let updated = false;
+
+    // Merge users
+    if (cloudData.users && typeof cloudData.users === 'object') {
+      for (const [phone, u] of Object.entries(cloudData.users)) {
+        if (!dbState.users[phone]) {
+          dbState.users[phone] = u;
+          updated = true;
+        }
+      }
+    }
+
+    // Merge SOS evidence clips
+    if (Array.isArray(cloudData.emergencyEvidence)) {
+      const evMap = new Map();
+      (dbState.emergencyEvidence || []).forEach(e => { if (e && e.id) evMap.set(e.id, e); });
+      cloudData.emergencyEvidence.forEach(e => {
+        if (e && e.id && !evMap.has(e.id)) {
+          evMap.set(e.id, e);
+          updated = true;
+        }
+      });
+      if (updated) {
+        dbState.emergencyEvidence = Array.from(evMap.values()).sort((a, b) => new Date(b.recordedAt || 0) - new Date(a.recordedAt || 0));
+      }
+    }
+
+    // Merge posts
+    if (cloudData.posts && typeof cloudData.posts === 'object') {
+      for (const [pid, post] of Object.entries(cloudData.posts)) {
+        if (post && post.id && !dbState.posts[pid]) {
+          dbState.posts[pid] = post;
+          if (post.approved && !dbState.approvedPostIds.includes(pid)) {
+            dbState.approvedPostIds.push(pid);
+          } else if (!post.approved && !post.rejected && !dbState.pendingPostIds.includes(pid)) {
+            dbState.pendingPostIds.push(pid);
+          }
+          updated = true;
+        }
+      }
+    }
+
+    if (updated) {
+      console.log(`[☁️ 5TB GOOGLE DRIVE VAULT RESTORED] Restored citizen records, SOS evidence, and posts from SAFE_BD_VAULT.`);
+      persistToDisk();
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 // Initialize on module load
@@ -1113,6 +1392,12 @@ module.exports = {
   grantAdminAccess,
   revokeAdminAccess,
   getAllUsersAdmin,
+  getCloudVaultConfig,
+  setCloudVaultConfig,
+  uploadToGoogleDriveVault,
+  fetchFromGoogleDriveVault,
+  deleteFromGoogleDriveVault,
+  restoreDatabaseFromGoogleDriveVault,
   getDatabaseMetrics,
   initDatabase
 };
