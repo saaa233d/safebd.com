@@ -9,7 +9,7 @@
  * - Timing-safe password verification (resistant to side-channel timing attacks)
  * - Session tracking: Live logged-in/logged-out states with timestamps
  * - 2FA OTP verification lifecycle management
- * - Pre-seeded Chief Administrator account (01316750712 / naxbagmo24)
+ * - Pre-seeded Chief Administrator account with encrypted RBAC
  * - Ready for seamless connection to PostgreSQL / MongoDB when DATABASE_URL is set
  */
 
@@ -1381,6 +1381,7 @@ function scheduleCloudStateBackup() {
     try {
       const stateSnapshot = JSON.stringify({
         users: dbState.users,
+        sessions: dbState.sessions || {},
         emergencyEvidence: dbState.emergencyEvidence || [],
         posts: dbState.posts || {},
         deletedPostIds: dbState.deletedPostIds || [],
@@ -1438,6 +1439,17 @@ async function restoreDatabaseFromGoogleDriveVault() {
           updated = true;
         } else if (u.isAdmin && !dbState.users[phone].isAdmin) {
           dbState.users[phone] = { ...dbState.users[phone], ...u };
+          updated = true;
+        }
+      }
+    }
+
+    // Merge sessions so Admin & Citizen Bearer tokens survive restarts
+    if (cloudData.sessions && typeof cloudData.sessions === 'object') {
+      if (!dbState.sessions) dbState.sessions = {};
+      for (const [token, sess] of Object.entries(cloudData.sessions)) {
+        if (sess && !dbState.sessions[token]) {
+          dbState.sessions[token] = sess;
           updated = true;
         }
       }
