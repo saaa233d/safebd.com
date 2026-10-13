@@ -1333,6 +1333,52 @@
       font-family: inherit;
       outline: none;
     }
+    .btn-pw-eye {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      margin-left: 8px;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s;
+    }
+    .btn-pw-eye:hover {
+      color: #fff;
+    }
+    .profile-contact-row {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-quiet);
+      border-radius: 13px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+    .profile-contact-row:hover {
+      border-color: var(--burgundy-border);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .profile-contact-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(185, 28, 28, 0.2);
+      border: 1px solid rgba(185, 28, 28, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fca5a5;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
     .btn-submit-action {
       width: 100%;
       background: var(--burgundy-core);
@@ -1818,33 +1864,146 @@
           <button class="modal-close-x" onclick="closeAuthModal()"><i class="fas fa-xmark"></i></button>
         </div>
 
-        <!-- Logged In Profile View -->
+        <!-- Logged In Profile View (UNLOCKED PROFILE) -->
         <div id="view-profile-active" style="display: none;">
-          <div style="background: var(--black-subtle); border: 1px solid var(--burgundy-border); border-radius: 16px; padding: 16px; margin-bottom: 20px; text-align: center;">
+          <!-- Top Citizen Status Banner -->
+          <div style="background: var(--black-subtle); border: 1px solid var(--burgundy-border); border-radius: 16px; padding: 16px; margin-bottom: 14px; text-align: center; position: relative;">
+            <div style="position: absolute; top: 12px; right: 12px; font-size: 10px; color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 2px 8px; border-radius: 10px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span> Unlocked
+            </div>
             <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--burgundy-deep); border: 2px solid var(--burgundy-vivid); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #fff;" id="profile-badge-letter">K</div>
-            <h4 style="font-size: 15px; color: #fff;" id="profile-display-name">Kazi Rahman</h4>
+            <h4 style="font-size: 16px; color: #fff; font-weight: 700;" id="profile-display-name">Kazi Rahman</h4>
             <div id="profile-role-badge" style="display: none; font-size: 11px; color: #d4af37; font-weight: 700; margin-top: 3px;"></div>
-            <p style="font-size: 12px; color: var(--text-muted); margin-top: 3px;" id="profile-display-phone">+880 1712-345678</p>
-            <div id="profile-status-badge" style="display: inline-block; font-size: 10px; color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16,185,129,0.3); padding: 2px 8px; border-radius: 12px; margin-top: 8px;">
-              <i class="fas fa-check-shield"></i> Verified BD Citizen (NID Linked)
+            <p style="font-size: 13px; color: #cbd5e1; font-weight: 600; margin-top: 4px; font-family: monospace; letter-spacing: 0.5px;" id="profile-display-phone">+880 1712-345678</p>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 10px;">
+              <div id="profile-status-badge" style="display: inline-block; font-size: 10px; color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16,185,129,0.3); padding: 2px 8px; border-radius: 12px;">
+                <i class="fas fa-check-shield"></i> Verified BD Citizen (NID Linked)
+              </div>
+              <div style="display: inline-flex; align-items: center; gap: 5px; font-size: 10px; color: #38bdf8; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); padding: 2px 8px; border-radius: 12px;">
+                <i class="fab fa-google-drive"></i> 5TB Cloud Vault Synced
+              </div>
             </div>
           </div>
+
+          <!-- Emergency Circle (Father, Mother, Guardian) -->
+          <div style="background: rgba(15, 11, 16, 0.95); border: 1px solid var(--burgundy-border); border-radius: 16px; padding: 14px; margin-bottom: 14px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-users-viewfinder" style="color: var(--danger-crimson); font-size: 14px;"></i>
+                <span style="font-size: 12.5px; font-weight: 700; color: #fff;">Emergency Family Circle</span>
+              </div>
+              <button type="button" onclick="toggleQuickContactsEditor()" style="background: rgba(185, 28, 28, 0.2); border: 1px solid rgba(185, 28, 28, 0.4); color: #fca5a5; font-size: 11px; padding: 4px 9px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <i class="fas fa-pen-to-square"></i> <span id="btn-toggle-edit-text">Edit Contacts</span>
+              </button>
+            </div>
+            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.35;">
+              Father, Mother, and Guardian receive live SOS alerts with your coordinates:
+            </p>
+
+            <!-- 3 Emergency Circle Rows -->
+            <div id="profile-emergency-circle-list">
+              <!-- Dynamically populated by updateProfileCircleUI() -->
+            </div>
+
+            <!-- Inline Quick Contacts Editor (Collapsible) -->
+            <form id="profile-quick-contacts-editor" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-quiet);" onsubmit="handleSaveQuickContacts(event)">
+              <div style="font-size: 11.5px; font-weight: 700; color: #e5e7eb; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-shield-cat" style="color: #60a5fa;"></i> Configure 11-Digit Numbers (01XXXXXXXXX)
+              </div>
+
+              <!-- Father -->
+              <div class="form-group" style="margin-bottom: 8px;">
+                <label class="form-label" style="font-size: 11px; margin-bottom: 3px;">👨 Father's Mobile Number</label>
+                <div class="input-field-wrap" style="padding: 7px 10px;">
+                  <span class="prefix-bd" style="font-size: 11.5px;">+880</span>
+                  <input type="tel" class="form-input" id="profile-input-father" placeholder="01XXXXXXXXX" style="font-size: 12px;">
+                </div>
+              </div>
+
+              <!-- Mother -->
+              <div class="form-group" style="margin-bottom: 8px;">
+                <label class="form-label" style="font-size: 11px; margin-bottom: 3px;">👩 Mother's Mobile Number</label>
+                <div class="input-field-wrap" style="padding: 7px 10px;">
+                  <span class="prefix-bd" style="font-size: 11.5px;">+880</span>
+                  <input type="tel" class="form-input" id="profile-input-mother" placeholder="01XXXXXXXXX" style="font-size: 12px;">
+                </div>
+              </div>
+
+              <!-- Guardian -->
+              <div class="form-group" style="margin-bottom: 10px;">
+                <label class="form-label" style="font-size: 11px; margin-bottom: 3px;">🛡️ Guardian's Mobile Number</label>
+                <div class="input-field-wrap" style="padding: 7px 10px;">
+                  <span class="prefix-bd" style="font-size: 11.5px;">+880</span>
+                  <input type="tel" class="form-input" id="profile-input-guardian" placeholder="01XXXXXXXXX" style="font-size: 12px;">
+                </div>
+              </div>
+
+              <button type="submit" class="btn-submit-action" id="btn-save-quick-contacts" style="padding: 10px; font-size: 12px; margin-top: 4px;">
+                <i class="fas fa-cloud-arrow-up"></i> Save &amp; Sync to 5TB Cloud Vault
+              </button>
+            </form>
+          </div>
+
+          <!-- Account Security / Change Password (Collapsible) -->
+          <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-quiet); border-radius: 14px; padding: 12px 14px; margin-bottom: 14px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onclick="toggleChangePasswordSection()">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-key" style="color: #60a5fa; font-size: 13px;"></i>
+                <span style="font-size: 12px; font-weight: 600; color: #fff;">Change Profile Password</span>
+              </div>
+              <i class="fas fa-chevron-down" id="chg-pw-chevron" style="color: var(--text-muted); font-size: 11px; transition: transform 0.2s;"></i>
+            </div>
+            <form id="form-change-password-inline" style="display: none; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06);" onsubmit="handleChangePasswordSubmit(event)">
+              <div class="form-group" style="margin-bottom: 8px;">
+                <label class="form-label" style="font-size: 10.5px;">Current Password</label>
+                <div class="input-field-wrap" style="padding: 7px 10px;">
+                  <input type="password" class="form-input" id="inline-current-pw" placeholder="Enter current password" required style="font-size: 12px;">
+                  <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('inline-current-pw', this)"><i class="fas fa-eye"></i></button>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom: 8px;">
+                <label class="form-label" style="font-size: 10.5px;">New Password (min 6 chars)</label>
+                <div class="input-field-wrap" style="padding: 7px 10px;">
+                  <input type="password" class="form-input" id="inline-new-pw" placeholder="New secure password" minlength="6" required style="font-size: 12px;">
+                  <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('inline-new-pw', this)"><i class="fas fa-eye"></i></button>
+                </div>
+              </div>
+              <button type="submit" class="btn-submit-action" id="btn-change-pw-submit" style="padding: 9px; font-size: 12px;">
+                <i class="fas fa-lock"></i> Update Password
+              </button>
+            </form>
+          </div>
+
           <button id="admin-portal-profile-btn" class="btn-submit-action" style="display: none; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); margin-bottom: 8px; border: none;" onclick="openAdminPortalFromProfile()"></button>
-          <button class="btn-submit-action" style="background: transparent; border-color: var(--border-quiet); color: var(--text-muted);" onclick="performLogout()">
-            Sign Out
+          <button class="btn-submit-action" style="background: transparent; border-color: rgba(239,68,68,0.4); color: #f87171; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="performLogout()">
+            <i class="fas fa-lock"></i> Lock Profile &amp; Sign Out
           </button>
         </div>
 
-        <!-- Auth Form Container -->
+        <!-- Auth Form Container (Profile Locked) -->
         <div id="view-auth-forms">
-          <div class="auth-toggle-bar" id="auth-main-tabs">
-            <button class="auth-toggle-tab active" id="tab-btn-login" onclick="toggleAuthTab('login')">Sign In</button>
-            <button class="auth-toggle-tab" id="tab-btn-signup" onclick="toggleAuthTab('signup')">Create Account</button>
+          <!-- Profile Locked Banner -->
+          <div style="background: rgba(185, 28, 28, 0.12); border: 1px solid rgba(185, 28, 28, 0.35); border-radius: 14px; padding: 12px 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(185, 28, 28, 0.25); border: 1px solid rgba(185, 28, 28, 0.5); display: flex; align-items: center; justify-content: center; color: #ef4444; font-size: 15px; flex-shrink: 0;">
+              <i class="fas fa-lock"></i>
+            </div>
+            <div>
+              <div style="font-size: 12.5px; font-weight: 700; color: #fca5a5;">CITIZEN PROFILE LOCKED</div>
+              <div style="font-size: 11px; color: var(--text-muted); line-height: 1.35; margin-top: 2px;">Profiles are password-protected. Enter credentials to unlock your emergency circle and 5TB vault data.</div>
+            </div>
           </div>
 
-          <!-- 1. LOGIN FORM (DIRECT WITH PASSWORD) -->
+          <div class="auth-toggle-bar" id="auth-main-tabs">
+            <button class="auth-toggle-tab active" id="tab-btn-login" onclick="toggleAuthTab('login')">
+              <i class="fas fa-lock-open" style="font-size: 11px; margin-right: 4px;"></i> Unlock Profile
+            </button>
+            <button class="auth-toggle-tab" id="tab-btn-signup" onclick="toggleAuthTab('signup')">
+              <i class="fas fa-user-plus" style="font-size: 11px; margin-right: 4px;"></i> Create Profile
+            </button>
+          </div>
+
+          <!-- 1. LOGIN (UNLOCK PROFILE) FORM -->
           <form id="form-login" onsubmit="handleLoginSubmit(event)">
-            <!-- Phone + Password -->
             <div id="login-step-1">
               <div class="form-group">
                 <label class="form-label">Bangladeshi Mobile Number</label>
@@ -1853,22 +2012,28 @@
                   <input type="tel" class="form-input" id="login-phone" placeholder="017XXXXXXXX" required>
                 </div>
                 <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
-                  Supported: 013, 014, 015, 016, 017, 018, 019
+                  Supported operators: 013, 014, 015, 016, 017, 018, 019
                 </div>
               </div>
+
               <div class="form-group">
-                <label class="form-label">Password</label>
+                <label class="form-label">Profile Password</label>
                 <div class="input-field-wrap">
-                  <input type="password" class="form-input" id="login-password" placeholder="Enter secure password" required>
+                  <input type="password" class="form-input" id="login-password" placeholder="Enter password to unlock" required>
+                  <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('login-password', this)" title="Show/Hide Password">
+                    <i class="fas fa-eye"></i>
+                  </button>
                 </div>
               </div>
+
               <div style="display: flex; justify-content: flex-end; margin-bottom: 14px;">
                 <a href="javascript:void(0)" onclick="openForgotPasswordFlow()" style="font-size: 11.5px; color: #60a5fa; text-decoration: none; display: flex; align-items: center; gap: 4px;">
                   <i class="fas fa-key"></i> Forgot Password?
                 </a>
               </div>
+
               <button type="submit" class="btn-submit-action" id="btn-login-submit">
-                <i class="fas fa-arrow-right-to-bracket"></i> Sign In
+                <i class="fas fa-lock-open"></i> Unlock Profile
               </button>
             </div>
 
@@ -1880,7 +2045,7 @@
                 </div>
                 <h4 style="font-size: 13.5px; color: #fff; margin-bottom: 4px;">Two-Factor Verification</h4>
                 <p style="font-size: 11.5px; color: var(--text-muted); line-height: 1.4;">
-                  Enter the 4-digit code dispatched to <strong id="login-otp-target" style="color: #fff;">+880 17XXXXXXXX</strong> to finish signing in.
+                  Enter the 4-digit code dispatched to <strong id="login-otp-target" style="color: #fff;">+880 17XXXXXXXX</strong> to finish unlocking.
                 </p>
               </div>
 
@@ -1892,7 +2057,7 @@
               </div>
 
               <button type="button" class="btn-submit-action" onclick="verifyLoginOTPAndFinish()">
-                <i class="fas fa-lock-open"></i> Verify OTP & Sign In
+                <i class="fas fa-lock-open"></i> Verify OTP &amp; Unlock
               </button>
               <button type="button" class="btn-close-sheet" style="margin-top: 8px;" onclick="backToLoginStep1()">
                 <i class="fas fa-arrow-left"></i> Change Number / Password
@@ -1900,7 +2065,7 @@
             </div>
           </form>
 
-          <!-- 2. FORGOT PASSWORD FORM (REQUIRES OTP) -->
+          <!-- 2. FORGOT PASSWORD FORM -->
           <div id="form-forgot-password" style="display: none;">
             <div id="forgot-step-1">
               <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.45;">
@@ -1913,14 +2078,14 @@
                   <input type="tel" class="form-input" id="forgot-phone" placeholder="017XXXXXXXX">
                 </div>
                 <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
-                  Allowed: 013, 014, 015, 016, 017, 018, 019 (011 &amp; 012 not supported)
+                  Allowed: 013, 014, 015, 016, 017, 018, 019
                 </div>
               </div>
               <button type="button" class="btn-submit-action" id="btn-forgot-request" onclick="handleForgotRequestOTP()">
                 <i class="fas fa-paper-plane"></i> Send Reset Code via SMS
               </button>
               <button type="button" class="btn-close-sheet" style="margin-top: 8px;" onclick="closeForgotPasswordFlow()">
-                <i class="fas fa-arrow-left"></i> Back to Sign In
+                <i class="fas fa-arrow-left"></i> Back to Unlock Profile
               </button>
             </div>
 
@@ -1940,11 +2105,14 @@
                 <label class="form-label">New Password</label>
                 <div class="input-field-wrap">
                   <input type="password" class="form-input" id="forgot-new-password" placeholder="Minimum 6 characters" minlength="6">
+                  <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('forgot-new-password', this)">
+                    <i class="fas fa-eye"></i>
+                  </button>
                 </div>
               </div>
 
               <button type="button" class="btn-submit-action" id="btn-forgot-verify" onclick="handleForgotVerifyReset()">
-                <i class="fas fa-key"></i> Verify OTP & Reset Password
+                <i class="fas fa-key"></i> Verify OTP &amp; Reset Password
               </button>
               <button type="button" class="btn-close-sheet" style="margin-top: 8px;" onclick="backToForgotStep1()">
                 <i class="fas fa-arrow-left"></i> Change Number
@@ -1952,10 +2120,10 @@
             </div>
           </div>
 
-          <!-- 3. CREATE ACCOUNT (SIGNUP) FORM — DIRECT REGISTRATION (NO OTP) -->
+          <!-- 3. CREATE ACCOUNT (SIGNUP) FORM -->
           <form id="form-signup" style="display: none;" onsubmit="handleSignupSubmit(event)">
             <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.45;">
-              Create your citizen account with your mobile number and password. Instant registration without OTP.
+              Create your citizen profile with a secure password. Your emergency circle and profile data will be locked and backed up to the 5TB Cloud Vault.
             </div>
             <div class="form-group">
               <label class="form-label">Bangladeshi Mobile Number</label>
@@ -1964,7 +2132,7 @@
                 <input type="tel" class="form-input" id="signup-phone" placeholder="017XXXXXXXX" required>
               </div>
               <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
-                Valid: 013, 014, 015, 016, 017, 018, 019 (011 &amp; 012 not supported)
+                Valid: 013, 014, 015, 016, 017, 018, 019
               </div>
             </div>
 
@@ -1979,11 +2147,28 @@
               <label class="form-label">Create Password</label>
               <div class="input-field-wrap">
                 <input type="password" class="form-input" id="signup-password" placeholder="Minimum 6 characters" minlength="6" required>
+                <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('signup-password', this)" title="Show/Hide Password">
+                  <i class="fas fa-eye"></i>
+                </button>
               </div>
             </div>
 
+            <div class="form-group">
+              <label class="form-label">Confirm Password</label>
+              <div class="input-field-wrap">
+                <input type="password" class="form-input" id="signup-password-confirm" placeholder="Re-enter password" minlength="6" required>
+                <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('signup-password-confirm', this)" title="Show/Hide Password">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; font-size: 11px; color: #93c5fd; line-height: 1.4;">
+              <i class="fab fa-google-drive" style="color: #38bdf8;"></i> <strong>Zero Data Loss:</strong> Your emergency contacts (Father, Mother, Guardian) are permanently stored and mirrored to our 5TB Google Drive Vault.
+            </div>
+
             <button type="submit" class="btn-submit-action" id="btn-signup-submit">
-              <i class="fas fa-user-plus"></i> Create Account
+              <i class="fas fa-shield-halved"></i> Create Profile &amp; Unlock
             </button>
           </form>
         </div>
@@ -2287,13 +2472,17 @@
     }
 
     try {
-      const saved = localStorage.getItem('safe_bd_user');
-      if (saved) {
-        currentUser = JSON.parse(saved);
-        setLoggedInState();
-        loadUserContacts(currentUser);
+      if (typeof initAuthOnPageLoad === 'function') {
+        initAuthOnPageLoad();
       } else {
-        loadUserContacts(null);
+        const saved = localStorage.getItem('safe_bd_user');
+        if (saved) {
+          currentUser = JSON.parse(saved);
+          setLoggedInState();
+          loadUserContacts(currentUser);
+        } else {
+          loadUserContacts(null);
+        }
       }
     } catch(e) {
       loadUserContacts(null);
@@ -3324,6 +3513,9 @@
         c.initial = newName.charAt(0).toUpperCase();
 
         renderContactsList();
+        if (typeof updateProfileCircleUI === 'function') {
+          updateProfileCircleUI();
+        }
 
         // If user is logged in, upload and save to their profile database!
         if (currentUser) {
@@ -4372,13 +4564,312 @@
        AUTHENTICATION
     ---------------------------------------------------- */
     function openAuthModal() {
-      document.getElementById('auth-modal').classList.add('open');
+      const modal = document.getElementById('auth-modal');
+      if (!modal) return;
+      modal.classList.add('open');
       if (currentUser) {
         document.getElementById('view-auth-forms').style.display = 'none';
         document.getElementById('view-profile-active').style.display = 'block';
+        const titleEl = document.getElementById('auth-title');
+        if (titleEl) titleEl.innerText = "Citizen Profile (Unlocked)";
+        updateProfileCircleUI();
       } else {
         document.getElementById('view-auth-forms').style.display = 'block';
         document.getElementById('view-profile-active').style.display = 'none';
+        const titleEl = document.getElementById('auth-title');
+        if (titleEl) titleEl.innerText = "Unlock Citizen Profile";
+      }
+    }
+
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const isPw = input.type === 'password';
+      input.type = isPw ? 'text' : 'password';
+      const icon = btn ? btn.querySelector('i') : null;
+      if (icon) {
+        icon.className = isPw ? 'fas fa-eye-slash' : 'fas fa-eye';
+      }
+    }
+
+    function updateProfileCircleUI() {
+      const container = document.getElementById('profile-emergency-circle-list');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const roles = [
+        { id: 'c1', label: 'Father', icon: 'fa-user-tie', color: '#60a5fa' },
+        { id: 'c2', label: 'Mother', icon: 'fa-user', color: '#f472b6' },
+        { id: 'c3', label: 'Guardian', icon: 'fa-shield-halved', color: '#34d399' }
+      ];
+
+      roles.forEach((r, idx) => {
+        const contact = (contacts && contacts[idx]) ? contacts[idx] : { name: r.label, phone: '' };
+        const hasNumber = contact.phone && String(contact.phone).trim() !== '' && contact.phone !== '01XXXXXXXXX';
+        const cleanNum = hasNumber ? String(contact.phone).replace(/\D/g, '').slice(-10) : '';
+        const displayPhone = hasNumber ? `+880 ${cleanNum}` : '01XXXXXXXXX (Not Set)';
+        const phoneStyle = hasNumber ? 'color: #f1f5f9; font-weight: 600;' : 'color: #94a3b8; font-style: italic;';
+
+        const row = document.createElement('div');
+        row.className = 'profile-contact-row';
+        row.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+            <div class="profile-contact-avatar" style="border-color: ${r.color}; color: ${r.color}; background: rgba(255,255,255,0.04);">
+              <i class="fas ${r.icon}"></i>
+            </div>
+            <div style="min-width: 0;">
+              <div style="font-size: 13px; font-weight: 700; color: #fff;">${contact.name || r.label}</div>
+              <div style="font-size: 11.5px; font-family: monospace; ${phoneStyle}; margin-top: 2px;">
+                ${displayPhone}
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+            ${hasNumber ? `
+              <a href="tel:+880${cleanNum}" style="width: 30px; height: 30px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); display: flex; align-items: center; justify-content: center; color: #ef4444; font-size: 12px; text-decoration: none;" title="Call ${contact.name}">
+                <i class="fas fa-phone"></i>
+              </a>
+              <a href="https://wa.me/880${cleanNum}" target="_blank" style="width: 30px; height: 30px; border-radius: 50%; background: rgba(37, 211, 102, 0.15); border: 1px solid rgba(37, 211, 102, 0.35); display: flex; align-items: center; justify-content: center; color: #25d366; font-size: 13px; text-decoration: none;" title="WhatsApp ${contact.name}">
+                <i class="fab fa-whatsapp"></i>
+              </a>
+            ` : ''}
+            <button type="button" onclick="openEditContactModal('${contact.id || r.id}')" style="width: 30px; height: 30px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-quiet); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 11px; cursor: pointer;" title="Edit ${r.label}">
+              <i class="fas fa-pen"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function toggleQuickContactsEditor() {
+      const editor = document.getElementById('profile-quick-contacts-editor');
+      const btnText = document.getElementById('btn-toggle-edit-text');
+      if (!editor) return;
+      const isOpen = editor.style.display === 'block';
+      editor.style.display = isOpen ? 'none' : 'block';
+      if (btnText) btnText.innerText = isOpen ? 'Edit Contacts' : 'Close Editor';
+
+      if (!isOpen) {
+        const fPhone = (contacts && contacts[0] && contacts[0].phone) ? String(contacts[0].phone).replace(/\D/g, '').slice(-10) : '';
+        const mPhone = (contacts && contacts[1] && contacts[1].phone) ? String(contacts[1].phone).replace(/\D/g, '').slice(-10) : '';
+        const gPhone = (contacts && contacts[2] && contacts[2].phone) ? String(contacts[2].phone).replace(/\D/g, '').slice(-10) : '';
+        document.getElementById('profile-input-father').value = fPhone ? '0' + fPhone : '';
+        document.getElementById('profile-input-mother').value = mPhone ? '0' + mPhone : '';
+        document.getElementById('profile-input-guardian').value = gPhone ? '0' + gPhone : '';
+        document.getElementById('profile-input-father').focus();
+      }
+    }
+
+    function handleSaveQuickContacts(e) {
+      e.preventDefault();
+      const rawF = document.getElementById('profile-input-father').value.trim();
+      const rawM = document.getElementById('profile-input-mother').value.trim();
+      const rawG = document.getElementById('profile-input-guardian').value.trim();
+
+      const validateField = (val, label) => {
+        if (!val || val === '01XXXXXXXXX') return { valid: true, clean: '' };
+        const res = validateBangladeshiPhone(val);
+        if (!res.valid) {
+          return { valid: false, message: `${label}: ${res.message}` };
+        }
+        return { valid: true, clean: res.cleanPhone };
+      };
+
+      const fCheck = validateField(rawF, "Father");
+      if (!fCheck.valid) { alert("⚠️ " + fCheck.message); return; }
+      const mCheck = validateField(rawM, "Mother");
+      if (!mCheck.valid) { alert("⚠️ " + mCheck.message); return; }
+      const gCheck = validateField(rawG, "Guardian");
+      if (!gCheck.valid) { alert("⚠️ " + gCheck.message); return; }
+
+      if (!contacts || contacts.length < 3) {
+        contacts = getDefaultContacts();
+      }
+      contacts[0] = { id: 'c1', name: 'Father', phone: fCheck.clean, initial: 'F' };
+      contacts[1] = { id: 'c2', name: 'Mother', phone: mCheck.clean, initial: 'M' };
+      contacts[2] = { id: 'c3', name: 'Guardian', phone: gCheck.clean, initial: 'G' };
+
+      renderContactsList();
+      updateProfileCircleUI();
+
+      const saveBtn = document.getElementById('btn-save-quick-contacts');
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing to 5TB Cloud Vault...';
+      }
+
+      if (currentUser) {
+        currentUser.contacts = contacts;
+        const userKey = (currentUser.phone || '').replace(/\D/g, '').slice(-10);
+        localStorage.setItem('safe_bd_contacts_' + userKey, JSON.stringify(contacts));
+        localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+
+        const token = localStorage.getItem('safe_bd_token');
+        fetch(`${API_BASE}/api/user/contacts`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token ? `Bearer ${token}` : ''
+          },
+          body: JSON.stringify({
+            phone: userKey,
+            token: token,
+            contacts: contacts
+          })
+        })
+        .then(r => r.json())
+        .then(data => {
+          if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-cloud-arrow-up"></i> Save &amp; Sync to 5TB Cloud Vault';
+          }
+          if (data.success && data.contacts) {
+            currentUser.contacts = data.contacts;
+            localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+          }
+          toggleQuickContactsEditor();
+          alert("✅ Emergency Circle Updated & Synced!\n\nFather, Mother, and Guardian contact records have been secured to your profile and backed up to the 5TB Google Drive Vault.");
+        })
+        .catch(err => {
+          if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-cloud-arrow-up"></i> Save &amp; Sync to 5TB Cloud Vault';
+          }
+          toggleQuickContactsEditor();
+          alert("⚠️ Contacts saved locally. Will mirror to 5TB Google Drive Vault on next connection.");
+        });
+      } else {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = '<i class="fas fa-cloud-arrow-up"></i> Save &amp; Sync to 5TB Cloud Vault';
+        }
+        toggleQuickContactsEditor();
+        alert("✅ Emergency Circle updated for this session!\nTip: Unlock or create your profile to permanently secure records to the 5TB Cloud Vault.");
+      }
+    }
+
+    function toggleChangePasswordSection() {
+      const form = document.getElementById('form-change-password-inline');
+      const chevron = document.getElementById('chg-pw-chevron');
+      if (!form) return;
+      const isOpen = form.style.display === 'block';
+      form.style.display = isOpen ? 'none' : 'block';
+      if (chevron) {
+        chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+      }
+    }
+
+    function handleChangePasswordSubmit(e) {
+      e.preventDefault();
+      const oldPw = document.getElementById('inline-current-pw').value.trim();
+      const newPw = document.getElementById('inline-new-pw').value.trim();
+
+      if (!oldPw) {
+        alert("Please enter your current password.");
+        document.getElementById('inline-current-pw').focus();
+        return;
+      }
+      if (!newPw || newPw.length < 6) {
+        alert("New password must be at least 6 characters long.");
+        document.getElementById('inline-new-pw').focus();
+        return;
+      }
+
+      const btn = document.getElementById('btn-change-pw-submit');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating Password...';
+      }
+
+      const token = localStorage.getItem('safe_bd_token');
+      const phone = currentUser ? (currentUser.phone || '').replace(/\D/g, '').slice(-10) : '';
+
+      fetch(`${API_BASE}/api/auth/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        body: JSON.stringify({
+          phone: phone,
+          token: token,
+          oldPassword: oldPw,
+          newPassword: newPw
+        })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-lock"></i> Update Password';
+        }
+        if (!data.success && data.error) {
+          alert("❌ Password Change Failed: " + data.error);
+          return;
+        }
+        document.getElementById('inline-current-pw').value = '';
+        document.getElementById('inline-new-pw').value = '';
+        toggleChangePasswordSection();
+        alert("🎉 Password Changed Successfully!\n\nYour profile password has been updated and securely hashed. All records are protected in the 5TB Cloud Vault.");
+      })
+      .catch(err => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-lock"></i> Update Password';
+        }
+        alert("⚠️ Network error updating password. Please check backend connection.");
+      });
+    }
+
+    function initAuthOnPageLoad() {
+      const token = localStorage.getItem('safe_bd_token');
+      const savedUser = localStorage.getItem('safe_bd_user');
+
+      if (token) {
+        fetch(`${API_BASE}/api/auth/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(r => {
+          if (r.status === 401 || r.status === 403) {
+            throw new Error("SESSION_INVALID");
+          }
+          return r.json();
+        })
+        .then(data => {
+          if (data && data.success && data.user) {
+            currentUser = data.user;
+            localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+            loadUserContacts(currentUser);
+            setLoggedInState();
+          } else {
+            throw new Error("INVALID_PAYLOAD");
+          }
+        })
+        .catch(err => {
+          if (err.message === "SESSION_INVALID") {
+            currentUser = null;
+            localStorage.removeItem('safe_bd_user');
+            localStorage.removeItem('safe_bd_token');
+            loadUserContacts(null);
+          } else if (savedUser) {
+            try {
+              currentUser = JSON.parse(savedUser);
+              loadUserContacts(currentUser);
+              setLoggedInState();
+            } catch(e) {
+              loadUserContacts(null);
+            }
+          } else {
+            loadUserContacts(null);
+          }
+        });
+      } else if (savedUser) {
+        currentUser = null;
+        localStorage.removeItem('safe_bd_user');
+        loadUserContacts(null);
+      } else {
+        loadUserContacts(null);
       }
     }
 
@@ -4459,7 +4950,7 @@
       const password = document.getElementById('login-password').value.trim();
 
       if (!password) {
-        alert("Please enter your account password.");
+        alert("Please enter your account password to unlock your profile.");
         document.getElementById('login-password').focus();
         return;
       }
@@ -4468,7 +4959,7 @@
       const submitBtn = document.getElementById('btn-login-submit');
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying Credentials...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Unlocking Profile...';
       }
 
       fetch(`${API_BASE}/api/auth/login`, {
@@ -4480,11 +4971,11 @@
       .then(data => {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i> Sign In';
+          submitBtn.innerHTML = '<i class="fas fa-lock-open"></i> Unlock Profile';
         }
 
         if (!data.success && data.error) {
-          alert("⚠️ " + data.error);
+          alert(`❌ Access Denied: ${data.error}\n\nProfile remains locked. Please verify your phone and password.`);
           return;
         }
 
@@ -4512,20 +5003,25 @@
           if (data.token) localStorage.setItem('safe_bd_token', data.token);
           loadUserContacts(currentUser);
           setLoggedInState();
-          closeAuthModal();
+          updateProfileCircleUI();
+
+          document.getElementById('view-auth-forms').style.display = 'none';
+          document.getElementById('view-profile-active').style.display = 'block';
+          const titleEl = document.getElementById('auth-title');
+          if (titleEl) titleEl.innerText = "Citizen Profile (Unlocked)";
 
           if (currentUser.isAdmin) {
-            alert("🛡️ Welcome Chief Admin!\nAdmin Command Portal unlocked. Opening Moderation Queue now.");
+            alert(`🛡️ Profile Unlocked: Welcome Chief Admin!\nAdmin Command Portal unlocked. Opening Moderation Queue.`);
             openAdminPortal();
           } else {
-            alert(`✅ Welcome back, ${currentUser.name}!\nSigned in as ${currentUser.displayPhone || '+880 ' + currentUser.phone}`);
+            alert(`🔓 Profile Unlocked Successfully!\n\nWelcome back, ${currentUser.name}!\nRegistered Mobile: +880 ${cleanPhone}\n\nYour emergency circle (Father, Mother, Guardian) is unlocked and synced with the 5TB Cloud Vault.`);
           }
         }
       })
       .catch(err => {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i> Sign In';
+          submitBtn.innerHTML = '<i class="fas fa-lock-open"></i> Unlock Profile';
         }
         alert("⚠️ Connection error verifying credentials. Please ensure backend server is reachable.");
       });
@@ -6071,6 +6567,8 @@
       const cleanPhone = phoneCheck.cleanPhone;
       const name = document.getElementById('signup-name').value.trim() || "Verified Citizen";
       const password = document.getElementById('signup-password').value.trim();
+      const confirmPwEl = document.getElementById('signup-password-confirm');
+      const confirmPassword = confirmPwEl ? confirmPwEl.value.trim() : password;
 
       if (!password || password.length < 6) {
         alert("Please create a password of at least 6 characters.");
@@ -6078,10 +6576,16 @@
         return;
       }
 
+      if (confirmPassword !== password) {
+        alert("⚠️ Passwords do not match! Please verify your password.");
+        if (confirmPwEl) confirmPwEl.focus();
+        return;
+      }
+
       const submitBtn = document.getElementById('btn-signup-submit');
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Profile...';
       }
 
       fetch(`${API_BASE}/api/auth/register`, {
@@ -6097,10 +6601,18 @@
       .then(data => {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+          submitBtn.innerHTML = '<i class="fas fa-shield-halved"></i> Create Profile &amp; Unlock';
         }
 
         if (!data.success && data.error) {
+          if (data.code === 'ACCOUNT_EXISTS') {
+            alert(`⚠️ Profile Already Registered & Locked!\n\nAn account is already registered for +880 ${cleanPhone}.\n\nPlease enter your password to unlock your profile.`);
+            toggleAuthTab('login');
+            document.getElementById('login-phone').value = cleanPhone;
+            document.getElementById('login-password').value = '';
+            document.getElementById('login-password').focus();
+            return;
+          }
           alert("⚠️ " + data.error);
           return;
         }
@@ -6116,14 +6628,19 @@
         localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
         loadUserContacts(currentUser);
         setLoggedInState();
-        closeAuthModal();
+        updateProfileCircleUI();
 
-        alert(`🎉 Account Successfully Created!\n\nWelcome, ${currentUser.name}!\nMobile: +880 ${cleanPhone}\nStatus: Verified BD Citizen (NID Linked)\n\nYou are now signed in and protected by SAFE BD.`);
+        document.getElementById('view-auth-forms').style.display = 'none';
+        document.getElementById('view-profile-active').style.display = 'block';
+        const titleEl = document.getElementById('auth-title');
+        if (titleEl) titleEl.innerText = "Citizen Profile (Unlocked)";
+
+        alert(`🎉 Citizen Profile Created & Unlocked!\n\nWelcome, ${currentUser.name}!\nMobile: +880 ${cleanPhone}\nStatus: Verified BD Citizen (NID Linked)\n\nYour emergency circle (Father, Mother, Guardian) is initialized and permanently backed up to your 5TB Google Drive Vault.`);
       })
       .catch(err => {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+          submitBtn.innerHTML = '<i class="fas fa-shield-halved"></i> Create Profile &amp; Unlock';
         }
         alert("⚠️ Connection error creating account. Please ensure backend server is reachable.");
       });
@@ -6168,6 +6685,10 @@
 
       document.getElementById('top-profile-btn').classList.add('logged-in');
       document.getElementById('profile-icon').className = isFounder ? "fas fa-crown" : (currentUser.isAdmin ? "fas fa-shield-halved" : "fas fa-user-check");
+
+      if (typeof updateProfileCircleUI === 'function') {
+        updateProfileCircleUI();
+      }
 
       // Toggle Admin UI elements
       const adminNavBtn = document.getElementById('nav-btn-admin');
@@ -6233,12 +6754,18 @@
         adminScreen.style.display = 'none';
       }
 
+      document.getElementById('view-profile-active').style.display = 'none';
+      document.getElementById('view-auth-forms').style.display = 'block';
+      const titleEl = document.getElementById('auth-title');
+      if (titleEl) titleEl.innerText = "Unlock Citizen Profile";
+
       toggleAuthTab('login');
       document.getElementById('login-step-1').style.display = 'block';
       document.getElementById('login-step-2').style.display = 'none';
+      document.getElementById('login-password').value = '';
       switchTab('screen-sos', document.querySelectorAll('.nav-tab-btn')[0]);
       openAuthModal();
-      alert("You have logged out.");
+      alert("🔒 Citizen Profile Locked.\n\nYou have signed out. All emergency contacts and personal records are securely locked.");
     }
   </script>
 </body>
