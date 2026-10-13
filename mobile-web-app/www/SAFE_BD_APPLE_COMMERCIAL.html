@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAFE bd — Apple Event Launch Keynote & Commercial</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-black: #000000;
+      --bg-surface: #0a0a0c;
+      --bg-glass: rgba(255, 255, 255, 0.04);
+      --border-glass: rgba(255, 255, 255, 0.1);
+      --border-highlight: rgba(255, 255, 255, 0.25);
+      --apple-gray: #86868b;
+      --apple-light-gray: #d2d2d7;
+      --crimson-core: #ef4444;
+      --crimson-glow: rgba(239, 68, 68, 0.45);
+      --burgundy-deep: #7f1d1d;
+      --gold-crest: #d4af37;
+      --titanium: #2b2b2f;
+      --ease-apple: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-black);
+      color: #f5f5f7;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", Roboto, sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    /* Ambient Cupertino Lighting */
+    .ambient-glow-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .ambient-glow-orb {
+      position: absolute;
+      width: 700px;
+      height: 700px;
+      border-radius: 50%;
+      filter: blur(140px);
+      opacity: 0.22;
+      transition: all 1.8s var(--ease-apple);
+    }
+    .orb-red {
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, #b91c1c 0%, rgba(185, 28, 28, 0) 70%);
+    }
+    .orb-blue {
+      bottom: -10%;
+      right: 10%;
+      background: radial-gradient(circle, #1d4ed8 0%, rgba(29, 78, 216, 0) 70%);
+      opacity: 0.12;
+    }
+
+    /* Top Apple Header Bar */
+    .apple-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 52px;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+    }
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-mark {
+      font-weight: 800;
+      font-size: 17px;
+      letter-spacing: -0.5px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-crest-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--crimson-core);
+      box-shadow: 0 0 10px var(--crimson-core);
+    }
+    .keynote-badge {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--apple-gray);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn-apple {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s ease;
+    }
+    .btn-apple:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: scale(1.02);
+    }
+    .btn-apple-primary {
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      font-weight: 600;
+    }
+    .btn-apple-primary:hover {
+      background: #e5e5ea;
+    }
+
+    /* Main Stage Container */
+    .stage-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 24px 32px 80px 32px;
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Stage Header & Tabs */
+    .view-switcher-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .view-tab-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--apple-gray);
+      padding: 7px 18px;
+      border-radius: 24px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .view-tab-pill.active {
+      background: rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Cinema Viewport (16:9 Aspect Ratio Experience) */
+    .cinema-screen {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      max-height: 720px;
+      background: radial-gradient(circle at 50% 30%, #15090c 0%, #050304 60%, #000000 100%);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 30px 100px rgba(0, 0, 0, 0.8), 0 0 60px rgba(239, 68, 68, 0.12);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 44px 56px 36px 56px;
+    }
+
+    /* Cinema Letterbox Bar (Apple Anamorphic Film Feel) */
+    .cinema-screen::before, .cinema-screen::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 14px;
+      background: #000;
+      z-index: 20;
+      pointer-events: none;
+    }
+    .cinema-screen::before { top: 0; }
+    .cinema-screen::after { bottom: 0; }
+
+    /* Scene Content Container */
+    .scene-viewport {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+    }
+
+    .scene-text-column {
+      flex: 1;
+      max-width: 580px;
+      animation: appleFadeIn 0.8s var(--ease-apple);
+    }
+    @keyframes appleFadeIn {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .scene-act-tag {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--crimson-core);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .scene-headline {
+      font-size: 44px;
+      line-height: 1.08;
+      font-weight: 800;
+      letter-spacing: -1.2px;
+      margin-bottom: 16px;
+      background: linear-gradient(180deg, #FFFFFF 20%, #A1A1A6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .scene-subheadline {
+      font-size: 18px;
+      line-height: 1.45;
+      font-weight: 400;
+      color: var(--apple-light-gray);
+      margin-bottom: 24px;
+    }
+    .scene-metric-row {
+      display: flex;
+      gap: 28px;
+      margin-top: 18px;
+    }
+    .metric-badge {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .metric-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+    .metric-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--apple-gray);
+    }
+
+    /* 3D Floating Device Stage */
+    .scene-device-stage {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .device-titanium-frame {
+      width: 270px;
+      height: 520px;
+      background: #000;
+      border-radius: 46px;
+      border: 4px solid var(--titanium);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 
+                  0 0 0 1px rgba(255, 255, 255, 0.15),
+                  inset 0 0 0 2px rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+      transform: perspective(900px) rotateY(-8deg) rotateX(4deg);
+      transition: transform 1.2s var(--ease-apple);
+    }
+    .device-titanium-frame:hover {
+      transform: perspective(900px) rotateY(0deg) rotateX(0deg) scale(1.02);
+    }
+    .device-notch {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 22px;
+      background: #000;
+      border-radius: 20px;
+      z-index: 30;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .device-screen-content {
+      width: 100%;
+      height: 100%;
+      background: #090608;
+      display: flex;
+      flex-direction: column;
+      padding: 38px 18px 24px 18px;
+      color: #fff;
+      position: relative;
+    }
+
+    /* Dynamic UI Modules inside Phone */
+    .phone-sos-module {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+    }
+    .phone-pulse-ring {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ef4444 0%, #991b1b 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #fff;
+      box-shadow: 0 0 40px var(--crimson-glow);
+      position: relative;
+      cursor: pointer;
+    }
+    .phone-pulse-ring::before {
+      content: "";
+      position: absolute;
+      inset: -14px;
+      border-radius: 50%;
+      border: 2px solid rgba(239, 68, 68, 0.5);
+      animation: ripple 2s infinite ease-out;
+    }
+    .phone-pulse-ring::after {
+      content: "";
+      position: absolute;
+      inset: -28px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(239, 68, 68, 0.25);
+      animation: ripple 2s infinite ease-out 0.6s;
+    }
+    @keyframes ripple {
+      0% { transform: scale(0.9); opacity: 1; }
+      100% { transform: scale(1.3); opacity: 0; }
+    }
+
+    /* Bottom Director / Playback Control Bar */
+    .cinema-controls-bar {
+      position: relative;
+      z-index: 25;
+      background: rgba(18, 18, 20, 0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .transport-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn-play-toggle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .btn-play-toggle:hover {
+      transform: scale(1.08);
+      background: #e5e5ea;
+    }
+    .btn-nav-step {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .btn-nav-step:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    /* Timeline Scrubber & Dots */
+    .timeline-scrubber-track {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .timeline-info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--apple-gray);
+      letter-spacing: 0.5px;
+    }
+    .scene-progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+    .scene-progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 14%;
+      background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
+      border-radius: 6px;
+      transition: width 0.3s linear;
+    }
+
+    /* Soundwave Visualizer */
+    .voiceover-wave-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .waveform-bars {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      height: 18px;
+    }
+    .wave-bar {
+      width: 3px;
+      height: 6px;
+      background: var(--crimson-core);
+      border-radius: 3px;
+      transition: height 0.15s ease;
+    }
+    .wave-bar.speaking {
+      animation: waveBeat 0.8s infinite ease-in-out;
+    }
+    .wave-bar:nth-child(2) { animation-delay: 0.15s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.3s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.45s; }
+    @keyframes waveBeat {
+      0%, 100% { height: 4px; }
+      50% { height: 18px; }
+    }
+
+    /* Subtitles Card */
+    .subtitles-overlay {
+      position: absolute;
+      bottom: 84px;
+      left: 56px;
+      right: 56px;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 12px;
+      padding: 12px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 14.5px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 15;
+    }
+    .subtitles-icon {
+      color: var(--crimson-core);
+      font-size: 16px;
+    }
+    .subtitles-text {
+      font-style: italic;
+      color: #e2e8f0;
+      line-height: 1.4;
+    }
+
+    /* ========================================================
+       SECTION 2: DIRECTOR'S STORYBOARD & PRODUCTION GUIDE
+    ======================================================== */
+    .production-grid {
+      display: none;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 24px;
+      margin-top: 28px;
+    }
+    .production-grid.active {
+      display: grid;
+    }
+
+    .storyboard-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-glass);
+      border-radius: 20px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+    .storyboard-card:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-4px);
+    }
+    .card-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .scene-badge {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--crimson-core);
+    }
+    .timecode {
+      font-size: 12px;
+      font-family: monospace;
+      color: var(--apple-gray);
+    }
+    .card-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    .spec-group {
+      margin-top: 14px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .spec-label {
+      color: var(--apple-gray);
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+    .spec-desc {
+      color: var(--apple-light-gray);
+    }
+    .vo-quote {
+      background: rgba(255, 255, 255, 0.03);
+      border-left: 3px solid var(--crimson-core);
+      padding: 10px 14px;
+      border-radius: 0 8px 8px 0;
+      margin-top: 12px;
+      font-size: 13px;
+      font-style: italic;
+      color: #fff;
+    }
+
+    /* Print / PDF Styling */
+    @media print {
+      body { background: #fff; color: #000; }
+      .ambient-glow-layer, .cinema-controls-bar, .apple-nav { display: none; }
+      .production-grid { display: grid !important; }
+      .storyboard-card { border: 1px solid #ccc; background: #fff; color: #000; break-inside: avoid; }
+      .vo-quote { border-left-color: #000; background: #f0f0f0; color: #000; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Cupertino Lighting Orbs -->
+  <div class="ambient-glow-layer">
+    <div class="ambient-glow-orb orb-red" id="orb-glow-1"></div>
+    <div class="ambient-glow-orb orb-blue" id="orb-glow-2"></div>
+  </div>
+
+  <!-- Top Apple Keynote Navigation Bar -->
+  <nav class="apple-nav">
+    <div class="nav-left">
+      <div class="brand-mark">
+        <span class="brand-crest-dot"></span>
+        <span>SAFE bd</span>
+      </div>
+      <span class="keynote-badge">Apple Keynote World Launch</span>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-apple" onclick="toggleVoiceoverNarrator()" id="btn-toggle-vo" title="Narrate with Posh British/Apple Voice">
+        <i class="fas fa-volume-high"></i> <span id="vo-status-label">Voiceover: ON</span>
+      </button>
+      <button class="btn-apple" onclick="toggleFullscreen()" title="Launch in Cinema Fullscreen">
+        <i class="fas fa-expand"></i> Fullscreen
+      </button>
+      <button class="btn-apple btn-apple-primary" onclick="printCommercialScript()" title="Print / Save PDF Storyboard">
+        <i class="fas fa-file-pdf"></i> Save PDF Script
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Presentation Stage -->
+  <main class="stage-wrapper">
+
+    <!-- View Switcher -->
+    <div class="view-switcher-bar">
+      <button class="view-tab-pill active" onclick="switchView('cinema', this)">
+        <i class="fas fa-film"></i> Keynote Cinema Player
+      </button>
+      <button class="view-tab-pill" onclick="switchView('storyboard', this)">
+        <i class="fas fa-clapperboard"></i> Director's Scene-by-Scene Script
+      </button>
+      <button class="view-tab-pill" onclick="switchView('production', this)">
+        <i class="fas fa-sliders"></i> Production Technical Specs
+      </button>
+    </div>
+
+    <!-- VIEW 1: CINEMA KEYNOTE SIMULATOR -->
+    <section id="view-cinema" style="display: block;">
+      <div class="cinema-screen" id="cinema-stage">
+        
+        <!-- Live Scene Viewport -->
+        <div class="scene-viewport">
+          
+          <!-- Text Column -->
+          <div class="scene-text-column" id="scene-text-box">
+            <div class="scene-act-tag" id="scene-act-tag">ACT I • THE PHILOSOPHICAL HOOK</div>
+            <h1 class="scene-headline" id="scene-headline">What does it mean<br>to feel truly safe?</h1>
+            <p class="scene-subheadline" id="scene-subheadline">
+              Not just when daylight is bright and streets are calm. But in the fragile seconds that define a life.
+            </p>
+            <div class="scene-metric-row" id="scene-metric-row">
+              <div class="metric-badge">
+                <span class="metric-value">300ms</span>
+                <span class="metric-label">Dispatch Latency</span>
+              </div>
+              <div class="metric-badge">
+                <span class="metric-value">100%</span>
+                <span class="metric-label">Covert Stealth</span>
+              </div>
+              <div class="metric-badge">
+                <span class="metric-value">5TB</span>
+                <span class="metric-label">Sovereign Vault</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3D Titanium Smartphone Mockup -->
+          <div class="scene-device-stage">
+            <div class="device-titanium-frame" id="device-mockup">
+              <div class="device-notch"></div>
+              <div class="device-screen-content" id="phone-screen-display">
+                <!-- Injected via JavaScript based on active scene -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Real-Time Subtitles & Audio Visualizer -->
+        <div class="subtitles-overlay">
+          <i class="fas fa-closed-captioning subtitles-icon"></i>
+          <span class="subtitles-text" id="subtitles-text">
+            “What does it mean to feel truly safe? In an emergency, complexity is the enemy.”
+          </span>
+        </div>
+
+        <!-- Cinema Transport & Timeline Controls -->
+        <div class="cinema-controls-bar">
+          <div class="transport-controls">
+            <button class="btn-nav-step" onclick="prevScene()" title="Previous Scene">
+              <i class="fas fa-backward-step"></i>
+            </button>
+            <button class="btn-play-toggle" onclick="togglePlayCommercial()" id="btn-play-toggle" title="Play / Pause Commercial">
+              <i class="fas fa-play" id="play-icon"></i>
+            </button>
+            <button class="btn-nav-step" onclick="nextScene()" title="Next Scene">
+              <i class="fas fa-forward-step"></i>
+            </button>
+          </div>
+
+          <div class="timeline-scrubber-track">
+            <div class="timeline-info-row">
+              <span id="timecode-display">0:00 / 2:20</span>
+              <span id="scene-counter-display">Scene 1 of 7: The Question</span>
+            </div>
+            <div class="scene-progress-bar">
+              <div class="scene-progress-fill" id="progress-fill"></div>
+            </div>
+          </div>
+
+          <div class="voiceover-wave-box">
+            <div class="waveform-bars">
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+            </div>
+            <span style="font-size: 11px; font-weight: 700; color: #fff; letter-spacing: 0.5px;">APPLE AUDIO 48kHz</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- VIEW 2: FULL DIRECTOR'S STORYBOARD SCRIPT -->
+    <section id="view-storyboard" class="production-grid">
+      
+      <!-- Scene 1 -->
+      <div class="storyboard-card">
+        <div class="card-top-row">
+          <span class="scene-badge">SCENE 01 • PROLOGUE</span>
+          <span class="timecode">0:00 – 0:18</span>
+        </div>
+        <h3 class="card-title">The Silence &amp; The Question</h3>
+        <div class="spec-group">
+          <div class="spec-label">Visual &amp; Camera Direction</div>
+          <div class="spec-desc">
+            Fade in from absolute OLED black (#000000). A single white beam of light grazes an unadorned surface. Minimalist typography in SF Pro Display fades in with zero motion blur.
+          </div>
+        </div>
+        <div class="spec-group">
+          <div class="spec-label">Audio &amp; SFX</div>
+          <div class="spec-desc">Sub-bass 32Hz sine pulse. Deep atmospheric resonance. Total silence behind narrator’s voice.</div>
+        </div>
+        <div class="vo-quote">
+          “What does it mean... to feel truly safe? Not just when everything goes to plan. But in the unpredictable, vulnerable moments of our lives.”
+        </div>
+      </div>
+
+      <!-- Scene 2 -->
+      <div class="storyboard-card">
+        <div class="card-top-row">
+          <span class="scene-badge">SCENE 02 • TENSION</span>
+          <span class="timecode">0:18 – 0:38</span>
+        </div>
+        <h3 class="card-title">The Dhaka Night &amp; The Friction</h3>
+        <div class="spec-group">
+          <div class="spec-label">Visual &amp; Camera Direction</div>
+          <div class="spec-desc">
+            Cinematic anamorphic 35mm lens. Rainy reflection on Dhanmondi asphalt at 11:15 PM. Neon city reflections. A lone university student walks briskly. Footsteps echo. A father glances at his phone.
+          </div>
+        </div>
+        <div class="spec-group">
+          <div class="spec-label">Audio &amp; SFX</div>
+          <div class="spec-desc">Subtle heartbeat tempo begins rising. Clock ticking effect at 120 BPM. Distant city sounds fade into silence.</div>
+        </div>
+        <div class="vo-quote">
+          “Because in an emergency... every single second counts. And traditional emergency response? It has too much friction. Too many menus. Too many questions.”
+        </div>
+      </div>
+
+      <!-- Scene 3 -->
+      <div class="storyboard-card">
+        <div class="card-top-row">
+          <span class="scene-badge">SCENE 03 • THE REVEAL</span>
+          <span class="timecode">0:38 – 0:58</span>
+        </div>
+        <h3 class="card-title">Introducing SAFE bd</h3>
+        <div class="spec-group">
+          <div class="spec-label">Visual &amp; Camera Direction</div>
+          <div class="spec-desc">
+            Explosive transition. Surgical titanium phone edge catches rim light. 3D slow-motion tumble. Deep crimson core pulses from the center. Clean typography: <strong>SAFE bd. Safety. Reimagined.</strong>
+          </div>
+        </div>
+        <div class="spec-group">
+          <div class="spec-label">Audio &amp; SFX</div>
+          <div class="spec-desc">Orchestral swell with punchy electronic bass hit (Apple Keynote signature drop). Crisp acoustic snap.</div>
+        </div>
+        <div class="vo-quote">
+          “Introducing SAFE bd. A national digital safety ecosystem. Designed not just to react... but to protect.”
+        </div>
+      </div>
+
+      <!-- Scene 4 -->
+      <div class="storyboard-card">
+        <div class="card-top-row">
+          <span class="scene-badge">SCENE 04 • INNOVATION 1</span>
+          <span class="timecode">0:58 – 1:18</span>
+        </div>
+        <h3 class="card-title">The 300ms Lifeline (Instant SOS)</h3>
+        <div class="spec-group">
+          <div class="spec-label">Visual &amp; Camera Direction</div>
+          <div class="spec-desc">
+            Extreme macro close-up of user’s thumb resting on screen. One firm tap. Radiant red shockwave expands across screen. Telemetry telemetry numbers flash in real time.
+          </div>
+        </div>
+        <div class="spec-group">
+          <div class="spec-label">On-Screen Graphic</div>
+          <div class="spec-desc"><strong>300ms Latency • Zero-Unlocking Emergency Dispatch</strong></div>
+        </div>
+        <div class="vo-quote">
+          “One tap. In under 300 milliseconds, an encrypted distress signal fans out to trusted family circles and the national 999 dispatch. With your live coordinates locked.”
+        </div>
+      </div>
+
+      <!-- Scene 5 -->
+      <div class="storyboard-card">
+        <div class="card-top-row">
+          <span class="scene-badge">SCENE 05 • INNOVATION 2</span>
+          <span class="timecode">1:18 – 1:38</span>
+        </div>
+        <h3 class="card-title">Walk With Me • The Virtual Escort</h3>
+        <div class="spec-group">
+          <div class="spec-label">Visual &amp; Camera Direction</div>
+          <div class="spec-desc">
+            Vector satellite map view smoothly zooms into street level. A luminous path highlights the commute. Intelligent geofencing perimeter pulses in tranquil cyan.
+          </div>
+        </div>
+        <div class="spec-group">
+          <div class="spec-label">On-Screen Graphic</div>
+          <div class="spec-desc"><strong>Intelligent Transit Heartbeat • Route Anomaly Alert</strong></div>
+        </div>
+        <div class="vo-quote">
+          “Walk With Me. A virtual guardian that tracks your journey in real time. If you stop unexpectedly or deviate from your route, SAFE bd initiates emergency protocols before you even have to ask.”
+        </div>
+      </div>
+
+      <!-- Scene 6 -->
+      <div class="storyboard-card">
+        <div class="card-top-row">
+          <span class="scene-badge">SCENE 06 • INNOVATION 3</span>
+          <span class="timecode">1:38 – 1:58</span>
+        </div>
+        <h3 class="card-title">Covert Evidence &amp; 5TB Sovereign Vault</h3>
+        <div class="spec-group">
+          <div class="spec-label">Visual &amp; Camera Direction</div>
+          <div class="spec-desc">
+            Phone screen goes totally pitch dark, yet the camera lens ring illuminates with a microscopic laser ring. Secure binary lock icon transitions into 5TB cloud vault badge.
+          </div>
+        </div>
+        <div class="spec-group">
+          <div class="spec-label">On-Screen Graphic</div>
+          <div class="spec-desc"><strong>Covert Stealth Video • 5TB Cloud Sovereign Vault</strong></div>
+        </div>
+        <div class="vo-quote">
+          “Covert witness. Zero screen illumination. High-definition video and audio streaming directly into a private 5-terabyte encrypted sovereign cloud vault. Truth that can never be erased.”
+        </div>
+      </div>
+
+      <!-- Scene 7 -->
+      <div class="storyboard-card">
+        <div class="card-top-row">
+          <span class="scene-badge">SCENE 07 • FINALE</span>
+          <span class="timecode">1:58 – 2:20</span>
+        </div>
+        <h3 class="card-title">A Nation Protected • Founder’s Vision</h3>
+        <div class="spec-group">
+          <div class="spec-label">Visual &amp; Camera Direction</div>
+          <div class="spec-desc">
+            Dawn sunlight spills across the Dhaka skyline. Thousands of interconnected safety nodes sparkle across Bangladesh. Logo lockup with golden crest.
+          </div>
+        </div>
+        <div class="spec-group">
+          <div class="spec-label">Closing Lockup</div>
+          <div class="spec-desc">
+            <strong>SAFE bd</strong><br>
+            Safety • Awareness • Fast Response • Emergency Assistance<br>
+            <em>Founded by Saad Rizwan • Available on Web, iOS &amp; Android</em>
+          </div>
+        </div>
+        <div class="vo-quote">
+          “This isn’t just an application. It is a national promise. For daughters walking home. For parents waiting. For 170 million people. This is SAFE bd.”
+        </div>
+      </div>
+
+    </section>
+
+    <!-- VIEW 3: PRODUCTION TECHNICAL SPECIFICATIONS -->
+    <section id="view-production" class="production-grid">
+      
+      <div class="storyboard-card">
+        <h3 class="card-title"><i class="fas fa-camera"></i> Cinematography &amp; Lenses</h3>
+        <div class="spec-group">
+          <div class="spec-label">Camera Body</div>
+          <div class="spec-desc">ARRI Alexa Mini LF / Sony FX9 (Large Format Sensor)</div>
+        </div>
+        <div class="spec-group">
+          <div class="spec-label">Lenses</div>
+          <div class="spec-desc">Cooke Anamorphic /i Full Frame Plus (2x Squeeze) for cinematic horizontal flares, and 90mm Macro T2.8 for phone screen details.</div>
+        </div>
+        <div class="spec-group">
+          <div class="spec-label">Color Grading</div>
+          <div class="spec-desc">Apple Keynote Palette: Deep Kodak 2383 film print emulation, crushed OLED black points, warm 3200K tungsten streetlights against cool 5600K Cupertino studio rim lights.</div>
+        </div>
+      </div>
+
+      <div class="storyboard-card">
+        <h3 class="card-title"><i class="fas fa-music"></i> Audio &amp; Sound Engineering</h3>
+        <div class="spec-group">
+          <div class="spec-label">Narrator Style</div>
+          <div class="spec-desc">Articulate, deep, authoritative baritone with quiet warmth (similar to Apple launch narrator / Sir Jony Ive product monologue).</div>
+        </div>
+        <div class="spec-group">
+          <div class="spec-label">Music Composition</div>
+          <div class="spec-desc">Custom hybrid orchestral score: Minimalist cello and warm piano opening $\rightarrow$ dramatic bass drop at 0:38 $\rightarrow$ rhythmic modular synth pulse at 120 BPM $\rightarrow$ triumphant brass &amp; strings climax.</div>
+        </div>
+        <div class="spec-group">
+          <div class="spec-label">Haptic SFX</div>
+          <div class="spec-desc">Bespoke tactile sound design: Sub-bass clicks, GPS radar pings, glass resonance, and vault locking mechanism.</div>
+        </div>
+      </div>
+
+      <div class="storyboard-card">
+        <h3 class="card-title"><i class="fas fa-map-location-dot"></i> Filming Locations (Dhaka)</h3>
+        <div class="spec-group">
+          <div class="spec-label">Night Walk Scene</div>
+          <div class="spec-desc">Dhanmondi Lake Walkway &amp; Gulshan 2 Avenue (wet pavement, neon ambient reflections).</div>
+        </div>
+        <div class="spec-group">
+          <div class="spec-label">Transit Scene</div>
+          <div class="spec-desc">Hatirjheel Expressway Bridge at twilight (moving vehicle headlights).</div>
+        </div>
+        <div class="spec-group">
+          <div class="spec-label">Studio Product Renders</div>
+          <div class="spec-desc">Dark infinity cyc wall, motorized rotating turntable, robotic camera arm (Bolt Cinebot) for macro product passes.</div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+    // ========================================================
+    // APPLE COMMERCIAL SCENE CONFIGURATION
+    // ========================================================
+    const SCENES = [
+      {
+        id: 1,
+        act: "ACT I • THE PHILOSOPHICAL HOOK",
+        timecode: "0:00 – 0:18",
+        headline: "What does it mean<br>to feel truly safe?",
+        subheadline: "Not just when daylight is bright and streets are calm. But in the fragile seconds that define a life.",
+        metric1: { val: "300ms", label: "Dispatch Latency" },
+        metric2: { val: "100%", label: "Covert Stealth" },
+        metric3: { val: "5TB", label: "Sovereign Vault" },
+        subtitles: "“What does it mean to feel truly safe? In an emergency, complexity is the enemy.”",
+        voText: "What does it mean to feel truly safe? Not just when everything goes to plan. But in the unpredictable, vulnerable moments of our lives.",
+        screenHtml: `
+          <div class="phone-sos-module">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--apple-gray); margin-bottom: 24px;">Emergency Standby</div>
+            <div class="phone-pulse-ring" style="width: 100px; height: 100px; font-size: 18px;">SOS</div>
+            <div style="font-size: 12px; color: var(--apple-gray); margin-top: 24px; line-height: 1.4;">Ready in background<br>Tap to summon assistance</div>
+          </div>
+        `
+      },
+      {
+        id: 2,
+        act: "ACT II • THE HUMAN TENSION",
+        timecode: "0:18 – 0:38",
+        headline: "Seconds that matter.<br>Zero room for friction.",
+        subheadline: "Traditional emergency response requires phone unlocking, dialing, and explaining. In a crisis, you don't have time to navigate menus.",
+        metric1: { val: "0.0s", label: "Dialing Delay" },
+        metric2: { val: "1-Tap", label: "Frictionless" },
+        metric3: { val: "999", label: "CAD Direct" },
+        subtitles: "“Because in a crisis, every second counts. Complexity is a barrier between you and help.”",
+        voText: "Because in an emergency, every single second counts. And traditional emergency response has too much friction. Too many menus. Too many questions.",
+        screenHtml: `
+          <div style="display: flex; flex-direction: column; justify-content: center; height: 100%; text-align: center;">
+            <div style="font-size: 10px; color: #ef4444; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">The Critical Gap</div>
+            <h3 style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 12px;">Immediate Help</h3>
+            <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 14px; padding: 14px; font-size: 12px; color: #fca5a5; line-height: 1.5;">
+              <i class="fas fa-triangle-exclamation" style="margin-bottom: 6px; font-size: 16px;"></i><br>
+              Danger requires instant notification without hesitation.
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 3,
+        act: "ACT III • THE MONOLITHIC REVEAL",
+        timecode: "0:38 – 0:58",
+        headline: "Introducing SAFE bd.<br>Safety. Reimagined.",
+        subheadline: "A national digital emergency infrastructure architected for 170 million citizens. Sovereign. High-speed. Life-saving.",
+        metric1: { val: "O(1)", label: "Query Speed" },
+        metric2: { val: "170M+", label: "Citizen Scale" },
+        metric3: { val: "Bank-Grade", label: "Cryptography" },
+        subtitles: "“Introducing SAFE bd. A national safety ecosystem engineered to bridge the gap to rapid help.”",
+        voText: "Introducing SAFE bd. A national digital safety ecosystem. Designed not just to react... but to protect.",
+        screenHtml: `
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center;">
+            <div style="width: 58px; height: 58px; border-radius: 16px; background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; box-shadow: 0 0 30px var(--crimson-glow); margin-bottom: 14px;">
+              <i class="fas fa-shield-halved"></i>
+            </div>
+            <h2 style="font-size: 22px; font-weight: 900; letter-spacing: -0.5px; color: #fff;">SAFE bd</h2>
+            <div style="font-size: 10px; color: var(--gold-crest); font-weight: 700; margin-top: 3px; letter-spacing: 0.5px;">ESTABLISHED 2026</div>
+            <div style="font-size: 11px; color: var(--apple-gray); margin-top: 14px; line-height: 1.4;">
+              Safety • Awareness<br>Fast Response • Emergency
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 4,
+        act: "ACT IV • INNOVATION ONE",
+        timecode: "0:58 – 1:18",
+        headline: "The 300ms Lifeline.<br>One tap summons all.",
+        subheadline: "Direct high-priority alert dispatch. Locks live GPS coordinates, alerts trusted circles, and interfaces with the national 999 command dispatch.",
+        metric1: { val: "&lt;300ms", label: "Beacon Speed" },
+        metric2: { val: "3-Sec", label: "False-Alarm Abort" },
+        metric3: { val: "Instant", label: "Circle Dispatch" },
+        subtitles: "“One tap. In under 300 milliseconds, high-priority emergency signals fan out to trusted contacts.”",
+        voText: "One tap. In under 300 milliseconds, an encrypted distress signal fans out to trusted family circles and the national 999 dispatch. With your live coordinates locked.",
+        screenHtml: `
+          <div class="phone-sos-module">
+            <div style="font-size: 10px; font-weight: 800; color: #ef4444; letter-spacing: 1.5px; margin-bottom: 14px; text-transform: uppercase;">
+              <i class="fas fa-satellite-dish"></i> GPS Beacon Active
+            </div>
+            <div class="phone-pulse-ring">SOS</div>
+            <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 8px 12px; margin-top: 18px; font-size: 11px; color: #fff;">
+              📍 Lat: 23.7925° N • Lon: 90.4078° E<br>
+              <span style="color: #10b981; font-weight: 700;">3 Contacts Notified</span>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 5,
+        act: "ACT V • INNOVATION TWO",
+        timecode: "1:18 – 1:38",
+        headline: "Walk With Me.<br>The virtual escort.",
+        subheadline: "Real-time satellite GPS tracking with intelligent route anomaly detection. If you stop or deviate, the system acts before you even have to ask.",
+        metric1: { val: "Live", label: "Satellite Heartbeat" },
+        metric2: { val: "Auto-SOS", label: "Deviation Trigger" },
+        metric3: { val: "Family", label: "Real-Time Telemetry" },
+        subtitles: "“Walk With Me. A virtual companion that tracks your journey in real time.”",
+        voText: "Walk With Me. A virtual guardian that tracks your journey in real time. If you stop unexpectedly or deviate from your route, SAFE bd initiates emergency protocols before you even have to ask.",
+        screenHtml: `
+          <div style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+            <div style="font-size: 11px; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 6px;">
+              <i class="fas fa-person-walking"></i> Walk With Me Active
+            </div>
+            <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 12px; font-size: 11px; line-height: 1.5; text-align: center;">
+              <i class="fas fa-location-crosshairs" style="font-size: 22px; color: #38bdf8; margin-bottom: 6px;"></i><br>
+              <strong>Destination:</strong> Dhanmondi<br>
+              <strong>ETA:</strong> 14 mins remaining<br>
+              <span style="color: #10b981;">Route Confirmed</span>
+            </div>
+            <div style="font-size: 10px; color: var(--apple-gray); text-align: center;">Heartbeat signal: every 5 sec</div>
+          </div>
+        `
+      },
+      {
+        id: 6,
+        act: "ACT VI • INNOVATION THREE",
+        timecode: "1:38 – 1:58",
+        headline: "Covert Witness.<br>Truth preserved in 5TB.",
+        subheadline: "Screen stays pitch dark while full-HD video and audio capture streams directly to a private 5-terabyte sovereign Google Drive vault. Tamper-proof evidence.",
+        metric1: { val: "0%", label: "Screen Illumination" },
+        metric2: { val: "5TB", label: "Private Vault" },
+        metric3: { val: "Irreversible", label: "Proof Preservation" },
+        subtitles: "“Covert witness. Zero screen illumination. Streamed directly to an encrypted 5-terabyte vault.”",
+        voText: "Covert witness. Zero screen illumination. High-definition video and audio streaming directly into a private 5-terabyte encrypted sovereign cloud vault. Truth that can never be erased.",
+        screenHtml: `
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center;">
+            <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #ef4444; margin-bottom: 12px;">
+              <i class="fas fa-lock"></i>
+            </div>
+            <div style="font-size: 13px; font-weight: 800; color: #fff;">STEALTH RECORDING</div>
+            <div style="font-size: 10px; color: #f87171; margin-top: 4px;">Screen black • Audio/Video Active</div>
+            <div style="margin-top: 14px; font-size: 10px; background: rgba(255,255,255,0.06); padding: 6px 12px; border-radius: 8px; color: #94a3b8;">
+              Vault: SAFE_BD_VAULT (5TB)
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 7,
+        act: "ACT VII • THE NATION & THE PROMISE",
+        timecode: "1:58 – 2:20",
+        headline: "A Nation Protected.<br>Peace of mind for all.",
+        subheadline: "Because when 170 million people look out for one another with high technology, fear fades. This is Bangladesh's safety standard.",
+        metric1: { val: "64", label: "Districts Covered" },
+        metric2: { val: "FREE", label: "For Every Citizen" },
+        metric3: { val: "Live", label: "Available Now" },
+        subtitles: "“This isn’t just an application. It is a national promise for 170 million people. This is SAFE bd.”",
+        voText: "This isn’t just an application. It is a national promise. For daughters walking home. For parents waiting. For 170 million people. This is SAFE bd.",
+        screenHtml: `
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center;">
+            <div style="font-size: 28px; color: var(--gold-crest); margin-bottom: 8px;">
+              <i class="fas fa-crown"></i>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 800; color: #fff;">SAAD RIZWAN</h3>
+            <div style="font-size: 10px; color: var(--apple-gray); margin-bottom: 14px;">Founder &amp; CEO, SAFE bd</div>
+            <div style="font-size: 11px; font-style: italic; color: #cbd5e1; line-height: 1.4; max-width: 200px;">
+              “In an emergency, every second counts. Help should always be within reach.”
+            </div>
+          </div>
+        `
+      }
+    ];
+
+    let currentSceneIndex = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let voiceoverEnabled = true;
+
+    // Ambient Web Audio Synthesizer (Cupertino Ambient Drone)
+    let audioCtx = null;
+    let ambientGain = null;
+
+    function initAmbientAudio() {
+      if (audioCtx) return;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+        
+        // Sub-bass drone oscillator
+        const osc = audioCtx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(55, audioCtx.currentTime); // A1 note
+
+        ambientGain = audioCtx.createGain();
+        ambientGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+
+        osc.connect(ambientGain);
+        ambientGain.connect(audioCtx.destination);
+        osc.start();
+      } catch (e) {
+        console.warn("Web Audio not supported or blocked:", e);
+      }
+    }
+
+    // Speech Synthesizer Voiceover
+    function speakNarration(text) {
+      if (!voiceoverEnabled || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.92; // Deliberate, sophisticated Apple keynote cadence
+      utterance.pitch = 0.96; // Deep, calm baritone
+
+      // Try selecting an English British / US articulate voice
+      const voices = window.speechSynthesis.getVoices();
+      const preferred = voices.find(v => v.lang.includes('en-GB') || v.name.includes('Daniel') || v.name.includes('Oliver') || v.name.includes('Google UK English Male') || v.name.includes('Samantha') || v.name.includes('Arthur'));
+      if (preferred) utterance.voice = preferred;
+
+      const waveBars = document.querySelectorAll('.wave-bar');
+      utterance.onstart = () => {
+        waveBars.forEach(b => b.classList.add('speaking'));
+      };
+      utterance.onend = () => {
+        waveBars.forEach(b => b.classList.remove('speaking'));
+      };
+      utterance.onerror = () => {
+        waveBars.forEach(b => b.classList.remove('speaking'));
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function renderScene(index) {
+      currentSceneIndex = Math.max(0, Math.min(SCENES.length - 1, index));
+      const s = SCENES[currentSceneIndex];
+
+      // Update Text Elements
+      document.getElementById('scene-act-tag').innerText = s.act;
+      document.getElementById('scene-headline').innerHTML = s.headline;
+      document.getElementById('scene-subheadline').innerHTML = s.subheadline;
+      document.getElementById('subtitles-text').innerText = s.subtitles;
+      document.getElementById('timecode-display').innerText = `${s.timecode} (Total 2:20)`;
+      document.getElementById('scene-counter-display').innerText = `Scene ${s.id} of ${SCENES.length}: ${s.act.split('•')[1] || ''}`;
+
+      // Update Metrics
+      const metricRow = document.getElementById('scene-metric-row');
+      metricRow.innerHTML = `
+        <div class="metric-badge">
+          <span class="metric-value">${s.metric1.val}</span>
+          <span class="metric-label">${s.metric1.label}</span>
+        </div>
+        <div class="metric-badge">
+          <span class="metric-value">${s.metric2.val}</span>
+          <span class="metric-label">${s.metric2.label}</span>
+        </div>
+        <div class="metric-badge">
+          <span class="metric-value">${s.metric3.val}</span>
+          <span class="metric-label">${s.metric3.label}</span>
+        </div>
+      `;
+
+      // Update Phone Screen
+      document.getElementById('phone-screen-display').innerHTML = s.screenHtml;
+
+      // Update Progress Bar
+      const progressPercent = ((currentSceneIndex + 1) / SCENES.length) * 100;
+      document.getElementById('progress-fill').style.width = `${progressPercent}%`;
+
+      // Trigger Narrator Voice
+      if (isPlaying || voiceoverEnabled) {
+        speakNarration(s.voText);
+      }
+
+      // Re-trigger subtle entrance animation
+      const box = document.getElementById('scene-text-box');
+      box.style.animation = 'none';
+      void box.offsetWidth;
+      box.style.animation = 'appleFadeIn 0.7s var(--ease-apple)';
+    }
+
+    function togglePlayCommercial() {
+      initAmbientAudio();
+      isPlaying = !isPlaying;
+      const playIcon = document.getElementById('play-icon');
+
+      if (isPlaying) {
+        playIcon.className = "fas fa-pause";
+        speakNarration(SCENES[currentSceneIndex].voText);
+        playInterval = setInterval(() => {
+          if (currentSceneIndex < SCENES.length - 1) {
+            renderScene(currentSceneIndex + 1);
+          } else {
+            // Loop or stop
+            clearInterval(playInterval);
+            isPlaying = false;
+            playIcon.className = "fas fa-play";
+          }
+        }, 11000); // 11 seconds per scene
+      } else {
+        playIcon.className = "fas fa-play";
+        clearInterval(playInterval);
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      }
+    }
+
+    function nextScene() {
+      if (currentSceneIndex < SCENES.length - 1) {
+        renderScene(currentSceneIndex + 1);
+      }
+    }
+
+    function prevScene() {
+      if (currentSceneIndex > 0) {
+        renderScene(currentSceneIndex - 1);
+      }
+    }
+
+    function toggleVoiceoverNarrator() {
+      voiceoverEnabled = !voiceoverEnabled;
+      const label = document.getElementById('vo-status-label');
+      if (voiceoverEnabled) {
+        label.innerText = "Voiceover: ON";
+        speakNarration(SCENES[currentSceneIndex].voText);
+      } else {
+        label.innerText = "Voiceover: MUTED";
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      }
+    }
+
+    function switchView(viewName, btn) {
+      document.querySelectorAll('.view-tab-pill').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+
+      document.getElementById('view-cinema').style.display = viewName === 'cinema' ? 'block' : 'none';
+      document.getElementById('view-storyboard').style.display = viewName === 'storyboard' ? 'grid' : 'none';
+      document.getElementById('view-production').style.display = viewName === 'production' ? 'grid' : 'none';
+    }
+
+    function toggleFullscreen() {
+      const el = document.getElementById('cinema-stage');
+      if (!document.fullscreenElement) {
+        if (el.requestFullscreen) el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    function printCommercialScript() {
+      // Switch to storyboard view and open print dialog
+      document.getElementById('view-cinema').style.display = 'none';
+      document.getElementById('view-storyboard').style.display = 'grid';
+      window.print();
+    }
+
+    // Keyboard Shortcuts (Space to play, arrows to navigate)
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlayCommercial();
+      } else if (e.code === 'ArrowRight') {
+        nextScene();
+      } else if (e.code === 'ArrowLeft') {
+        prevScene();
+      }
+    });
+
+    // Initial render
+    window.addEventListener('DOMContentLoaded', () => {
+      renderScene(0);
+    });
+  </script>
+</body>
+</html>
