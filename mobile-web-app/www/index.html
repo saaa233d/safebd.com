@@ -1916,7 +1916,10 @@
           </button>
         </div>
         <div id="admin-evidence-full-container">
-          <!-- Rendered dynamically -->
+          <div id="admin-evidence-loading" style="text-align: center; padding: 50px 20px; color: var(--text-muted); font-size: 13px;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 28px; color: #ef4444; display: block; margin-bottom: 12px;"></i>
+            Loading SOS evidence vault...
+          </div>
         </div>
       </div>
 
@@ -5355,7 +5358,14 @@
       return [];
     }
 
-    let adminEmergencyEvidenceList = loadCachedEvidenceMeta();
+    // Strip stale blob URLs from cached items — they expire across sessions and cause black video players
+    let adminEmergencyEvidenceList = loadCachedEvidenceMeta().map(item => {
+      if (item) {
+        delete item._blobUrl;   // Blob URLs are session-specific and expire on page reload
+        delete item.videoBlob;  // Blob objects are not serializable and are always lost on reload
+      }
+      return item;
+    });
 
     // Fast synchronous Base64 to Blob conversion (Safe on all mobile browsers with chunked arrays)
     function base64ToBlobSync(dataUri, fallbackMime) {
@@ -5491,6 +5501,18 @@
     }
 
     function fetchAdminEmergencyEvidence() {
+      // Show loading state inside the evidence section while fetching
+      const fullCont = document.getElementById('admin-evidence-full-container');
+      if (fullCont && fullCont.children.length === 0 || (fullCont && fullCont.querySelector('#admin-evidence-loading'))) {
+        fullCont.innerHTML = `
+          <div id="admin-evidence-loading" style="text-align: center; padding: 50px 20px; color: var(--text-muted); font-size: 13px;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 28px; color: #ef4444; display: block; margin-bottom: 12px;"></i>
+            Loading SOS evidence vault...
+          </div>`;
+      }
+      // Reset signature so the empty-state renders properly even if data hasn't changed
+      lastRenderedEvidenceSignature = '__FETCHING__';
+
       const token = localStorage.getItem('safe_bd_token') || '';
       fetch(`${API_BASE}/api/admin/emergency-evidence`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -5538,11 +5560,11 @@
           localStorage.setItem(EVIDENCE_META_KEY, JSON.stringify(metadataOnly.slice(0, 50)));
         } catch (e) {}
 
-        renderAdminEmergencyEvidence();
+        renderAdminEmergencyEvidence(true);
       })
       .catch(err => {
         console.warn("Evidence fetch error, keeping cached:", err);
-        renderAdminEmergencyEvidence();
+        renderAdminEmergencyEvidence(true);
       });
     }
 
@@ -5703,7 +5725,7 @@
     }
 
     let lastRenderedEvidenceSignature = '';
-    function renderAdminEmergencyEvidence() {
+    function renderAdminEmergencyEvidence(forceRender) {
       const count = adminEmergencyEvidenceList.length;
       const signature = count + ':' + adminEmergencyEvidenceList.map(e => `${e.id}_${e.reviewed}_${e.fileName}`).join(',');
 
@@ -5714,7 +5736,8 @@
       if (badgeEl) badgeEl.innerText = count;
 
       // Do NOT destroy video player DOM if evidence hasn't changed (Prevents 15s reset)
-      if (signature === lastRenderedEvidenceSignature) {
+      // But always allow rendering if forced (i.e. called from fetchAdminEmergencyEvidence)
+      if (!forceRender && signature === lastRenderedEvidenceSignature) {
         return;
       }
       lastRenderedEvidenceSignature = signature;
