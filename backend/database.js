@@ -571,13 +571,16 @@ function markUserLogin(phone, sessionToken) {
     user.lastLoginAt = new Date().toISOString();
     user.loginCount = (user.loginCount || 0) + 1;
 
-    // Create session record
+    // Create session record with 30-day sliding TTL
+    const now = Date.now();
+    const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
     dbState.sessions[sessionToken] = {
       token: sessionToken,
       phone: cleanPhone,
       userName: user.name,
       isAdmin: user.isAdmin,
       createdAt: new Date().toISOString(),
+      expiresAt: now + SESSION_TTL_MS,
       active: true
     };
 
@@ -650,8 +653,8 @@ function verifyOtp(phone, inputCode, expectedPurpose = null) {
     return { success: false, message: 'Too many incorrect attempts. Please request a new OTP.' };
   }
 
-  // Allow master test pin only in non-production development environments
-  const isDevMasterMatch = (process.env.NODE_ENV !== 'production' && inputCode === '1234');
+  // Strictly disallow test PINs unless explicitly enabled in local development testing
+  const isDevMasterMatch = (process.env.SAFEBD_ALLOW_TEST_OTP === 'true' && inputCode === '1234');
   if (record.code === inputCode || isDevMasterMatch) {
     delete dbState.otpCodes[cleanPhone];
     return { success: true };
@@ -663,10 +666,19 @@ function verifyOtp(phone, inputCode, expectedPurpose = null) {
 function getSession(token) {
   if (!token) return null;
   const sess = dbState.sessions[token];
-  if (sess && sess.active) {
-    return sess;
+  if (!sess || !sess.active) return null;
+
+  // Enforce sliding TTL expiration
+  if (sess.expiresAt && Date.now() > sess.expiresAt) {
+    sess.active = false;
+    delete dbState.sessions[token];
+    persistToDisk();
+    return null;
   }
-  return null;
+
+  // Extend sliding TTL on active verified use
+  sess.expiresAt = Date.now() + (30 * 24 * 60 * 60 * 1000);
+  return sess;
 }
 
 function generateSecureToken(prefix = 'safe_token_') {
@@ -742,7 +754,7 @@ function markEmergencyEvidenceReviewed(id, notes = "") {
    Designed for millions of concurrent posts with O(1) retrieval and O(limit) pagination.
 ========================================================================= */
 
-function createPost({ id, author, authorPhone, content, category, media, gdriveFileId = null, mediaFileName = null, mediaMimeType = null, verified = false, authorRole }) {
+function createPost({ id, author, authorPhone, content, category, media, gdriveFileId = null, mediaFileName = null, mediaMimeType = null, verified = false, authorRole, isChiefAdminVerified = false }) {
   if (!content && !media) {
     throw new Error("Post content or media attachment is required.");
   }
@@ -751,13 +763,14 @@ function createPost({ id, author, authorPhone, content, category, media, gdriveF
   const cleanCategory = category || "General Safety";
   const now = new Date().toISOString();
 
-  const isChiefAdmin = authorPhone === '01316750712' || (author && author.toUpperCase().includes('SAAD RIZWAN'));
+  // Strict Cryptographic Clearance: Official founder/admin badges require verified token!
+  const isChiefAdmin = Boolean(isChiefAdminVerified);
 
   const newPost = {
     id: postId,
-    author: (author && author.trim()) || (isChiefAdmin ? "SAAD RIZWAN" : "Citizen Reporter"),
-    authorPhone: authorPhone || (isChiefAdmin ? "01316750712" : ""),
-    authorRole: isChiefAdmin ? "Founder & CEO, SAFE bd" : (authorRole || ""),
+    author: isChiefAdmin ? "SAAD RIZWAN" : ((author && author.trim()) || "Citizen Reporter"),
+    authorPhone: isChiefAdmin ? "01316750712" : (authorPhone || ""),
+    authorRole: isChiefAdmin ? "Founder & CEO, SAFE bd" : (authorRole || "Citizen"),
     isFounder: isChiefAdmin,
     verified: isChiefAdmin || !!verified,
     type: isChiefAdmin ? "official" : "community",
