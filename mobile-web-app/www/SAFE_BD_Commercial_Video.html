@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAFE BD — Official 60s Commercial (Apple Event Master)</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', Roboto, sans-serif;
+    }
+    
+    .glow-red {
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.45);
+    }
+  </style>
+</head>
+<body class="bg-[#060305] text-[#f8fafc] antialiased min-h-screen p-3 md:p-6 flex flex-col items-center justify-center">
+
+  <!-- Main Player Container -->
+  <div class="w-full max-w-5xl bg-[#0f070b]/95 border border-white/10 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-2xl flex flex-col">
+    
+    <!-- Top Bar -->
+    <div class="px-6 py-3.5 border-b border-white/10 flex items-center justify-between bg-black/50">
+      <div class="flex items-center gap-3">
+        <span class="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_12px_#ef4444] animate-pulse"></span>
+        <span class="text-xs md:text-sm font-extrabold tracking-wider uppercase text-red-400">SAFE BD • Official Brand Film</span>
+      </div>
+      <div class="flex items-center gap-2 md:gap-3 text-xs text-slate-400">
+        <span class="hidden sm:inline bg-white/5 border border-white/10 px-2.5 py-1 rounded-full font-mono text-[11px]">Apple Keynote 4K Master</span>
+        <span class="font-mono text-red-300 font-bold">0:60 Extended Film</span>
+      </div>
+    </div>
+
+    <!-- Video Canvas Viewport (16:9) -->
+    <div class="relative w-full aspect-video bg-black overflow-hidden flex items-center justify-center group" id="videoContainer">
+      <canvas id="stageCanvas" width="1280" height="720" class="w-full h-full block object-contain"></canvas>
+
+      <!-- Glassmorphic HUD -->
+      <div id="hudOverlay" class="absolute inset-0 pointer-events-none flex flex-col justify-between p-5 md:p-8 transition-opacity duration-300 opacity-100 z-10">
+        <!-- Top Left Chapter & CAD Badges -->
+        <div class="flex items-center gap-3">
+          <div id="sceneBadge" class="bg-black/70 border border-white/20 text-white text-[11px] md:text-xs px-3.5 py-1.5 rounded-full backdrop-blur-md uppercase tracking-wider font-bold">
+            Scene 01 • Streets at Dusk
+          </div>
+          <div id="cadBadge" class="hidden bg-red-950/80 border border-red-500/40 text-red-300 text-[11px] md:text-xs px-3.5 py-1.5 rounded-full backdrop-blur-md font-mono flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> 999 CAD LINKED
+          </div>
+        </div>
+
+        <!-- Dynamic Subtitles Container -->
+        <div class="w-full flex justify-center pb-2">
+          <div id="subtitleBox" class="bg-black/80 border border-white/20 px-6 py-2.5 rounded-2xl backdrop-blur-xl text-center max-w-3xl text-sm md:text-base font-medium text-slate-100 shadow-2xl transition-all duration-300">
+            "Every day, millions of us step out into the world..."
+          </div>
+        </div>
+      </div>
+
+      <!-- Start / Paused Overlay -->
+      <div id="startOverlay" class="absolute inset-0 bg-black/75 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-20">
+        <div class="w-20 h-20 rounded-full bg-red-600 hover:bg-red-500 text-white flex items-center justify-center shadow-[0_0_50px_rgba(239,68,68,0.7)] cursor-pointer transform hover:scale-105 transition active:scale-95 mb-5" id="bigPlayBtn">
+          <svg class="w-8 h-8 translate-x-0.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight">SAFE BD — "Peace of Mind"</h2>
+        <p class="text-xs md:text-sm text-slate-300 max-w-lg mt-2 leading-relaxed">
+          The 60-second Apple Event commercial featuring photorealistic visual scenes, dynamic camera motion, synthesized score, and spoken narration.
+        </p>
+        <button id="quickStartBtn" class="mt-6 px-7 py-2.5 bg-white text-black font-bold text-xs md:text-sm rounded-full hover:bg-slate-200 transition shadow-xl flex items-center gap-2">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Play Commercial (With Sound)
+        </button>
+      </div>
+
+      <!-- Exporting Status Pill -->
+      <div id="recordingTag" class="hidden absolute top-4 right-4 bg-red-600/90 text-white font-mono text-xs px-3.5 py-1.5 rounded-full flex items-center gap-2 z-30 shadow-lg">
+        <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span> EXPORTING VIDEO...
+      </div>
+    </div>
+
+    <!-- Scrubber & Controls -->
+    <div class="px-6 py-4 bg-[#0a0408] border-t border-white/10 flex flex-col gap-3">
+      
+      <!-- Progress Bar -->
+      <div class="w-full flex items-center gap-3">
+        <span id="timeCurrent" class="text-xs font-mono text-slate-400 w-10 text-right">0:00</span>
+        <div class="relative flex-1 h-2.5 bg-white/10 rounded-full cursor-pointer overflow-hidden group" id="progressBarContainer">
+          <div id="progressBar" class="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-red-600 via-red-500 to-amber-500 rounded-full w-0 transition-all duration-75"></div>
+        </div>
+        <span id="timeDuration" class="text-xs font-mono text-slate-400 w-10">1:00</span>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-wrap items-center justify-between gap-4 pt-1">
+        
+        <!-- Left: Play/Pause/Restart & Voice Toggle -->
+        <div class="flex items-center gap-3">
+          <button id="ctrlPlayBtn" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition border border-white/10">
+            <svg id="playIcon" class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="pauseIcon" class="w-5 h-5 fill-current hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          </button>
+          
+          <button id="ctrlRestartBtn" class="p-2 text-slate-400 hover:text-white transition" title="Restart">
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+          </button>
+
+          <button id="voiceToggleBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 transition">
+            <svg class="w-3.5 h-3.5 fill-current text-red-400" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+            <span id="voiceStatusText">Voice: ON</span>
+          </button>
+        </div>
+
+        <!-- Center: Chapter Jumps -->
+        <div class="hidden lg:flex items-center gap-1.5">
+          <button onclick="seekTo(0)" class="px-2.5 py-1 text-[11px] font-semibold bg-white/5 hover:bg-white/10 rounded-md text-slate-300">01. Streets</button>
+          <button onclick="seekTo(8)" class="px-2.5 py-1 text-[11px] font-semibold bg-white/5 hover:bg-white/10 rounded-md text-slate-300">02. Vulnerability</button>
+          <button onclick="seekTo(17)" class="px-2.5 py-1 text-[11px] font-semibold bg-white/5 hover:bg-white/10 rounded-md text-slate-300">03. Reveal</button>
+          <button onclick="seekTo(22)" class="px-2.5 py-1 text-[11px] font-semibold bg-white/5 hover:bg-white/10 rounded-md text-red-300 border border-red-500/30">04. Covert SOS</button>
+          <button onclick="seekTo(34)" class="px-2.5 py-1 text-[11px] font-semibold bg-white/5 hover:bg-white/10 rounded-md text-amber-300 border border-amber-500/30">05. Walk With Me</button>
+          <button onclick="seekTo(52)" class="px-2.5 py-1 text-[11px] font-semibold bg-white/5 hover:bg-white/10 rounded-md text-slate-300">06. Safe Return</button>
+        </div>
+
+        <!-- Right: Export Video -->
+        <div class="flex items-center gap-3">
+          <button id="downloadVideoBtn" class="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white shadow-lg shadow-red-900/40 transition transform hover:scale-102 active:scale-98">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+            <span>Export &amp; Download Video</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Footer Specs -->
+    <div class="px-6 py-3 bg-black/60 border-t border-white/5 flex flex-col md:flex-row items-start md:items-center justify-between text-[11px] text-slate-400 gap-2">
+      <div>
+        <strong>SAFE BD</strong>: National Citizen Safety, Covert SOS &amp; Live Transit Platform • <em>Saad Rizwan, Founder &amp; CEO</em>
+      </div>
+      <div class="flex items-center gap-4">
+        <span>Integrated with: <strong>999 Emergency CAD</strong></span>
+        <span>Visual Render: <strong>Cinematic 1080p 60 FPS</strong></span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Client-Side Motion Graphics Engine -->
+  <script>
+    // --- Asset Loading ---
+    const imgStreet = new Image();
+    imgStreet.src = 'dhaka_cinematic_commuter_v2_1791911903427.jpg';
+
+    const imgHero = new Image();
+    imgHero.src = 'safe_bd_hero_promo_1791911780793.jpg';
+
+    const imgCad = new Image();
+    imgCad.src = 'dhaka_999_cad_console_1791911921827.jpg';
+
+    // --- Timeline Definitions ---
+    const TIMELINE = [
+      {
+        start: 0,
+        end: 8,
+        title: "Scene 01 • Streets at Dusk",
+        subtitle: "Every day, millions of us step out into the world. Commuting late. Returning from campus. Navigating the unpredictable.",
+        type: "streets"
+      },
+      {
+        start: 8,
+        end: 17,
+        title: "Scene 02 • The Critical Vulnerability",
+        subtitle: "And in a crisis... voice calls fail. When seconds matter, you can't unlock a screen. And once a phone is lost... the evidence is gone.",
+        type: "vulnerability"
+      },
+      {
+        start: 17,
+        end: 22,
+        title: "Scene 03 • Protection. Redefined.",
+        subtitle: "We believe safety shouldn't depend on luck. It should be engineered into every second.",
+        type: "reveal"
+      },
+      {
+        start: 22,
+        end: 34,
+        title: "Scene 04 • 15s Covert SOS Video Vault",
+        subtitle: "Introducing SAFE BD. With a covert tap—even while your screen remains dark—it captures 15 seconds of encrypted audio and video straight to the cloud vault.",
+        type: "sos_vault"
+      },
+      {
+        start: 34,
+        end: 44,
+        title: "Scene 05 • 'Walk With Me' Transit Companion",
+        subtitle: "For late-night commutes, 'Walk With Me' watches over your journey. Live satellite tracking. Intelligent traffic modeling. And automated dead-man timers.",
+        type: "transit"
+      },
+      {
+        start: 44,
+        end: 52,
+        title: "Scene 06 • Connected Guardians & Civic Shield",
+        subtitle: "Direct integration with 999, automated WhatsApp alerts for your family, and verified civic hazard intelligence for your community.",
+        type: "network"
+      },
+      {
+        start: 52,
+        end: 60,
+        title: "Scene 07 • SAFE BD — Peace of Mind",
+        subtitle: "Because the most advanced technology isn't just about what changes your life... It's about what protects it. SAFE BD.",
+        type: "outro"
+      }
+    ];
+
+    // --- Playback State ---
+    let isPlaying = false;
+    let currentTime = 0;
+    const duration = 60;
+    let lastTimestamp = 0;
+    let voiceEnabled = true;
+    let currentSubtitleIndex = -1;
+    let isRecording = false;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+
+    // --- Canvas & DOM ---
+    const canvas = document.getElementById('stageCanvas');
+    const ctx = canvas.getContext('2d');
+    const startOverlay = document.getElementById('startOverlay');
+    const quickStartBtn = document.getElementById('quickStartBtn');
+    const bigPlayBtn = document.getElementById('bigPlayBtn');
+    const ctrlPlayBtn = document.getElementById('ctrlPlayBtn');
+    const playIcon = document.getElementById('playIcon');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const ctrlRestartBtn = document.getElementById('ctrlRestartBtn');
+    const progressBar = document.getElementById('progressBar');
+    const progressBarContainer = document.getElementById('progressBarContainer');
+    const timeCurrent = document.getElementById('timeCurrent');
+    const subtitleBox = document.getElementById('subtitleBox');
+    const sceneBadge = document.getElementById('sceneBadge');
+    const cadBadge = document.getElementById('cadBadge');
+    const voiceToggleBtn = document.getElementById('voiceToggleBtn');
+    const voiceStatusText = document.getElementById('voiceStatusText');
+    const downloadVideoBtn = document.getElementById('downloadVideoBtn');
+    const recordingTag = document.getElementById('recordingTag');
+
+    // --- Web Audio Cinematic Synthesizer ---
+    let audioCtx = null;
+    let masterGain = null;
+    let synthDestination = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+        synthDestination = audioCtx.createMediaStreamDestination();
+        masterGain.connect(audioCtx.destination);
+        masterGain.connect(synthDestination);
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playCinematicAudioCues(t) {
+      if (!audioCtx) return;
+      // Pulse beat
+      if (t < 17 && Math.floor(t * 1.5) % 2 === 0 && Math.random() < 0.2) {
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.frequency.setValueAtTime(60, audioCtx.currentTime);
+        g.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+        osc.connect(g);
+        g.connect(masterGain);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.25);
+      }
+      // Synth Arp
+      if (t >= 17 && t < 58 && Math.floor(t * 3) % 3 === 0 && Math.random() < 0.15) {
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(640, audioCtx.currentTime + 0.2);
+        g.gain.setValueAtTime(0.07, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+        osc.connect(g);
+        g.connect(masterGain);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.2);
+      }
+    }
+
+    // --- Voiceover Synthesis ---
+    function speakSubtitle(text) {
+      if (!voiceEnabled || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.93;
+      utterance.pitch = 0.98;
+      const voices = window.speechSynthesis.getVoices();
+      const preferred = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha')));
+      if (preferred) utterance.voice = preferred;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // --- Helper: Draw Image with Ken Burns Camera Zoom ---
+    function drawKenBurns(image, zoomStart, zoomEnd, progress, alpha = 1) {
+      if (!image.complete || image.naturalWidth === 0) return;
+      const w = canvas.width;
+      const h = canvas.height;
+      const currentZoom = zoomStart + (zoomEnd - zoomStart) * progress;
+      const dw = w * currentZoom;
+      const dh = h * currentZoom;
+      const dx = (w - dw) / 2;
+      const dy = (h - dh) / 2;
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(image, dx, dy, dw, dh);
+      ctx.restore();
+    }
+
+    // --- Frame Rendering ---
+    function renderFrame(t) {
+      const w = canvas.width;
+      const h = canvas.height;
+
+      // Dark background fill
+      ctx.fillStyle = '#060305';
+      ctx.fillRect(0, 0, w, h);
+
+      const sceneIndex = TIMELINE.findIndex(item => t >= item.start && t < item.end);
+      const scene = TIMELINE[sceneIndex] || TIMELINE[TIMELINE.length - 1];
+
+      // Update HUD
+      if (sceneIndex !== currentSubtitleIndex) {
+        currentSubtitleIndex = sceneIndex;
+        subtitleBox.innerText = `"${scene.subtitle}"`;
+        sceneBadge.innerText = scene.title;
+        if (scene.type === 'sos_vault' || scene.type === 'transit') {
+          cadBadge.classList.remove('hidden');
+        } else {
+          cadBadge.classList.add('hidden');
+        }
+        if (isPlaying) speakSubtitle(scene.subtitle);
+      }
+
+      const sceneElapsed = t - scene.start;
+      const sceneProgress = Math.min(1, Math.max(0, sceneElapsed / (scene.end - scene.start)));
+
+      // Render Active Scene
+      if (scene.type === 'streets') {
+        // Scene 1: Dhaka dusk street with Ken Burns zoom & rain lighting
+        drawKenBurns(imgStreet, 1.0, 1.08, sceneProgress, 1.0);
+        // Vignette
+        renderDarkVignette(w, h, 0.45);
+        // Onscreen text
+        renderCenteredTitle('50 MILLION CITIZENS', 'Commuting into the night.');
+
+      } else if (scene.type === 'vulnerability') {
+        // Scene 2: Shaken / Glitched Street image + shattered screen
+        const glitchX = Math.sin(t * 30) > 0.8 ? (Math.random() - 0.5) * 16 : 0;
+        ctx.save();
+        ctx.translate(glitchX, 0);
+        drawKenBurns(imgStreet, 1.08, 1.15, sceneProgress, 0.6);
+        ctx.restore();
+        renderDarkVignette(w, h, 0.7);
+
+        // Crack wireframe
+        ctx.save();
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(w / 2 - 140, h / 2 - 240, 280, 480);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.beginPath();
+        ctx.moveTo(w / 2 - 140, h / 2 - 80);
+        ctx.lineTo(w / 2 + 20, h / 2 + 10);
+        ctx.lineTo(w / 2 + 140, h / 2 + 100);
+        ctx.moveTo(w / 2 + 20, h / 2 + 10);
+        ctx.lineTo(w / 2 - 50, h / 2 + 180);
+        ctx.stroke();
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#ef4444';
+        ctx.font = '800 24px "Plus Jakarta Sans"';
+        ctx.fillText('CRITICAL EMERGENCY GAP', w / 2, h / 2 - 10);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '600 16px "Plus Jakarta Sans"';
+        ctx.fillText('When phones are snatched, voice calls fail.', w / 2, h / 2 + 30);
+        ctx.restore();
+
+      } else if (scene.type === 'reveal') {
+        // Scene 3: Hero Product Reveal with glowing crimson sonar rings
+        drawKenBurns(imgHero, 1.15, 1.05, sceneProgress, 0.85);
+        renderDarkVignette(w, h, 0.4);
+
+        // Sonar Wave
+        const pulse = (sceneProgress * 300) % 180 + 30;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(w / 2, h / 2 - 40, pulse, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '900 68px "Plus Jakarta Sans"';
+        ctx.fillText('SAFE BD', w / 2, h / 2 + 80);
+        ctx.fillStyle = '#ef4444';
+        ctx.font = '800 22px "Plus Jakarta Sans"';
+        ctx.fillText('PROTECTION. REDEFINED.', w / 2, h / 2 + 120);
+        ctx.restore();
+
+      } else if (scene.type === 'sos_vault') {
+        // Scene 4: Covert SOS Video Vault (Hero + Data Stream)
+        drawKenBurns(imgHero, 1.05, 1.0, sceneProgress, 0.75);
+        renderDarkVignette(w, h, 0.5);
+
+        // Holographic Data Stream Pills
+        ctx.save();
+        ctx.fillStyle = 'rgba(15, 8, 12, 0.9)';
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(w * 0.08, h * 0.25, 420, 240, 20);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#ef4444';
+        ctx.font = '800 20px "Plus Jakarta Sans"';
+        ctx.fillText('COVERT SOS VIDEO VAULT', w * 0.08 + 24, h * 0.25 + 40);
+
+        ctx.fillStyle = '#10b981';
+        ctx.font = '700 13px monospace';
+        ctx.fillText('• 3x Power-Button Click: TRIGGERED', w * 0.08 + 24, h * 0.25 + 80);
+        ctx.fillText('• Screen Status: PITCH BLACK (Covert)', w * 0.08 + 24, h * 0.25 + 110);
+        ctx.fillText('• 15s AES-256 MP4 Cloud Vault: LOCKED', w * 0.08 + 24, h * 0.25 + 140);
+        ctx.fillText('• 999 CAD Dispatch: LIVE STREAM READY', w * 0.08 + 24, h * 0.25 + 170);
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '500 13px "Plus Jakarta Sans"';
+        ctx.fillText('Even if phone is smashed, attacker is identified.', w * 0.08 + 24, h * 0.25 + 210);
+        ctx.restore();
+
+      } else if (scene.type === 'transit') {
+        // Scene 5: 999 CAD Console & "Walk With Me"
+        drawKenBurns(imgCad, 1.0, 1.06, sceneProgress, 0.9);
+        renderDarkVignette(w, h, 0.4);
+
+        // Overlay Card
+        ctx.save();
+        ctx.fillStyle = 'rgba(15, 8, 12, 0.92)';
+        ctx.strokeStyle = 'rgba(245, 158, 11, 0.8)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(w * 0.08, h * 0.2, 380, 200, 18);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = '800 20px "Plus Jakarta Sans"';
+        ctx.fillText('"WALK WITH ME" ACTIVE', w * 0.08 + 24, h * 0.2 + 40);
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '600 14px "Plus Jakarta Sans"';
+        ctx.fillText('Real-Time Route Telemetry (32 km/h)', w * 0.08 + 24, h * 0.2 + 80);
+        ctx.fillText('Dhaka Traffic Congestion Modeling', w * 0.08 + 24, h * 0.2 + 110);
+
+        ctx.fillStyle = '#10b981';
+        ctx.font = '700 13px monospace';
+        ctx.fillText('• Automated Dead-Man Timer: ACTIVE', w * 0.08 + 24, h * 0.2 + 150);
+        ctx.restore();
+
+      } else if (scene.type === 'network') {
+        // Scene 6: Connected Guardians & 999 CAD
+        drawKenBurns(imgCad, 1.06, 1.12, sceneProgress, 0.8);
+        renderDarkVignette(w, h, 0.55);
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '800 40px "Plus Jakarta Sans"';
+        ctx.fillText('UNIFIED PUBLIC SAFETY', w / 2, h / 2 - 30);
+        ctx.fillStyle = '#10b981';
+        ctx.font = '700 18px "Plus Jakarta Sans"';
+        ctx.fillText('999 Police CAD  •  1-Tap Family WhatsApp GPS  •  Civic Feed', w / 2, h / 2 + 20);
+        ctx.restore();
+
+      } else if (scene.type === 'outro') {
+        // Scene 7: Climax & Outro with Hero Promo
+        drawKenBurns(imgHero, 1.0, 1.05, sceneProgress, 0.95);
+        renderDarkVignette(w, h, 0.45);
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '900 70px "Plus Jakarta Sans"';
+        ctx.fillText('SAFE BD', w / 2, h / 2 + 30);
+
+        ctx.fillStyle = '#fca5a5';
+        ctx.font = '700 20px "Plus Jakarta Sans"';
+        ctx.fillText('National Citizen Safety & Transit Protection', w / 2, h / 2 + 75);
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '600 14px monospace';
+        ctx.fillText('In Official Coordination with 999 • safebd.gov.bd', w / 2, h / 2 + 115);
+        ctx.restore();
+      }
+
+      // Cinematic Letterbox
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, w, 40);
+      ctx.fillRect(0, h - 40, w, 40);
+    }
+
+    function renderDarkVignette(w, h, opacity) {
+      const grad = ctx.createRadialGradient(w / 2, h / 2, w * 0.2, w / 2, h / 2, w * 0.75);
+      grad.addColorStop(0, 'rgba(0,0,0,0)');
+      grad.addColorStop(1, `rgba(0,0,0,${opacity})`);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    function renderCenteredTitle(title, subtitle) {
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.font = '800 42px "Plus Jakarta Sans"';
+      ctx.fillText(title, w / 2, h / 2 - 10);
+      ctx.fillStyle = 'rgba(203, 213, 225, 0.85)';
+      ctx.font = '500 20px "Plus Jakarta Sans"';
+      ctx.fillText(subtitle, w / 2, h / 2 + 35);
+      ctx.restore();
+    }
+
+    // --- Main Tick Loop ---
+    function step(timestamp) {
+      if (!lastTimestamp) lastTimestamp = timestamp;
+      const delta = (timestamp - lastTimestamp) / 1000;
+      lastTimestamp = timestamp;
+
+      if (isPlaying) {
+        currentTime += delta;
+        playCinematicAudioCues(currentTime);
+
+        if (currentTime >= duration) {
+          currentTime = duration;
+          pauseCommercial();
+        }
+      }
+
+      const progressPercent = (currentTime / duration) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+
+      const curM = Math.floor(currentTime / 60);
+      const curS = Math.floor(currentTime % 60).toString().padStart(2, '0');
+      timeCurrent.innerText = `${curM}:${curS}`;
+
+      renderFrame(currentTime);
+      requestAnimationFrame(step);
+    }
+
+    // --- Controls ---
+    function playCommercial() {
+      initAudio();
+      isPlaying = true;
+      startOverlay.classList.add('hidden');
+      playIcon.classList.add('hidden');
+      pauseIcon.classList.remove('hidden');
+      lastTimestamp = 0;
+      const sceneIndex = TIMELINE.findIndex(item => currentTime >= item.start && currentTime < item.end);
+      if (sceneIndex >= 0 && voiceEnabled) {
+        speakSubtitle(TIMELINE[sceneIndex].subtitle);
+      }
+    }
+
+    function pauseCommercial() {
+      isPlaying = false;
+      playIcon.classList.remove('hidden');
+      pauseIcon.classList.add('hidden');
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+    }
+
+    function togglePlay() {
+      if (isPlaying) pauseCommercial();
+      else playCommercial();
+    }
+
+    function restartCommercial() {
+      currentTime = 0;
+      currentSubtitleIndex = -1;
+      playCommercial();
+    }
+
+    function seekTo(targetSec) {
+      currentTime = Math.max(0, Math.min(duration, targetSec));
+      currentSubtitleIndex = -1;
+      renderFrame(currentTime);
+      if (isPlaying) {
+        const sceneIndex = TIMELINE.findIndex(item => currentTime >= item.start && currentTime < item.end);
+        if (sceneIndex >= 0 && voiceEnabled) {
+          speakSubtitle(TIMELINE[sceneIndex].subtitle);
+        }
+      }
+    }
+
+    // --- Video Recorder & Downloader ---
+    async function startVideoExport() {
+      initAudio();
+      if (isRecording) return;
+      isRecording = true;
+      recordingTag.classList.remove('hidden');
+      downloadVideoBtn.disabled = true;
+      downloadVideoBtn.innerHTML = `<span>Exporting (Please wait)...</span>`;
+
+      currentTime = 0;
+      currentSubtitleIndex = -1;
+
+      const canvasStream = canvas.captureStream(60);
+      let combinedStream = canvasStream;
+      if (synthDestination && synthDestination.stream) {
+        combinedStream = new MediaStream([
+          ...canvasStream.getVideoTracks(),
+          ...synthDestination.stream.getAudioTracks()
+        ]);
+      }
+
+      recordedChunks = [];
+      try {
+        const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+          ? 'video/webm;codecs=vp9'
+          : 'video/webm';
+        
+        mediaRecorder = new MediaRecorder(combinedStream, { mimeType, videoBitsPerSecond: 6000000 });
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) recordedChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(recordedChunks, { type: 'video/webm' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = url;
+          a.download = 'SAFE_BD_60s_Commercial.webm';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+          }, 100);
+
+          isRecording = false;
+          recordingTag.classList.add('hidden');
+          downloadVideoBtn.disabled = false;
+          downloadVideoBtn.innerHTML = `
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+            <span>Export &amp; Download Video</span>
+          `;
+        };
+
+        mediaRecorder.start();
+        playCommercial();
+
+        const checkInterval = setInterval(() => {
+          if (currentTime >= 59.8 || !isPlaying) {
+            clearInterval(checkInterval);
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+              mediaRecorder.stop();
+            }
+          }
+        }, 200);
+
+      } catch (err) {
+        console.error("Recording error:", err);
+        isRecording = false;
+        recordingTag.classList.add('hidden');
+        downloadVideoBtn.disabled = false;
+      }
+    }
+
+    // --- Listeners ---
+    quickStartBtn.addEventListener('click', playCommercial);
+    bigPlayBtn.addEventListener('click', playCommercial);
+    ctrlPlayBtn.addEventListener('click', togglePlay);
+    ctrlRestartBtn.addEventListener('click', restartCommercial);
+    downloadVideoBtn.addEventListener('click', startVideoExport);
+
+    voiceToggleBtn.addEventListener('click', () => {
+      voiceEnabled = !voiceEnabled;
+      voiceStatusText.innerText = `Voice: ${voiceEnabled ? 'ON' : 'OFF'}`;
+      if (!voiceEnabled && window.speechSynthesis) window.speechSynthesis.cancel();
+    });
+
+    progressBarContainer.addEventListener('click', (e) => {
+      const rect = progressBarContainer.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      seekTo((clickX / rect.width) * duration);
+    });
+
+    // Start rendering
+    renderFrame(0);
+    requestAnimationFrame(step);
+  </script>
+</body>
+</html>
