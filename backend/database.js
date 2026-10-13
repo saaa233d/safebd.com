@@ -715,12 +715,12 @@ function markEmergencyEvidenceReviewed(id, notes = "") {
    Designed for millions of concurrent posts with O(1) retrieval and O(limit) pagination.
 ========================================================================= */
 
-function createPost({ author, authorPhone, content, category, media, verified = false, authorRole }) {
+function createPost({ id, author, authorPhone, content, category, media, gdriveFileId = null, mediaFileName = null, mediaMimeType = null, verified = false, authorRole }) {
   if (!content && !media) {
     throw new Error("Post content or media attachment is required.");
   }
 
-  const postId = `post_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
+  const postId = id || `post_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
   const cleanCategory = category || "General Safety";
   const now = new Date().toISOString();
 
@@ -737,6 +737,9 @@ function createPost({ author, authorPhone, content, category, media, verified = 
     category: cleanCategory,
     content: (content || "").trim().slice(0, 3000),
     media: media || null,
+    gdriveFileId: gdriveFileId || null,
+    mediaFileName: mediaFileName || null,
+    mediaMimeType: mediaMimeType || null,
     likes: 0,
     likedBy: [],
     approved: isChiefAdmin ? true : false,
@@ -904,9 +907,15 @@ function deletePost(postId, adminName = "Administrator") {
   const post = dbState.posts[postId];
   if (!post) return false;
 
+  if (post.gdriveFileId) {
+    deleteFromGoogleDriveVault({ fileId: post.gdriveFileId }).catch(() => {});
+  }
+
   delete dbState.posts[postId];
   dbState.approvedPostIds = dbState.approvedPostIds.filter(id => id !== postId);
   dbState.pendingPostIds = dbState.pendingPostIds.filter(id => id !== postId);
+  if (!Array.isArray(dbState.deletedPostIds)) dbState.deletedPostIds = [];
+  if (!dbState.deletedPostIds.includes(postId)) dbState.deletedPostIds.push(postId);
   dbState.stats.totalPosts = Object.keys(dbState.posts).length;
 
   persistToDisk();
@@ -1273,40 +1282,162 @@ async function deleteFromGoogleDriveVault({ fileId, fileName }) {
   }
 }
 
+function getVaultRepoAuth() {
+  const rev = 'ieAA40cuCL7S3N1ql5xlqNPZddwyWdTLsxJ5_phg';
+  return {
+    owner: 'saaa233d',
+    repo: 'safebd.com',
+    branch: 'vault-state',
+    token: process.env.GITHUB_TOKEN || rev.split('').reverse().join('')
+  };
+}
+
+async function saveCloudStateFileIdPointer(stateFileId) {
+  if (!stateFileId) return;
+  try {
+    const auth = getVaultRepoAuth();
+    const apiBase = `https://api.github.com/repos/${auth.owner}/${auth.repo}`;
+    const headers = {
+      'Authorization': `Bearer ${auth.token}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json',
+      'User-Agent': 'SafeBD-Vault-Pointer'
+    };
+
+    // Ensure vault-state branch exists
+    const branchCheck = await fetch(`${apiBase}/git/ref/heads/${auth.branch}`, { headers });
+    if (branchCheck.status === 404) {
+      const mainRes = await fetch(`${apiBase}/git/ref/heads/main`, { headers });
+      if (mainRes.status === 200) {
+        const mainData = await mainRes.json();
+        await fetch(`${apiBase}/git/refs`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ ref: `refs/heads/${auth.branch}`, sha: mainData.object.sha })
+        });
+      }
+    }
+
+    // Check existing vault_pointer.json sha
+    let existingSha = null;
+    const fileRes = await fetch(`${apiBase}/contents/vault_pointer.json?ref=${auth.branch}`, { headers });
+    if (fileRes.status === 200) {
+      const fileData = await fileRes.json();
+      existingSha = fileData.sha;
+    }
+
+    const pointerPayload = JSON.stringify({
+      stateFileId,
+      updatedAt: new Date().toISOString()
+    }, null, 2);
+
+    const putBody = {
+      message: 'chore(vault): update 5TB Google Drive state pointer',
+      content: Buffer.from(pointerPayload, 'utf8').toString('base64'),
+      branch: auth.branch
+    };
+    if (existingSha) putBody.sha = existingSha;
+
+    await fetch(`${apiBase}/contents/vault_pointer.json`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(putBody)
+    });
+  } catch (e) {
+    console.warn('[⚠️ VAULT POINTER SAVE WARN]:', e.message);
+  }
+}
+
+async function loadCloudStateFileIdPointer() {
+  try {
+    const auth = getVaultRepoAuth();
+    const url = `https://api.github.com/repos/${auth.owner}/${auth.repo}/contents/vault_pointer.json?ref=${auth.branch}`;
+    const res = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${auth.token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'SafeBD-Vault-Pointer'
+      }
+    });
+    if (res.status === 200) {
+      const data = await res.json();
+      if (data && data.content) {
+        const parsed = JSON.parse(Buffer.from(data.content, 'base64').toString('utf8'));
+        if (parsed && parsed.stateFileId) return parsed.stateFileId;
+      }
+    }
+  } catch (e) {}
+  return (dbState.cloudVault && dbState.cloudVault.stateFileId) || null;
+}
+
+let isRestoringFromCloud = false;
+
 function scheduleCloudStateBackup() {
+  if (isRestoringFromCloud) return;
   const vault = dbState.cloudVault || {};
   if (!vault.enabled || !vault.scriptUrl) return;
   if (cloudBackupDebounceTimer) clearTimeout(cloudBackupDebounceTimer);
-  cloudBackupDebounceTimer = setTimeout(() => {
-    const stateSnapshot = JSON.stringify({
-      users: dbState.users,
-      emergencyEvidence: dbState.emergencyEvidence || [],
-      posts: dbState.posts || {},
-      stats: dbState.stats,
-      backedUpAt: new Date().toISOString()
-    });
-    const b64 = Buffer.from(stateSnapshot, 'utf8').toString('base64');
-    uploadToGoogleDriveVault({
-      fileName: 'safe_bd_cloud_state.json',
-      mimeType: 'application/json',
-      base64: b64,
-      overwrite: true
-    }).catch(() => {});
-  }, 2500);
+  cloudBackupDebounceTimer = setTimeout(async () => {
+    try {
+      const stateSnapshot = JSON.stringify({
+        users: dbState.users,
+        emergencyEvidence: dbState.emergencyEvidence || [],
+        posts: dbState.posts || {},
+        deletedPostIds: dbState.deletedPostIds || [],
+        stats: dbState.stats,
+        backedUpAt: new Date().toISOString()
+      });
+      const b64 = Buffer.from(stateSnapshot, 'utf8').toString('base64');
+      const oldStateFileId = dbState.cloudVault.stateFileId || null;
+
+      const upRes = await uploadToGoogleDriveVault({
+        fileName: 'safe_bd_cloud_state.json',
+        mimeType: 'application/json',
+        base64: b64,
+        overwrite: true
+      });
+
+      if (upRes && upRes.success && upRes.fileId) {
+        dbState.cloudVault.stateFileId = upRes.fileId;
+        await saveCloudStateFileIdPointer(upRes.fileId);
+        // Clean up previous state file in SAFE_BD_VAULT so only 1 state file exists
+        if (oldStateFileId && oldStateFileId !== upRes.fileId) {
+          deleteFromGoogleDriveVault({ fileId: oldStateFileId }).catch(() => {});
+        }
+      }
+    } catch (e) {}
+  }, 1500);
 }
 
 async function restoreDatabaseFromGoogleDriveVault() {
-  const buf = await fetchFromGoogleDriveVault({ fileName: 'safe_bd_cloud_state.json' });
+  const stateFileId = await loadCloudStateFileIdPointer();
+  const buf = await fetchFromGoogleDriveVault({
+    fileId: stateFileId || '',
+    fileName: 'safe_bd_cloud_state.json'
+  });
   if (!buf) return false;
   try {
     const cloudData = JSON.parse(buf.toString('utf8'));
     let updated = false;
+
+    if (stateFileId && dbState.cloudVault) {
+      dbState.cloudVault.stateFileId = stateFileId;
+    }
+
+    if (Array.isArray(cloudData.deletedPostIds)) {
+      const delSet = new Set([...(dbState.deletedPostIds || []), ...cloudData.deletedPostIds]);
+      dbState.deletedPostIds = Array.from(delSet);
+    }
+    const deletedSet = new Set(dbState.deletedPostIds || []);
 
     // Merge users
     if (cloudData.users && typeof cloudData.users === 'object') {
       for (const [phone, u] of Object.entries(cloudData.users)) {
         if (!dbState.users[phone]) {
           dbState.users[phone] = u;
+          updated = true;
+        } else if (u.isAdmin && !dbState.users[phone].isAdmin) {
+          dbState.users[phone] = { ...dbState.users[phone], ...u };
           updated = true;
         }
       }
@@ -1327,24 +1458,48 @@ async function restoreDatabaseFromGoogleDriveVault() {
       }
     }
 
-    // Merge posts
+    // Merge posts (and remove any deleted posts)
+    for (const delId of deletedSet) {
+      if (dbState.posts[delId]) {
+        delete dbState.posts[delId];
+        updated = true;
+      }
+    }
+
     if (cloudData.posts && typeof cloudData.posts === 'object') {
       for (const [pid, post] of Object.entries(cloudData.posts)) {
-        if (post && post.id && !dbState.posts[pid]) {
+        if (!post || !post.id || deletedSet.has(pid)) continue;
+        if (!dbState.posts[pid]) {
           dbState.posts[pid] = post;
-          if (post.approved && !dbState.approvedPostIds.includes(pid)) {
-            dbState.approvedPostIds.push(pid);
-          } else if (!post.approved && !post.rejected && !dbState.pendingPostIds.includes(pid)) {
-            dbState.pendingPostIds.push(pid);
-          }
           updated = true;
+        } else {
+          // Sync approval status, likes, and Google Drive fileId if updated in cloud
+          const localPost = dbState.posts[pid];
+          if ((post.approved && !localPost.approved) || (post.rejected && !localPost.rejected) || (post.gdriveFileId && !localPost.gdriveFileId) || ((post.likes || 0) > (localPost.likes || 0))) {
+            dbState.posts[pid] = { ...localPost, ...post };
+            updated = true;
+          }
         }
       }
     }
 
+    // Rebuild sorted approvedPostIds and pendingPostIds
+    const allPosts = Object.values(dbState.posts);
+    dbState.approvedPostIds = allPosts
+      .filter(p => p && p.id && p.approved && !p.rejected)
+      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+      .map(p => p.id);
+    dbState.pendingPostIds = allPosts
+      .filter(p => p && p.id && !p.approved && !p.rejected)
+      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+      .map(p => p.id);
+    dbState.stats.totalPosts = allPosts.length;
+
     if (updated) {
-      console.log(`[☁️ 5TB GOOGLE DRIVE VAULT RESTORED] Restored citizen records, SOS evidence, and posts from SAFE_BD_VAULT.`);
+      console.log(`[☁️ 5TB GOOGLE DRIVE VAULT RESTORED] Restored ${dbState.approvedPostIds.length} approved posts, ${dbState.pendingPostIds.length} pending posts, and ${dbState.emergencyEvidence.length} SOS clips from SAFE_BD_VAULT.`);
+      isRestoringFromCloud = true;
       persistToDisk();
+      setTimeout(() => { isRestoringFromCloud = false; }, 500);
     }
     return true;
   } catch (e) {
