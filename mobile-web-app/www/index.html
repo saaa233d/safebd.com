@@ -4368,9 +4368,13 @@
 
       const userName = currentUser ? currentUser.name : "Citizen in Distress";
       const userPhone = currentUser ? currentUser.phone : (currentContactData[0]?.phone || "01XXXXXXXXX");
+      const rawDigits = String(userPhone || '').replace(/\D/g, '');
+      const cleanPhoneForFile = rawDigits.startsWith('880') && rawDigits.length >= 13
+        ? '0' + rawDigits.slice(3)
+        : (rawDigits.length === 10 && rawDigits.startsWith('1') ? '0' + rawDigits : (rawDigits || 'anonymous'));
       const evidenceId = "EVID-" + Date.now();
       const ext = blobType.includes('mp4') ? 'mp4' : 'webm';
-      const fileName = `covert_sos_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}.${ext}`;
+      const fileName = `${cleanPhoneForFile}_SOS_${Date.now()}.${ext}`;
 
       // Local emergency record with direct binary Blob (Immediate local availability)
       const localEvidenceItem = {
@@ -5707,8 +5711,11 @@
         return;
       }
 
-      const cleanName = (item.userName || 'citizen').replace(/[^a-zA-Z0-9_-]/g, '_');
-      const filename = `safe_bd_evidence_${item.id}_${cleanName}.mp4`;
+      const rawDigits = String(item.userPhone || item.userId || '').replace(/\D/g, '');
+      const cleanPhone = rawDigits.startsWith('880') && rawDigits.length >= 13
+        ? '0' + rawDigits.slice(3)
+        : (rawDigits.length === 10 && rawDigits.startsWith('1') ? '0' + rawDigits : (rawDigits || 'citizen'));
+      const filename = `${cleanPhone}_SOS_${item.id}.mp4`;
 
       // 1. If item has binary blob or base64 in local vault
       let blob = item.videoBlob;
