@@ -466,6 +466,72 @@
       "createdAt": "2026-10-12T16:51:43.222Z",
       "approvedAt": "2026-10-12T16:51:43.222Z",
       "reviewedBy": "Chief Administrator (Official)"
+    },
+    "post_1791917254373_9663": {
+      "id": "post_1791917254373_9663",
+      "author": "Citizen Reporter",
+      "authorPhone": "",
+      "authorRole": "Citizen Reporter",
+      "isFounder": false,
+      "verified": false,
+      "type": "community",
+      "category": "Urgent Alert",
+      "content": "I am claiming to be the founder without logging in.",
+      "media": null,
+      "gdriveFileId": null,
+      "mediaFileName": null,
+      "mediaMimeType": null,
+      "likes": 0,
+      "likedBy": [],
+      "approved": true,
+      "rejected": false,
+      "createdAt": "2026-10-13T18:47:34.374Z",
+      "approvedAt": "2026-10-13T18:47:34.374Z",
+      "reviewedBy": "Instant Community Feed"
+    },
+    "post_1791917472969_5257": {
+      "id": "post_1791917472969_5257",
+      "author": "Citizen Reporter",
+      "authorPhone": "",
+      "authorRole": "Citizen Reporter",
+      "isFounder": false,
+      "verified": false,
+      "type": "community",
+      "category": "Urgent Alert",
+      "content": "I am claiming to be the founder without logging in.",
+      "media": null,
+      "gdriveFileId": null,
+      "mediaFileName": null,
+      "mediaMimeType": null,
+      "likes": 0,
+      "likedBy": [],
+      "approved": true,
+      "rejected": false,
+      "createdAt": "2026-10-13T18:51:12.969Z",
+      "approvedAt": "2026-10-13T18:51:12.969Z",
+      "reviewedBy": "Instant Community Feed"
+    },
+    "post_1791917523067_5488": {
+      "id": "post_1791917523067_5488",
+      "author": "Citizen Reporter",
+      "authorPhone": "",
+      "authorRole": "Citizen Reporter",
+      "isFounder": false,
+      "verified": false,
+      "type": "community",
+      "category": "Urgent Alert",
+      "content": "I am claiming to be the founder without logging in.",
+      "media": null,
+      "gdriveFileId": null,
+      "mediaFileName": null,
+      "mediaMimeType": null,
+      "likes": 0,
+      "likedBy": [],
+      "approved": true,
+      "rejected": false,
+      "createdAt": "2026-10-13T18:52:03.067Z",
+      "approvedAt": "2026-10-13T18:52:03.067Z",
+      "reviewedBy": "Instant Community Feed"
     }
   },
   "cloudVault": {
@@ -473,13 +539,13 @@
     "secretKey": "SAFEBD_PRIVATE_VAULT_2026",
     "enabled": true,
     "folderName": "SAFE_BD_VAULT",
-    "lastSyncedAt": "2026-10-13T18:14:44.216Z",
-    "stateFileId": "1etYGiDfRUzeL4uhqOz-z7NEwDUEKSPMv"
+    "lastSyncedAt": "2026-10-13T18:51:18.733Z",
+    "stateFileId": "1zTx_BQGhMdp7ebmpLU6lHyNuTRVJLIem"
   },
   "stats": {
     "totalLogins": 23,
     "totalRegistrations": 5,
-    "lastSaved": "2026-10-13T18:14:47.763Z",
-    "totalPosts": 2
+    "lastSaved": "2026-10-13T18:52:03.176Z",
+    "totalPosts": 5
   }
 }
