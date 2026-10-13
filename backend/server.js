@@ -17,6 +17,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 app.disable('x-powered-by');
 
@@ -471,41 +472,40 @@ app.post('/api/auth/logout', (req, res) => {
   return res.json({ success: true, message: "Signed out successfully." });
 });
 
-// 1.8 Citizen Emergency Contacts Sync (Per-Profile Cloud Storage)
+// 1.8 Citizen Emergency Contacts Sync (Per-Profile Cloud Storage — Strict Auth Enforced)
 app.get('/api/user/contacts', (req, res) => {
   const authHeader = req.headers['authorization'] || '';
   const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.query.token;
-  let phone = req.query.phone;
+  const session = token ? db.getSession(token) : null;
 
-  if (token) {
-    const session = db.getSession(token);
-    if (session) phone = session.phone;
+  if (!session || !session.phone) {
+    return res.status(401).json({ error: "UNAUTHORIZED", message: "Active citizen authentication required to access emergency contacts." });
   }
 
-  if (phone) {
-    const cleanPhone = db.normalizePhone(phone);
-    const contacts = db.getUserContacts(cleanPhone);
-    return res.json({ success: true, contacts });
+  // If admin is inspecting another citizen
+  if (session.isAdmin && req.query.phone) {
+    const targetPhone = db.normalizePhone(req.query.phone);
+    return res.json({ success: true, contacts: db.getUserContacts(targetPhone) });
   }
-
-  return res.json({ success: true, contacts: db.getDefaultUserContacts() });
+  const cleanPhone = db.normalizePhone(session.phone);
+  const contacts = db.getUserContacts(cleanPhone);
+  return res.json({ success: true, contacts });
 });
 
 app.put('/api/user/contacts', authLimiter, (req, res) => {
   const authHeader = req.headers['authorization'] || '';
   const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.body.token;
-  let phone = req.body.phone;
 
-  if (token) {
-    const session = db.getSession(token);
-    if (session) phone = session.phone;
+  if (!token) {
+    return res.status(401).json({ error: "UNAUTHORIZED", message: "Active citizen authentication required to update emergency contacts." });
   }
 
-  if (!phone) {
-    return res.status(401).json({ error: "UNAUTHORIZED", message: "User phone or authorization token required to save contacts." });
+  const session = db.getSession(token);
+  if (!session || !session.phone) {
+    return res.status(401).json({ error: "SESSION_EXPIRED", message: "Session expired or invalid. Please sign in to update your profile." });
   }
 
-  const cleanPhone = db.normalizePhone(phone);
+  const cleanPhone = db.normalizePhone(session.phone);
   try {
     const updated = db.updateUserContacts(cleanPhone, req.body.contacts);
     console.log(`[👥 CONTACTS SYNCED TO DB] Citizen +880 ${cleanPhone} saved emergency contacts.`);
@@ -522,18 +522,17 @@ app.put('/api/user/contacts', authLimiter, (req, res) => {
 app.post('/api/user/contacts', authLimiter, (req, res) => {
   const authHeader = req.headers['authorization'] || '';
   const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.body.token;
-  let phone = req.body.phone;
 
-  if (token) {
-    const session = db.getSession(token);
-    if (session) phone = session.phone;
+  if (!token) {
+    return res.status(401).json({ error: "UNAUTHORIZED", message: "Active citizen authentication required to update emergency contacts." });
   }
 
-  if (!phone) {
-    return res.status(401).json({ error: "UNAUTHORIZED", message: "User phone or authorization token required to save contacts." });
+  const session = db.getSession(token);
+  if (!session || !session.phone) {
+    return res.status(401).json({ error: "SESSION_EXPIRED", message: "Session expired or invalid. Please sign in to update your profile." });
   }
 
-  const cleanPhone = db.normalizePhone(phone);
+  const cleanPhone = db.normalizePhone(session.phone);
   try {
     const updated = db.updateUserContacts(cleanPhone, req.body.contacts);
     return res.json({
@@ -781,6 +780,34 @@ app.get('/api/emergency/evidence/:filename', async (req, res) => {
     return res.status(200).end();
   }
 
+  // Authorization Guard: Emergency recording contains sensitive citizen distress video & audio
+  const authHeader = req.headers['authorization'] || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.query.token;
+  const session = token ? db.getSession(token) : null;
+
+  if (!session) {
+    return res.status(401).json({
+      error: "UNAUTHORIZED",
+      message: "Authentication required to access emergency evidence records."
+    });
+  }
+
+  const user = session ? db.getUserByPhone(session.phone) : null;
+
+  // Extract phone number from filename (e.g. "01316750712_SOS_..." or "1316750712_SOS_...")
+  const phonePrefixMatch = filename.match(/^0?(\d{10})_SOS_/);
+  const targetPhone = phonePrefixMatch ? phonePrefixMatch[1] : null;
+
+  const isOwner = !!(session && targetPhone && (db.normalizePhone(session.phone) === db.normalizePhone(targetPhone)));
+  const isAdmin = !!((user && user.isAdmin) || (session && session.isAdmin) || (session && session.phone === '1316750712'));
+
+  if (!isOwner && !isAdmin) {
+    return res.status(403).json({
+      error: "FORBIDDEN",
+      message: "Access denied. Emergency evidence records require citizen owner or administrator authorization."
+    });
+  }
+
   // If requesting .mp4 but only .webm exists on disk, transcode or fallback to webm
   if (filename.endsWith('.mp4') && !fs.existsSync(filePath)) {
     const webmName = filename.replace(/\.mp4$/i, '.webm');
@@ -899,7 +926,7 @@ app.post('/api/admin/emergency-evidence/:id/review', (req, res) => {
 
 app.post('/api/walk/start', (req, res) => {
   const { userId, userName, userPhone, origin, destination, travelMode, estimatedMinutes, currentCoords } = req.body;
-  const sessionId = "journey_" + Date.now();
+  const sessionId = "journey_" + crypto.randomBytes(16).toString('hex');
 
   const session = {
     sessionId,
@@ -1155,6 +1182,33 @@ app.post('/api/feed/posts', postCreateLimiter, async (req, res) => {
       return res.status(400).json({ error: "MISSING_CONTENT", message: "Please enter report content or attach media." });
     }
 
+    // Authenticate caller session to prevent identity spoofing
+    const authHeader = req.headers['authorization'] || '';
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim() || (req.body && req.body.token);
+    const session = token ? db.getSession(token) : null;
+    const user = session ? db.getUserByPhone(session.phone) : null;
+
+    let validatedAuthor = "Citizen Reporter";
+    let validatedPhone = "";
+    let validatedRole = "Citizen";
+    let isChiefAdminVerified = false;
+
+    if (session && user) {
+      validatedAuthor = user.name || session.userName || "Verified Citizen";
+      validatedPhone = session.phone;
+      validatedRole = user.role || (user.isAdmin ? "Administrator" : "Citizen");
+      isChiefAdminVerified = Boolean(user.isAdmin || session.isAdmin || session.phone === '1316750712');
+    } else {
+      let rawAuthor = (author || "").trim();
+      if (rawAuthor.toUpperCase().includes('SAAD RIZWAN') || rawAuthor.toLowerCase().includes('admin') || rawAuthor.toLowerCase().includes('founder') || rawAuthor.toLowerCase().includes('chief')) {
+        rawAuthor = "Citizen Reporter";
+      }
+      validatedAuthor = rawAuthor || "Citizen Reporter";
+      validatedPhone = "";
+      validatedRole = "Citizen Reporter";
+      isChiefAdminVerified = false;
+    }
+
     const postId = `post_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
     let storedMediaUrl = media || null;
     let gdriveFileId = null;
@@ -1167,7 +1221,7 @@ app.post('/api/feed/posts', postCreateLimiter, async (req, res) => {
       const mime = (mimeMatch && mimeMatch[1]) ? mimeMatch[1] : 'image/jpeg';
       const isVid = mime.startsWith('video');
       const ext = isVid ? (mime.includes('webm') ? 'webm' : 'mp4') : (mime.includes('png') ? 'png' : (mime.includes('webp') ? 'webp' : 'jpg'));
-      const rawPhoneDigits = String(authorPhone || '').replace(/\D/g, '');
+      const rawPhoneDigits = String(validatedPhone || authorPhone || '').replace(/\D/g, '');
       const cleanPhoneForFile = rawPhoneDigits.startsWith('880') && rawPhoneDigits.length >= 13
         ? '0' + rawPhoneDigits.slice(3)
         : (rawPhoneDigits.length === 10 && rawPhoneDigits.startsWith('1') ? '0' + rawPhoneDigits : (rawPhoneDigits || 'anonymous'));
@@ -1200,16 +1254,17 @@ app.post('/api/feed/posts', postCreateLimiter, async (req, res) => {
 
     const newPost = db.createPost({
       id: postId,
-      author: author || "Citizen Reporter",
-      authorPhone: authorPhone || "",
-      authorRole: authorRole || "",
+      author: validatedAuthor,
+      authorPhone: validatedPhone,
+      authorRole: validatedRole,
       content,
       category: category || "General Safety",
       media: storedMediaUrl,
       gdriveFileId,
       mediaFileName,
       mediaMimeType,
-      verified: !!verified
+      verified: isChiefAdminVerified,
+      isChiefAdminVerified: isChiefAdminVerified
     });
 
     // Notify any active admin WebSocket listeners in real-time
@@ -1268,27 +1323,31 @@ app.post('/api/admin/posts/:id/reject', (req, res) => {
 
 // 4.5.1 Admin or Post Author Deletes Post Permanently (Unrestricted Deletion for Admins, Author Self-Deletion)
 function handlePostDeletion(req, res) {
+  // Extract auth credentials strictly from verified session token
+  const authHeader = req.headers['authorization'] || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.query.token || (req.body && req.body.token);
+  const session = token ? db.getSession(token) : null;
+  const user = session ? db.getUserByPhone(session.phone) : null;
+
+  if (!session) {
+    return res.status(401).json({ error: "UNAUTHORIZED", message: "Authentication required to delete posts." });
+  }
+
   const postId = req.params.id;
   const post = db.getPostById(postId);
   if (!post) {
     return res.status(404).json({ error: "NOT_FOUND", message: "Post not found or already deleted." });
   }
 
-  // Extract auth credentials
-  const authHeader = req.headers['authorization'] || '';
-  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.query.token || (req.body && req.body.token);
-  const session = token ? db.getSession(token) : null;
-  const user = session ? db.getUserByPhone(session.phone) : null;
-
   const isAdmin = !!(req.adminUser || (session && session.isAdmin) || (user && user.isAdmin) || (session && session.phone === '1316750712') || (user && user.phone === '1316750712'));
-  const callerPhone = (user && user.phone) || (session && session.phone) || (req.body && req.body.phone) || '';
+  const callerPhone = (user && user.phone) || (session && session.phone) || '';
   const isAuthor = !!(callerPhone && post.authorPhone && (db.normalizePhone(callerPhone) === db.normalizePhone(post.authorPhone)));
 
   if (!isAdmin && !isAuthor) {
     return res.status(403).json({ error: "FORBIDDEN", message: "Chief Administrator clearance or post author ownership required to delete." });
   }
 
-  const deleterName = (user && user.name) || (req.body && req.body.adminName) || (isAdmin ? "Chief Administrator" : (post.author || "Author"));
+  const deleterName = (user && user.name) || (session && session.userName) || (isAdmin ? "Chief Administrator" : (post.author || "Author"));
   const success = db.deletePost(postId, deleterName);
   if (!success) {
     return res.status(404).json({ error: "NOT_FOUND", message: "Post not found or already deleted." });
@@ -1720,15 +1779,61 @@ const wss = new WebSocketServer({ server });
 
 const connectedClients = new Set();
 
-wss.on('connection', (ws) => {
+wss.on('connection', (ws, req) => {
   connectedClients.add(ws);
-  console.log(`[WS] Client connected. Total active streams: ${connectedClients.size}`);
+
+  // Authenticate socket via query parameter (?token=...)
+  try {
+    const reqUrl = req && req.url ? new URL(req.url, 'http://localhost') : null;
+    const token = reqUrl ? reqUrl.searchParams.get('token') : null;
+    if (token) {
+      const session = db.getSession(token);
+      if (session) {
+        const user = db.getUserByPhone(session.phone);
+        ws.authenticated = true;
+        ws.phone = session.phone;
+        ws.userName = session.userName;
+        ws.isAdmin = !!(session.isAdmin || (user && user.isAdmin) || session.phone === '1316750712');
+      }
+    }
+  } catch (e) {
+    // URL parsing fallback
+  }
+
+  console.log(`[WS] Client connected (Auth: ${!!ws.authenticated}). Total active streams: ${connectedClients.size}`);
 
   ws.on('message', (message) => {
     try {
       const payload = JSON.parse(message);
-      // Fan-out encrypted coordinates to family circle subscribers
+
+      // Support in-band authentication
+      if (payload.type === "AUTH") {
+        if (!payload.token) {
+          ws.send(JSON.stringify({ type: "AUTH_ERROR", message: "Token missing" }));
+          return;
+        }
+        const session = db.getSession(payload.token);
+        if (session) {
+          const user = db.getUserByPhone(session.phone);
+          ws.authenticated = true;
+          ws.phone = session.phone;
+          ws.userName = session.userName;
+          ws.isAdmin = !!(session.isAdmin || (user && user.isAdmin) || session.phone === '1316750712');
+          ws.send(JSON.stringify({ type: "AUTH_SUCCESS", phone: ws.phone, isAdmin: ws.isAdmin }));
+        } else {
+          ws.send(JSON.stringify({ type: "AUTH_ERROR", message: "Invalid or expired session token" }));
+        }
+        return;
+      }
+
+      // Fan-out encrypted coordinates to family circle subscribers and authorized dispatchers
       if (payload.type === "LIVE_LOCATION_PING") {
+        if (!ws.authenticated) {
+          ws.send(JSON.stringify({ type: "ERROR", message: "Authentication required to stream live location telemetry." }));
+          return;
+        }
+        payload.senderPhone = ws.phone;
+        payload.senderName = ws.userName;
         broadcastLocationUpdate(payload, ws);
       }
     } catch (e) {
@@ -1744,8 +1849,70 @@ wss.on('connection', (ws) => {
 
 function broadcastLocationUpdate(data, senderWs = null) {
   const msg = JSON.stringify(data);
+  const type = data.type || '';
+
+  // Public civic broadcasts (e.g. approved posts, post deletions, awareness announcements)
+  const isPublicEvent = [
+    'CIVIC_POST_APPROVED_LIVE',
+    'CIVIC_POST_DELETED',
+    'CIVIC_POST_PUBLISHED',
+    'NEW_LIVE_CIVIC_POST'
+  ].includes(type);
+
   for (const client of connectedClients) {
-    if (client !== senderWs && client.readyState === 1) {
+    if (client === senderWs || client.readyState !== 1) continue;
+
+    if (isPublicEvent) {
+      client.send(msg);
+      continue;
+    }
+
+    // SENSITIVE TELEMETRY & EMERGENCY DATA FILTERING:
+    // 1. Live location pings: only send to CAD admins or authorized family circles
+    if (type === 'LIVE_LOCATION_PING') {
+      const senderPhone = db.normalizePhone(data.senderPhone || (senderWs && senderWs.phone) || '');
+      const clientPhone = db.normalizePhone(client.phone || '');
+
+      if (client.isAdmin) {
+        client.send(msg);
+      } else if (client.authenticated && senderPhone && clientPhone) {
+        const senderContacts = db.getUserContacts(senderPhone) || [];
+        const isSenderContact = senderContacts.some(c => c.phone && db.normalizePhone(c.phone) === clientPhone);
+        if (isSenderContact) {
+          client.send(msg);
+        }
+      }
+      continue;
+    }
+
+    // 2. Emergency SOS alerts and covert video evidence:
+    if (type === 'EMERGENCY_SOS_ALERT' || type === 'EMERGENCY_COVERT_VIDEO_EVIDENCE') {
+      if (client.isAdmin) {
+        client.send(msg);
+      } else if (client.authenticated) {
+        const victimPhone = db.normalizePhone(
+          (data.incident && data.incident.userPhone) ||
+          (data.evidence && data.evidence.userPhone) ||
+          ''
+        );
+        const clientPhone = db.normalizePhone(client.phone || '');
+        if (victimPhone && clientPhone) {
+          if (victimPhone === clientPhone) {
+            client.send(msg);
+          } else {
+            const victimContacts = db.getUserContacts(victimPhone) || [];
+            const isVictimContact = victimContacts.some(c => c.phone && db.normalizePhone(c.phone) === clientPhone);
+            if (isVictimContact) {
+              client.send(msg);
+            }
+          }
+        }
+      }
+      continue;
+    }
+
+    // Default fallback: Admins receive system dispatch events
+    if (client.isAdmin) {
       client.send(msg);
     }
   }
