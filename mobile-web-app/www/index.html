@@ -2622,13 +2622,16 @@
         removeAttachedMedia();
         closeCreatePostModal();
 
-        if (res.post && res.post.approved) {
-          alert("✅ Announcement Live on Feed!\n\nYour post has been published to the community feed with official verified credentials.");
-        } else {
-          alert("📋 Report Submitted for Moderation!\n\nYour awareness post has been recorded and submitted to the Chief Administrator.\nIt will permanently appear on the live feed once officially approved.");
+        // Optimistically show immediately on live feed (Facebook style)
+        if (res.post) {
+          liveApprovedPosts = liveApprovedPosts.filter(p => p.id !== res.post.id);
+          liveApprovedPosts.unshift(res.post);
+          renderCommunityPosts();
         }
 
-        // Refresh moderation queue and live feed
+        alert("✅ Post Published!\n\nYour awareness update is now live on the feed.");
+
+        // Refresh live feed in background
         if (currentUser && currentUser.isAdmin) fetchAdminPendingPosts();
         fetchLiveFeedPosts(1, false);
       })
@@ -2960,6 +2963,17 @@
       }
     }
 
+    function canDeletePost(p) {
+      if (!p) return false;
+      if (currentUser && (currentUser.isAdmin || currentUser.isFounder || (currentUser.name && currentUser.name.toUpperCase().includes('SAAD RIZWAN')))) return true;
+      if (currentUser && currentUser.phone && p.authorPhone) {
+        const cPhone = String(currentUser.phone).replace(/\D/g, '').slice(-10);
+        const aPhone = String(p.authorPhone).replace(/\D/g, '').slice(-10);
+        if (cPhone && aPhone && cPhone === aPhone) return true;
+      }
+      return false;
+    }
+
     function renderCommunityPosts() {
       const container = document.getElementById('posts-container');
       if (!container) return;
@@ -3032,8 +3046,8 @@
             <div class="post-action-btn" onclick="sharePost('${p.id}')">
               <i class="fas fa-share-nodes"></i> Share
             </div>
-            ${(currentUser && currentUser.isAdmin) ? `
-            <div class="post-action-btn" onclick="deletePostAdmin('${p.id}', event)" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4); margin-left: auto;" title="Chief Admin: Permanently Delete Post">
+            ${canDeletePost(p) ? `
+            <div class="post-action-btn" onclick="deletePostAdmin('${p.id}', event)" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4); margin-left: auto;" title="Permanently Delete Post">
               <i class="fas fa-trash-can"></i> Delete
             </div>` : ''}
           </div>
@@ -3186,10 +3200,36 @@
     }
 
     function sharePost(id) {
+      let post = liveApprovedPosts.find(p => p.id === id);
+      if (!post && typeof adminAllPostsList !== 'undefined') {
+        post = adminAllPostsList.find(p => p.id === id);
+      }
+      const author = post ? (post.author || 'Citizen Reporter') : 'SAFE bd Community';
+      const textPreview = post && post.content ? post.content.slice(0, 140) : 'Safety awareness advisory';
+      const shareUrl = window.location.origin + window.location.pathname;
+      const shareMsg = `🚨 SAFE bd Safety Advisory (by ${author}):\n"${textPreview}"\n\nStay protected with SAFE bd: ${shareUrl}`;
+
       if (navigator.share) {
-        navigator.share({ title: "SAFE BD Safety Alert", url: window.location.href });
+        navigator.share({
+          title: "SAFE bd Safety Advisory",
+          text: shareMsg,
+          url: shareUrl
+        }).catch(() => {});
+        return;
+      }
+
+      // WhatsApp + Clipboard fallback
+      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareMsg)}`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareMsg).then(() => {
+          if (confirm("📋 Safety alert copied to clipboard!\n\nWould you like to open WhatsApp now to share with your family and emergency contacts?")) {
+            window.open(waUrl, '_blank');
+          }
+        }).catch(() => {
+          window.open(waUrl, '_blank');
+        });
       } else {
-        alert("Link copied! Share this alert with friends and family.");
+        window.open(waUrl, '_blank');
       }
     }
 
@@ -4738,22 +4778,32 @@
       }
       const token = localStorage.getItem('safe_bd_token') || '';
       try {
-        const res = await fetch(`${API_BASE}/api/admin/posts/${id}/delete`, {
+        const res = await fetch(`${API_BASE}/api/posts/${encodeURIComponent(id)}/delete`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ adminName: currentUser ? currentUser.name : 'Administrator' })
+          body: JSON.stringify({
+            adminName: currentUser ? currentUser.name : 'Administrator',
+            phone: currentUser ? currentUser.phone : ''
+          })
         });
         const data = await res.json();
         if (data && data.success) {
           liveApprovedPosts = liveApprovedPosts.filter(p => p.id !== id);
-          adminPendingPostsList = adminPendingPostsList.filter(p => p.id !== id);
-          adminAllPostsList = adminAllPostsList.filter(p => p.id !== id);
-          renderFeedPosts();
-          renderAdminPendingPosts();
-          renderAdminAllPosts();
+          if (Array.isArray(adminPendingPostsList)) {
+            adminPendingPostsList = adminPendingPostsList.filter(p => p.id !== id);
+          }
+          if (Array.isArray(adminAllPostsList)) {
+            adminAllPostsList = adminAllPostsList.filter(p => p.id !== id);
+          }
+          try {
+            localStorage.setItem('safe_bd_approved_posts', JSON.stringify(liveApprovedPosts.slice(0, 50)));
+          } catch(e) {}
+          renderCommunityPosts();
+          if (typeof renderAdminPendingPosts === 'function') renderAdminPendingPosts();
+          if (typeof renderAdminAllPosts === 'function') renderAdminAllPosts();
           alert("✅ Post has been permanently deleted from the system.");
         } else {
           alert("⚠️ Failed to delete post: " + (data ? data.message : "Unknown error"));
@@ -4762,6 +4812,7 @@
         alert("⚠️ Error deleting post: " + err.message);
       }
     }
+    window.deletePost = deletePostAdmin;
 
     // 2. All Posts Content Governance Controller
     let adminAllPostsList = [];
