@@ -161,7 +161,11 @@ app.post('/api/auth/register', authLimiter, (req, res) => {
 
   const existing = db.getUserByPhone(cleanPhone);
   if (existing) {
-    return res.status(400).json({ error: "An account is already registered with this phone number. Please sign in instead." });
+    return res.status(400).json({ 
+      error: `An account is already registered with +880 ${cleanPhone}. Please sign in with your password to unlock your profile.`,
+      code: "ACCOUNT_EXISTS",
+      phone: cleanPhone
+    });
   }
 
   try {
@@ -177,6 +181,7 @@ app.post('/api/auth/register', authLimiter, (req, res) => {
     db.markUserLogin(cleanPhone, token);
 
     const { salt: _, passwordHash: __, ...safeUser } = newUser;
+    safeUser.contacts = db.getUserContacts(cleanPhone);
     console.log(`[✅ CITIZEN REGISTERED DIRECTLY] ${safeUser.name} (+880 ${cleanPhone})`);
 
     return res.json({
@@ -275,6 +280,7 @@ app.post('/api/auth/login', authLimiter, (req, res) => {
     db.markUserLogin('1316750712', token);
     const adminRecord = db.getUserByPhone('1316750712');
     const { salt: _, passwordHash: __, ...adminUser } = adminRecord;
+    adminUser.contacts = db.getUserContacts('1316750712');
     return res.json({
       success: true,
       requireOtp: false,
@@ -294,7 +300,7 @@ app.post('/api/auth/login', authLimiter, (req, res) => {
   // Verify against persistent database
   const check = db.verifyUserCredentials(validatedPhone, password);
   if (!check.valid) {
-    return res.status(401).json({ error: check.message });
+    return res.status(401).json({ error: check.message, code: check.error });
   }
 
   // Direct Login Successful! Generate session token and sign in immediately
@@ -302,6 +308,7 @@ app.post('/api/auth/login', authLimiter, (req, res) => {
   db.markUserLogin(validatedPhone, token);
 
   const { salt: _, passwordHash: __, ...safeUser } = check.user;
+  safeUser.contacts = db.getUserContacts(validatedPhone);
   console.log(`[🔐 DIRECT SIGN-IN SUCCESSFUL] Citizen ${safeUser.name} (+880 ${validatedPhone}) logged in.`);
 
   return res.json({
@@ -311,6 +318,57 @@ app.post('/api/auth/login', authLimiter, (req, res) => {
     user: safeUser,
     message: `Welcome back, ${safeUser.name}!`
   });
+});
+
+// 1.3.1 Active Session Verification & Profile Fetcher
+app.get('/api/auth/me', (req, res) => {
+  const authHeader = req.headers['authorization'] || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.query.token;
+
+  if (!token) {
+    return res.status(401).json({ error: "UNAUTHORIZED", message: "No active session token." });
+  }
+
+  const session = db.getSession(token);
+  if (!session || !session.phone) {
+    return res.status(401).json({ error: "SESSION_EXPIRED", message: "Session expired or invalid. Please sign in again." });
+  }
+
+  const user = db.getUserByPhone(session.phone);
+  if (!user) {
+    return res.status(404).json({ error: "NOT_FOUND", message: "User account not found." });
+  }
+
+  const { salt: _, passwordHash: __, ...safeUser } = user;
+  safeUser.contacts = db.getUserContacts(session.phone);
+  return res.json({
+    success: true,
+    user: safeUser
+  });
+});
+
+// 1.3.2 Authenticated Password Change
+app.post('/api/auth/change-password', authLimiter, (req, res) => {
+  const authHeader = req.headers['authorization'] || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.body.token;
+  const session = token ? db.getSession(token) : null;
+  const phone = (session && session.phone) || (req.body && req.body.phone);
+
+  if (!phone) {
+    return res.status(401).json({ error: "UNAUTHORIZED", message: "Authentication required to change password." });
+  }
+
+  const { oldPassword, newPassword } = req.body;
+  if (!oldPassword || !newPassword) {
+    return res.status(400).json({ error: "Both current password and new password are required." });
+  }
+
+  try {
+    db.changeUserPassword(phone, oldPassword, newPassword);
+    return res.json({ success: true, message: "Password updated successfully." });
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
 });
 
 // 1.4 Optional 2FA Login OTP Verification (Retained for Backwards Compatibility)
