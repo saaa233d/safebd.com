@@ -109,6 +109,42 @@
       ],
       "updatedAt": "2026-10-12T05:24:00.990Z"
     },
+    "1799887766": {
+      "id": "usr_1799887766",
+      "phone": "1799887766",
+      "displayPhone": "+880 1799887766",
+      "name": "Ashikur Rahman",
+      "salt": "1ef8ee182dfb90f17fa006a0cba14c73",
+      "passwordHash": "64f850346eef6b8882c51765d072fe3ab8d168d7fc09e39ec7a50bfef38676ede6f7a27cfbac4119a9a00ab780a559a6ef6c2e0007fb2656f7ae3594bcc4714d",
+      "nidVerified": true,
+      "isAdmin": false,
+      "isLoggedIn": true,
+      "createdAt": "2026-10-13T18:10:40.966Z",
+      "lastLoginAt": "2026-10-13T18:12:22.164Z",
+      "lastLogoutAt": null,
+      "loginCount": 2,
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Father",
+          "phone": "1712345678",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Mother",
+          "phone": "1812345678",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "Guardian",
+          "phone": "1912345678",
+          "initial": "G"
+        }
+      ],
+      "updatedAt": "2026-10-13T18:14:47.648Z"
+    },
     "1799921101": {
       "id": "usr_1799921101",
       "phone": "1799921101",
@@ -360,6 +396,14 @@
       "isAdmin": true,
       "createdAt": "2026-10-13T13:03:58.342Z",
       "active": true
+    },
+    "safe_token_58c41bbed790bc47ce4e63ff17c224af8fa81912ad592433616b9516b0fd5424": {
+      "token": "safe_token_58c41bbed790bc47ce4e63ff17c224af8fa81912ad592433616b9516b0fd5424",
+      "phone": "1799887766",
+      "userName": "Ashikur Rahman",
+      "isAdmin": false,
+      "createdAt": "2026-10-13T18:12:22.164Z",
+      "active": true
     }
   },
   "emergencyEvidence": [
@@ -429,13 +473,13 @@
     "secretKey": "SAFEBD_PRIVATE_VAULT_2026",
     "enabled": true,
     "folderName": "SAFE_BD_VAULT",
-    "lastSyncedAt": "2026-10-13T13:04:20.581Z",
-    "stateFileId": "128XKqD8I5h_AtnTPJtoAMpaeYofbPjh5"
+    "lastSyncedAt": "2026-10-13T18:14:44.216Z",
+    "stateFileId": "1etYGiDfRUzeL4uhqOz-z7NEwDUEKSPMv"
   },
   "stats": {
-    "totalLogins": 21,
-    "totalRegistrations": 4,
-    "lastSaved": "2026-10-13T13:04:20.741Z",
+    "totalLogins": 23,
+    "totalRegistrations": 5,
+    "lastSaved": "2026-10-13T18:14:47.763Z",
     "totalPosts": 2
   }
 }
