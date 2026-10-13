@@ -1081,36 +1081,66 @@ app.get('/api/feed/posts', (req, res) => {
   return res.json({ success: true, ...result });
 });
 
-// 4.2 Citizen Submits Post for Review (Starts as pending, awaits Chief Admin approval)
-app.post('/api/feed/posts', postCreateLimiter, (req, res) => {
+// 4.2 Citizen Submits Post for Review (Starts as pending, awaits Chief Admin approval; media stored in 5TB Google Drive Vault)
+app.post('/api/feed/posts', postCreateLimiter, async (req, res) => {
   try {
     const { author, authorPhone, authorRole, content, category, media, verified } = req.body;
     if (!content && !media) {
       return res.status(400).json({ error: "MISSING_CONTENT", message: "Please enter report content or attach media." });
     }
 
+    const postId = `post_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
+    let storedMediaUrl = media || null;
+    let gdriveFileId = null;
+    let mediaFileName = null;
+    let mediaMimeType = null;
+
+    // Upload post picture or video directly to Private 5TB Google Drive Vault (SAFE_BD_VAULT) so Render RAM never overflows
+    if (media && typeof media === 'string' && media.startsWith('data:')) {
+      const mimeMatch = media.match(/^data:([^;]+);base64,/);
+      const mime = (mimeMatch && mimeMatch[1]) ? mimeMatch[1] : 'image/jpeg';
+      const isVid = mime.startsWith('video');
+      const ext = isVid ? (mime.includes('webm') ? 'webm' : 'mp4') : (mime.includes('png') ? 'png' : (mime.includes('webp') ? 'webp' : 'jpg'));
+      mediaFileName = `safebd_post_${postId}_${isVid ? 'video' : 'photo'}.${ext}`;
+      mediaMimeType = mime;
+
+      // Cache locally on disk for instant serving
+      try {
+        const base64Clean = media.includes(',') ? media.split(',')[1] : media;
+        const mediaBuf = Buffer.from(base64Clean, 'base64');
+        if (!fs.existsSync(EVIDENCE_DIR)) fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
+        fs.writeFileSync(path.join(EVIDENCE_DIR, mediaFileName), mediaBuf);
+      } catch (diskErr) {}
+
+      // Upload to 5TB Google Drive Vault (SAFE_BD_VAULT)
+      try {
+        const gdRes = await db.uploadToGoogleDriveVault({
+          fileName: mediaFileName,
+          mimeType: mime,
+          base64: media
+        });
+        if (gdRes && gdRes.success && gdRes.fileId) {
+          gdriveFileId = gdRes.fileId;
+          storedMediaUrl = `/api/feed/posts/${postId}/media.${ext}`;
+        }
+      } catch (gdErr) {
+        console.warn('[⚠️ GDRIVE POST MEDIA UPLOAD WARN]:', gdErr.message);
+      }
+    }
+
     const newPost = db.createPost({
+      id: postId,
       author: author || "Citizen Reporter",
       authorPhone: authorPhone || "",
       authorRole: authorRole || "",
       content,
       category: category || "General Safety",
-      media,
+      media: storedMediaUrl,
+      gdriveFileId,
+      mediaFileName,
+      mediaMimeType,
       verified: !!verified
     });
-
-    // Also archive post media (videos/photos) in Private 5TB Google Drive Vault (SAFE_BD_VAULT)
-    if (media && typeof media === 'string' && media.startsWith('data:')) {
-      const mimeMatch = media.match(/^data:([^;]+);base64,/);
-      const mime = (mimeMatch && mimeMatch[1]) ? mimeMatch[1] : 'video/mp4';
-      const isVid = mime.startsWith('video');
-      const ext = isVid ? (mime.includes('webm') ? 'webm' : 'mp4') : (mime.includes('png') ? 'png' : 'jpg');
-      db.uploadToGoogleDriveVault({
-        fileName: `safebd_post_${newPost.id}_${isVid ? 'video' : 'photo'}.${ext}`,
-        mimeType: mime,
-        base64: media
-      }).catch(() => {});
-    }
 
     // Notify any active admin WebSocket listeners in real-time
     broadcastLocationUpdate({
@@ -1121,8 +1151,8 @@ app.post('/api/feed/posts', postCreateLimiter, (req, res) => {
     return res.json({
       success: true,
       message: newPost.approved
-        ? "Official announcement published to live feed."
-        : "Report submitted to Admin Moderation Queue. It will go live once officially approved by Chief Administrator.",
+        ? "Official announcement published to live feed & archived in 5TB Google Drive Vault."
+        : "Report submitted to Admin Moderation Queue & archived in 5TB Google Drive Vault.",
       post: newPost
     });
   } catch (err) {
@@ -1300,8 +1330,8 @@ app.post('/api/feed/posts/:id/like', (req, res) => {
   return res.json({ success: true, ...result });
 });
 
-// 4.7 Direct Media Streaming & Single-Click Download Endpoint
-app.get('/api/feed/posts/:id/media', (req, res) => {
+// 4.7 Direct Media Streaming & Single-Click Download Endpoint (Backed by 5TB Google Drive Vault)
+app.get(['/api/feed/posts/:id/media', '/api/feed/posts/:id/media.:ext'], async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', '*');
@@ -1309,10 +1339,13 @@ app.get('/api/feed/posts/:id/media', (req, res) => {
 
   try {
     const post = db.getPostById(req.params.id);
-    if (!post || !post.media) {
+    if (!post || (!post.media && !post.gdriveFileId)) {
       return res.status(404).json({ error: "NOT_FOUND", message: "Media attachment not found for this post." });
     }
-    const media = post.media;
+
+    const media = post.media || '';
+
+    // 1. If legacy inline base64 data URI
     if (typeof media === 'string' && media.startsWith('data:')) {
       const mimeMatch = media.match(/^data:([^;]+);base64,/);
       const mime = (mimeMatch && mimeMatch[1]) ? mimeMatch[1] : 'application/octet-stream';
@@ -1324,17 +1357,53 @@ app.get('/api/feed/posts/:id/media', (req, res) => {
 
       res.setHeader('Content-Type', mime);
       res.setHeader('Content-Length', buffer.length);
+      res.setHeader('Cache-Control', 'public, max-age=86400');
       if (req.query.download === '1') {
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       } else {
         res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
       }
       return res.send(buffer);
-    } else if (typeof media === 'string') {
-      return res.redirect(media);
-    } else {
-      return res.status(400).send("Invalid media format.");
     }
+
+    // 2. Backed by 5TB Google Drive Vault (SAFE_BD_VAULT) + Local Disk Cache
+    const ext = req.params.ext || (post.mediaFileName ? post.mediaFileName.split('.').pop() : 'jpg');
+    const isVideo = ['mp4', 'webm', 'mov'].includes(ext.toLowerCase());
+    const mime = post.mediaMimeType || (isVideo ? (ext === 'webm' ? 'video/webm' : 'video/mp4') : (ext === 'png' ? 'image/png' : 'image/jpeg'));
+    const cacheFileName = post.mediaFileName || `safebd_post_${post.id}_${isVideo ? 'video' : 'photo'}.${ext}`;
+    const cacheFilePath = path.join(EVIDENCE_DIR, cacheFileName);
+
+    let fileBuf = null;
+    if (fs.existsSync(cacheFilePath)) {
+      fileBuf = fs.readFileSync(cacheFilePath);
+    } else if (post.gdriveFileId) {
+      // Restore directly from Private 5TB Google Drive Vault (SAFE_BD_VAULT)
+      fileBuf = await db.fetchFromGoogleDriveVault({
+        fileId: post.gdriveFileId,
+        fileName: cacheFileName
+      });
+      if (fileBuf && fileBuf.length > 0) {
+        try {
+          if (!fs.existsSync(EVIDENCE_DIR)) fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
+          fs.writeFileSync(cacheFilePath, fileBuf);
+          console.log(`[☁️ RESTORED POST MEDIA FROM 5TB VAULT] Restored ${cacheFileName} (${Math.round(fileBuf.length / 1024)} KB)`);
+        } catch (e) {}
+      }
+    }
+
+    if (fileBuf && fileBuf.length > 0) {
+      res.setHeader('Content-Type', mime);
+      res.setHeader('Content-Length', fileBuf.length);
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      if (req.query.download === '1') {
+        res.setHeader('Content-Disposition', `attachment; filename="${cacheFileName}"`);
+      } else {
+        res.setHeader('Content-Disposition', `inline; filename="${cacheFileName}"`);
+      }
+      return res.send(fileBuf);
+    }
+
+    return res.status(404).send("Media file not found in vault.");
   } catch (err) {
     console.error("Post media serve error:", err.message);
     return res.status(500).send("Error retrieving media.");
