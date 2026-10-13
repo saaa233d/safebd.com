@@ -337,6 +337,13 @@
       "reviewedBy": "Chief Administrator (Official)"
     }
   },
+  "cloudVault": {
+    "scriptUrl": "https://script.google.com/macros/s/AKfycby3O-1dfJeGE5DJ8dDrhBHtkdgnk-IKSXFRtUswiTblka1M3GoC8uxGHfOM2kvyOVmq/exec",
+    "secretKey": "SAFEBD_PRIVATE_VAULT_2026",
+    "enabled": true,
+    "folderName": "SAFE_BD_VAULT",
+    "lastSyncedAt": "2026-10-13T04:35:00.000Z"
+  },
   "stats": {
     "totalLogins": 18,
     "totalRegistrations": 4,
