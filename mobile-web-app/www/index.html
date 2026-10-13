@@ -1909,8 +1909,27 @@
 
       <!-- SECTION E: DEDICATED COVERT SPY SOS EVIDENCE QUEUE -->
       <div id="admin-section-evidence" style="display: none;">
+        <!-- 5TB Google Drive Private Vault Status Card -->
+        <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <i class="fab fa-google-drive" style="color: #10b981; font-size: 16px;"></i>
+            <div>
+              <div style="font-size: 11.5px; font-weight: 700; color: #fff;">5TB Google Drive Private Vault (<span style="color: #10b981;">SAFE_BD_VAULT</span>)</div>
+              <div style="font-size: 10px; color: var(--text-muted);" id="admin-gdrive-vault-status">Encrypted &amp; isolated folder • Zero Render RAM usage</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button type="button" onclick="verifyGoogleDriveVaultConnection()" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.45); color: #10b981; padding: 5px 10px; border-radius: 8px; font-size: 10.5px; font-weight: 700; cursor: pointer;">
+              <i class="fas fa-cloud-check"></i> Verify 5TB Vault
+            </button>
+            <button type="button" onclick="clearStaleLocalEvidenceClips()" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; padding: 5px 10px; border-radius: 8px; font-size: 10.5px; font-weight: 700; cursor: pointer;" title="Remove old dead test clips from browser cache">
+              <i class="fas fa-broom"></i> Clear Old Cache
+            </button>
+          </div>
+        </div>
+
         <div class="module-header" style="margin-bottom: 12px;">
-          <span style="color: #ef4444;"><i class="fas fa-triangle-exclamation"></i> Covert SOS Video & Audio Evidence</span>
+          <span style="color: #ef4444;"><i class="fas fa-triangle-exclamation"></i> Covert SOS Video &amp; Audio Evidence</span>
           <button class="btn-gps-refresh" onclick="fetchAdminEmergencyEvidence()" style="font-size: 11px;">
             <i class="fas fa-arrows-rotate"></i> Refresh Evidence
           </button>
@@ -5907,10 +5926,72 @@
             <a href="tel:${(item.userPhone || '').replace(/\s+/g, '')}" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16,185,129,0.3); color: #10b981; padding: 9px 12px; border-radius: 10px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px;">
               <i class="fas fa-phone"></i> Call Citizen
             </a>
+            <button type="button" onclick="deleteEvidenceClipAdmin('${item.id}')" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.45); color: #f87171; padding: 9px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+              <i class="fas fa-trash-can"></i> Delete Clip
+            </button>
           </div>
         `;
         fullContainer.appendChild(card);
       });
+    }
+
+    function verifyGoogleDriveVaultConnection() {
+      const statusEl = document.getElementById('admin-gdrive-vault-status');
+      if (statusEl) statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing connection to 5TB Google Drive (SAFE_BD_VAULT)...';
+
+      fetch(`${API_BASE}/api/admin/cloud-vault/test`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.success) {
+          if (statusEl) statusEl.innerHTML = '<span style="color:#10b981; font-weight:700;">✅ Connected to SAFE_BD_VAULT (5TB Drive) • All videos stored permanently</span>';
+          alert("✅ 5TB Google Drive Vault Connected!\n\nFolder: SAFE_BD_VAULT\nStatus: Active & Private\n\nAll SOS clips and media are now saved permanently to your Google Drive.");
+        } else {
+          const errMsg = (data && data.result && data.result.error) ? data.result.error : "Please ensure 'Who has access' is set to 'Anyone' in Google Apps Script.";
+          if (statusEl) statusEl.innerHTML = `<span style="color:#f59e0b;">⚠️ ${errMsg}</span>`;
+          alert("⚠️ Google Drive Vault Notice:\n\n" + errMsg);
+        }
+      })
+      .catch(err => {
+        if (statusEl) statusEl.innerText = 'Connection check failed.';
+      });
+    }
+
+    async function clearStaleLocalEvidenceClips() {
+      try {
+        localStorage.removeItem(EVIDENCE_META_KEY);
+        localStorage.removeItem(OLD_EVIDENCE_KEY);
+        const db = await SafeBDVaultDB.getDB();
+        if (db) {
+          const tx = db.transaction(SafeBDVaultDB.storeName, 'readwrite');
+          tx.objectStore(SafeBDVaultDB.storeName).clear();
+        }
+      } catch (e) {}
+      adminEmergencyEvidenceList = [];
+      lastRenderedEvidenceSignature = '';
+      fetchAdminEmergencyEvidence();
+      alert("✅ Cleared old cached test clips from your browser. Only live server & 5TB Google Drive Vault clips will now be shown.");
+    }
+
+    async function deleteEvidenceClipAdmin(id) {
+      if (!confirm("Delete this SOS clip from the vault?")) return;
+      try {
+        await fetch(`${API_BASE}/api/admin/emergency-evidence/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      } catch (e) {}
+      adminEmergencyEvidenceList = adminEmergencyEvidenceList.filter(e => e.id !== id);
+      try {
+        localStorage.setItem(EVIDENCE_META_KEY, JSON.stringify(adminEmergencyEvidenceList.slice(0, 50)));
+        const db = await SafeBDVaultDB.getDB();
+        if (db) {
+          const tx = db.transaction(SafeBDVaultDB.storeName, 'readwrite');
+          tx.objectStore(SafeBDVaultDB.storeName).delete(id);
+        }
+      } catch (e) {}
+      lastRenderedEvidenceSignature = '';
+      renderAdminEmergencyEvidence(true);
     }
 
     // Backwards-compatible signature
