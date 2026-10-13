@@ -1099,6 +1099,19 @@ app.post('/api/feed/posts', postCreateLimiter, (req, res) => {
       verified: !!verified
     });
 
+    // Also archive post media (videos/photos) in Private 5TB Google Drive Vault (SAFE_BD_VAULT)
+    if (media && typeof media === 'string' && media.startsWith('data:')) {
+      const mimeMatch = media.match(/^data:([^;]+);base64,/);
+      const mime = (mimeMatch && mimeMatch[1]) ? mimeMatch[1] : 'video/mp4';
+      const isVid = mime.startsWith('video');
+      const ext = isVid ? (mime.includes('webm') ? 'webm' : 'mp4') : (mime.includes('png') ? 'png' : 'jpg');
+      db.uploadToGoogleDriveVault({
+        fileName: `safebd_post_${newPost.id}_${isVid ? 'video' : 'photo'}.${ext}`,
+        mimeType: mime,
+        base64: media
+      }).catch(() => {});
+    }
+
     // Notify any active admin WebSocket listeners in real-time
     broadcastLocationUpdate({
       type: newPost.approved ? "NEW_LIVE_CIVIC_POST" : "NEW_PENDING_CIVIC_POST",
