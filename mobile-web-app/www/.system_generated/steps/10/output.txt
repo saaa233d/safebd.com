@@ -1,0 +1,114 @@
+
+The command exited with code 0.
+Output:
+<truncated 1 lines>
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        10/11/2026  11:07 AM          53725 index.d.ts                                                           
+
+
+    Directory: C:\Users\B\.gemini\antigravity\scratch\safe-bd\mobile-web-app\node_modules\yallist
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        10/11/2026  11:07 AM            207 iterator.js                                                          
+-a----        10/11/2026  11:07 AM            765 LICENSE                                                              
+-a----        10/11/2026  11:07 AM            652 package.json                                                         
+-a----        10/11/2026  11:07 AM           4717 README.md                                                            
+-a----        10/11/2026  11:07 AM           8411 yallist.js                                                           
+
+
+    Directory: C:\Users\B\.gemini\antigravity\scratch\safe-bd\mobile-web-app\node_modules\yauzl
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        10/11/2026  11:07 AM          33069 index.js                                                             
+-a----        10/11/2026  11:07 AM           1077 LICENSE                                                              
+-a----        10/11/2026  11:07 AM            881 package.json                                                         
+-a----        10/11/2026  11:07 AM          31177 README.md                                                            
+
+
+    Directory: C:\Users\B\.gemini\antigravity\scratch\safe-bd\mobile-web-app\www
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        10/11/2026  11:26 AM         416639 app-icon.jpg                                                         
+-a----        10/11/2026  11:36 AM           2142 app-icon.svg                                                         
+-a----        10/11/2026  11:36 AM           2896 icon-generator.html                                                  
+-a----        10/13/2026   7:02 PM         267969 index.html                                                           
+-a----        10/11/2026  11:36 AM            518 manifest.json                                                        
+-a----        10/13/2026  12:45 PM         143150 SAFE_BD_GOVERNMENT_PROPOSAL.pdf                                      
+-a----        10/13/2026   1:01 PM          32694 SAFE_BD_PITCH_DECK.html                                              
+-a----        10/13/2026   1:02 PM        1892404 SAFE_BD_PITCH_DECK.pdf                                               
+
+
+    Directory: C:\Users\B\.gemini\antigravity\scratch\safe-bd\UPLOAD_TO_GITHUB
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d-----        10/13/2026  11:03 PM                backend                                                              
+d-----        10/13/2026  11:03 PM                mobile-web-app                                                       
+-a----        10/13/2026  12:30 AM            447 package.json                                                         
+
+
+    Directory: C:\Users\B\.gemini\antigravity\scratch\safe-bd\UPLOAD_TO_GITHUB\backend
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d-----        10/13/2026  11:03 PM                data                                                                 
+-a----        10/13/2026   7:00 PM          54535 database.js                                                          
+-a----        10/13/2026  12:30 AM            388 package.json                                                         
+-a----        10/13/2026   7:00 PM          74392 server.js                                                            
+
+
+    Directory: C:\Users\B\.gemini\antigravity\scratch\safe-bd\UPLOAD_TO_GITHUB\backend\data
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d-----        10/13/2026  11:03 PM                evidence                                                             
+-a----        10/13/2026   7:04 PM          15087 safe_bd_database.json                                                
+-a----        10/13/2026   7:04 PM            636 safe_bd_evidence.json                                                
+-a----        10/13/2026   7:04 PM           1958 safe_bd_posts.json                                                   
+
+
+    Directory: C:\Users\B\.gemini\antigravity\scratch\safe-bd\UPLOAD_TO_GITHUB\backend\data\evidence
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        10/13/2026  12:34 PM        4999733 01316750712_SOS_1791873285383.mp4                                    
+-a----        10/13/2026   7:04 PM             70 01999887766_POST_1791896656972.png                                   
+
+
+    Directory: C:\Users\B\.gemini\antigravity\scratch\safe-bd\UPLOAD_TO_GITHUB\mobile-web-app
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d-----        10/13/2026  11:11 PM                www                                                                  
+
+
+    Directory: C:\Users\B\.gemini\antigravity\scratch\safe-bd\UPLOAD_TO_GITHUB\mobile-web-app\www
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        10/11/2026  11:26 AM         416639 app-icon.jpg                                                         
+-a----        10/11/2026  11:36 AM           2142 app-icon.svg                                                         
+-a----        10/11/2026  11:36 AM           2896 icon-generator.html                                                  
+-a----        10/13/2026   7:02 PM         267969 index.html                                                           
+-a----        10/11/2026  11:36 AM            518 manifest.json                                                        
+-a----        10/13/2026  12:45 PM         143150 SAFE_BD_GOVERNMENT_PROPOSAL.pdf                                      
+-a----        10/13/2026   1:01 PM          32694 SAFE_BD_PITCH_DECK.html                                              
+-a----        10/13/2026   1:02 PM        1892404 SAFE_BD_PITCH_DECK.pdf                                               
+
+
+
