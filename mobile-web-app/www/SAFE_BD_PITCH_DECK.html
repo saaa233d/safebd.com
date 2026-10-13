@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAFE BD — Official Government Pitch Deck</title>
+  <style>
+    @page {
+      size: 297mm 167mm; /* 16:9 Widescreen Landscape */
+      margin: 0;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+      background: #090406;
+      color: #f8fafc;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Slide Container */
+    .deck-container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    .slide {
+      width: 100vw;
+      height: 100vh;
+      padding: 48px 68px 68px 68px;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      background: radial-gradient(circle at 85% 15%, rgba(153, 27, 27, 0.24) 0%, rgba(12, 6, 9, 0.98) 55%, #070305 100%);
+      position: relative;
+      overflow: hidden;
+      border-top: 5px solid #dc2626;
+    }
+    .slide.active {
+      display: flex;
+    }
+
+    /* Subtle Background Grid */
+    .slide::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .slide > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Top Bar inside each slide */
+    .slide-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      padding-bottom: 14px;
+      margin-bottom: 22px;
+    }
+    .brand-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: 1px;
+      color: #f87171;
+      text-transform: uppercase;
+    }
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 10px #ef4444;
+    }
+    .slide-num {
+      font-size: 13px;
+      color: #94a3b8;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* Typography */
+    .kicker {
+      display: inline-block;
+      background: rgba(239, 68, 68, 0.16);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      color: #fca5a5;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: 46px;
+      font-weight: 900;
+      line-height: 1.12;
+      letter-spacing: -0.8px;
+      color: #ffffff;
+      margin-bottom: 16px;
+    }
+    h2 {
+      font-size: 32px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    .lead {
+      font-size: 18px;
+      color: #cbd5e1;
+      line-height: 1.5;
+      max-width: 920px;
+    }
+
+    /* Grids & Cards */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      flex: 1;
+      align-items: stretch;
+      margin: 12px 0;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      flex: 1;
+      align-items: stretch;
+      margin: 12px 0;
+    }
+    .card {
+      background: rgba(20, 10, 14, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    .card.highlight {
+      border-color: rgba(239, 68, 68, 0.55);
+      background: linear-gradient(160deg, rgba(127, 29, 29, 0.28) 0%, rgba(15, 8, 12, 0.88) 100%);
+    }
+    .card.gold {
+      border-color: rgba(245, 158, 11, 0.55);
+      background: linear-gradient(160deg, rgba(180, 83, 9, 0.22) 0%, rgba(15, 8, 12, 0.88) 100%);
+    }
+    .card.emerald {
+      border-color: rgba(16, 185, 129, 0.5);
+      background: linear-gradient(160deg, rgba(6, 95, 70, 0.24) 0%, rgba(15, 8, 12, 0.88) 100%);
+    }
+    .card-tag {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #f87171;
+      margin-bottom: 8px;
+    }
+    .card h3 {
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+    .card p, .card li {
+      font-size: 14.5px;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+    .card ul {
+      margin-left: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      background: rgba(15, 8, 12, 0.75);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    th {
+      background: rgba(153, 27, 27, 0.85);
+      color: #ffffff;
+      text-align: left;
+      padding: 11px 16px;
+      font-weight: 800;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    td {
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      color: #e2e8f0;
+    }
+    tr.total-row td {
+      background: rgba(239, 68, 68, 0.18);
+      font-weight: 800;
+      color: #fca5a5;
+      border-top: 1.5px solid #ef4444;
+    }
+
+    /* Architecture Pipeline */
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin: 14px 0;
+    }
+    .pipe-step {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+    .pipe-step strong {
+      display: block;
+      font-size: 14.5px;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+    .pipe-step span {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    /* Slide Footer */
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 12.5px;
+      color: #94a3b8;
+    }
+
+    /* Floating Interactive Controls (Hidden when printing to PDF) */
+    .deck-controls {
+      position: fixed;
+      bottom: 16px;
+      right: 24px;
+      display: flex;
+      gap: 8px;
+      z-index: 999;
+      background: rgba(15, 8, 12, 0.9);
+      border: 1px solid rgba(255,255,255,0.18);
+      padding: 6px 10px;
+      border-radius: 12px;
+    }
+    .ctrl-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .ctrl-btn:hover {
+      background: #dc2626;
+      border-color: #ef4444;
+    }
+
+    @media print {
+      body {
+        overflow: visible;
+        background: #090406;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .deck-container {
+        height: auto;
+      }
+      .slide {
+        display: flex !important;
+        width: 297mm;
+        height: 167mm;
+        page-break-after: always;
+        break-after: page;
+        padding: 12mm 16mm;
+      }
+      .deck-controls {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="deck-container">
+
+    <!-- ==================== SLIDE 1: TITLE & VISION ==================== -->
+    <section class="slide active">
+      <div class="slide-top">
+        <div class="brand-pill"><span class="brand-dot"></span> SAFE BD • NATIONAL PUBLIC SAFETY INITIATIVE</div>
+        <div class="slide-num">SLIDE 01 / 08</div>
+      </div>
+
+      <div style="margin: auto 0;">
+        <div class="kicker">Official Government Pitch Deck • Concept Note &amp; DPP</div>
+        <h1>SAFE BD<br><span style="color: #ef4444;">National Citizen Safety, Covert SOS<br>&amp; Live Transit Protection Platform</span></h1>
+        <p class="lead" style="margin-top: 14px;">
+          Bridging <strong>50 Million Bangladeshi Citizens</strong> directly to <strong>999 Emergency CAD</strong> and family guardians through automated <strong>Snatch-Proof Video Evidence</strong>, <strong>Live Commute Monitoring</strong>, and <strong>Verified Civic Alerts</strong>.
+        </p>
+
+        <div style="display: flex; gap: 28px; margin-top: 32px; flex-wrap: wrap;">
+          <div style="background: rgba(255,255,255,0.05); border-left: 4px solid #ef4444; padding: 12px 18px; border-radius: 8px;">
+            <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Founder &amp; Chief Executive Officer</div>
+            <div style="font-size: 18px; font-weight: 800; color: #fff; margin-top: 2px;">Saad Rizwan</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.05); border-left: 4px solid #f59e0b; padding: 12px 18px; border-radius: 8px;">
+            <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Target National Capacity</div>
+            <div style="font-size: 18px; font-weight: 800; color: #f59e0b; margin-top: 2px;">10M – 50M Active Citizens</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.05); border-left: 4px solid #10b981; padding: 12px 18px; border-radius: 8px;">
+            <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Current Project Status</div>
+            <div style="font-size: 18px; font-weight: 800; color: #10b981; margin-top: 2px;">Live Operational Prototype Ready</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Proposed to: Ministry of Home Affairs • ICT Division (BDCCL) • Bangladesh Police (999) • BTRC</span>
+        <span>Confidential — Government Briefing</span>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 2: THE PROBLEM & WHY OLD APPS FAILED ==================== -->
+    <section class="slide">
+      <div class="slide-top">
+        <div class="brand-pill"><span class="brand-dot"></span> THE NATIONAL CHALLENGE</div>
+        <div class="slide-num">SLIDE 02 / 08</div>
+      </div>
+
+      <div>
+        <div class="kicker">Why Bangladesh Needs SAFE BD Today</div>
+        <h2>Critical Gaps in Existing Emergency Response</h2>
+        <p class="lead">Voice-only helplines and older single-purpose apps leave three dangerous blind spots during real street emergencies:</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card highlight">
+          <div class="card-tag">Problem 01 • Phone Snatching</div>
+          <h3>Voice Calls Fail When Attacked</h3>
+          <p>During muggings, assaults, or abductions, criminals immediately snatch or smash the victim's phone before they can speak to a 999 operator or explain their exact street location.</p>
+          <p style="margin-top: 12px; color: #fca5a5; font-weight: 700;">Result: Zero video evidence and lost location trail.</p>
+        </div>
+
+        <div class="card gold">
+          <div class="card-tag" style="color: #fbbf24;">Problem 02 • Night Transit Risk</div>
+          <h3>Millions Commute Unmonitored</h3>
+          <p>Students, garment workers, and women traveling at night in buses, CNGs, or rickshaws have no automated dead-man timer that alerts 999 if they fail to reach home on time.</p>
+          <p style="margin-top: 12px; color: #fde68a; font-weight: 700;">Result: Crucial Golden Hour is lost before family notices.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-tag" style="color: #38bdf8;">Problem 03 • Why "Joy (2018)" Failed</div>
+          <h3>Zero Daily Citizen Engagement</h3>
+          <p>Older apps like the 2018 <em>Joy (109)</em> app had no daily utility (no live hazard feed or route companion). Citizens forgot the app existed or uninstalled it before an emergency occurred.</p>
+          <p style="margin-top: 12px; color: #7dd3fc; font-weight: 700;">Result: High development cost with minimal public adoption.</p>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>SAFE BD — Solving Evidence Loss, Commuter Safety &amp; Daily Retention</span>
+        <span>Saad Rizwan • Founder &amp; CEO</span>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 3: THE 3-PILLAR SOLUTION ==================== -->
+    <section class="slide">
+      <div class="slide-top">
+        <div class="brand-pill"><span class="brand-dot"></span> THE UNIFIED SOLUTION (WORKING PROTOTYPE)</div>
+        <div class="slide-num">SLIDE 03 / 08</div>
+      </div>
+
+      <div>
+        <div class="kicker">3 Life-Saving Systems in One Platform</div>
+        <h2>How SAFE BD Protects Citizens Every Day</h2>
+      </div>
+
+      <div class="grid-3">
+        <div class="card highlight">
+          <div class="card-tag">Pillar 01 • Instant Emergency Response</div>
+          <h3>15s Covert SOS Video Vault</h3>
+          <ul>
+            <li><strong>1-Tap SOS Dispatch:</strong> Alerts 999 CAD + sends 1-Tap WhatsApp Live GPS link to Father, Mother &amp; Guardian.</li>
+            <li><strong>Snatch-Proof Cloud Recording:</strong> Automatically captures 15 seconds of encrypted MP4 video &amp; audio and uploads it to the Private Cloud Vault.</li>
+            <li><strong>Permanent Proof:</strong> Even if the phone is destroyed, Admin &amp; Police have the attacker's face, voice, and GPS pin.</li>
+          </ul>
+        </div>
+
+        <div class="card gold">
+          <div class="card-tag" style="color: #fbbf24;">Pillar 02 • Preventive Protection</div>
+          <h3>"Walk With Me" Live Companion</h3>
+          <ul>
+            <li><strong>Multi-Modal Bangladesh Routing:</strong> Calculates live ETA for Walking, Bike, or Car/CNG with Dhaka traffic modeling.</li>
+            <li><strong>Live Satellite Telemetry:</strong> Streams moving coordinates &amp; speed (`km/h`) to the server.</li>
+            <li><strong>Automated Overdue Escalation:</strong> If a citizen is &gt;10 mins overdue and unresponsive, an <strong>OVERDUE ALERT</strong> flashes on the Admin Command Portal.</li>
+          </ul>
+        </div>
+
+        <div class="card emerald">
+          <div class="card-tag" style="color: #34d399;">Pillar 03 • Daily Utility &amp; Retention</div>
+          <h3>Moderated Civic Safety Feed</h3>
+          <ul>
+            <li><strong>Daily Engagement:</strong> Citizens open SAFE BD daily to check verified road hazards, fire advisories, and campus safety alerts.</li>
+            <li><strong>100% Rumor-Free Governance:</strong> Every citizen report enters a strict <strong>Admin Moderation Queue</strong> before going live.</li>
+            <li><strong>Verified Authority:</strong> Official announcements carry verified credentials.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Live Prototype Built &amp; Tested — Ready for National Scaling</span>
+        <span>Saad Rizwan • Founder &amp; CEO</span>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 4: GLOBAL PRECEDENTS VS SAFE BD ==================== -->
+    <section class="slide">
+      <div class="slide-top">
+        <div class="brand-pill"><span class="brand-dot"></span> GLOBAL BENCHMARKING</div>
+        <div class="slide-num">SLIDE 04 / 08</div>
+      </div>
+
+      <div>
+        <div class="kicker">Proven Internationally • Unified for Bangladesh</div>
+        <h2>How SAFE BD Compares to World-Leading Systems</h2>
+        <p class="lead">Developed nations use separate apps for each safety function. <strong>SAFE BD</strong> is the first platform to unify all three for Bangladesh.</p>
+      </div>
+
+      <div style="margin: auto 0;">
+        <table>
+          <thead>
+            <tr>
+              <th>Platform &amp; Country</th>
+              <th>15s Covert SOS Video Vault</th>
+              <th>"Walk With Me" Overdue Timer</th>
+              <th>Moderated Civic Hazard Feed</th>
+              <th>1-Tap WhatsApp Family GPS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>🇰🇷 Ansim-i</strong> (Seoul Govt, South Korea)</td>
+              <td style="color:#10b981; font-weight:700;">✔ Yes (CCTV + Phone)</td>
+              <td style="color:#10b981; font-weight:700;">✔ Yes (Safe Return)</td>
+              <td style="color:#94a3b8;">✖ No</td>
+              <td style="color:#94a3b8;">✖ No</td>
+            </tr>
+            <tr>
+              <td><strong>🇬🇧 Hollie Guard</strong> (UK Police Approved)</td>
+              <td style="color:#10b981; font-weight:700;">✔ Yes (Cloud Evidence)</td>
+              <td style="color:#10b981; font-weight:700;">✔ Yes (Journey Timer)</td>
+              <td style="color:#94a3b8;">✖ No</td>
+              <td style="color:#94a3b8;">✖ No</td>
+            </tr>
+            <tr>
+              <td><strong>🇺🇸 Citizen App / Prepared 911</strong> (USA)</td>
+              <td style="color:#10b981; font-weight:700;">✔ Yes (911 Video)</td>
+              <td style="color:#f59e0b;">Paid Subscription Only</td>
+              <td style="color:#10b981; font-weight:700;">✔ Yes (10M+ Users)</td>
+              <td style="color:#94a3b8;">✖ No</td>
+            </tr>
+            <tr>
+              <td><strong>🇧🇩 Legacy BD Apps</strong> (Joy 109 / Old 999)</td>
+              <td style="color:#ef4444;">✖ No Auto-Vault</td>
+              <td style="color:#ef4444;">✖ No</td>
+              <td style="color:#ef4444;">✖ No</td>
+              <td style="color:#ef4444;">✖ No</td>
+            </tr>
+            <tr class="total-row">
+              <td><strong>🇧🇩 SAFE BD (Proposed National Platform)</strong></td>
+              <td style="color:#34d399;">✔ YES (MP4 Cloud Vault)</td>
+              <td style="color:#34d399;">✔ YES (Auto-Escalation)</td>
+              <td style="color:#34d399;">✔ YES (Admin Moderated)</td>
+              <td style="color:#34d399;">✔ YES (Built for BD Families)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="slide-footer">
+        <span>Combining South Korea’s Ansim-i + UK’s Hollie Guard + USA’s Citizen into One Sovereign Platform</span>
+        <span>Saad Rizwan • Founder &amp; CEO</span>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 5: SECURITY & ZERO-CRASH ARCHITECTURE ==================== -->
+    <section class="slide">
+      <div class="slide-top">
+        <div class="brand-pill"><span class="brand-dot"></span> MILITARY-GRADE CYBERSECURITY &amp; SCALE</div>
+        <div class="slide-num">SLIDE 05 / 08</div>
+      </div>
+
+      <div>
+        <div class="kicker">Engineered for 10 Million – 50 Million Users</div>
+        <h2>Zero-Crash Cloud &amp; Zero-Trust Security Architecture</h2>
+      </div>
+
+      <div class="pipeline">
+        <div class="pipe-step">
+          <strong>1. Citizen Devices</strong>
+          <span>Native iOS/Android App &amp; Web PWA</span>
+        </div>
+        <div class="pipe-step">
+          <strong>2. Cloudflare Edge</strong>
+          <span>Enterprise WAF &amp; Layer-7 DDoS Shield</span>
+        </div>
+        <div class="pipe-step">
+          <strong>3. BD National Cloud</strong>
+          <span>BDCCL Tier-IV Kubernetes Auto-Scaling</span>
+        </div>
+        <div class="pipe-step">
+          <strong>4. PostGIS &amp; S3 Vault</strong>
+          <span>AES-256 Encrypted Geo &amp; Video Storage</span>
+        </div>
+        <div class="pipe-step">
+          <strong>5. 999 Command Center</strong>
+          <span>Isolated Domain + YubiKey Hardware Auth</span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card highlight">
+          <div class="card-tag">Anti-Hacker Defense (BGD e-Gov CIRT Standard)</div>
+          <h3>Zero-Trust Admin &amp; Data Protection</h3>
+          <ul>
+            <li><strong>Complete Admin Isolation:</strong> Admin Portal is invisible in public source code and hosted on an isolated private network behind <strong>Zero-Trust VPN</strong>.</li>
+            <li><strong>FIDO2 Hardware Keys (YubiKey):</strong> Admin access requires physical cryptographic hardware keys—100% immune to password phishing.</li>
+            <li><strong>Porichoy NID Verification:</strong> Cryptographic citizen verification without exposing raw NID data.</li>
+          </ul>
+        </div>
+
+        <div class="card emerald">
+          <div class="card-tag" style="color: #34d399;">Native Mobile App (Phase 2 Rollout)</div>
+          <h3>Works Even With Screen Locked or Offline</h3>
+          <ul>
+            <li><strong>Hardware Power-Button SOS:</strong> Pressing the phone's physical power button 3 times in a pocket triggers covert recording &amp; 999 alert while the screen stays black.</li>
+            <li><strong>Offline SMS Fallback:</strong> If 4G mobile data is unavailable, GPS coordinates are transmitted via encrypted SMS to the 999 short-code.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>99.999% Uptime SLA • Sovereign Data Hosting Inside Bangladesh (BDCCL Tier-IV NDC)</span>
+        <span>Saad Rizwan • Founder &amp; CEO</span>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 6: ENGINEERING & OPERATIONS TEAM ==================== -->
+    <section class="slide">
+      <div class="slide-top">
+        <div class="brand-pill"><span class="brand-dot"></span> ORGANIZATIONAL STRUCTURE</div>
+        <div class="slide-num">SLIDE 06 / 08</div>
+      </div>
+
+      <div>
+        <div class="kicker">24/7 National Reliability Team</div>
+        <h2>Dedicated Engineering &amp; Command Operations Roster</h2>
+        <p class="lead">A specialized 16-member technical and operational unit to build, secure, and run SAFE BD 24/7/365:</p>
+      </div>
+
+      <div style="margin: auto 0;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 32%;">Specialist Role</th>
+              <th style="width: 12%;">Headcount</th>
+              <th>Core Mission &amp; Deliverable</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>CTO / Principal Systems Architect</strong></td>
+              <td><strong>1</strong></td>
+              <td>Leads national cloud architecture, 999 CAD technical integration &amp; ICT Division coordination</td>
+            </tr>
+            <tr>
+              <td><strong>Senior Backend &amp; Distributed Systems Engineers</strong></td>
+              <td><strong>3</strong></td>
+              <td>High-concurrency microservices, PostgreSQL/PostGIS spatial engine, Redis &amp; live WebRTC video</td>
+            </tr>
+            <tr>
+              <td><strong>Senior Native Mobile Engineers (iOS &amp; Android)</strong></td>
+              <td><strong>3</strong></td>
+              <td>Builds native iOS/Android apps with lock-screen power-button SOS, background GPS &amp; offline SMS</td>
+            </tr>
+            <tr>
+              <td><strong>Frontend &amp; GIS CAD Map Engineers</strong></td>
+              <td><strong>2</strong></td>
+              <td>Public web platform &amp; real-time 999 Dispatcher live map tracking console</td>
+            </tr>
+            <tr>
+              <td><strong>DevOps / SRE, Cybersecurity &amp; QA Engineers</strong></td>
+              <td><strong>4</strong></td>
+              <td>Kubernetes auto-scaling, Cloudflare WAF, load-testing for 10M+ users &amp; BGD e-Gov CIRT audits</td>
+            </tr>
+            <tr class="total-row">
+              <td><strong>24/7 NOC &amp; Moderation Officers (3 Shifts)</strong></td>
+              <td><strong>3</strong></td>
+              <td>Round-the-clock live monitoring of SOS video clips, overdue transit alerts &amp; civic feed approvals</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="slide-footer">
+        <span>Total Core Team: 16 Full-Time Specialists Operating Under Executive Leadership</span>
+        <span>Saad Rizwan • Founder &amp; CEO</span>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 7: FINANCIAL BUDGET & GOVT OPTIMIZATION ==================== -->
+    <section class="slide">
+      <div class="slide-top">
+        <div class="brand-pill"><span class="brand-dot"></span> FINANCIAL BUDGET (10M–50M CITIZEN SCALE)</div>
+        <div class="slide-num">SLIDE 07 / 08</div>
+      </div>
+
+      <div>
+        <div class="kicker">High-ROI Public Safety Investment</div>
+        <h2>Development (CAPEX) &amp; Annual Operating Budget (OPEX)</h2>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <h3 style="font-size: 16px; color: #fca5a5; margin-bottom: 8px; text-transform: uppercase;">Phase 1: One-Time National Build (6–8 Months CAPEX)</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Deliverable</th>
+                <th>USD</th>
+                <th>BDT</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Full Engineering Team &amp; Native iOS/Android Apps (8 Mo)</td>
+                <td>$140,000</td>
+                <td>৳1.68 Cr</td>
+              </tr>
+              <tr>
+                <td>Cybersecurity Red-Team Audit, ISO 27001 &amp; YubiKeys</td>
+                <td>$20,000</td>
+                <td>৳24 Lakh</td>
+              </tr>
+              <tr>
+                <td>999 CAD Dispatch Workstations &amp; Command Setup</td>
+                <td>$25,000</td>
+                <td>৳30 Lakh</td>
+              </tr>
+              <tr class="total-row">
+                <td>Total One-Time Launch Budget</td>
+                <td>$185,000</td>
+                <td>৳2.22 Crore</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <h3 style="font-size: 16px; color: #34d399; margin-bottom: 8px; text-transform: uppercase;">Phase 2: Annual Operations (10M–50M Users OPEX)</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Annual Operational Item</th>
+                <th>Commercial</th>
+                <th>With Govt Support</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Cloud &amp; Video Vault <em>(BDCCL Tier-IV NDC)</em></td>
+                <td>৳1.80 Cr/yr</td>
+                <td style="color:#34d399; font-weight:700;">৳0 (National NDC)</td>
+              </tr>
+              <tr>
+                <td>SMS OTP &amp; Alerts <em>(BTRC Public Safety Mandate)</em></td>
+                <td>৳90 Lakh/yr</td>
+                <td style="color:#34d399; font-weight:700;">৳0 (BTRC Mandate)</td>
+              </tr>
+              <tr>
+                <td>Cloudflare Enterprise WAF &amp; GIS Maps API</td>
+                <td>৳1.10 Cr/yr</td>
+                <td>৳1.10 Cr/yr</td>
+              </tr>
+              <tr>
+                <td>16-Member Engineering &amp; 24/7 NOC Payroll</td>
+                <td>৳2.40 Cr/yr</td>
+                <td>৳2.40 Cr/yr</td>
+              </tr>
+              <tr class="total-row">
+                <td>Total Annual Operating Cost</td>
+                <td>৳6.20 Cr/yr</td>
+                <td style="color:#34d399;">৳3.50 Crore / yr</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Government Hosting &amp; BTRC Zero-Rating Saves Over ৳2.70 Crore Per Year</span>
+        <span>Saad Rizwan • Founder &amp; CEO</span>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 8: THE ASK & ROLLOUT ROADMAP ==================== -->
+    <section class="slide">
+      <div class="slide-top">
+        <div class="brand-pill"><span class="brand-dot"></span> GOVERNMENT PARTNERSHIP &amp; NEXT STEPS</div>
+        <div class="slide-num">SLIDE 08 / 08</div>
+      </div>
+
+      <div>
+        <div class="kicker">Actionable Path to National Launch</div>
+        <h2>Requested Clearances &amp; 6-Month Rollout Roadmap</h2>
+      </div>
+
+      <div class="grid-2">
+        <div class="card highlight">
+          <div class="card-tag">4 Government Approvals Requested</div>
+          <h3>Strategic State Support</h3>
+          <ul>
+            <li><strong>1. Official Domain &amp; Sovereign Cloud:</strong> Allocation of <code>safebd.gov.bd</code> and server capacity inside <strong>BDCCL Tier-IV National Data Center</strong>.</li>
+            <li><strong>2. BTRC Zero-Rated Data Directive:</strong> Allow citizens on GP, Robi, Banglalink &amp; Teletalk to trigger SAFE BD SOS with <strong>0 MB mobile data balance</strong>.</li>
+            <li><strong>3. 999 CAD &amp; Porichoy NID API Access:</strong> Direct webhook integration with National Emergency Service 999 and Election Commission NID gateway.</li>
+            <li><strong>4. Seed Grant / DPP Allocation:</strong> Approval of <strong>৳2.22 Crore (CAPEX)</strong> for native mobile app completion and nationwide launch.</li>
+          </ul>
+        </div>
+
+        <div class="card gold">
+          <div class="card-tag" style="color: #fbbf24;">Execution Timeline</div>
+          <h3>6-Month National Deployment Plan</h3>
+          <ul>
+            <li><strong>Months 1–2:</strong> BDCCL Tier-IV Cloud deployment, Porichoy NID &amp; 999 CAD API integration.</li>
+            <li><strong>Months 3–4:</strong> Native iOS &amp; Android app build (Lock-screen Power-Button SOS &amp; Offline SMS fallback).</li>
+            <li><strong>Month 5:</strong> BGD e-Gov CIRT cybersecurity penetration testing &amp; 10M-user stress test.</li>
+            <li><strong>Month 6:</strong> Nationwide public launch across Dhaka, Chattogram &amp; all 64 districts.</li>
+          </ul>
+          <div style="margin-top: auto; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.12); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 11px; color: #fde68a; text-transform: uppercase;">Presented By</div>
+              <div style="font-size: 17px; font-weight: 800; color: #fff;">Saad Rizwan — Founder &amp; CEO, SAFE BD</div>
+            </div>
+            <div style="background: #ef4444; color: #fff; font-weight: 800; font-size: 12px; padding: 8px 14px; border-radius: 8px;">
+              Ready for Live Demo
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Thank You • SAFE BD: Protecting Every Citizen, Every Commute, Every Second</span>
+        <span>Live Prototype Demonstration Available</span>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Interactive Navigation Bar (Hidden in PDF Print) -->
+  <div class="deck-controls">
+    <button class="ctrl-btn" onclick="prevSlide()">◀ Prev</button>
+    <span id="slide-indicator" style="color:#cbd5e1; font-size:12px; font-weight:700; display:flex; align-items:center; padding:0 8px;">1 / 8</span>
+    <button class="ctrl-btn" onclick="nextSlide()">Next ▶</button>
+    <button class="ctrl-btn" onclick="toggleFullScreen()">⛶ Fullscreen</button>
+    <button class="ctrl-btn" onclick="window.print()">🖨 Print / Save PDF</button>
+  </div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    let current = 0;
+
+    function showSlide(index) {
+      if (index < 0) index = 0;
+      if (index >= slides.length) index = slides.length - 1;
+      current = index;
+      slides.forEach((s, i) => s.classList.toggle('active', i === current));
+      document.getElementById('slide-indicator').innerText = `${current + 1} / ${slides.length}`;
+    }
+
+    function nextSlide() { showSlide(current + 1); }
+    function prevSlide() { showSlide(current - 1); }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullScreen();
+      }
+    });
+  </script>
+</body>
+</html>
