@@ -644,6 +644,23 @@ app.post('/api/emergency/covert-recording', async (req, res) => {
     }
 
     const evidenceId = id || ("EVID-" + Date.now());
+    let gdriveFileId = null;
+
+    // Upload MP4 directly to Private 5TB Google Drive Vault (Zero Render RAM pressure & permanent across redeploys)
+    try {
+      const mp4Base64 = fs.readFileSync(finalFilePath).toString('base64');
+      const gdriveRes = await db.uploadToGoogleDriveVault({
+        fileName: finalFileName,
+        mimeType: finalMimeType,
+        base64: mp4Base64
+      });
+      if (gdriveRes && gdriveRes.success && gdriveRes.fileId) {
+        gdriveFileId = gdriveRes.fileId;
+      }
+    } catch (gdErr) {
+      console.warn('[⚠️ GDRIVE EVIDENCE UPLOAD FALLBACK]:', gdErr.message);
+    }
+
     const evidenceItem = {
       id: evidenceId,
       userId: userId || "anonymous",
@@ -651,7 +668,8 @@ app.post('/api/emergency/covert-recording', async (req, res) => {
       userPhone: userPhone || "01XXXXXXXXX",
       location: location || { lat: 23.8103, lon: 90.4125, address: "Dhaka, Bangladesh" },
       videoUrl: `/api/emergency/evidence/${finalFileName}`,
-      // Stored on disk at EVIDENCE_DIR; never bloat RAM heap with multi-megabyte strings
+      gdriveFileId: gdriveFileId,
+      // Stored on disk at EVIDENCE_DIR + Private 5TB Google Drive Vault
       fileName: finalFileName,
       fileSizeKb: finalFileSizeKb,
       mimeType: finalMimeType,
@@ -724,8 +742,28 @@ app.get('/api/emergency/evidence/:filename', async (req, res) => {
     }
   }
 
+  // If wiped by Render redeploy/restart, automatically restore from Private 5TB Google Drive Vault
   if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ error: "EVIDENCE_NOT_FOUND", message: "Requested evidence file does not exist on disk." });
+    try {
+      const rawBase = filename.replace(/\.(mp4|webm)$/i, '');
+      const allEvidence = db.getAllEmergencyEvidence() || [];
+      const matchItem = allEvidence.find(e => e.fileName === filename || (e.fileName && e.fileName.replace(/\.(mp4|webm)$/i, '') === rawBase));
+      const cloudBuf = await db.fetchFromGoogleDriveVault({
+        fileId: matchItem ? matchItem.gdriveFileId : '',
+        fileName: (matchItem && matchItem.fileName) ? matchItem.fileName : filename
+      });
+      if (cloudBuf && cloudBuf.length > 0) {
+        if (!fs.existsSync(EVIDENCE_DIR)) fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
+        fs.writeFileSync(filePath, cloudBuf);
+        console.log(`[☁️ RESTORED FROM 5TB GOOGLE DRIVE VAULT] Restored ${filename} (${Math.round(cloudBuf.length / 1024)} KB)`);
+      }
+    } catch (restoreErr) {
+      console.warn('[⚠️ GDRIVE EVIDENCE RESTORE WARN]:', restoreErr.message);
+    }
+  }
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: "EVIDENCE_NOT_FOUND", message: "Requested evidence file does not exist on disk or in Google Drive Vault." });
   }
 
   const stat = fs.statSync(filePath);
@@ -1210,6 +1248,35 @@ app.delete('/api/admin/emergency-evidence/:id', (req, res) => {
     return res.json({ success: true, message: "Evidence record removed from archive." });
   }
   return res.status(404).json({ error: "NOT_FOUND", message: "Evidence record not found." });
+});
+
+// 5.6 Get & Update Private 5TB Google Drive Vault Configuration
+app.get('/api/admin/cloud-vault', (req, res) => {
+  return res.json({ success: true, vault: db.getCloudVaultConfig() });
+});
+
+app.post('/api/admin/cloud-vault', async (req, res) => {
+  const { scriptUrl, secretKey, enabled } = req.body || {};
+  const updated = db.setCloudVaultConfig({ scriptUrl, secretKey, enabled });
+  return res.json({ success: true, vault: updated });
+});
+
+app.post('/api/admin/cloud-vault/test', async (req, res) => {
+  const { scriptUrl, secretKey } = req.body || {};
+  if (scriptUrl) {
+    db.setCloudVaultConfig({ scriptUrl, secretKey, enabled: true });
+  }
+  const testRes = await db.uploadToGoogleDriveVault({
+    fileName: 'safe_bd_vault_verified.txt',
+    mimeType: 'text/plain',
+    base64: Buffer.from(`SAFE BD 5TB Google Drive Private Vault Verified at ${new Date().toISOString()}`).toString('base64'),
+    overwrite: true
+  });
+  return res.json({
+    success: !!(testRes && testRes.success),
+    result: testRes,
+    vault: db.getCloudVaultConfig()
+  });
 });
 
 // 4.6 Single Like per User (Toggle Like / Unlike)
