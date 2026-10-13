@@ -1,0 +1,14 @@
+
+The command exited with code 0.
+Output:
+
+
+    Directory: C:\Users\B\.gemini\antigravity\brain\24bac50d-4c2d-4734-a270-fe35dfea2990
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        10/13/2026  11:16 PM         515524 safe_bd_hero_promo_1791911780793.jpg                                 
+
+
+
