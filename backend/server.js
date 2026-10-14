@@ -924,17 +924,30 @@ app.post('/api/admin/emergency-evidence/:id/review', (req, res) => {
    3. "WALK WITH ME" / JOURNEY COMPANION SESSIONS & LIVE TRACKING
 ========================================================== */
 
+// Start / Register Personal Walk With Me Companion Session (User-Isolated)
 app.post('/api/walk/start', (req, res) => {
-  const { userId, userName, userPhone, origin, destination, travelMode, estimatedMinutes, currentCoords } = req.body;
+  const authHeader = req.headers.authorization;
+  let authenticatedUser = null;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.split(' ')[1];
+    const sess = db.getSession(token);
+    if (sess && sess.user) authenticatedUser = sess.user;
+  }
+
+  const { userId, userName, userPhone, origin, destination, travelMode, estimatedMinutes, currentCoords, destCoords } = req.body;
+  const rawPhone = (authenticatedUser && authenticatedUser.phone) || userPhone || userId || ('guest_' + Date.now());
+  const cleanPhone = db.normalizePhone(rawPhone) || rawPhone;
+  const displayName = (authenticatedUser && authenticatedUser.name) || userName || "Citizen Traveler";
   const sessionId = "journey_" + crypto.randomBytes(16).toString('hex');
 
   const session = {
     sessionId,
-    userId: userId || "anonymous",
-    userName: userName || "Citizen Traveler",
-    userPhone: userPhone || "Unknown",
+    userId: cleanPhone,
+    userName: displayName,
+    userPhone: cleanPhone,
     origin: origin || "Current Location",
     destination: destination || "Destination",
+    destCoords: destCoords || null,
     travelMode: travelMode || "walking",
     estimatedMinutes: estimatedMinutes || 20,
     startTime: new Date().toISOString(),
@@ -945,15 +958,52 @@ app.post('/api/walk/start', (req, res) => {
     overdueUploadedToAdmin: false
   };
 
+  // 1. Fast in-memory session lookup
   activeWalkSessions.set(sessionId, session);
-  console.log(`[🚗 JOURNEY STARTED] User: ${session.userName} (${session.travelMode}) -> ${session.destination} | Est: ${session.estimatedMinutes} mins`);
+
+  // 2. User-isolated persistence in Database & 5TB Cloud Vault
+  db.saveUserActiveJourney(cleanPhone, session);
+
+  console.log(`[🚗 JOURNEY STARTED] User: ${session.userName} (${cleanPhone}) | Mode: ${session.travelMode} -> ${session.destination} | Est: ${session.estimatedMinutes} mins`);
   return res.json({ success: true, session });
 });
 
-// Update location during transit
+// Retrieve Logged-in User's Personal Active Walk Session
+app.get('/api/walk/my-session', (req, res) => {
+  const authHeader = req.headers.authorization;
+  let phone = req.query.phone;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.split(' ')[1];
+    const sess = db.getSession(token);
+    if (sess && sess.user) phone = sess.user.phone;
+  }
+
+  if (!phone) {
+    return res.json({ success: true, session: null });
+  }
+
+  const cleanPhone = db.normalizePhone(phone) || phone;
+  const userJourney = db.getUserActiveJourney(cleanPhone);
+  return res.json({ success: true, session: userJourney || null });
+});
+
+// Update location during transit (Updates user's private session)
 app.post('/api/walk/update-location', (req, res) => {
-  const { sessionId, lat, lon, address } = req.body;
-  const session = activeWalkSessions.get(sessionId);
+  const { sessionId, phone, lat, lon, address } = req.body;
+  let session = sessionId ? activeWalkSessions.get(sessionId) : null;
+  
+  const targetPhone = phone || (session && session.userPhone);
+  if (targetPhone) {
+    const cleanPhone = db.normalizePhone(targetPhone) || targetPhone;
+    const dbJourney = db.getUserActiveJourney(cleanPhone);
+    if (dbJourney) {
+      dbJourney.currentCoords = { lat, lon, address };
+      dbJourney.lastPing = Date.now();
+      db.saveUserActiveJourney(cleanPhone, dbJourney);
+      if (!session) session = dbJourney;
+    }
+  }
+
   if (session) {
     session.currentCoords = { lat, lon, address };
     session.lastPing = Date.now();
@@ -964,8 +1014,25 @@ app.post('/api/walk/update-location', (req, res) => {
 
 // Flag session as Overdue / Unresponsive (Uploaded to Admin Page)
 app.post('/api/walk/report-overdue', (req, res) => {
-  const { sessionId, lat, lon, address } = req.body;
-  const session = activeWalkSessions.get(sessionId);
+  const { sessionId, phone, lat, lon, address } = req.body;
+  let session = sessionId ? activeWalkSessions.get(sessionId) : null;
+
+  const targetPhone = phone || (session && session.userPhone);
+  if (targetPhone) {
+    const cleanPhone = db.normalizePhone(targetPhone) || targetPhone;
+    const dbJourney = db.getUserActiveJourney(cleanPhone);
+    if (dbJourney) {
+      dbJourney.status = "OVERDUE_ALERT";
+      dbJourney.isOverdue = true;
+      dbJourney.overdueUploadedToAdmin = true;
+      if (lat && lon) {
+        dbJourney.currentCoords = { lat, lon, address: address || dbJourney.currentCoords.address };
+      }
+      db.saveUserActiveJourney(cleanPhone, dbJourney);
+      if (!session) session = dbJourney;
+    }
+  }
+
   if (session) {
     session.status = "OVERDUE_ALERT";
     session.isOverdue = true;
@@ -981,15 +1048,31 @@ app.post('/api/walk/report-overdue', (req, res) => {
 
 // Admin endpoint: Get all active citizen journeys & live locations (Protected by Admin Auth Guard)
 app.get('/api/admin/active-journeys', requireAdminAuth, (req, res) => {
-  const journeys = Array.from(activeWalkSessions.values());
+  const journeys = db.getAllActiveJourneys();
+  // Merge any in-memory sessions that haven't persisted yet
+  activeWalkSessions.forEach((s) => {
+    if (s.userPhone && !journeys.some(j => j.sessionId === s.sessionId)) {
+      journeys.push(s);
+    }
+  });
   return res.json({ success: true, journeys });
 });
 
+// Finish / Clear Walk Session (Per User)
 app.post('/api/walk/finish', (req, res) => {
-  const { sessionId } = req.body;
-  if (activeWalkSessions.has(sessionId)) {
+  const { sessionId, phone } = req.body;
+  let targetPhone = phone;
+
+  if (sessionId && activeWalkSessions.has(sessionId)) {
+    const sess = activeWalkSessions.get(sessionId);
+    if (sess && sess.userPhone) targetPhone = sess.userPhone;
     activeWalkSessions.delete(sessionId);
   }
+
+  if (targetPhone) {
+    db.finishUserActiveJourney(targetPhone);
+  }
+
   return res.json({ success: true, message: "Walk With Me session completed safely." });
 });
 
