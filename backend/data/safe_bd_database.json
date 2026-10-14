@@ -406,7 +406,29 @@
       "active": true
     }
   },
-  "activeJourneys": {},
+  "activeJourneys": {
+    "1711111111": {
+      "sessionId": "journey_c6e041992412838f5ffbd52126af3318",
+      "userId": "1711111111",
+      "userName": "Citizen Traveler",
+      "userPhone": "1711111111",
+      "origin": "Current Location",
+      "destination": "Dhanmondi",
+      "destCoords": null,
+      "travelMode": "walking",
+      "estimatedMinutes": 20,
+      "startTime": "2026-10-14T01:18:33.303Z",
+      "currentCoords": {
+        "lat": 23.7388,
+        "lon": 90.4143
+      },
+      "status": "IN_TRANSIT",
+      "lastPing": 1791940713303,
+      "isOverdue": false,
+      "overdueUploadedToAdmin": false,
+      "updatedAt": "2026-10-14T01:18:33.303Z"
+    }
+  },
   "emergencyEvidence": [
     {
       "id": "EVID-1791873285243",
@@ -599,6 +621,50 @@
       "createdAt": "2026-10-14T00:55:49.553Z",
       "approvedAt": "2026-10-14T00:55:49.553Z",
       "reviewedBy": "Instant Community Feed"
+    },
+    "post_1791940606997_5219": {
+      "id": "post_1791940606997_5219",
+      "author": "Citizen Reporter",
+      "authorPhone": "",
+      "authorRole": "Citizen Reporter",
+      "isFounder": false,
+      "verified": false,
+      "type": "community",
+      "category": "Urgent Alert",
+      "content": "I am claiming to be the founder without logging in.",
+      "media": null,
+      "gdriveFileId": null,
+      "mediaFileName": null,
+      "mediaMimeType": null,
+      "likes": 0,
+      "likedBy": [],
+      "approved": true,
+      "rejected": false,
+      "createdAt": "2026-10-14T01:16:46.998Z",
+      "approvedAt": "2026-10-14T01:16:46.998Z",
+      "reviewedBy": "Instant Community Feed"
+    },
+    "post_1791940713291_5406": {
+      "id": "post_1791940713291_5406",
+      "author": "Citizen Reporter",
+      "authorPhone": "",
+      "authorRole": "Citizen Reporter",
+      "isFounder": false,
+      "verified": false,
+      "type": "community",
+      "category": "Urgent Alert",
+      "content": "I am claiming to be the founder without logging in.",
+      "media": null,
+      "gdriveFileId": null,
+      "mediaFileName": null,
+      "mediaMimeType": null,
+      "likes": 0,
+      "likedBy": [],
+      "approved": true,
+      "rejected": false,
+      "createdAt": "2026-10-14T01:18:33.291Z",
+      "approvedAt": "2026-10-14T01:18:33.291Z",
+      "reviewedBy": "Instant Community Feed"
     }
   },
   "cloudVault": {
@@ -606,12 +672,13 @@
     "secretKey": "SAFEBD_PRIVATE_VAULT_2026",
     "enabled": true,
     "folderName": "SAFE_BD_VAULT",
-    "lastSyncedAt": "2026-10-14T00:41:09.075Z"
+    "lastSyncedAt": "2026-10-14T01:16:52.346Z",
+    "stateFileId": "1zBhNnAKLkyX68a5NCmGALDXs-ThQg0Cy"
   },
   "stats": {
     "totalLogins": 23,
     "totalRegistrations": 5,
-    "lastSaved": "2026-10-14T00:56:08.145Z",
-    "totalPosts": 8
+    "lastSaved": "2026-10-14T01:18:33.414Z",
+    "totalPosts": 10
   }
 }
