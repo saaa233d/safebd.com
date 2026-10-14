@@ -203,6 +203,25 @@ function initDatabase() {
   // Commit initial state
   persistToDisk();
 
+  // Asynchronously restore permanent citizen posts from Supabase PostgreSQL cloud
+  fetchPostsFromSupabase().then(supaPosts => {
+    if (supaPosts && supaPosts.length > 0) {
+      let mergedCount = 0;
+      for (const sp of supaPosts) {
+        if (!dbState.posts[sp.id]) {
+          dbState.posts[sp.id] = sp;
+          if (!dbState.approvedPostIds.includes(sp.id)) dbState.approvedPostIds.push(sp.id);
+          mergedCount++;
+        }
+      }
+      if (mergedCount > 0) {
+        dbState.approvedPostIds.sort((a, b) => new Date(dbState.posts[b]?.createdAt || 0) - new Date(dbState.posts[a]?.createdAt || 0));
+        persistToDisk();
+        console.log(`[⚡ SUPABASE CLOUD RESTORE] Restored ${mergedCount} permanent citizen posts from Supabase PostgreSQL.`);
+      }
+    }
+  }).catch(() => {});
+
   // If 5TB Google Drive Vault is configured, asynchronously pull and merge any newer records from cloud vault
   if (dbState.cloudVault && dbState.cloudVault.enabled && dbState.cloudVault.scriptUrl) {
     setTimeout(() => {
@@ -900,6 +919,7 @@ function createPost({ id, author, authorPhone, content, category, media, gdriveF
     mediaMimeType: mediaMimeType || null,
     likes: 0,
     likedBy: [],
+    comments: [], // Facebook-style comments thread
     approved: true, // Direct live publish like Facebook!
     rejected: false,
     createdAt: now,
@@ -912,6 +932,7 @@ function createPost({ id, author, authorPhone, content, category, media, gdriveF
   dbState.stats.totalPosts = Object.keys(dbState.posts).length;
 
   persistToDisk();
+  syncPostToSupabase(newPost).catch(() => {});
   console.log(`[📝 ${isChiefAdmin ? 'OFFICIAL FOUNDER POST' : 'COMMUNITY POST PUBLISHED'}] ID: ${postId} by ${newPost.author} (${cleanCategory}) -> LIVE ON AWARENESS FEED`);
   return formatPostOutput(newPost);
 }
@@ -1029,7 +1050,54 @@ function toggleLikePost(postId, userId = "anonymous") {
 }
 
 function likePost(postId, userId) {
-  return toggleLikePost(postId, userId);
+  const res = toggleLikePost(postId, userId);
+  const post = dbState.posts[postId];
+  if (post) syncPostToSupabase(post).catch(() => {});
+  return res;
+}
+
+function addCommentToPost(postId, { author, authorPhone, text, isFounder, isAdmin } = {}) {
+  const post = dbState.posts[postId];
+  if (!post) throw new Error("Post not found");
+  const cleanText = (text || "").trim();
+  if (!cleanText) throw new Error("Comment text cannot be empty");
+
+  if (!Array.isArray(post.comments)) {
+    post.comments = [];
+  }
+
+  const comment = {
+    id: `c_${Date.now()}_${Math.floor(100 + Math.random() * 900)}`,
+    author: (author || "Citizen").trim().slice(0, 80),
+    authorPhone: authorPhone || "",
+    text: cleanText.slice(0, 1000),
+    isFounder: Boolean(isFounder),
+    isAdmin: Boolean(isAdmin),
+    createdAt: new Date().toISOString()
+  };
+
+  post.comments.push(comment);
+  persistToDisk();
+  syncPostToSupabase(post).catch(() => {});
+  console.log(`[💬 NEW COMMENT] Post: ${postId} by ${comment.author}: "${comment.text.slice(0, 30)}..."`);
+  return { comment, totalComments: post.comments.length };
+}
+
+function deleteCommentFromPost(postId, commentId, userPhone, isAdmin) {
+  const post = dbState.posts[postId];
+  if (!post || !Array.isArray(post.comments)) return false;
+
+  const idx = post.comments.findIndex(c => c.id === commentId);
+  if (idx === -1) return false;
+
+  const comment = post.comments[idx];
+  const canDel = isAdmin || (userPhone && comment.authorPhone && String(userPhone).replace(/\D/g, '').slice(-10) === String(comment.authorPhone).replace(/\D/g, '').slice(-10));
+  if (!canDel) return false;
+
+  post.comments.splice(idx, 1);
+  persistToDisk();
+  syncPostToSupabase(post).catch(() => {});
+  return true;
 }
 
 function getPostById(postId) {
@@ -1048,11 +1116,13 @@ function formatPostOutput(post) {
 
   const likedBy = Array.isArray(post.likedBy) ? post.likedBy : [];
   const likes = typeof post.likes === 'number' ? post.likes : likedBy.length;
+  const comments = Array.isArray(post.comments) ? post.comments : [];
 
   return {
     ...post,
     likes,
     likedBy,
+    comments,
     time: timeStr
   };
 }
@@ -1073,8 +1143,107 @@ function deletePost(postId, adminName = "Administrator") {
   dbState.stats.totalPosts = Object.keys(dbState.posts).length;
 
   persistToDisk();
+  deletePostFromSupabase(postId).catch(() => {});
   console.log(`[🗑️ POST DELETED BY ADMIN] Post ID: ${postId} removed by ${adminName}`);
   return true;
+}
+
+// =========================================================================
+// SUPABASE POSTGRESQL PERMANENT CLOUD PERSISTENCE ENGINE
+// =========================================================================
+async function syncPostToSupabase(post) {
+  const supaUrl = process.env.SUPABASE_URL;
+  const supaKey = process.env.SUPABASE_SECRET_KEY;
+  if (!supaUrl || !supaKey || !post || !post.id) return false;
+
+  try {
+    const res = await fetch(`${supaUrl}/rest/v1/posts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supaKey,
+        'Authorization': `Bearer ${supaKey}`,
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({
+        id: post.id,
+        author: post.author,
+        author_phone: post.authorPhone || null,
+        author_role: post.authorRole || null,
+        is_founder: Boolean(post.isFounder),
+        verified: Boolean(post.verified),
+        type: post.type || 'community',
+        category: post.category || 'General Safety',
+        content: post.content || '',
+        media: post.media || null,
+        likes: post.likes || 0,
+        liked_by: post.likedBy || [],
+        comments: post.comments || [],
+        approved: post.approved !== false,
+        created_at: post.createdAt,
+        approved_at: post.approvedAt || post.createdAt
+      })
+    });
+    return res.ok || res.status === 201 || res.status === 200;
+  } catch (err) {
+    return false;
+  }
+}
+
+async function fetchPostsFromSupabase() {
+  const supaUrl = process.env.SUPABASE_URL;
+  const supaKey = process.env.SUPABASE_SECRET_KEY;
+  if (!supaUrl || !supaKey) return null;
+
+  try {
+    const res = await fetch(`${supaUrl}/rest/v1/posts?select=*&order=created_at.desc&limit=200`, {
+      method: 'GET',
+      headers: {
+        'apikey': supaKey,
+        'Authorization': `Bearer ${supaKey}`
+      }
+    });
+    if (res.ok) {
+      const rows = await res.json();
+      if (Array.isArray(rows)) {
+        return rows.map(r => ({
+          id: r.id,
+          author: r.author,
+          authorPhone: r.author_phone || '',
+          authorRole: r.author_role || '',
+          isFounder: Boolean(r.is_founder),
+          verified: Boolean(r.verified),
+          type: r.type || 'community',
+          category: r.category || 'General Safety',
+          content: r.content || '',
+          media: r.media || null,
+          likes: r.likes || 0,
+          likedBy: Array.isArray(r.liked_by) ? r.liked_by : [],
+          comments: Array.isArray(r.comments) ? r.comments : [],
+          approved: r.approved !== false,
+          rejected: false,
+          createdAt: r.created_at,
+          approvedAt: r.approved_at || r.created_at
+        }));
+      }
+    }
+  } catch (err) {}
+  return null;
+}
+
+async function deletePostFromSupabase(postId) {
+  const supaUrl = process.env.SUPABASE_URL;
+  const supaKey = process.env.SUPABASE_SECRET_KEY;
+  if (!supaUrl || !supaKey || !postId) return;
+  try {
+    await fetch(`${supaUrl}/rest/v1/posts?id=eq.${encodeURIComponent(postId)}`, {
+      method: 'DELETE',
+      headers: {
+        'apikey': supaKey,
+        'Authorization': `Bearer ${supaKey}`
+      }
+    });
+  } catch (e) {}
 }
 
 function getAllPostsAdmin({ search = '', status = 'all', category = 'all', page = 1, limit = 50 } = {}) {
@@ -1437,12 +1606,11 @@ async function deleteFromGoogleDriveVault({ fileId, fileName }) {
 }
 
 function getVaultRepoAuth() {
-  const rev = 'ieAA40cuCL7S3N1ql5xlqNPZddwyWdTLsxJ5_phg';
   return {
-    owner: 'saaa233d',
-    repo: 'safebd.com',
+    owner: process.env.GITHUB_OWNER || 'saaa233d',
+    repo: process.env.GITHUB_REPO || 'safebd.com',
     branch: 'vault-state',
-    token: process.env.GITHUB_TOKEN || rev.split('').reverse().join('')
+    token: process.env.GITHUB_TOKEN || ''
   };
 }
 
@@ -1737,6 +1905,10 @@ module.exports = {
   deletePost,
   likePost,
   toggleLikePost,
+  addCommentToPost,
+  deleteCommentFromPost,
+  syncPostToSupabase,
+  fetchPostsFromSupabase,
   getPostById,
   getAllAdmins,
   grantAdminAccess,
