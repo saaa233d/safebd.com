@@ -423,8 +423,16 @@ function validateBdPhone(phone) {
 function getUserByPhone(phone) {
   const cleanPhone = normalizePhone(phone);
   const user = dbState.users[cleanPhone];
-  if (user && (!user.contacts || !Array.isArray(user.contacts))) {
-    user.contacts = getDefaultUserContacts();
+  if (user) {
+    if (cleanPhone !== '1316750712') {
+      if (user.isFounder) user.isFounder = false;
+      if (user.name && user.name.toUpperCase().includes('SAAD RIZWAN')) {
+        user.name = 'Citizen';
+      }
+    }
+    if (!user.contacts || !Array.isArray(user.contacts)) {
+      user.contacts = getDefaultUserContacts();
+    }
   }
   return user || null;
 }
@@ -460,6 +468,11 @@ function createUser({ phone, name, password, nidVerified = true, contacts = null
     throw new Error('An account already exists with this phone number. Please sign in instead.');
   }
 
+  let cleanName = (name && name.trim()) || 'Verified Citizen';
+  if (cleanPhone !== '1316750712' && cleanName.toUpperCase().includes('SAAD RIZWAN')) {
+    cleanName = 'Verified Citizen';
+  }
+
   const salt = crypto.randomBytes(16).toString('hex');
   const passwordHash = hashPassword(password, salt);
   const userContacts = (Array.isArray(contacts) && contacts.length > 0)
@@ -470,11 +483,12 @@ function createUser({ phone, name, password, nidVerified = true, contacts = null
     id: `usr_${cleanPhone}`,
     phone: cleanPhone,
     displayPhone: `+880 ${cleanPhone}`,
-    name: name.trim() || 'Verified Citizen',
+    name: cleanName,
     salt: salt,
     passwordHash: passwordHash,
     nidVerified: Boolean(nidVerified),
     isAdmin: (cleanPhone === '1316750712'),
+    isFounder: (cleanPhone === '1316750712'),
     isLoggedIn: true,
     createdAt: new Date().toISOString(),
     lastLoginAt: new Date().toISOString(),
@@ -560,6 +574,13 @@ function verifyUserCredentials(phone, password) {
   const user = dbState.users[cleanPhone];
   if (!user) {
     return { valid: false, error: 'NO_USER', message: 'No account found with this phone number. Please click "Create Profile".' };
+  }
+
+  if (cleanPhone !== '1316750712') {
+    if (user.isFounder) user.isFounder = false;
+    if (user.name && user.name.toUpperCase().includes('SAAD RIZWAN')) {
+      user.name = 'Citizen';
+    }
   }
 
   const trimmedPassword = String(password || '').trim();
@@ -1554,6 +1575,16 @@ async function restoreDatabaseFromGoogleDriveVault() {
         } else if (u.isAdmin && !dbState.users[phone].isAdmin) {
           dbState.users[phone] = { ...dbState.users[phone], ...u };
           updated = true;
+        }
+      }
+      // Enforce strict founder identity: Only phone 1316750712 can be SAAD RIZWAN or founder
+      for (const [phone, u] of Object.entries(dbState.users)) {
+        if (phone !== '1316750712') {
+          if (u.isFounder) u.isFounder = false;
+          if (u.name && u.name.toUpperCase().includes('SAAD RIZWAN')) {
+            u.name = 'Citizen';
+            updated = true;
+          }
         }
       }
     }
