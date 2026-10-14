@@ -15,6 +15,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Leaflet Interactive Vector & Tile Map Engine (Google Maps Live Navigation) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   
   <style>
     :root {
@@ -610,7 +613,103 @@
       padding: 14px 16px;
       backdrop-filter: blur(14px);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-      z-index: 10;
+      z-index: 95;
+    }
+    .dock-emergency-call-btn {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .dock-emergency-call-btn:active {
+      transform: scale(0.96);
+      filter: brightness(1.2);
+    }
+
+    /* GOOGLE MAPS LIVE NAVIGATION GREEN PUCK & LOCATION TAG */
+    .google-live-nav-marker-wrapper {
+      position: relative;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .google-live-location-tag {
+      position: absolute;
+      bottom: 54px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(5, 5, 7, 0.92);
+      border: 1.5px solid #10b981;
+      color: #10b981;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.45);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    .live-tag-beacon {
+      width: 7px;
+      height: 7px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10b981;
+      animation: greenBeaconFlash 1s infinite alternate;
+    }
+    @keyframes greenBeaconFlash {
+      from { opacity: 0.4; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1.3); }
+    }
+    .google-live-puck-ripple {
+      position: absolute;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.35);
+      border: 1.5px solid #10b981;
+      animation: greenNavRipple 2s infinite ease-out;
+      pointer-events: none;
+    }
+    @keyframes greenNavRipple {
+      0% { transform: scale(0.7); opacity: 0.9; }
+      70% { transform: scale(1.9); opacity: 0.2; }
+      100% { transform: scale(2.6); opacity: 0; }
+    }
+    .google-live-nav-puck {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border: 3px solid #ffffff;
+      box-shadow: 0 0 18px rgba(16, 185, 129, 0.9), 0 4px 12px rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 16px;
+      transition: transform 0.3s ease-out;
+      z-index: 2;
+    }
+    @keyframes emergencyCallPulse {
+      0% { transform: scale(1); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.45); }
+      50% { transform: scale(1.03); box-shadow: 0 4px 22px rgba(239, 68, 68, 0.85); }
+      100% { transform: scale(1); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.45); }
+    }
+
+    #interactive-nav-map .leaflet-tile {
+      filter: brightness(0.85) contrast(1.15);
+    }
+    .custom-live-green-nav-icon {
+      background: transparent;
+      border: none;
+    }
+    .custom-dest-pin {
+      background: transparent;
+      border: none;
     }
     .dock-stat-row {
       display: flex;
@@ -1566,11 +1665,16 @@
     <div id="screen-map" class="screen" style="padding: 0;">
       <div class="google-maps-viewport">
         
+        <!-- Interactive Live Google Maps Navigation Vector & Tile Engine -->
+        <div id="interactive-nav-map" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"></div>
+        
+        <!-- Google Maps Satellite / Street View Fallback Iframe -->
         <iframe 
           id="gmaps-frame"
           class="google-map-iframe"
           loading="lazy"
           allowfullscreen
+          style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; display: none;"
           src="https://maps.google.com/maps?q=Dhaka%2C%20Bangladesh&t=&z=14&ie=UTF8&iwloc=&output=embed">
         </iframe>
 
@@ -1711,9 +1815,15 @@
             </a>
           </div>
 
-          <button class="dock-finish-btn" onclick="finishWalkWithMe()">
-            <i class="fas fa-check"></i> I Have Arrived Safely
-          </button>
+          <!-- Emergency 999 Direct Dial & Safe Arrival Action Group -->
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="dock-emergency-call-btn" onclick="directCall999()" style="flex: 1; background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); color: #fff; border: 1.5px solid #fca5a5; padding: 12px 10px; border-radius: 12px; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 18px rgba(239, 68, 68, 0.55); animation: emergencyCallPulse 1.8s infinite;">
+              <i class="fas fa-phone-volume" style="font-size: 14px;"></i> Call 999
+            </button>
+            <button type="button" class="dock-finish-btn" onclick="finishWalkWithMe()" style="flex: 1.25; margin-top: 0; padding: 12px 10px; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <i class="fas fa-check"></i> I Have Arrived Safely
+            </button>
+          </div>
         </div>
 
       </div>
@@ -2422,6 +2532,183 @@
       return R * c;
     }
 
+    // -------------------------------------------------------------------------
+    // EMERGENCY 999 DIRECT DIAL ENGINE (ZERO-PROMPT INSTANT CALL)
+    // -------------------------------------------------------------------------
+    function directCall999() {
+      console.log("[🚨 EMERGENCY 999] Direct dial initiated immediately without prompts.");
+      window.location.href = "tel:999";
+    }
+
+    // -------------------------------------------------------------------------
+    // GOOGLE-STYLE REAL-TIME LIVE NAVIGATION ENGINE (MOVING GREEN PUCK & TAG)
+    // -------------------------------------------------------------------------
+    let navMap = null;
+    let liveNavMarker = null;
+    let navTrailPolyline = null;
+    let navDestMarker = null;
+    let navRoutePolyline = null;
+    let currentHeadingAngle = 0;
+    let isLeafletInitialized = false;
+
+    function computeBearing(lat1, lon1, lat2, lon2) {
+      if (!lat1 || !lon1 || !lat2 || !lon2) return 0;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const y = Math.sin(dLon) * Math.cos(lat2 * Math.PI / 180);
+      const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+                Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLon);
+      let brng = Math.atan2(y, x) * 180 / Math.PI;
+      return (brng + 360) % 360;
+    }
+
+    function initLeafletNavMap(initialLat = 23.8103, initialLon = 90.4125) {
+      if (isLeafletInitialized || typeof L === 'undefined') return;
+      const container = document.getElementById('interactive-nav-map');
+      if (!container) return;
+
+      try {
+        navMap = L.map('interactive-nav-map', {
+          zoomControl: false,
+          attributionControl: false
+        }).setView([initialLat, initialLon], 16);
+
+        // High resolution Google Maps-styled tiles
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+          maxZoom: 19,
+          subdomains: 'abcd'
+        }).addTo(navMap);
+
+        // Custom Live Green Navigation Puck Icon with Radar Ripple and Live Tag
+        const greenPuckHtml = `
+          <div class="google-live-nav-marker-wrapper">
+            <div class="google-live-location-tag" id="live-nav-floating-tag">
+              <span class="live-tag-beacon"></span>
+              <span class="live-tag-text" id="live-puck-tag-text">LIVE • Guarded</span>
+            </div>
+            <div class="google-live-puck-ripple"></div>
+            <div class="google-live-nav-puck" id="google-live-puck-body">
+              <i class="fas fa-location-arrow" id="nav-arrow-icon" style="transform: rotate(0deg); transition: transform 0.25s ease-out;"></i>
+            </div>
+          </div>
+        `;
+
+        const greenNavIcon = L.divIcon({
+          html: greenPuckHtml,
+          className: 'custom-live-green-nav-icon',
+          iconSize: [50, 50],
+          iconAnchor: [25, 25]
+        });
+
+        liveNavMarker = L.marker([initialLat, initialLon], {
+          icon: greenNavIcon,
+          zIndexOffset: 1000
+        }).addTo(navMap);
+
+        // Glowing green route trail / breadcrumbs polyline
+        navTrailPolyline = L.polyline([[initialLat, initialLon]], {
+          color: '#10b981',
+          weight: 6,
+          opacity: 0.85,
+          lineCap: 'round',
+          lineJoin: 'round'
+        }).addTo(navMap);
+
+        isLeafletInitialized = true;
+        console.log("📍 [LIVE NAVIGATION ENGINE] Google-style green navigation puck activated.");
+      } catch (e) {
+        console.warn("Leaflet map initialization skipped, using fallback iframe:", e);
+      }
+    }
+
+    function updateLiveNavMarker(lat, lon, speedKmh = 0, heading = null) {
+      if (!isLeafletInitialized || !navMap) {
+        initLeafletNavMap(lat, lon);
+      }
+      if (!liveNavMarker) return;
+
+      const newLatLng = [lat, lon];
+      liveNavMarker.setLatLng(newLatLng);
+
+      if (navTrailPolyline) {
+        navTrailPolyline.addLatLng(newLatLng);
+      }
+
+      // Smooth auto-follow camera (Google Maps live navigation behavior)
+      if (navMap && mapTrackingViewMode === 'live_location') {
+        navMap.panTo(newLatLng, { animate: true, duration: 0.6 });
+      }
+
+      // Update heading rotation
+      if (heading !== null && !isNaN(heading)) {
+        currentHeadingAngle = heading;
+      }
+      const arrowEl = document.getElementById('nav-arrow-icon');
+      const tagText = document.getElementById('live-puck-tag-text');
+
+      if (arrowEl) {
+        if (speedKmh > 22 || selectedTravelMode === 'driving') {
+          arrowEl.className = 'fas fa-car-side';
+          arrowEl.style.transform = `rotate(0deg)`;
+        } else if (selectedTravelMode === 'bicycling' || (speedKmh > 10 && speedKmh <= 22)) {
+          arrowEl.className = 'fas fa-motorcycle';
+          arrowEl.style.transform = `rotate(0deg)`;
+        } else {
+          arrowEl.className = 'fas fa-location-arrow';
+          arrowEl.style.transform = `rotate(${currentHeadingAngle - 45}deg)`;
+        }
+      }
+
+      if (tagText) {
+        if (speedKmh > 3) {
+          const modeLabel = (speedKmh > 20 || selectedTravelMode === 'driving') ? 'In Vehicle' : (selectedTravelMode === 'bicycling' ? 'On Bike' : 'Moving');
+          tagText.innerText = `LIVE • ${modeLabel} (${speedKmh} km/h)`;
+        } else {
+          tagText.innerText = `LIVE • ${selectedTravelMode === 'walking' ? 'Walking' : 'Guarded'}`;
+        }
+      }
+
+      if (selectedDestCoords && selectedDestCoords.lat && selectedDestCoords.lon) {
+        updateNavDestinationRoute(lat, lon, selectedDestCoords.lat, selectedDestCoords.lon);
+      }
+    }
+
+    function updateNavDestinationRoute(userLat, userLon, destLat, destLon) {
+      if (!navMap) return;
+
+      const destLabel = escapeHtml(currentDestinationQuery || 'Destination');
+      if (!navDestMarker) {
+        const destIcon = L.divIcon({
+          html: `
+            <div style="display:flex; flex-direction:column; align-items:center;">
+              <div style="background:#ef4444; color:#fff; font-size:10px; font-weight:800; padding:2px 8px; border-radius:10px; white-space:nowrap; box-shadow:0 2px 8px rgba(0,0,0,0.5); margin-bottom:2px;">
+                ${destLabel}
+              </div>
+              <div style="width:26px; height:26px; background:#ef4444; border:2.5px solid #fff; border-radius:50%; box-shadow:0 0 12px rgba(239,68,68,0.8); display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px;">
+                <i class="fas fa-flag-checkered"></i>
+              </div>
+            </div>
+          `,
+          className: 'custom-dest-pin',
+          iconSize: [100, 50],
+          iconAnchor: [50, 48]
+        });
+        navDestMarker = L.marker([destLat, destLon], { icon: destIcon }).addTo(navMap);
+      } else {
+        navDestMarker.setLatLng([destLat, destLon]);
+      }
+
+      if (!navRoutePolyline) {
+        navRoutePolyline = L.polyline([[userLat, userLon], [destLat, destLon]], {
+          color: '#38bdf8',
+          weight: 4,
+          dashArray: '8, 8',
+          opacity: 0.85
+        }).addTo(navMap);
+      } else {
+        navRoutePolyline.setLatLngs([[userLat, userLon], [destLat, destLon]]);
+      }
+    }
+
     function safelyUpdateMapFrame(targetUrl) {
       const mapFrame = document.getElementById('gmaps-frame');
       if (!mapFrame || !targetUrl) return;
@@ -2441,6 +2728,9 @@
       }
 
       if (currentCoords.lat && currentCoords.lon) {
+        if (navMap) {
+          navMap.setView([currentCoords.lat, currentCoords.lon], focusZoom ? 17 : 16, { animate: true });
+        }
         const zoom = focusZoom ? 17 : 16;
         const gmapsLiveUrl = `https://maps.google.com/maps?q=${currentCoords.lat},${currentCoords.lon}&t=&z=${zoom}&ie=UTF8&iwloc=B&output=embed`;
         safelyUpdateMapFrame(gmapsLiveUrl);
@@ -2594,6 +2884,17 @@
         const el = document.getElementById(id);
         if (el) el.href = liveNavUrl;
       });
+
+      // Compute accurate heading from device sensors or coordinate displacement
+      let headingAngle = null;
+      if (position.coords.heading !== null && position.coords.heading !== undefined && !isNaN(position.coords.heading)) {
+        headingAngle = position.coords.heading;
+      } else if (lastProcessedGpsCoords.lat && movedMeters > 1.5) {
+        headingAngle = computeBearing(lastProcessedGpsCoords.lat, lastProcessedGpsCoords.lon, lat, lon);
+      }
+
+      // Update the moving Green Navigation Button and Green Location Tag across the map in real time
+      updateLiveNavMarker(lat, lon, currentSpeedKmh, headingAngle);
 
       // STABILIZER: If user moved less than 35 meters (and not forced alert), suppress heavy re-render
       if (!isFirstFix && movedMeters !== null && movedMeters < 35 && !showAlert) {
@@ -3771,6 +4072,10 @@
       const activeBtn = document.getElementById(`mode-btn-${mode}`);
       if (activeBtn) activeBtn.classList.add('active');
 
+      if (typeof updateLiveNavMarker === 'function' && currentCoords.lat) {
+        updateLiveNavMarker(currentCoords.lat, currentCoords.lon, currentSpeedKmh, currentHeadingAngle);
+      }
+
       const destInput = document.getElementById('walk-destination');
       const destText = (currentDestinationQuery || (destInput ? destInput.value.trim() : '')).trim();
       if (destText) {
@@ -3871,6 +4176,16 @@
 
       if (forceMapReload) {
         safelyUpdateMapFrame(targetEmbedUrl);
+      }
+
+      if (dLat && dLon && currentCoords.lat && currentCoords.lon && typeof updateNavDestinationRoute === 'function') {
+        updateNavDestinationRoute(currentCoords.lat, currentCoords.lon, dLat, dLon);
+        if (navMap) {
+          navMap.fitBounds([
+            [currentCoords.lat, currentCoords.lon],
+            [dLat, dLon]
+          ], { padding: [60, 60], maxZoom: 16 });
+        }
       }
 
       const extGmaps = document.getElementById('btn-external-gmaps');
@@ -4086,6 +4401,14 @@
       // Immediately focus Google Maps on user's live moving location
       centerOnUserLiveLocation(true);
 
+      // Initialize moving green navigation puck and route on live map
+      if (typeof updateLiveNavMarker === 'function' && currentCoords.lat) {
+        updateLiveNavMarker(currentCoords.lat, currentCoords.lon, currentSpeedKmh, currentHeadingAngle);
+      }
+      if (selectedDestCoords && selectedDestCoords.lat && selectedDestCoords.lon && typeof updateNavDestinationRoute === 'function') {
+        updateNavDestinationRoute(currentCoords.lat || 23.8103, currentCoords.lon || 90.4125, selectedDestCoords.lat, selectedDestCoords.lon);
+      }
+
       if (walkTimerInterval) clearInterval(walkTimerInterval);
       walkTimerInterval = setInterval(() => {
         handleJourneyTimerTick(destination);
@@ -4165,6 +4488,15 @@
 
       const toggleBtn = document.getElementById('btn-toggle-route-view');
       if (toggleBtn) toggleBtn.style.display = 'none';
+
+      if (navDestMarker && navMap) {
+        navMap.removeLayer(navDestMarker);
+        navDestMarker = null;
+      }
+      if (navRoutePolyline && navMap) {
+        navMap.removeLayer(navRoutePolyline);
+        navRoutePolyline = null;
+      }
 
       if (activeJourneySessionId) {
         fetch(`${API_BASE}/api/walk/finish`, {
@@ -4579,6 +4911,17 @@
         fetchAdminActiveJourneys();
       } else if (id === 'screen-feed') {
         fetchLiveFeedPosts(1, false);
+      } else if (id === 'screen-map') {
+        setTimeout(() => {
+          if (navMap) {
+            navMap.invalidateSize();
+            if (currentCoords.lat && currentCoords.lon) {
+              navMap.panTo([currentCoords.lat, currentCoords.lon]);
+            }
+          } else {
+            initLeafletNavMap(currentCoords.lat || 23.8103, currentCoords.lon || 90.4125);
+          }
+        }, 150);
       }
     }
 
