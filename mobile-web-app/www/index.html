@@ -5776,17 +5776,20 @@
       const token = localStorage.getItem('safe_bd_token') || '';
       if (!token) return false;
 
-      try {
-        const res = await fetch(`${API_BASE}/api/admin/portal-template`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if (data && data.success && data.html) {
-          adminScreen.innerHTML = data.html;
-          return true;
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          const res = await fetch(`${API_BASE}/api/admin/portal-template`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const data = await res.json();
+          if (data && data.success && data.html) {
+            adminScreen.innerHTML = data.html;
+            return true;
+          }
+        } catch (e) {
+          console.warn(`Admin portal mount attempt ${attempt} error:`, e);
+          if (attempt < 2) await new Promise(r => setTimeout(r, 800));
         }
-      } catch (e) {
-        console.warn("Admin portal mount error:", e);
       }
       return false;
     }
