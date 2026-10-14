@@ -2084,82 +2084,14 @@
 
         <!-- Logged In Profile View (UNLOCKED PROFILE) -->
         <div id="view-profile-active" style="display: none;">
-          <!-- Top Citizen Status Banner -->
-          <div style="background: var(--black-subtle); border: 1px solid var(--burgundy-border); border-radius: 16px; padding: 16px; margin-bottom: 14px; text-align: center; position: relative;">
+          <!-- Top Citizen Status Banner (Only Name & Phone Number) -->
+          <div style="background: var(--black-subtle); border: 1px solid var(--burgundy-border); border-radius: 16px; padding: 24px 16px; margin-bottom: 16px; text-align: center; position: relative;">
             <div style="position: absolute; top: 12px; right: 12px; font-size: 10px; color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 2px 8px; border-radius: 10px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
               <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span> Unlocked
             </div>
-            <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--burgundy-deep); border: 2px solid var(--burgundy-vivid); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #fff;" id="profile-badge-letter">K</div>
-            <h4 style="font-size: 16px; color: #fff; font-weight: 700;" id="profile-display-name">Kazi Rahman</h4>
-            <div id="profile-role-badge" style="display: none; font-size: 11px; color: #d4af37; font-weight: 700; margin-top: 3px;"></div>
-            <p style="font-size: 13px; color: #cbd5e1; font-weight: 600; margin-top: 4px; font-family: monospace; letter-spacing: 0.5px;" id="profile-display-phone">+880 1712-345678</p>
-            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 10px;">
-              <div id="profile-status-badge" style="display: inline-block; font-size: 10px; color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16,185,129,0.3); padding: 2px 8px; border-radius: 12px;">
-                <i class="fas fa-check-shield"></i> Verified BD Citizen (NID Linked)
-              </div>
-              <div style="display: inline-flex; align-items: center; gap: 5px; font-size: 10px; color: #38bdf8; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); padding: 2px 8px; border-radius: 12px;">
-                <i class="fab fa-google-drive"></i> 5TB Cloud Vault Synced
-              </div>
-            </div>
-          </div>
-
-          <!-- Emergency Circle (Father, Mother, Guardian) -->
-          <div style="background: rgba(15, 11, 16, 0.95); border: 1px solid var(--burgundy-border); border-radius: 16px; padding: 14px; margin-bottom: 14px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <i class="fas fa-users-viewfinder" style="color: var(--danger-crimson); font-size: 14px;"></i>
-                <span style="font-size: 12.5px; font-weight: 700; color: #fff;">Emergency Family Circle</span>
-              </div>
-              <button type="button" onclick="toggleQuickContactsEditor()" style="background: rgba(185, 28, 28, 0.2); border: 1px solid rgba(185, 28, 28, 0.4); color: #fca5a5; font-size: 11px; padding: 4px 9px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                <i class="fas fa-pen-to-square"></i> <span id="btn-toggle-edit-text">Edit Contacts</span>
-              </button>
-            </div>
-            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.35;">
-              Father, Mother, and Guardian receive live SOS alerts with your coordinates:
-            </p>
-
-            <!-- 3 Emergency Circle Rows -->
-            <div id="profile-emergency-circle-list">
-              <!-- Dynamically populated by updateProfileCircleUI() -->
-            </div>
-
-            <!-- Inline Quick Contacts Editor (Collapsible) -->
-            <form id="profile-quick-contacts-editor" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-quiet);" onsubmit="handleSaveQuickContacts(event)">
-              <div style="font-size: 11.5px; font-weight: 700; color: #e5e7eb; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
-                <i class="fas fa-shield-cat" style="color: #60a5fa;"></i> Configure 11-Digit Numbers (01XXXXXXXXX)
-              </div>
-
-              <!-- Father -->
-              <div class="form-group" style="margin-bottom: 8px;">
-                <label class="form-label" style="font-size: 11px; margin-bottom: 3px;">👨 Father's Mobile Number</label>
-                <div class="input-field-wrap" style="padding: 7px 10px;">
-                  <span class="prefix-bd" style="font-size: 11.5px;">+880</span>
-                  <input type="tel" class="form-input" id="profile-input-father" placeholder="01XXXXXXXXX" style="font-size: 12px;">
-                </div>
-              </div>
-
-              <!-- Mother -->
-              <div class="form-group" style="margin-bottom: 8px;">
-                <label class="form-label" style="font-size: 11px; margin-bottom: 3px;">👩 Mother's Mobile Number</label>
-                <div class="input-field-wrap" style="padding: 7px 10px;">
-                  <span class="prefix-bd" style="font-size: 11.5px;">+880</span>
-                  <input type="tel" class="form-input" id="profile-input-mother" placeholder="01XXXXXXXXX" style="font-size: 12px;">
-                </div>
-              </div>
-
-              <!-- Guardian -->
-              <div class="form-group" style="margin-bottom: 10px;">
-                <label class="form-label" style="font-size: 11px; margin-bottom: 3px;">🛡️ Guardian's Mobile Number</label>
-                <div class="input-field-wrap" style="padding: 7px 10px;">
-                  <span class="prefix-bd" style="font-size: 11.5px;">+880</span>
-                  <input type="tel" class="form-input" id="profile-input-guardian" placeholder="01XXXXXXXXX" style="font-size: 12px;">
-                </div>
-              </div>
-
-              <button type="submit" class="btn-submit-action" id="btn-save-quick-contacts" style="padding: 10px; font-size: 12px; margin-top: 4px;">
-                <i class="fas fa-cloud-arrow-up"></i> Save &amp; Sync to 5TB Cloud Vault
-              </button>
-            </form>
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--burgundy-deep); border: 2px solid var(--burgundy-vivid); margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #fff;" id="profile-badge-letter">C</div>
+            <h4 style="font-size: 18px; color: #fff; font-weight: 700; margin: 0 0 6px 0;" id="profile-display-name">Citizen</h4>
+            <p style="font-size: 13.5px; color: #cbd5e1; font-weight: 600; margin: 0; font-family: monospace; letter-spacing: 0.5px;" id="profile-display-phone">+880 17XXXXXXXX</p>
           </div>
 
           <!-- Account Security / Change Password (Collapsible) -->
@@ -2207,7 +2139,7 @@
             </div>
             <div>
               <div style="font-size: 12.5px; font-weight: 700; color: #fca5a5;">CITIZEN PROFILE LOCKED</div>
-              <div style="font-size: 11px; color: var(--text-muted); line-height: 1.35; margin-top: 2px;">Profiles are password-protected. Enter credentials to unlock your emergency circle and 5TB vault data.</div>
+              <div style="font-size: 11px; color: var(--text-muted); line-height: 1.35; margin-top: 2px;">Profiles are password-protected. Enter credentials to unlock your profile.</div>
             </div>
           </div>
 
@@ -2349,7 +2281,7 @@
           <!-- 3. CREATE ACCOUNT (SIGNUP) FORM -->
           <form id="form-signup" style="display: none;" onsubmit="handleSignupSubmit(event)">
             <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.45;">
-              Create your citizen profile with a secure password. Your emergency circle and profile data will be locked and backed up to the 5TB Cloud Vault.
+              Create your citizen profile with a secure password to unlock personalized emergency protection.
             </div>
             <div class="form-group">
               <label class="form-label">Bangladeshi Mobile Number</label>
@@ -2389,8 +2321,8 @@
               </div>
             </div>
 
-            <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; font-size: 11px; color: #93c5fd; line-height: 1.4;">
-              <i class="fab fa-google-drive" style="color: #38bdf8;"></i> <strong>Zero Data Loss:</strong> Your emergency contacts (Father, Mother, Guardian) are permanently stored and mirrored to our 5TB Google Drive Vault.
+            <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; font-size: 11px; color: #a7f3d0; line-height: 1.4;">
+              <i class="fas fa-shield-halved" style="color: #10b981;"></i> <strong>Citizen Privacy:</strong> Your profile credentials and safety data are protected with end-to-end cryptographic hashing.
             </div>
 
             <button type="submit" class="btn-submit-action" id="btn-signup-submit">
@@ -3228,6 +3160,12 @@
         const saved = localStorage.getItem('safe_bd_user');
         if (saved) {
           currentUser = JSON.parse(saved);
+          const cleanPhone = String(currentUser.phone || '').replace(/\D/g, '').slice(-10);
+          if (cleanPhone !== '1316750712' && currentUser.name && currentUser.name.toUpperCase().includes('SAAD RIZWAN')) {
+            currentUser.name = 'Citizen';
+            currentUser.isFounder = false;
+            try { localStorage.setItem('safe_bd_user', JSON.stringify(currentUser)); } catch(e) {}
+          }
           setLoggedInState();
           loadUserContacts(currentUser);
         } else {
@@ -5699,7 +5637,7 @@
         document.getElementById('view-profile-active').style.display = 'block';
         const titleEl = document.getElementById('auth-title');
         if (titleEl) titleEl.innerText = "Citizen Profile (Unlocked)";
-        updateProfileCircleUI();
+        setLoggedInState();
       } else {
         if (typeof hideAuthError === 'function') hideAuthError();
         document.getElementById('view-auth-forms').style.display = 'block';
@@ -5974,6 +5912,11 @@
         .then(data => {
           if (data && data.success && data.user) {
             currentUser = data.user;
+            const cleanPhone = String(currentUser.phone || '').replace(/\D/g, '').slice(-10);
+            if (cleanPhone !== '1316750712' && currentUser.name && currentUser.name.toUpperCase().includes('SAAD RIZWAN')) {
+              currentUser.name = 'Citizen';
+              currentUser.isFounder = false;
+            }
             localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
             loadUserContacts(currentUser);
             setLoggedInState();
@@ -5990,6 +5933,12 @@
           } else if (savedUser) {
             try {
               currentUser = JSON.parse(savedUser);
+              const cleanPhone = String(currentUser.phone || '').replace(/\D/g, '').slice(-10);
+              if (cleanPhone !== '1316750712' && currentUser.name && currentUser.name.toUpperCase().includes('SAAD RIZWAN')) {
+                currentUser.name = 'Citizen';
+                currentUser.isFounder = false;
+                localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+              }
               loadUserContacts(currentUser);
               setLoggedInState();
             } catch(e) {
@@ -6184,11 +6133,15 @@
         // Direct Sign In Authenticated by Backend
         if (data.user) {
           currentUser = data.user;
+          const cleanUserPhone = String(currentUser.phone || cleanPhone).replace(/\D/g, '').slice(-10);
+          if (cleanUserPhone !== '1316750712' && currentUser.name && currentUser.name.toUpperCase().includes('SAAD RIZWAN')) {
+            currentUser.name = 'Citizen';
+            currentUser.isFounder = false;
+          }
           localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
           if (data.token) localStorage.setItem('safe_bd_token', data.token);
           loadUserContacts(currentUser);
           setLoggedInState();
-          updateProfileCircleUI();
 
           document.getElementById('view-auth-forms').style.display = 'none';
           document.getElementById('view-profile-active').style.display = 'block';
@@ -6202,7 +6155,7 @@
             alert(`🛡️ Profile Unlocked: Welcome Chief Admin!\nAdmin Command Portal unlocked. Opening Moderation Queue.`);
             openAdminPortal();
           } else {
-            alert(`🔓 Profile Unlocked Successfully!\n\nWelcome back, ${currentUser.name}!\nRegistered Mobile: +880 ${cleanPhone}\n\nYour emergency circle (Father, Mother, Guardian) is unlocked and synced with the 5TB Cloud Vault.`);
+            alert(`🔓 Profile Unlocked Successfully!\n\nWelcome back, ${currentUser.name}!\nRegistered Mobile: +880 ${cleanPhone}`);
           }
         }
       })
@@ -7816,14 +7769,13 @@
         localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
         loadUserContacts(currentUser);
         setLoggedInState();
-        updateProfileCircleUI();
 
         document.getElementById('view-auth-forms').style.display = 'none';
         document.getElementById('view-profile-active').style.display = 'block';
         const titleEl = document.getElementById('auth-title');
         if (titleEl) titleEl.innerText = "Citizen Profile (Unlocked)";
 
-        alert(`🎉 Citizen Profile Created & Unlocked!\n\nWelcome, ${currentUser.name}!\nMobile: +880 ${cleanPhone}\nStatus: Verified BD Citizen (NID Linked)\n\nYour emergency circle (Father, Mother, Guardian) is initialized and permanently backed up to your 5TB Google Drive Vault.`);
+        alert(`🎉 Citizen Profile Created & Unlocked!\n\nWelcome, ${currentUser.name}!\nMobile: +880 ${cleanPhone}`);
       })
       .catch(err => {
         if (submitBtn) {
@@ -7841,42 +7793,42 @@
     }
 
     function setLoggedInState() {
-      const isFounder = (currentUser.name && currentUser.name.toUpperCase().includes('SAAD RIZWAN')) || currentUser.isFounder;
-      document.getElementById('profile-display-name').innerText = currentUser.name;
-      document.getElementById('profile-display-phone').innerText = currentUser.displayPhone || currentUser.phone;
-      document.getElementById('profile-badge-letter').innerText = isFounder ? "SR" : currentUser.name.charAt(0).toUpperCase();
+      if (!currentUser) return;
 
-      const roleBadge = document.getElementById('profile-role-badge');
-      if (roleBadge) {
-        if (isFounder) {
-          roleBadge.style.display = 'block';
-          roleBadge.innerHTML = '<i class="fas fa-crown" style="color: #d4af37;"></i> Founder &amp; CEO, SAFE bd';
-        } else {
-          roleBadge.style.display = 'none';
-        }
+      const cleanPhone = String(currentUser.phone || '').replace(/\D/g, '').slice(-10);
+      const isChiefAdmin = cleanPhone === '1316750712';
+
+      // Strict Founder Identity Isolation: Only phone 01316750712 can be SAAD RIZWAN!
+      if (!isChiefAdmin && currentUser.name && currentUser.name.toUpperCase().includes('SAAD RIZWAN')) {
+        currentUser.name = 'Citizen';
+        currentUser.isFounder = false;
+        try {
+          localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+        } catch(e) {}
       }
 
-      const statusBadge = document.getElementById('profile-status-badge');
-      if (statusBadge) {
-        if (isFounder) {
-          statusBadge.innerHTML = '<i class="fas fa-certificate" style="color: #38bdf8;"></i> Founder &amp; Executive Command';
-          statusBadge.style.color = '#d4af37';
-          statusBadge.style.borderColor = 'rgba(212, 175, 55, 0.4)';
-          statusBadge.style.background = 'rgba(212, 175, 55, 0.12)';
-        } else {
-          statusBadge.innerHTML = '<i class="fas fa-check-shield"></i> Verified BD Citizen (NID Linked)';
-          statusBadge.style.color = '#10b981';
-          statusBadge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
-          statusBadge.style.background = 'rgba(16, 185, 129, 0.15)';
-        }
+      const displayName = currentUser.name || "Citizen";
+      const displayPhone = currentUser.displayPhone || (cleanPhone ? `+880 ${cleanPhone}` : '');
+
+      const nameEl = document.getElementById('profile-display-name');
+      if (nameEl) nameEl.innerText = displayName;
+
+      const phoneEl = document.getElementById('profile-display-phone');
+      if (phoneEl) phoneEl.innerText = displayPhone;
+
+      const badgeLetterEl = document.getElementById('profile-badge-letter');
+      if (badgeLetterEl) {
+        badgeLetterEl.innerText = isChiefAdmin ? "SR" : (displayName ? displayName.charAt(0).toUpperCase() : "C");
       }
 
-      document.getElementById('top-profile-btn').classList.add('logged-in');
-      document.getElementById('profile-icon').className = isFounder ? "fas fa-crown" : (currentUser.isAdmin ? "fas fa-shield-halved" : "fas fa-user-check");
+      const topProfileBtn = document.getElementById('top-profile-btn');
+      if (topProfileBtn) topProfileBtn.classList.add('logged-in');
 
-      if (typeof updateProfileCircleUI === 'function') {
-        updateProfileCircleUI();
+      const profileIcon = document.getElementById('profile-icon');
+      if (profileIcon) {
+        profileIcon.className = isChiefAdmin ? "fas fa-crown" : (currentUser.isAdmin ? "fas fa-shield-halved" : "fas fa-user-check");
       }
+
       if (typeof updateWalkUserBadge === 'function') {
         updateWalkUserBadge();
       }
@@ -7884,7 +7836,7 @@
       // Toggle Admin UI elements
       const adminNavBtn = document.getElementById('nav-btn-admin');
       const adminProfileBtn = document.getElementById('admin-portal-profile-btn');
-      if (currentUser.isAdmin) {
+      if (currentUser.isAdmin || isChiefAdmin) {
         if (adminNavBtn) {
           adminNavBtn.innerHTML = '<i class="fas fa-gavel"></i> Admin';
           adminNavBtn.style.display = 'block';
