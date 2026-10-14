@@ -510,23 +510,25 @@
       top: calc(100% + 5px);
       left: 0;
       right: 0;
-      max-height: 250px;
+      max-height: 290px;
       overflow-y: auto;
       background: #141018;
       border: 1px solid var(--burgundy-border);
       border-radius: 12px;
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.95);
       z-index: 500;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(225, 29, 72, 0.4) transparent;
     }
     .location-dropdown-popup.open {
       display: block;
     }
     .location-suggestion-item {
-      padding: 10px 14px;
+      padding: 9px 12px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       cursor: pointer;
       transition: background 0.15s;
     }
@@ -536,15 +538,34 @@
     .location-suggestion-item:hover, .location-suggestion-item:active {
       background: var(--burgundy-tint);
     }
-    .location-suggestion-item i {
-      font-size: 14px;
-      color: #ef4444;
+    .sug-icon-box {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
+      font-size: 13px;
+    }
+    .sug-primary-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
     }
     .sug-primary {
       font-size: 12.5px;
       font-weight: 600;
       color: #fff;
+    }
+    .sug-cat-pill {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
     .sug-secondary {
       font-size: 10.5px;
@@ -562,6 +583,17 @@
       border-radius: 8px;
       white-space: nowrap;
       font-weight: 600;
+      flex-shrink: 0;
+    }
+    .location-searching-indicator {
+      padding: 8px 12px;
+      font-size: 10.5px;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .walk-action-btns {
@@ -2342,54 +2374,147 @@
     // BANGLADESH LOCATIONS DATABASE
     // =========================================================================
     const BANGLADESH_LOCATIONS = [
-      { name: "Shantinagar", area: "Dhaka Central (Twin Towers / Rajarbagh)", query: "Shantinagar, Dhaka, Bangladesh", lat: 23.7388, lon: 90.4143 },
-      { name: "Baily Road", area: "Dhaka Central", query: "Baily Road, Dhaka, Bangladesh", lat: 23.7408, lon: 90.4079 },
-      { name: "Kakrail", area: "Dhaka Central", query: "Kakrail, Dhaka, Bangladesh", lat: 23.7369, lon: 90.4093 },
-      { name: "Malibagh", area: "Dhaka Central", query: "Malibagh, Dhaka, Bangladesh", lat: 23.7471, lon: 90.4158 },
-      { name: "Rajarbagh", area: "Dhaka Central", query: "Rajarbagh, Dhaka, Bangladesh", lat: 23.7375, lon: 90.4180 },
-      { name: "Moghbazar", area: "Dhaka Central", query: "Moghbazar, Dhaka, Bangladesh", lat: 23.7490, lon: 90.4036 },
-      { name: "Banani", area: "Dhaka North", query: "Banani, Dhaka, Bangladesh", lat: 23.7937, lon: 90.4066 },
-      { name: "Gulshan 1", area: "Dhaka North", query: "Gulshan 1, Dhaka, Bangladesh", lat: 23.7785, lon: 90.4172 },
-      { name: "Gulshan 2", area: "Dhaka North", query: "Gulshan 2, Dhaka, Bangladesh", lat: 23.7925, lon: 90.4162 },
-      { name: "Dhanmondi 27", area: "Dhaka South", query: "Dhanmondi 27, Dhaka, Bangladesh", lat: 23.7538, lon: 90.3768 },
-      { name: "Dhanmondi 32", area: "Dhaka South", query: "Dhanmondi 32, Dhaka, Bangladesh", lat: 23.7508, lon: 90.3792 },
-      { name: "Dhanmondi Lake", area: "Dhaka South", query: "Dhanmondi Lake, Dhaka, Bangladesh", lat: 23.7460, lon: 90.3780 },
-      { name: "Jamuna Future Park", area: "Kuril, Pragati Sarani, Dhaka", query: "Jamuna Future Park, Ka-244, Pragati Sarani, Dhaka, Bangladesh", lat: 23.8135, lon: 90.4242 },
-      { name: "Bashundhara City Shopping Mall", area: "Panthapath, Dhaka", query: "Bashundhara City, Panthapath, Dhaka, Bangladesh", lat: 23.7508, lon: 90.3905 },
-      { name: "Bashundhara R/A", area: "Dhaka North", query: "Bashundhara Residential Area, Dhaka, Bangladesh", lat: 23.8162, lon: 90.4287 },
-      { name: "Evercare Hospital", area: "Bashundhara R/A, Dhaka", query: "Evercare Hospital Dhaka, Plot 81, Block E, Bashundhara R/A, Dhaka", lat: 23.8105, lon: 90.4312 },
-      { name: "Uttara Sector 3", area: "Dhaka North", query: "Uttara Sector 3, Dhaka, Bangladesh", lat: 23.8687, lon: 90.3995 },
-      { name: "Uttara Sector 11", area: "Dhaka North", query: "Uttara Sector 11, Dhaka, Bangladesh", lat: 23.8795, lon: 90.3887 },
-      { name: "Mirpur 1", area: "Dhaka North", query: "Mirpur 1, Dhaka, Bangladesh", lat: 23.7956, lon: 90.3537 },
-      { name: "Mirpur 10", area: "Dhaka North", query: "Mirpur 10, Dhaka, Bangladesh", lat: 23.8069, lon: 90.3687 },
-      { name: "Mohakhali", area: "Dhaka North", query: "Mohakhali, Dhaka, Bangladesh", lat: 23.7776, lon: 90.4005 },
-      { name: "Badda", area: "Dhaka North", query: "Badda, Dhaka, Bangladesh", lat: 23.7806, lon: 90.4267 },
-      { name: "Farmgate", area: "Dhaka Central", query: "Farmgate, Dhaka, Bangladesh", lat: 23.7570, lon: 90.3892 },
-      { name: "Shahbag", area: "Dhaka Central", query: "Shahbag, Dhaka, Bangladesh", lat: 23.7380, lon: 90.3957 },
-      { name: "Dhaka University Campus", area: "Dhaka South", query: "University of Dhaka, Nilkhet Rd, Dhaka, Bangladesh", lat: 23.7297, lon: 90.3993 },
-      { name: "Motijheel", area: "Commercial District", query: "Motijheel, Dhaka, Bangladesh", lat: 23.7330, lon: 90.4172 },
-      { name: "Mohammadpur", area: "Dhaka West", query: "Mohammadpur, Dhaka, Bangladesh", lat: 23.7658, lon: 90.3585 },
-      { name: "Old Dhaka (Lalbagh Fort)", area: "Dhaka South", query: "Lalbagh Fort, Lalbagh, Dhaka, Bangladesh", lat: 23.7189, lon: 90.3881 },
-      { name: "Puran Dhaka (Sadarghat)", area: "Dhaka South", query: "Sadarghat, Dhaka, Bangladesh", lat: 23.7047, lon: 90.4125 },
-      { name: "Purbachal 300 Feet Expressway", area: "Dhaka East", query: "Purbachal Expressway, Dhaka, Bangladesh", lat: 23.8242, lon: 90.4578 },
-      { name: "Hazrat Shahjalal International Airport", area: "Kurmitola, Dhaka", query: "Hazrat Shahjalal International Airport, Dhaka, Bangladesh", lat: 23.8433, lon: 90.4031 },
-      { name: "Chattogram (GEC Circle)", area: "Chattogram City", query: "GEC Circle, Chattogram, Bangladesh", lat: 22.3592, lon: 91.8216 },
-      { name: "Chattogram (Agrabad)", area: "Chattogram Commercial", query: "Agrabad, Chattogram, Bangladesh", lat: 22.3243, lon: 91.8122 },
-      { name: "Cox's Bazar Sea Beach", area: "Chattogram Division", query: "Cox's Bazar Beach, Bangladesh", lat: 21.4272, lon: 91.9702 },
-      { name: "Sylhet (Zindabazar)", area: "Sylhet City", query: "Zinda Bazar, Sylhet, Bangladesh", lat: 24.8968, lon: 91.8687 },
-      { name: "Shahjalal Dargah", area: "Sylhet", query: "Hazrat Shahjalal Mazar Sharif, Sylhet, Bangladesh", lat: 24.9025, lon: 91.8708 },
-      { name: "Rajshahi (Zero Point)", area: "Rajshahi Division", query: "Zero Point, Rajshahi, Bangladesh", lat: 24.3636, lon: 88.6241 },
-      { name: "Khulna (Shibbari)", area: "Khulna Division", query: "Shibbari More, Khulna, Bangladesh", lat: 22.8228, lon: 89.5539 },
-      { name: "Barishal (Sadar)", area: "Barishal Division", query: "Barishal Sadar, Bangladesh", lat: 22.7010, lon: 90.3535 },
-      { name: "Rangpur (Dhap)", area: "Rangpur Division", query: "Dhap, Rangpur, Bangladesh", lat: 25.7584, lon: 89.2467 },
-      { name: "Mymensingh (Ganginarpar)", area: "Mymensingh Division", query: "Ganginarpar, Mymensingh, Bangladesh", lat: 24.7570, lon: 90.4072 },
-      { name: "Cumilla (Kandirpar)", area: "Chattogram Division", query: "Kandirpar, Cumilla, Bangladesh", lat: 23.4607, lon: 91.1809 },
-      { name: "Narayanganj (Chashara)", area: "Dhaka Division", query: "Chashara, Narayanganj, Bangladesh", lat: 23.6238, lon: 90.4990 },
-      { name: "Gazipur (Chowrasta)", area: "Dhaka Division", query: "Gazipur Chowrasta, Bangladesh", lat: 23.9999, lon: 90.3800 },
-      { name: "Savar (Bus Stand)", area: "Dhaka Division", query: "Savar Bus Stand, Savar, Bangladesh", lat: 23.8443, lon: 90.2582 },
-      { name: "Jahangirnagar University", area: "Savar, Dhaka", query: "Jahangirnagar University, Savar, Bangladesh", lat: 23.8814, lon: 90.2673 },
-      { name: "Bogura (Saatmatha)", area: "Rajshahi Division", query: "Satmatha, Bogura, Bangladesh", lat: 24.8510, lon: 89.3730 },
-      { name: "Jessore (Chowrasta)", area: "Khulna Division", query: "Jessore, Bangladesh", lat: 23.1664, lon: 89.2081 }
+      // --- DHANMONDI & SURROUNDINGS ---
+      { name: "Dhanmondi 27", area: "Dhaka South", query: "Dhanmondi 27, Dhaka, Bangladesh", lat: 23.7538, lon: 90.3768, category: "area", keywords: "dhanmondi 27 rapa plaza meenabazar satmasjid road" },
+      { name: "Dhanmondi 32", area: "Dhaka South", query: "Dhanmondi 32, Dhaka, Bangladesh", lat: 23.7508, lon: 90.3792, category: "area", keywords: "dhanmondi 32 lake bridge museum" },
+      { name: "Dhanmondi 8/A", area: "Dhaka South", query: "Dhanmondi 8/A, Dhaka, Bangladesh", lat: 23.7485, lon: 90.3752, category: "area", keywords: "dhanmondi 8a 8/a anondo confectionary" },
+      { name: "Dhanmondi 15 (Old 28)", area: "Dhaka South", query: "Dhanmondi 15, Dhaka, Bangladesh", lat: 23.7515, lon: 90.3725, category: "area", keywords: "dhanmondi 15 star kabab satmasjid road" },
+      { name: "Dhanmondi 4", area: "Dhaka South", query: "Dhanmondi 4, Dhaka, Bangladesh", lat: 23.7420, lon: 90.3820, category: "area", keywords: "dhanmondi 4 labaid science lab" },
+      { name: "Dhanmondi Lake & Rabindra Sarobar", area: "Dhaka South", query: "Dhanmondi Lake, Dhaka, Bangladesh", lat: 23.7460, lon: 90.3780, category: "park", keywords: "dhanmondi lake rabindra sarobar amphitheater" },
+      { name: "Shimanto Shambhar / Square", area: "Pilkhana, Dhanmondi, Dhaka", query: "Shimanto Shambhar, Dhanmondi, Dhaka", lat: 23.7380, lon: 90.3812, category: "mall", keywords: "shimanto square shambhar bgb star cineplex" },
+      { name: "Labaid Specialized Hospital", area: "Dhanmondi 4, Dhaka", query: "Labaid Hospital, Dhanmondi, Dhaka", lat: 23.7415, lon: 90.3825, category: "hospital", keywords: "labaid hospital cardiac specialized dhanmondi" },
+      { name: "Ibn Sina Hospital Dhanmondi", area: "Road 15, Dhanmondi, Dhaka", query: "Ibn Sina Hospital, Dhanmondi, Dhaka", lat: 23.7495, lon: 90.3730, category: "hospital", keywords: "ibn sina diagnostic hospital dhanmondi" },
+
+      // --- GULSHAN, BANANI & BARIDHARA ---
+      { name: "Gulshan 1 Circle", area: "Dhaka North", query: "Gulshan 1 Circle, Dhaka, Bangladesh", lat: 23.7785, lon: 90.4172, category: "area", keywords: "gulshan 1 circle dcc market navana" },
+      { name: "Gulshan 2 Circle", area: "Dhaka North", query: "Gulshan 2 Circle, Dhaka, Bangladesh", lat: 23.7925, lon: 90.4162, category: "area", keywords: "gulshan 2 circle pink city westin hotel" },
+      { name: "Gulshan Avenue", area: "Dhaka North", query: "Gulshan Avenue, Dhaka, Bangladesh", lat: 23.7850, lon: 90.4168, category: "street", keywords: "gulshan avenue corporate street" },
+      { name: "Police Plaza Concord", area: "Gulshan 1 (Hatirjheel Bridge), Dhaka", query: "Police Plaza Concord, Gulshan 1, Dhaka", lat: 23.7735, lon: 90.4140, category: "mall", keywords: "police plaza concord shopping mall hatirjheel" },
+      { name: "Banani Road 11", area: "Dhaka North", query: "Road 11, Banani, Dhaka, Bangladesh", lat: 23.7942, lon: 90.4045, category: "street", keywords: "banani road 11 food street shopping" },
+      { name: "Kemal Ataturk Avenue", area: "Banani, Dhaka", query: "Kemal Ataturk Avenue, Banani, Dhaka", lat: 23.7937, lon: 90.4066, category: "street", keywords: "kemal ataturk avenue banani sheraton" },
+      { name: "Banani DOHS", area: "Dhaka North", query: "Banani DOHS, Dhaka, Bangladesh", lat: 23.7985, lon: 90.3980, category: "area", keywords: "banani dohs residential" },
+      { name: "United Hospital Gulshan", area: "Plot 15, Road 71, Gulshan 2, Dhaka", query: "United Hospital, Gulshan 2, Dhaka", lat: 23.7980, lon: 90.4175, category: "hospital", keywords: "united hospital gulshan 2 medical" },
+      { name: "Baridhara Diplomatic Zone", area: "Dhaka North", query: "Baridhara Diplomatic Zone, Dhaka, Bangladesh", lat: 23.7995, lon: 90.4215, category: "area", keywords: "baridhara diplomatic zone embassy" },
+      { name: "Baridhara DOHS", area: "Dhaka North", query: "Baridhara DOHS, Dhaka, Bangladesh", lat: 23.8115, lon: 90.4180, category: "area", keywords: "baridhara dohs residential cantonment" },
+
+      // --- UTTARA SECTORS & METRO ---
+      { name: "Uttara Sector 1", area: "Dhaka North (Near Airport)", query: "Uttara Sector 1, Dhaka, Bangladesh", lat: 23.8550, lon: 90.4010, category: "area", keywords: "uttara sector 1 airport road jashimuddin" },
+      { name: "Uttara Sector 3", area: "Dhaka North (Rajlaxmi)", query: "Uttara Sector 3, Dhaka, Bangladesh", lat: 23.8687, lon: 90.3995, category: "area", keywords: "uttara sector 3 rajlaxmi complex friends club" },
+      { name: "Uttara Sector 4 (Rabindra Sarani)", area: "Dhaka North", query: "Uttara Sector 4, Dhaka, Bangladesh", lat: 23.8695, lon: 90.4055, category: "area", keywords: "uttara sector 4 rabindra sarani restaurants" },
+      { name: "Uttara Sector 7 (Mascot Plaza)", area: "Dhaka North", query: "Uttara Sector 7, Dhaka, Bangladesh", lat: 23.8735, lon: 90.3980, category: "area", keywords: "uttara sector 7 mascot plaza azampur house building" },
+      { name: "Uttara Sector 9", area: "Dhaka North", query: "Uttara Sector 9, Dhaka, Bangladesh", lat: 23.8765, lon: 90.3990, category: "area", keywords: "uttara sector 9 modern medical" },
+      { name: "Uttara Sector 10", area: "Dhaka North", query: "Uttara Sector 10, Dhaka, Bangladesh", lat: 23.8820, lon: 90.3960, category: "area", keywords: "uttara sector 10 kamardhar bridge" },
+      { name: "Uttara Sector 11 (Gareeb-e-Nawaz)", area: "Dhaka North", query: "Uttara Sector 11, Dhaka, Bangladesh", lat: 23.8795, lon: 90.3887, category: "area", keywords: "uttara sector 11 gareeb e nawaz avenue zamzam tower" },
+      { name: "Uttara Sector 12", area: "Dhaka North", query: "Uttara Sector 12, Dhaka, Bangladesh", lat: 23.8805, lon: 90.3810, category: "area", keywords: "uttara sector 12 residential lake" },
+      { name: "Uttara Sector 13", area: "Dhaka North", query: "Uttara Sector 13, Dhaka, Bangladesh", lat: 23.8745, lon: 90.3835, category: "area", keywords: "uttara sector 13 residential" },
+      { name: "Uttara Sector 14", area: "Dhaka North", query: "Uttara Sector 14, Dhaka, Bangladesh", lat: 23.8680, lon: 90.3850, category: "area", keywords: "uttara sector 14 khalpar" },
+      { name: "Uttara House Building", area: "Dhaka North", query: "House Building, Uttara, Dhaka", lat: 23.8730, lon: 90.3990, category: "area", keywords: "house building uttara bus stop" },
+      { name: "Diabari (Uttara Sector 15)", area: "Dhaka North", query: "Diabari, Uttara, Dhaka, Bangladesh", lat: 23.8885, lon: 90.3720, category: "park", keywords: "diabari uttara 15 metro depot kashful" },
+
+      // --- DHAKA METRO RAIL (MRT LINE 6) STATIONS ---
+      { name: "Uttara North Metro Station", area: "Diabari, Uttara", query: "Uttara North Metro Station, Dhaka", lat: 23.8905, lon: 90.3745, category: "metro", keywords: "metro rail station uttara north diabari mrt 6" },
+      { name: "Uttara Center Metro Station", area: "Uttara, Dhaka", query: "Uttara Center Metro Station, Dhaka", lat: 23.8785, lon: 90.3770, category: "metro", keywords: "metro rail station uttara center mrt 6" },
+      { name: "Uttara South Metro Station", area: "Uttara, Dhaka", query: "Uttara South Metro Station, Dhaka", lat: 23.8665, lon: 90.3755, category: "metro", keywords: "metro rail station uttara south mrt 6" },
+      { name: "Pallabi Metro Station", area: "Pallabi, Mirpur, Dhaka", query: "Pallabi Metro Station, Mirpur, Dhaka", lat: 23.8260, lon: 90.3645, category: "metro", keywords: "metro rail station pallabi mirpur 12 mrt 6" },
+      { name: "Mirpur 11 Metro Station", area: "Mirpur 11, Dhaka", query: "Mirpur 11 Metro Station, Dhaka", lat: 23.8165, lon: 90.3665, category: "metro", keywords: "metro rail station mirpur 11 purobi mrt 6" },
+      { name: "Mirpur 10 Metro Station", area: "Mirpur 10 Circle, Dhaka", query: "Mirpur 10 Metro Station, Dhaka", lat: 23.8069, lon: 90.3687, category: "metro", keywords: "metro rail station mirpur 10 circle mrt 6" },
+      { name: "Kazipara Metro Station", area: "Kazipara, Mirpur, Dhaka", query: "Kazipara Metro Station, Dhaka", lat: 23.7975, lon: 90.3725, category: "metro", keywords: "metro rail station kazipara mrt 6" },
+      { name: "Shewrapara Metro Station", area: "Shewrapara, Mirpur, Dhaka", query: "Shewrapara Metro Station, Dhaka", lat: 23.7895, lon: 90.3745, category: "metro", keywords: "metro rail station shewrapara mrt 6" },
+      { name: "Agargaon Metro Station", area: "Agargaon, Dhaka", query: "Agargaon Metro Station, Dhaka", lat: 23.7760, lon: 90.3775, category: "metro", keywords: "metro rail station agargaon passport office mrt 6" },
+      { name: "Bijoy Sarani Metro Station", area: "Bijoy Sarani, Tejgaon, Dhaka", query: "Bijoy Sarani Metro Station, Dhaka", lat: 23.7665, lon: 90.3840, category: "metro", keywords: "metro rail station bijoy sarani military museum mrt 6" },
+      { name: "Farmgate Metro Station", area: "Farmgate, Dhaka", query: "Farmgate Metro Station, Dhaka", lat: 23.7570, lon: 90.3892, category: "metro", keywords: "metro rail station farmgate ananda mrt 6" },
+      { name: "Karwan Bazar Metro Station", area: "Karwan Bazar, Dhaka", query: "Karwan Bazar Metro Station, Dhaka", lat: 23.7510, lon: 90.3925, category: "metro", keywords: "metro rail station karwan bazar petrobangla mrt 6" },
+      { name: "Shahbagh Metro Station", area: "Shahbagh, Dhaka", query: "Shahbagh Metro Station, Dhaka", lat: 23.7380, lon: 90.3957, category: "metro", keywords: "metro rail station shahbagh bsmmu pg museum mrt 6" },
+      { name: "Dhaka University Metro Station", area: "TSC, Dhaka University", query: "Dhaka University Metro Station, Dhaka", lat: 23.7315, lon: 90.3965, category: "metro", keywords: "metro rail station dhaka university tsc curzon mrt 6" },
+      { name: "Bangladesh Secretariat Metro Station", area: "Press Club, Dhaka", query: "Secretariat Metro Station, Dhaka", lat: 23.7280, lon: 90.4075, category: "metro", keywords: "metro rail station bangladesh secretariat press club mrt 6" },
+      { name: "Motijheel Metro Station", area: "Motijheel Shapla Chottor, Dhaka", query: "Motijheel Metro Station, Dhaka", lat: 23.7330, lon: 90.4172, category: "metro", keywords: "metro rail station motijheel shapla chottor mrt 6" },
+
+      // --- MIRPUR REGION ---
+      { name: "Mirpur 1", area: "Dhaka North", query: "Mirpur 1, Dhaka, Bangladesh", lat: 23.7956, lon: 90.3537, category: "area", keywords: "mirpur 1 muktodhara sony square mazar" },
+      { name: "Mirpur 2", area: "Dhaka North", query: "Mirpur 2, Dhaka, Bangladesh", lat: 23.8020, lon: 90.3615, category: "area", keywords: "mirpur 2 commerce college national zoo road" },
+      { name: "Mirpur 10 Circle", area: "Dhaka North", query: "Mirpur 10, Dhaka, Bangladesh", lat: 23.8069, lon: 90.3687, category: "area", keywords: "mirpur 10 circle round stadium benarasipolli" },
+      { name: "Mirpur 12 Bus Stand", area: "Dhaka North", query: "Mirpur 12, Dhaka, Bangladesh", lat: 23.8245, lon: 90.3635, category: "area", keywords: "mirpur 12 bus stand pallabi" },
+      { name: "Mirpur 14", area: "Dhaka North", query: "Mirpur 14, Dhaka, Bangladesh", lat: 23.7985, lon: 90.3840, category: "area", keywords: "mirpur 14 dental college cantonment police lines" },
+      { name: "Mirpur DOHS", area: "Dhaka North", query: "Mirpur DOHS, Dhaka, Bangladesh", lat: 23.8340, lon: 90.3670, category: "area", keywords: "mirpur dohs residential lake" },
+      { name: "Sher-e-Bangla National Cricket Stadium", area: "Mirpur 2, Dhaka", query: "Sher-e-Bangla National Cricket Stadium, Mirpur, Dhaka", lat: 23.8068, lon: 90.3635, category: "landmark", keywords: "mirpur stadium cricket national ground" },
+      { name: "Bangladesh National Zoo", area: "Mirpur 1, Dhaka", query: "Bangladesh National Zoo, Mirpur, Dhaka", lat: 23.8125, lon: 90.3475, category: "park", keywords: "national zoo mirpur chiriakhana botanical garden" },
+
+      // --- BASHUNDHARA, KURIL & AIRPORT ---
+      { name: "Bashundhara R/A (Gate / Block C, D)", area: "Dhaka North", query: "Bashundhara Residential Area, Dhaka, Bangladesh", lat: 23.8162, lon: 90.4287, category: "area", keywords: "bashundhara ra residential area block c d f i" },
+      { name: "Jamuna Future Park", area: "Kuril, Pragati Sarani, Dhaka", query: "Jamuna Future Park, Ka-244, Pragati Sarani, Dhaka, Bangladesh", lat: 23.8135, lon: 90.4242, category: "mall", keywords: "jamuna future park jfp shopping mall kuril cineplex" },
+      { name: "Evercare Hospital Dhaka", area: "Plot 81, Block E, Bashundhara R/A", query: "Evercare Hospital Dhaka, Bashundhara R/A, Dhaka", lat: 23.8105, lon: 90.4312, category: "hospital", keywords: "evercare hospital apollo bashundhara medical" },
+      { name: "North South University (NSU)", area: "Plot 15, Block B, Bashundhara R/A", query: "North South University, Bashundhara, Dhaka", lat: 23.8150, lon: 90.4255, category: "university", keywords: "north south university nsu bashundhara" },
+      { name: "Independent University Bangladesh (IUB)", area: "Plot 16, Block B, Bashundhara R/A", query: "Independent University Bangladesh, Bashundhara, Dhaka", lat: 23.8160, lon: 90.4270, category: "university", keywords: "iub independent university bashundhara" },
+      { name: "AIUB (American International University)", area: "Kuratoli, Khilkhet, Dhaka", query: "AIUB, 408/1, Kuratoli, Khilkhet, Dhaka", lat: 23.8220, lon: 90.4275, category: "university", keywords: "aiub american international university kuratoli" },
+      { name: "BRAC University New Campus", area: "Kha-224, Bir Uttam Rafiqul Islam Ave, Merul Badda", query: "BRAC University, Merul Badda, Dhaka", lat: 23.7735, lon: 90.4255, category: "university", keywords: "brac university new green campus merul badda" },
+      { name: "Hazrat Shahjalal International Airport (Terminal 1 & 2)", area: "Kurmitola, Dhaka", query: "Hazrat Shahjalal International Airport, Dhaka, Bangladesh", lat: 23.8433, lon: 90.4031, category: "airport", keywords: "airport shahjalal terminal 1 2 international flight" },
+      { name: "Shahjalal Airport Terminal 3", area: "Kurmitola, Dhaka", query: "Terminal 3, Hazrat Shahjalal International Airport, Dhaka", lat: 23.8475, lon: 90.4075, category: "airport", keywords: "terminal 3 new airport shahjalal aviation" },
+      { name: "Airport Railway Station", area: "Dakshin Khan, Dhaka", query: "Airport Railway Station, Dhaka", lat: 23.8520, lon: 90.4080, category: "transit", keywords: "airport railway station train biman bondor" },
+      { name: "Purbachal 300 Feet Expressway", area: "Kuril - Kanchan Bridge, Dhaka", query: "Purbachal Expressway, Dhaka, Bangladesh", lat: 23.8242, lon: 90.4578, category: "highway", keywords: "purbachal 300 feet expressway nilgonj kanchan bridge" },
+
+      // --- MOHAKHALI, BADDA, RAMPURA & HATIRJHEEL ---
+      { name: "Mohakhali Flyover & Bus Terminal", area: "Dhaka North", query: "Mohakhali, Dhaka, Bangladesh", lat: 23.7776, lon: 90.4005, category: "transit", keywords: "mohakhali flyover inter district bus terminal icddrb" },
+      { name: "Mohakhali DOHS", area: "Dhaka North", query: "Mohakhali DOHS, Dhaka, Bangladesh", lat: 23.7790, lon: 90.3925, category: "area", keywords: "mohakhali dohs residential raowa club" },
+      { name: "Badda (Link Road / Pragati Sarani)", area: "Dhaka North", query: "Badda, Dhaka, Bangladesh", lat: 23.7806, lon: 90.4267, category: "area", keywords: "badda link road middle badda north badda" },
+      { name: "Hatirjheel Promenade & Amphitheatre", area: "Dhaka Central", query: "Hatirjheel, Dhaka, Bangladesh", lat: 23.7680, lon: 90.4120, category: "park", keywords: "hatirjheel bridge lake water taxi amphitheatre modhubag" },
+      { name: "Rampura Bridge & BTV Bhaban", area: "Dhaka East", query: "Rampura Bridge, Dhaka, Bangladesh", lat: 23.7620, lon: 90.4230, category: "area", keywords: "rampura bridge btv center banasree road" },
+      { name: "Khilgaon Taltola Market", area: "Dhaka East", query: "Khilgaon Taltola, Dhaka, Bangladesh", lat: 23.7510, lon: 90.4235, category: "mall", keywords: "khilgaon taltola restaurant row food street" },
+      { name: "East West University (Aftabnagar)", area: "Aftabnagar, Rampura, Dhaka", query: "East West University, Aftabnagar, Dhaka", lat: 23.7685, lon: 90.4255, category: "university", keywords: "east west university ewu aftabnagar rampura" },
+      { name: "UIU (United International University)", area: "United City, Madani Avenue, Badda", query: "United International University, Madani Avenue, Dhaka", lat: 23.7975, lon: 90.4495, category: "university", keywords: "uiu united international university madani avenue 100 feet" },
+
+      // --- CENTRAL DHAKA & COMMERCIAL HUBS ---
+      { name: "Bashundhara City Shopping Mall", area: "Panthapath, Dhaka", query: "Bashundhara City, Panthapath, Dhaka, Bangladesh", lat: 23.7508, lon: 90.3905, category: "mall", keywords: "bashundhara city mall panthapath star cineplex" },
+      { name: "Square Hospital Panthapath", area: "18/F, Bir Uttam Qazi Nuruzzaman Sarak, Dhaka", query: "Square Hospital, Panthapath, Dhaka", lat: 23.7530, lon: 90.3875, category: "hospital", keywords: "square hospital panthapath green road medical" },
+      { name: "Farmgate (Ananda Cinema & Park)", area: "Dhaka Central", query: "Farmgate, Dhaka, Bangladesh", lat: 23.7570, lon: 90.3892, category: "transit", keywords: "farmgate footbridge ananda cinema khamarbari green road" },
+      { name: "Karwan Bazar", area: "Dhaka Central", query: "Karwan Bazar, Dhaka, Bangladesh", lat: 23.7510, lon: 90.3925, category: "area", keywords: "karwan bazar petrobangla tcb bhaban hasan plaza wholesale" },
+      { name: "Shahbagh Circle & BSMMU (PG)", area: "Dhaka Central", query: "Shahbag, Dhaka, Bangladesh", lat: 23.7380, lon: 90.3957, category: "hospital", keywords: "shahbagh bsmmu pg hospital birdem museum public library" },
+      { name: "University of Dhaka (TSC & Campus)", area: "Nilkhet Rd, Dhaka", query: "University of Dhaka, Nilkhet Rd, Dhaka, Bangladesh", lat: 23.7297, lon: 90.3993, category: "university", keywords: "dhaka university du tsc curzon hall central library rokeya" },
+      { name: "BUET Campus", area: "Palashi, Dhaka", query: "BUET, Palashi, Dhaka, Bangladesh", lat: 23.7265, lon: 90.3925, category: "university", keywords: "buet engineering university palashi engineering" },
+      { name: "Dhaka Medical College Hospital (DMCH)", area: "Bakshibazar, Dhaka", query: "Dhaka Medical College Hospital, Dhaka", lat: 23.7255, lon: 90.3980, category: "hospital", keywords: "dmch dhaka medical college hospital emergency" },
+      { name: "Motijheel Shapla Chottor", area: "Financial District, Dhaka", query: "Motijheel, Dhaka, Bangladesh", lat: 23.7330, lon: 90.4172, category: "area", keywords: "motijheel shapla chottor bangladesh bank sonali dse" },
+      { name: "Kamalapur Railway Station", area: "Motijheel, Dhaka", query: "Kamalapur Railway Station, Dhaka", lat: 23.7315, lon: 90.4255, category: "transit", keywords: "kamalapur railway station central train terminal" },
+      { name: "Baitul Mukarram National Mosque", area: "Paltan, Dhaka", query: "Baitul Mukarram, Paltan, Dhaka", lat: 23.7285, lon: 90.4125, category: "landmark", keywords: "baitul mukarram national mosque stadium paltan" },
+      { name: "Shantinagar (Twin Towers)", area: "Dhaka Central", query: "Shantinagar, Dhaka, Bangladesh", lat: 23.7388, lon: 90.4143, category: "area", keywords: "shantinagar twin towers concord chamelibagh" },
+      { name: "Baily Road", area: "Dhaka Central", query: "Baily Road, Dhaka, Bangladesh", lat: 23.7408, lon: 90.4079, category: "street", keywords: "baily road officers club natok para viqarunnisa" },
+      { name: "Moghbazar & Wireless Mor", area: "Dhaka Central", query: "Moghbazar, Dhaka, Bangladesh", lat: 23.7490, lon: 90.4036, category: "area", keywords: "moghbazar wireless flyover dilu road" },
+      { name: "Malibagh & Mouchak", area: "Dhaka Central", query: "Malibagh, Dhaka, Bangladesh", lat: 23.7471, lon: 90.4158, category: "mall", keywords: "malibagh mouchak market flyover abul hotel" },
+      { name: "New Market & Nilkhet", area: "Dhaka South", query: "New Market, Dhaka, Bangladesh", lat: 23.7335, lon: 90.3845, category: "mall", keywords: "new market nilkhet book market chandrima dhaka college" },
+      { name: "Elephant Road & Multiplan", area: "Dhaka Central", query: "Elephant Road, Dhaka, Bangladesh", lat: 23.7410, lon: 90.3865, category: "mall", keywords: "elephant road multiplan computer market bata signal" },
+
+      // --- WEST & OLD DHAKA ---
+      { name: "Mohammadpur Town Hall", area: "Dhaka West", query: "Mohammadpur Town Hall, Dhaka, Bangladesh", lat: 23.7658, lon: 90.3585, category: "area", keywords: "mohammadpur town hall krishi market tajmahal road" },
+      { name: "Mohammadpur Ring Road (Suchona)", area: "Dhaka West", query: "Ring Road, Mohammadpur, Dhaka", lat: 23.7715, lon: 90.3590, category: "street", keywords: "mohammadpur ring road suchona community center japan garden city" },
+      { name: "Shyamoli (Cinema Hall & Square)", area: "Mirpur Road, Dhaka", query: "Shyamoli, Dhaka, Bangladesh", lat: 23.7710, lon: 90.3670, category: "transit", keywords: "shyamoli square shyamoli cinema pongu hospital" },
+      { name: "Kalyanpur Bus Stand", area: "Mirpur Road, Dhaka", query: "Kalyanpur, Dhaka, Bangladesh", lat: 23.7790, lon: 90.3620, category: "transit", keywords: "kalyanpur bus stand inter district coaches" },
+      { name: "Gabtoli Bus Terminal", area: "Dhaka West", query: "Gabtoli Bus Terminal, Dhaka, Bangladesh", lat: 23.7845, lon: 90.3425, category: "transit", keywords: "gabtoli bus terminal cattle market mazar" },
+      { name: "Agargaon Passport Office", area: "Dhaka Central", query: "Agargaon, Dhaka, Bangladesh", lat: 23.7770, lon: 90.3785, category: "landmark", keywords: "agargaon passport office election commission biman bhaban" },
+      { name: "Jatiya Sangsad Bhaban (Parliament)", area: "Manik Mia Ave, Sher-e-Bangla Nagar", query: "National Parliament House, Dhaka", lat: 23.7625, lon: 90.3785, category: "landmark", keywords: "parliament house jatiya sangsad bhaban manik mia avenue" },
+      { name: "Old Dhaka (Lalbagh Fort)", area: "Lalbagh, Dhaka South", query: "Lalbagh Fort, Lalbagh, Dhaka, Bangladesh", lat: 23.7189, lon: 90.3881, category: "landmark", keywords: "lalbagh fort puran dhaka kella shaista khan" },
+      { name: "Sadarghat Launch Terminal", area: "Buriganga River, Dhaka South", query: "Sadarghat, Dhaka, Bangladesh", lat: 23.7047, lon: 90.4125, category: "transit", keywords: "sadarghat launch terminal river port puran dhaka" },
+      { name: "Ahsan Manzil (Pink Palace)", area: "Islampur, Old Dhaka", query: "Ahsan Manzil, Islampur, Dhaka", lat: 23.7085, lon: 90.4060, category: "landmark", keywords: "ahsan manzil pink palace nawab museum islampur" },
+      { name: "Wari (Rankin Street & Baldha Garden)", area: "Dhaka South", query: "Wari, Dhaka, Bangladesh", lat: 23.7175, lon: 90.4190, category: "area", keywords: "wari rankin street baldha garden hare street" },
+
+      // --- OUTSIDE DHAKA / MAJOR DIVISIONS & CITIES ---
+      { name: "Chattogram (GEC Circle)", area: "Chattogram City", query: "GEC Circle, Chattogram, Bangladesh", lat: 22.3592, lon: 91.8216, category: "area", keywords: "chittagong gec circle sanmar ocean city" },
+      { name: "Chattogram (Agrabad Commercial)", area: "Chattogram City", query: "Agrabad, Chattogram, Bangladesh", lat: 22.3243, lon: 91.8122, category: "area", keywords: "agrabad commercial port chittagong" },
+      { name: "Patenga Sea Beach", area: "Chattogram", query: "Patenga Sea Beach, Chattogram, Bangladesh", lat: 22.2355, lon: 91.7915, category: "park", keywords: "patenga sea beach naval academy chittagong" },
+      { name: "Cox's Bazar (Kolatoli Beach)", area: "Cox's Bazar", query: "Kolatoli Beach, Cox's Bazar, Bangladesh", lat: 21.4272, lon: 91.9702, category: "park", keywords: "coxs bazar kolatoli beach sea hotel motel" },
+      { name: "Cox's Bazar (Laboni & Sugandha Beach)", area: "Cox's Bazar", query: "Laboni Beach, Cox's Bazar, Bangladesh", lat: 21.4385, lon: 91.9680, category: "park", keywords: "laboni beach sugandha sea beach coxs bazar" },
+      { name: "Marine Drive (Inani Beach)", area: "Cox's Bazar", query: "Inani Beach, Cox's Bazar, Bangladesh", lat: 21.3050, lon: 92.0485, category: "park", keywords: "marine drive inani beach coral coral stone" },
+      { name: "Sylhet (Zindabazar)", area: "Sylhet City", query: "Zinda Bazar, Sylhet, Bangladesh", lat: 24.8968, lon: 91.8687, category: "area", keywords: "sylhet zindabazar city centre al hamra" },
+      { name: "Hazrat Shahjalal Mazar Sharif", area: "Sylhet", query: "Hazrat Shahjalal Mazar Sharif, Sylhet, Bangladesh", lat: 24.9025, lon: 91.8708, category: "landmark", keywords: "shahjalal mazar dargah sharif sylhet" },
+      { name: "Rajshahi (Zero Point)", area: "Rajshahi Division", query: "Zero Point, Rajshahi, Bangladesh", lat: 24.3636, lon: 88.6241, category: "area", keywords: "rajshahi zero point shaheb bazar padma river" },
+      { name: "Rajshahi University Campus", area: "Motihar, Rajshahi", query: "University of Rajshahi, Bangladesh", lat: 24.3695, lon: 88.6415, category: "university", keywords: "rajshahi university ru motihar paris road" },
+      { name: "Khulna (Shibbari More)", area: "Khulna Division", query: "Shibbari More, Khulna, Bangladesh", lat: 22.8228, lon: 89.5539, category: "area", keywords: "khulna shibbari more royal mor sonadanga" },
+      { name: "Barishal (Sadar Road)", area: "Barishal Division", query: "Sadar Road, Barishal, Bangladesh", lat: 22.7010, lon: 90.3535, category: "area", keywords: "barishal sadar road bibir pukur nathullabad" },
+      { name: "Rangpur (Jahaj Company Mor)", area: "Rangpur Division", query: "Jahaj Company More, Rangpur, Bangladesh", lat: 25.7535, lon: 89.2485, category: "area", keywords: "rangpur jahaj company mor dhap medical" },
+      { name: "Mymensingh (Ganginarpar Mor)", area: "Mymensingh Division", query: "Ganginarpar, Mymensingh, Bangladesh", lat: 24.7570, lon: 90.4072, category: "area", keywords: "mymensingh ganginarpar town hall brahmaputra" },
+      { name: "Cumilla (Kandirpar)", area: "Chattogram Division", query: "Kandirpar, Cumilla, Bangladesh", lat: 23.4607, lon: 91.1809, category: "area", keywords: "cumilla kandirpar town hall victoria college kotbari" },
+      { name: "Narayanganj (Chashara)", area: "Dhaka Division", query: "Chashara, Narayanganj, Bangladesh", lat: 23.6238, lon: 90.4990, category: "area", keywords: "narayanganj chashara 2 no rail gate shitalakshya" },
+      { name: "Gazipur (Chowrasta)", area: "Dhaka Division", query: "Gazipur Chowrasta, Bangladesh", lat: 23.9999, lon: 90.3800, category: "transit", keywords: "gazipur chowrasta chandona boardbazar boro bari" },
+      { name: "Savar (Bus Stand & Smriti Soudho)", area: "Dhaka Division", query: "National Martyrs Memorial, Savar, Bangladesh", lat: 23.9110, lon: 90.2545, category: "landmark", keywords: "savar smriti soudho national martyrs memorial bus stand" },
+      { name: "Jahangirnagar University (JU)", area: "Savar, Dhaka", query: "Jahangirnagar University, Savar, Bangladesh", lat: 23.8814, lon: 90.2673, category: "university", keywords: "jahangirnagar university ju savar campus lake" },
+      { name: "Padma Bridge Toll Plaza (Mawa)", area: "Munshiganj / Shariatpur", query: "Padma Bridge Mawa Toll Plaza, Bangladesh", lat: 23.4795, lon: 90.2635, category: "highway", keywords: "padma bridge mawa toll plaza jajira express" }
     ];
 
     function getDefaultContacts() {
@@ -2515,10 +2640,94 @@
     let isRouteCalculating = false;
     let currentMapFrameSrc = "";
 
-    // Live Movement & Tracking State
+    // Live Movement & Realistic Speed State Engine
     let currentSpeedKmh = 0;
+    let smoothedSpeedKmh = 0;
+    let lastRawSpeedCoords = { lat: 0, lon: 0, timestamp: 0 };
+    let stationaryConsecutiveTicks = 0;
     let lastGpsTimestamp = 0;
     let mapTrackingViewMode = 'route'; // 'route' | 'live_location'
+
+    /**
+     * Realistic Speed Engine:
+     * - Uses hardware GNSS Doppler speed (position.coords.speed) if available & accuracy <= 35m
+     * - In delta fallback mode: uses per-tick delta coordinates with a noise-gating deadband (>= 6.5m)
+     * - Enforces physical speed ceilings based on travel mode (walking <= 12 km/h, bike <= 42 km/h, driving <= 110 km/h)
+     * - Implements maximum acceleration clamp (22 km/h per sec) to kill GPS teleport spikes
+     * - Applies Exponential Moving Average (EMA) and cleanly snaps to 0 km/h (Stopped) when stationary
+     */
+    function computeRealisticSpeed(position, acc) {
+      const now = Date.now();
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      let rawSpeedKmh = null;
+
+      // 1. Device GNSS Doppler velocity in m/s (provided by smartphone satellite chip)
+      if (position.coords.speed !== null && position.coords.speed !== undefined && !isNaN(position.coords.speed) && position.coords.speed >= 0 && acc <= 35) {
+        rawSpeedKmh = position.coords.speed * 3.6;
+        if (rawSpeedKmh < 1.2) {
+          rawSpeedKmh = 0;
+        }
+      }
+
+      // 2. Coordinate Delta Distance Fallback
+      if (rawSpeedKmh === null) {
+        if (lastRawSpeedCoords.lat !== 0 && lastRawSpeedCoords.timestamp > 0) {
+          const dtSeconds = (now - lastRawSpeedCoords.timestamp) / 1000;
+          if (dtSeconds >= 0.7 && dtSeconds <= 25) {
+            const stepDistMeters = computeGeoDistanceMeters(lastRawSpeedCoords.lat, lastRawSpeedCoords.lon, lat, lon);
+            // Strict deadband: if device moved less than jitter threshold, treat as stationary
+            const jitterThreshold = Math.max(6.5, Math.min(acc * 0.45, 18.0));
+            if (stepDistMeters !== null && stepDistMeters < jitterThreshold) {
+              rawSpeedKmh = 0;
+            } else if (stepDistMeters !== null) {
+              rawSpeedKmh = (stepDistMeters / dtSeconds) * 3.6;
+            }
+          }
+        }
+      }
+
+      // Update last raw speed coordinates on every single GPS tick
+      lastRawSpeedCoords = { lat, lon, timestamp: now };
+
+      if (rawSpeedKmh === null) {
+        return smoothedSpeedKmh;
+      }
+
+      // 3. Travel Mode Maximum Physical Limit
+      let modeCeiling = 110;
+      if (selectedTravelMode === 'walking') {
+        modeCeiling = 12; // Max walking/jogging speed
+      } else if (selectedTravelMode === 'bicycling') {
+        modeCeiling = 42;
+      } else {
+        modeCeiling = 110;
+      }
+
+      if (rawSpeedKmh > modeCeiling) {
+        rawSpeedKmh = modeCeiling;
+      }
+
+      // 4. Stationary Gating & Exponential Moving Average (EMA)
+      if (rawSpeedKmh === 0) {
+        stationaryConsecutiveTicks++;
+        if (stationaryConsecutiveTicks >= 2) {
+          smoothedSpeedKmh = 0;
+        } else {
+          smoothedSpeedKmh = Math.round(smoothedSpeedKmh * 0.35);
+        }
+      } else {
+        stationaryConsecutiveTicks = 0;
+        // Clamp acceleration spike
+        const maxDelta = 22;
+        if (rawSpeedKmh > smoothedSpeedKmh + maxDelta) {
+          rawSpeedKmh = smoothedSpeedKmh + maxDelta;
+        }
+        smoothedSpeedKmh = Math.round((smoothedSpeedKmh * 0.55) + (rawSpeedKmh * 0.45));
+      }
+
+      return smoothedSpeedKmh;
+    }
 
     function computeGeoDistanceMeters(lat1, lon1, lat2, lon2) {
       if (!lat1 || !lon1 || !lat2 || !lon2) return null;
@@ -2659,11 +2868,11 @@
       }
 
       if (tagText) {
-        if (speedKmh > 3) {
-          const modeLabel = (speedKmh > 20 || selectedTravelMode === 'driving') ? 'In Vehicle' : (selectedTravelMode === 'bicycling' ? 'On Bike' : 'Moving');
+        if (speedKmh >= 1) {
+          const modeLabel = (speedKmh > 20 || selectedTravelMode === 'driving') ? 'In Vehicle' : (selectedTravelMode === 'bicycling' ? 'Cycling' : 'Walking');
           tagText.innerText = `LIVE • ${modeLabel} (${speedKmh} km/h)`;
         } else {
-          tagText.innerText = `LIVE • ${selectedTravelMode === 'walking' ? 'Walking' : 'Guarded'}`;
+          tagText.innerText = `LIVE • Guarded (Stationary)`;
         }
       }
 
@@ -2839,28 +3048,24 @@
       const isFirstFix = (lastProcessedGpsCoords.lat === 0 && lastProcessedGpsCoords.lon === 0);
       const movedMeters = isFirstFix ? 999999 : computeGeoDistanceMeters(lastProcessedGpsCoords.lat, lastProcessedGpsCoords.lon, lat, lon);
 
-      // Real-time speed calculation from GPS sensor or delta movement
-      if (position.coords.speed !== null && position.coords.speed !== undefined && position.coords.speed > 0) {
-        currentSpeedKmh = Math.round(position.coords.speed * 3.6);
-      } else if (lastGpsTimestamp && lastProcessedGpsCoords.lat && movedMeters !== null) {
-        const timeDiffSec = (Date.now() - lastGpsTimestamp) / 1000;
-        if (timeDiffSec > 0 && movedMeters > 0 && timeDiffSec < 120) {
-          currentSpeedKmh = Math.round((movedMeters / timeDiffSec) * 3.6);
-        }
-      }
+      // Realistic real-time speed calculation from sensor Doppler or jitter-gated delta
+      currentSpeedKmh = computeRealisticSpeed(position, acc);
       lastGpsTimestamp = Date.now();
 
       // Format live speed indicator
-      let speedText = `${currentSpeedKmh} km/h`;
-      if (currentSpeedKmh === 0) {
-        if (selectedTravelMode === 'walking') speedText = 'Walking (~4 km/h)';
-        else if (selectedTravelMode === 'bicycling') speedText = 'Bike transit';
-        else speedText = 'In Vehicle';
+      let speedText = "";
+      if (currentSpeedKmh <= 0) {
+        speedText = "0 km/h (Stopped)";
+      } else {
+        const modeLabel = selectedTravelMode === 'walking' ? 'Walking' : (selectedTravelMode === 'bicycling' ? 'Cycling' : 'Moving');
+        speedText = `${currentSpeedKmh} km/h (${modeLabel})`;
       }
 
       // Update telemetry badges and active HUD in real time
       const speedBadge = document.getElementById('transit-speed-badge');
-      if (speedBadge) speedBadge.innerHTML = `⚡ ${speedText}`;
+      if (speedBadge) {
+        speedBadge.innerHTML = currentSpeedKmh > 0 ? `⚡ ${speedText}` : `🟢 ${speedText}`;
+      }
 
       const dockSpeed = document.getElementById('dock-live-speed');
       if (dockSpeed) dockSpeed.innerText = speedText;
@@ -3942,6 +4147,8 @@
     ---------------------------------------------------- */
     let placeSearchTimer = null;
     let selectedDestCoords = null;
+    let latestSearchQuery = "";
+    let isOnlineSearchRunning = false;
 
     function escapeHtml(str) {
       if (!str) return '';
@@ -3953,10 +4160,40 @@
         .replace(/'/g, '&#39;');
     }
 
+    function getLocationCategoryMeta(item) {
+      const cat = (item.category || '').toLowerCase();
+      const name = (item.name || '').toLowerCase();
+      const kw = (item.keywords || '').toLowerCase();
+
+      if (cat === 'metro' || name.includes('metro') || kw.includes('metro') || kw.includes('mrt') || cat === 'railway') {
+        return { icon: 'fa-train-subway', color: '#10b981', label: 'Metro', bg: 'rgba(16, 185, 129, 0.16)' };
+      }
+      if (cat === 'hospital' || name.includes('hospital') || name.includes('clinic') || name.includes('medical') || kw.includes('hospital')) {
+        return { icon: 'fa-hospital', color: '#ef4444', label: 'Hospital', bg: 'rgba(239, 68, 68, 0.16)' };
+      }
+      if (cat === 'university' || name.includes('university') || name.includes('college') || kw.includes('university') || cat === 'college') {
+        return { icon: 'fa-graduation-cap', color: '#a855f7', label: 'Campus', bg: 'rgba(168, 85, 247, 0.16)' };
+      }
+      if (cat === 'airport' || name.includes('airport') || name.includes('aerodrome') || kw.includes('airport')) {
+        return { icon: 'fa-plane-departure', color: '#06b6d4', label: 'Airport', bg: 'rgba(6, 182, 212, 0.16)' };
+      }
+      if (cat === 'mall' || cat === 'shop' || name.includes('mall') || name.includes('plaza') || name.includes('market') || kw.includes('mall') || kw.includes('shopping')) {
+        return { icon: 'fa-bag-shopping', color: '#f59e0b', label: 'Shopping', bg: 'rgba(245, 158, 11, 0.16)' };
+      }
+      if (cat === 'park' || name.includes('beach') || name.includes('lake') || name.includes('park') || name.includes('garden')) {
+        return { icon: 'fa-tree', color: '#22c55e', label: 'Park', bg: 'rgba(34, 197, 94, 0.16)' };
+      }
+      if (cat === 'transit' || name.includes('terminal') || name.includes('bus stand') || name.includes('launch') || name.includes('ferry')) {
+        return { icon: 'fa-bus', color: '#3b82f6', label: 'Transit', bg: 'rgba(59, 130, 246, 0.16)' };
+      }
+      return { icon: 'fa-location-dot', color: '#f43f5e', label: 'Area', bg: 'rgba(244, 63, 94, 0.16)' };
+    }
+
     function handleLocationSearch(val) {
       const dropdown = document.getElementById('bd-location-dropdown');
       const clearBtn = document.getElementById('btn-clear-dest');
       const q = (val || '').trim();
+      latestSearchQuery = q;
 
       if (clearBtn) {
         clearBtn.style.display = q ? 'block' : 'none';
@@ -3968,41 +4205,72 @@
           dropdown.innerHTML = '';
         }
         if (placeSearchTimer) clearTimeout(placeSearchTimer);
+        isOnlineSearchRunning = false;
         return;
       }
 
-      // Step 1: Render instant local database matches right away for zero latency
-      const localMatches = BANGLADESH_LOCATIONS.filter(item =>
-        item.name.toLowerCase().includes(q.toLowerCase()) ||
-        item.area.toLowerCase().includes(q.toLowerCase())
-      ).slice(0, 6);
+      // Step 1: Multi-word token fuzzy match against 120+ curated Bangladesh places
+      const qTokens = q.toLowerCase().split(/\s+/).filter(Boolean);
+      const localMatches = BANGLADESH_LOCATIONS.filter(item => {
+        const corpus = `${item.name} ${item.area} ${item.keywords || ''}`.toLowerCase();
+        return qTokens.every(t => corpus.includes(t));
+      }).slice(0, 8);
 
-      renderDropdownItems(localMatches, q, false);
+      isOnlineSearchRunning = true;
+      renderDropdownItems(localMatches, q, isOnlineSearchRunning);
 
-      // Step 2: Fetch live specific places from backend proxy (OSM / Google Places search)
+      // Step 2: Query backend dual-engine proxy (Photon + OSM Nominatim Bangladesh geocoders)
       if (placeSearchTimer) clearTimeout(placeSearchTimer);
       placeSearchTimer = setTimeout(() => {
-        fetchLivePlacesSearch(q);
-      }, 280);
+        fetchLivePlacesSearch(q, localMatches);
+      }, 260);
     }
 
-    function fetchLivePlacesSearch(query) {
+    function fetchLivePlacesSearch(query, localMatches = []) {
       const dropdown = document.getElementById('bd-location-dropdown');
-      if (!dropdown) return;
+      if (!dropdown || query !== latestSearchQuery) return;
 
       fetch(`${API_BASE}/api/places/search?q=${encodeURIComponent(query)}`)
         .then(res => res.json())
         .then(data => {
+          if (query !== latestSearchQuery) return; // Discard stale responses
+          isOnlineSearchRunning = false;
+
+          let mergedItems = [...localMatches];
+
           if (data && data.success && Array.isArray(data.results) && data.results.length > 0) {
-            renderDropdownItems(data.results, query, true);
+            // Deduplicate live results against local matches
+            data.results.forEach(liveItem => {
+              const liveName = (liveItem.name || '').toLowerCase();
+              const isDupe = mergedItems.some(existing => {
+                const exName = (existing.name || '').toLowerCase();
+                if (exName === liveName || (exName.length > 4 && liveName.includes(exName)) || (liveName.length > 4 && exName.includes(liveName))) {
+                  return true;
+                }
+                if (existing.lat && existing.lon && liveItem.lat && liveItem.lon) {
+                  const d = computeHaversineKm(existing.lat, existing.lon, liveItem.lat, liveItem.lon);
+                  if (d !== null && d < 0.2) return true; // closer than 200m
+                }
+                return false;
+              });
+
+              if (!isDupe) {
+                mergedItems.push(liveItem);
+              }
+            });
           }
+
+          renderDropdownItems(mergedItems.slice(0, 10), query, false);
         })
         .catch(err => {
-          console.warn("Live place search fallback:", err.message);
+          if (query === latestSearchQuery) {
+            isOnlineSearchRunning = false;
+            renderDropdownItems(localMatches, query, false);
+          }
         });
     }
 
-    function renderDropdownItems(items, rawQuery, isLiveResult) {
+    function renderDropdownItems(items, rawQuery, isLoadingOnline) {
       const dropdown = document.getElementById('bd-location-dropdown');
       if (!dropdown) return;
 
@@ -4012,6 +4280,8 @@
         items.forEach(item => {
           const itemEl = document.createElement('div');
           itemEl.className = 'location-suggestion-item';
+
+          const catMeta = getLocationCategoryMeta(item);
 
           // Calculate direct distance if coordinates are present
           let distBadgeHtml = '';
@@ -4026,9 +4296,14 @@
           const secondaryText = escapeHtml(item.area || item.fullAddress || 'Bangladesh');
 
           itemEl.innerHTML = `
-            <i class="fas fa-location-dot" style="color: #ef4444;"></i>
+            <div class="sug-icon-box" style="background: ${catMeta.bg}; color: ${catMeta.color};">
+              <i class="fas ${catMeta.icon}"></i>
+            </div>
             <div style="flex: 1; min-width: 0;">
-              <div class="sug-primary">${primaryText}</div>
+              <div class="sug-primary-row">
+                <span class="sug-primary">${primaryText}</span>
+                <span class="sug-cat-pill" style="color: ${catMeta.color}; background: ${catMeta.bg};">${catMeta.label}</span>
+              </div>
               <div class="sug-secondary">${secondaryText}</div>
             </div>
             ${distBadgeHtml}
@@ -4047,16 +4322,30 @@
         });
       }
 
-      // Google Maps Live Search Direct Option
+      // Online searching loader row if in-flight
+      if (isLoadingOnline) {
+        const loaderEl = document.createElement('div');
+        loaderEl.className = 'location-searching-indicator';
+        loaderEl.innerHTML = `
+          <i class="fas fa-circle-notch fa-spin" style="color: #60a5fa;"></i>
+          <span>Searching live places across Bangladesh...</span>
+        `;
+        dropdown.appendChild(loaderEl);
+      }
+
+      // Google Maps Direct Route Option (Always available at the bottom)
       const gmapsItem = document.createElement('div');
       gmapsItem.className = 'location-suggestion-item';
       gmapsItem.style.background = 'rgba(66, 133, 244, 0.08)';
       gmapsItem.innerHTML = `
-        <i class="fab fa-google" style="color: #4285f4;"></i>
-        <div style="flex: 1; min-width: 0;">
-          <div class="sug-primary" style="color: #60a5fa;">Search Google Maps for "${escapeHtml(rawQuery)}"</div>
-          <div class="sug-secondary">Direct Live Route & Place Info Popup</div>
+        <div class="sug-icon-box" style="background: rgba(66, 133, 244, 0.16); color: #4285f4;">
+          <i class="fab fa-google"></i>
         </div>
+        <div style="flex: 1; min-width: 0;">
+          <div class="sug-primary" style="color: #60a5fa;">Route with Google Maps: "${escapeHtml(rawQuery)}"</div>
+          <div class="sug-secondary">Direct Turn-by-Turn Navigation & Accurate Route</div>
+        </div>
+        <i class="fas fa-arrow-right" style="color: #60a5fa; font-size: 11px; margin-left: auto;"></i>
       `;
       gmapsItem.addEventListener('click', () => {
         selectCustomLocation(rawQuery);
