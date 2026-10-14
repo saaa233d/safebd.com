@@ -1218,19 +1218,35 @@ app.get('/api/routing/directions', async (req, res) => {
   let trafficStatus = "";
   let modeLabel = "";
 
-  // 1. Attempt Live Road Network Distance via OSRM / Foot routing
+  // 1. Attempt Live Road Network Distance & Geometry via OSRM turn-by-turn routing
+  let routeGeometry = null;
+  let turnSteps = [];
   try {
-    const routeUrl = travelMode === 'walking'
-      ? `https://routing.openstreetmap.de/routed-foot/route/v1/foot/${oLon},${oLat};${dLon},${dLat}?overview=false`
-      : `https://router.project-osrm.org/route/v1/driving/${oLon},${oLat};${dLon},${dLat}?overview=false`;
+    const osrmProfile = travelMode === 'walking' ? 'walking' : (travelMode === 'bicycling' ? 'cycling' : 'driving');
+    const routeUrl = `https://router.project-osrm.org/route/v1/${osrmProfile}/${oLon},${oLat};${dLon},${dLat}?overview=full&geometries=geojson&steps=true`;
     
-    const routeRes = await fetch(routeUrl, { signal: AbortSignal.timeout(4500) });
+    const routeRes = await fetch(routeUrl, { signal: AbortSignal.timeout(5000) });
     const routeData = await routeRes.json();
 
     if (routeData && routeData.routes && routeData.routes[0]) {
-      const roadMeters = routeData.routes[0].distance;
+      const primaryRoute = routeData.routes[0];
+      const roadMeters = primaryRoute.distance;
       distanceKm = Math.round((roadMeters / 1000) * 10) / 10;
-      const osrmSec = routeData.routes[0].duration;
+      const osrmSec = primaryRoute.duration;
+
+      if (primaryRoute.geometry && Array.isArray(primaryRoute.geometry.coordinates)) {
+        routeGeometry = primaryRoute.geometry;
+      }
+      if (primaryRoute.legs && primaryRoute.legs[0] && Array.isArray(primaryRoute.legs[0].steps)) {
+        turnSteps = primaryRoute.legs[0].steps.map(s => ({
+          modifier: s.maneuver ? s.maneuver.modifier : '',
+          type: s.maneuver ? s.maneuver.type : '',
+          instruction: s.name ? `${s.maneuver && s.maneuver.type ? s.maneuver.type.toUpperCase() : 'PROCEED'} onto ${s.name}` : (s.maneuver ? s.maneuver.type : 'Continue'),
+          name: s.name || '',
+          distance: Math.round(s.distance || 0),
+          duration: Math.round(s.duration || 0)
+        }));
+      }
 
       if (travelMode === 'walking') {
         durationMinutes = Math.max(3, Math.round(osrmSec / 60));
@@ -1287,6 +1303,8 @@ app.get('/api/routing/directions', async (req, res) => {
     durationMinutes,
     trafficStatus,
     isPeakTraffic,
+    geometry: routeGeometry,
+    steps: turnSteps,
     googleMapsUrl,
     embedUrl
   });
