@@ -146,5 +146,27 @@
     "createdAt": "2026-10-14T00:41:04.044Z",
     "approvedAt": "2026-10-14T00:41:04.044Z",
     "reviewedBy": "Instant Community Feed"
+  },
+  "post_1791939349553_1936": {
+    "id": "post_1791939349553_1936",
+    "author": "Citizen Reporter",
+    "authorPhone": "",
+    "authorRole": "Citizen Reporter",
+    "isFounder": false,
+    "verified": false,
+    "type": "community",
+    "category": "Urgent Alert",
+    "content": "I am claiming to be the founder without logging in.",
+    "media": null,
+    "gdriveFileId": null,
+    "mediaFileName": null,
+    "mediaMimeType": null,
+    "likes": 0,
+    "likedBy": [],
+    "approved": true,
+    "rejected": false,
+    "createdAt": "2026-10-14T00:55:49.553Z",
+    "approvedAt": "2026-10-14T00:55:49.553Z",
+    "reviewedBy": "Instant Community Feed"
   }
 }
