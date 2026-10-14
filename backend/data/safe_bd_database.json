@@ -532,6 +532,28 @@
       "createdAt": "2026-10-13T18:52:03.067Z",
       "approvedAt": "2026-10-13T18:52:03.067Z",
       "reviewedBy": "Instant Community Feed"
+    },
+    "post_1791936434467_1400": {
+      "id": "post_1791936434467_1400",
+      "author": "Citizen Reporter",
+      "authorPhone": "",
+      "authorRole": "Citizen Reporter",
+      "isFounder": false,
+      "verified": false,
+      "type": "community",
+      "category": "Urgent Alert",
+      "content": "I am claiming to be the founder without logging in.",
+      "media": null,
+      "gdriveFileId": null,
+      "mediaFileName": null,
+      "mediaMimeType": null,
+      "likes": 0,
+      "likedBy": [],
+      "approved": true,
+      "rejected": false,
+      "createdAt": "2026-10-14T00:07:14.467Z",
+      "approvedAt": "2026-10-14T00:07:14.467Z",
+      "reviewedBy": "Instant Community Feed"
     }
   },
   "cloudVault": {
@@ -539,13 +561,13 @@
     "secretKey": "SAFEBD_PRIVATE_VAULT_2026",
     "enabled": true,
     "folderName": "SAFE_BD_VAULT",
-    "lastSyncedAt": "2026-10-13T18:51:18.733Z",
-    "stateFileId": "1zTx_BQGhMdp7ebmpLU6lHyNuTRVJLIem"
+    "lastSyncedAt": "2026-10-13T18:52:26.062Z",
+    "stateFileId": "1V-0VCOC6tD5jazd6Tw_jx1cBy9ul6VYQ"
   },
   "stats": {
     "totalLogins": 23,
     "totalRegistrations": 5,
-    "lastSaved": "2026-10-13T18:52:03.176Z",
-    "totalPosts": 5
+    "lastSaved": "2026-10-14T00:07:14.576Z",
+    "totalPosts": 6
   }
 }
