@@ -116,8 +116,14 @@ function initDatabase() {
       Object.values(mergedPosts).forEach(post => {
         if (!post || !post.id) return;
         const authorLower = (post.author || '').toLowerCase();
-        // Remove dummy posts requested by user
-        if (authorLower.includes('traffic command') || authorLower.includes('safe bd community') || post.id === 'post-1' || post.id === 'post-2') {
+        const contentLower = (post.content || '').toLowerCase();
+        // Remove dummy posts and any security test artifact posts
+        if (authorLower.includes('traffic command') || 
+            authorLower.includes('safe bd community') || 
+            post.id === 'post-1' || 
+            post.id === 'post-2' ||
+            contentLower.includes('claiming to be the founder') ||
+            contentLower.includes('without logging in')) {
           return;
         }
         cleanPosts[post.id] = post;
@@ -273,9 +279,8 @@ Founder, SAFE bd.`;
       approvedAt: new Date().toISOString(),
       reviewedBy: "Founder & CEO"
     };
-    if (!dbState.approvedPostIds.includes(founderPostId)) {
-      dbState.approvedPostIds.unshift(founderPostId);
-    }
+    dbState.approvedPostIds = dbState.approvedPostIds.filter(id => id !== founderPostId);
+    dbState.approvedPostIds.unshift(founderPostId);
     console.log('[👑 FOUNDER POST SEEDED] Official Announcement by SAAD RIZWAN is verified and live on public feed.');
   } else {
     dbState.posts[founderPostId].author = "SAAD RIZWAN";
@@ -287,9 +292,8 @@ Founder, SAFE bd.`;
     dbState.posts[founderPostId].likedBy = []; // CLEAR LIKED USERS
     dbState.posts[founderPostId].approved = true;
     dbState.posts[founderPostId].category = "Official Announcement";
-    if (!dbState.approvedPostIds.includes(founderPostId)) {
-      dbState.approvedPostIds.unshift(founderPostId);
-    }
+    dbState.approvedPostIds = dbState.approvedPostIds.filter(id => id !== founderPostId);
+    dbState.approvedPostIds.unshift(founderPostId);
   }
 }
 
