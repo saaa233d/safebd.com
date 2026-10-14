@@ -752,6 +752,8 @@
     }
     #interactive-nav-map .leaflet-tile {
       background: #09070d !important;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: high-quality;
     }
     /* Ensure all overlays, markers, polylines, and popups remain vibrant without inversion */
     #interactive-nav-map .leaflet-marker-pane,
@@ -2835,13 +2837,20 @@
     }
 
     // -------------------------------------------------------------------------
-    // GOOGLE-STYLE REAL-TIME LIVE NAVIGATION ENGINE (MOVING GREEN PUCK & TAG)
+    // GOOGLE-STYLE REAL-TIME LIVE NAVIGATION & EXACT ROAD ROUTE ENGINE
     // -------------------------------------------------------------------------
     let navMap = null;
     let liveNavMarker = null;
     let navTrailPolyline = null;
     let navDestMarker = null;
+    let navRouteCasingPolyline = null;
     let navRoutePolyline = null;
+    let cachedRouteWaypoints = [];
+    let cachedRouteSteps = [];
+    let lastRouteOrigin = { lat: 0, lon: 0 };
+    let lastRouteDest = { lat: 0, lon: 0 };
+    let lastRouteMode = '';
+    let isFetchingRoadGeometry = false;
     let currentHeadingAngle = 0;
     let isLeafletInitialized = false;
 
@@ -2866,10 +2875,20 @@
           attributionControl: false
         }).setView([initialLat, initialLon], 16);
 
-        // Genuine Real Google Maps Tile Engine (Zero watermark, high-speed Dhaka satellite/road tiles)
-        L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        // Genuine High-DPI Retina Google Maps Tile Engine (Zero watermark, 512x512 retina tiles, razor-sharp on mobile)
+        const dpr = window.devicePixelRatio || 1;
+        const googleTileUrl = dpr > 1.2
+          ? 'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&scale=2'
+          : 'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}';
+
+        L.tileLayer(googleTileUrl, {
           maxZoom: 20,
-          subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+          maxNativeZoom: 20,
+          subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+          tileSize: 256,
+          keepBuffer: 6,
+          updateWhenIdle: false,
+          updateWhenZooming: true
         }).addTo(navMap);
 
         // Custom Live Green Navigation Puck Icon with Radar Ripple and Live Tag
@@ -2908,9 +2927,161 @@
         }).addTo(navMap);
 
         isLeafletInitialized = true;
-        console.log("📍 [LIVE NAVIGATION ENGINE] Google-style green navigation puck activated.");
+        console.log("📍 [LIVE NAVIGATION ENGINE] Google-style retina map & green navigation puck activated.");
       } catch (e) {
         console.warn("Leaflet map initialization skipped, using fallback iframe:", e);
+      }
+    }
+
+    function renderTurnByTurnPolyline(latLngs) {
+      if (!navMap || !Array.isArray(latLngs) || latLngs.length < 2) return;
+
+      // 1. Google Maps Navigation Outer Casing (Deep vibrant cyan/blue casing)
+      if (!navRouteCasingPolyline) {
+        navRouteCasingPolyline = L.polyline(latLngs, {
+          color: '#0284c7',
+          weight: 7,
+          opacity: 0.95,
+          lineCap: 'round',
+          lineJoin: 'round'
+        }).addTo(navMap);
+      } else {
+        navRouteCasingPolyline.setLatLngs(latLngs);
+      }
+
+      // 2. Google Maps Navigation Core Path (Luminous sky cyan path)
+      if (!navRoutePolyline) {
+        navRoutePolyline = L.polyline(latLngs, {
+          color: '#38bdf8',
+          weight: 4.5,
+          opacity: 1.0,
+          lineCap: 'round',
+          lineJoin: 'round'
+        }).addTo(navMap);
+      } else {
+        navRoutePolyline.setLatLngs(latLngs);
+      }
+    }
+
+    function clearNavRoutePolylines() {
+      if (navRoutePolyline && navMap) {
+        navMap.removeLayer(navRoutePolyline);
+        navRoutePolyline = null;
+      }
+      if (navRouteCasingPolyline && navMap) {
+        navMap.removeLayer(navRouteCasingPolyline);
+        navRouteCasingPolyline = null;
+      }
+      if (navDestMarker && navMap) {
+        navMap.removeLayer(navDestMarker);
+        navDestMarker = null;
+      }
+      cachedRouteWaypoints = [];
+      cachedRouteSteps = [];
+      lastRouteOrigin = { lat: 0, lon: 0 };
+      lastRouteDest = { lat: 0, lon: 0 };
+      lastRouteMode = '';
+    }
+
+    async function fetchTurnByTurnRoadRoute(userLat, userLon, destLat, destLon, mode, force = false) {
+      if (!navMap || isFetchingRoadGeometry) return;
+
+      const profile = mode === 'walking' ? 'walking' : (mode === 'bicycling' ? 'cycling' : 'driving');
+      const originDist = (lastRouteOrigin.lat && lastRouteOrigin.lon)
+        ? computeGeoDistanceMeters(lastRouteOrigin.lat, lastRouteOrigin.lon, userLat, userLon)
+        : null;
+      const destDist = (lastRouteDest.lat && lastRouteDest.lon)
+        ? computeGeoDistanceMeters(lastRouteDest.lat, lastRouteDest.lon, destLat, destLon)
+        : null;
+
+      // Throttling: If user moved < 35m and dest + mode haven't changed, reuse cached path and connect user
+      if (!force && cachedRouteWaypoints.length > 1 && originDist !== null && originDist < 35 && destDist !== null && destDist < 25 && lastRouteMode === mode) {
+        const activePath = [[userLat, userLon], ...cachedRouteWaypoints.slice(1)];
+        renderTurnByTurnPolyline(activePath);
+        return;
+      }
+
+      isFetchingRoadGeometry = true;
+
+      try {
+        // Step A: Attempt direct high-speed client-side OSRM GeoJSON road query
+        const osrmUrl = `https://router.project-osrm.org/route/v1/${profile}/${userLon},${userLat};${destLon},${destLat}?overview=full&geometries=geojson&steps=true`;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4500);
+
+        let data = null;
+        try {
+          const res = await fetch(osrmUrl, { signal: controller.signal });
+          clearTimeout(timeoutId);
+          data = await res.json();
+        } catch (clientErr) {
+          clearTimeout(timeoutId);
+          // Step B: Fallback to Backend proxy endpoint
+          const backendUrl = `${API_BASE}/api/routing/directions?originLat=${userLat}&originLon=${userLon}&destLat=${destLat}&destLon=${destLon}&mode=${mode}`;
+          const bRes = await fetch(backendUrl);
+          const bData = await bRes.json();
+          if (bData && bData.success && bData.geometry && bData.geometry.coordinates) {
+            data = {
+              routes: [{
+                geometry: bData.geometry,
+                distance: (bData.distanceKm || 0) * 1000,
+                duration: (bData.durationMinutes || 0) * 60,
+                legs: [{ steps: bData.steps || [] }]
+              }]
+            };
+          }
+        }
+
+        if (data && data.routes && data.routes[0] && data.routes[0].geometry && Array.isArray(data.routes[0].geometry.coordinates)) {
+          const rawCoords = data.routes[0].geometry.coordinates;
+          // Convert GeoJSON [lon, lat] to Leaflet [lat, lon]
+          const roadPoints = rawCoords.map(pt => [pt[1], pt[0]]);
+
+          // Prepend user live position so route connects seamlessly to moving puck
+          cachedRouteWaypoints = [[userLat, userLon], ...roadPoints];
+          lastRouteOrigin = { lat: userLat, lon: userLon };
+          lastRouteDest = { lat: destLat, lon: destLon };
+          lastRouteMode = mode;
+
+          renderTurnByTurnPolyline(cachedRouteWaypoints);
+
+          // Update metrics from actual road geometry
+          if (data.routes[0].distance) {
+            calculatedRouteDistanceKm = Math.round((data.routes[0].distance / 1000) * 10) / 10;
+          }
+          if (data.routes[0].duration && mode === 'walking') {
+            calculatedDurationMinutes = Math.max(2, Math.round(data.routes[0].duration / 60));
+          }
+
+          if (data.routes[0].legs && data.routes[0].legs[0] && Array.isArray(data.routes[0].legs[0].steps)) {
+            cachedRouteSteps = data.routes[0].legs[0].steps;
+          }
+
+          const distEl = document.getElementById('route-est-distance');
+          const timeEl = document.getElementById('route-est-time');
+          const modeIcon = mode === 'driving' ? 'fa-car-side' : (mode === 'bicycling' ? 'fa-motorcycle' : 'fa-person-walking');
+          const modeTitle = mode === 'driving' ? 'Car / CNG' : (mode === 'bicycling' ? 'Bike' : 'Walk');
+
+          if (distEl) {
+            distEl.innerHTML = `<i class="fas ${modeIcon}" style="color: #10b981;"></i> <span>${calculatedRouteDistanceKm} km • <strong style="color: #fff;">${modeTitle}</strong></span>`;
+          }
+          if (timeEl) {
+            timeEl.innerHTML = `<span style="color: #10b981; font-weight: 800; font-size: 12px;">ETA ~${calculatedDurationMinutes} mins</span>`;
+          }
+
+          const dockDist = document.getElementById('dock-live-accuracy');
+          if (dockDist && calculatedRouteDistanceKm) {
+            dockDist.innerText = `Route: ${calculatedRouteDistanceKm} km (~${calculatedDurationMinutes}m)`;
+          }
+        } else {
+          // Fallback to straight line if road geometry was unavailable
+          renderTurnByTurnPolyline([[userLat, userLon], [destLat, destLon]]);
+        }
+      } catch (err) {
+        console.warn("[TURN-BY-TURN ROUTE] Routing geometry fallback:", err);
+        renderTurnByTurnPolyline([[userLat, userLon], [destLat, destLon]]);
+      } finally {
+        isFetchingRoadGeometry = false;
       }
     }
 
@@ -2991,16 +3162,7 @@
         navDestMarker.setLatLng([destLat, destLon]);
       }
 
-      if (!navRoutePolyline) {
-        navRoutePolyline = L.polyline([[userLat, userLon], [destLat, destLon]], {
-          color: '#38bdf8',
-          weight: 4,
-          dashArray: '8, 8',
-          opacity: 0.85
-        }).addTo(navMap);
-      } else {
-        navRoutePolyline.setLatLngs([[userLat, userLon], [destLat, destLon]]);
-      }
+      fetchTurnByTurnRoadRoute(userLat, userLon, destLat, destLon, selectedTravelMode || 'walking', false);
     }
 
     function safelyUpdateMapFrame(targetUrl) {
@@ -3039,7 +3201,11 @@
           toggleBtn.innerHTML = '<i class="fas fa-crosshairs" style="color: #38bdf8;"></i>';
           toggleBtn.title = 'Track My Live Location Pin';
         }
-        computeLiveGoogleMapsRoute(currentDestinationQuery, selectedDestCoords, true);
+        if (navMap && cachedRouteWaypoints && cachedRouteWaypoints.length > 1) {
+          navMap.fitBounds(L.polyline(cachedRouteWaypoints).getBounds(), { padding: [50, 50], maxZoom: 17 });
+        } else {
+          computeLiveGoogleMapsRoute(currentDestinationQuery, selectedDestCoords, true);
+        }
       } else {
         centerOnUserLiveLocation(true);
       }
@@ -4506,6 +4672,10 @@
       lastRouteCalculatedTime = 0;
       isRouteCalculating = false;
 
+      if (typeof clearNavRoutePolylines === 'function') {
+        clearNavRoutePolylines();
+      }
+
       // Reset map view to user's live device GPS location safely without flicker
       if (currentCoords.lat && currentCoords.lon) {
         const gmapsUrl = `https://maps.google.com/maps?q=${currentCoords.lat},${currentCoords.lon}&t=&z=16&ie=UTF8&iwloc=B&output=embed`;
@@ -4613,6 +4783,23 @@
             calculatedDurationMinutes = data.durationMinutes;
             if (data.destination && data.destination.lat) {
               selectedDestCoords = data.destination;
+            }
+
+            // Real Turn-by-Turn Road Geometry Integration
+            if (data.geometry && Array.isArray(data.geometry.coordinates) && data.geometry.coordinates.length > 1) {
+              const roadPoints = data.geometry.coordinates.map(pt => [pt[1], pt[0]]);
+              cachedRouteWaypoints = (currentCoords.lat && currentCoords.lon)
+                ? [[currentCoords.lat, currentCoords.lon], ...roadPoints]
+                : roadPoints;
+              lastRouteOrigin = { lat: currentCoords.lat || 0, lon: currentCoords.lon || 0 };
+              lastRouteDest = { lat: (data.destination && data.destination.lat) || dLat || 0, lon: (data.destination && data.destination.lon) || dLon || 0 };
+              lastRouteMode = modeParam;
+              if (data.steps && Array.isArray(data.steps)) {
+                cachedRouteSteps = data.steps;
+              }
+              if (typeof renderTurnByTurnPolyline === 'function') {
+                renderTurnByTurnPolyline(cachedRouteWaypoints);
+              }
             }
 
             // Update map safely only if embed URL actually changed
@@ -4757,13 +4944,17 @@
       const banner = document.getElementById('route-estimate-banner');
       if (banner) banner.style.display = 'none';
 
-      if (navDestMarker && navMap) {
-        navMap.removeLayer(navDestMarker);
-        navDestMarker = null;
-      }
-      if (navRoutePolyline && navMap) {
-        navMap.removeLayer(navRoutePolyline);
-        navRoutePolyline = null;
+      if (typeof clearNavRoutePolylines === 'function') {
+        clearNavRoutePolylines();
+      } else {
+        if (navDestMarker && navMap) {
+          navMap.removeLayer(navDestMarker);
+          navDestMarker = null;
+        }
+        if (navRoutePolyline && navMap) {
+          navMap.removeLayer(navRoutePolyline);
+          navRoutePolyline = null;
+        }
       }
 
       activeJourneySessionId = null;
