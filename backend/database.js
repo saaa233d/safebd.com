@@ -215,16 +215,29 @@ function initDatabase() {
     if (supaPosts && supaPosts.length > 0) {
       let mergedCount = 0;
       for (const sp of supaPosts) {
-        if (!dbState.posts[sp.id]) {
+        const existing = dbState.posts[sp.id];
+        if (!existing) {
           dbState.posts[sp.id] = sp;
           if (!dbState.approvedPostIds.includes(sp.id)) dbState.approvedPostIds.push(sp.id);
           mergedCount++;
+        } else {
+          let updated = false;
+          if (Array.isArray(sp.comments) && sp.comments.length > (existing.comments || []).length) {
+            existing.comments = sp.comments;
+            updated = true;
+          }
+          if (typeof sp.likes === 'number' && sp.likes > (existing.likes || 0)) {
+            existing.likes = sp.likes;
+            existing.likedBy = sp.likedBy || [];
+            updated = true;
+          }
+          if (updated) mergedCount++;
         }
       }
       if (mergedCount > 0) {
         dbState.approvedPostIds.sort((a, b) => new Date(dbState.posts[b]?.createdAt || 0) - new Date(dbState.posts[a]?.createdAt || 0));
         persistToDisk();
-        console.log(`[⚡ SUPABASE CLOUD RESTORE] Restored ${mergedCount} permanent citizen posts from Supabase PostgreSQL.`);
+        console.log(`[⚡ SUPABASE CLOUD RESTORE] Synced/Restored ${mergedCount} permanent citizen posts and comments from Supabase PostgreSQL.`);
       }
     }
   }).catch(() => {});
@@ -1290,12 +1303,37 @@ function getPostById(postId) {
 
 function formatPostOutput(post) {
   if (!post) return null;
-  const diffSec = Math.max(0, Math.round((Date.now() - new Date(post.createdAt || Date.now()).getTime()) / 1000));
-  let timeStr = "Just now";
-  if (diffSec < 60) timeStr = "Just now";
-  else if (diffSec < 3600) timeStr = `${Math.floor(diffSec / 60)}m ago`;
-  else if (diffSec < 86400) timeStr = `${Math.floor(diffSec / 3600)}h ago`;
-  else timeStr = `${Math.floor(diffSec / 86400)}d ago`;
+  const createdAtIso = post.createdAt || new Date().toISOString();
+  const d = new Date(createdAtIso);
+  const diffSec = Math.max(0, Math.round((Date.now() - d.getTime()) / 1000));
+  let relTime = "Just now";
+  if (diffSec < 60) relTime = "Just now";
+  else if (diffSec < 3600) relTime = `${Math.floor(diffSec / 60)}m ago`;
+  else if (diffSec < 86400) relTime = `${Math.floor(diffSec / 3600)}h ago`;
+  else relTime = `${Math.floor(diffSec / 86400)}d ago`;
+
+  let exactTime = relTime;
+  if (!isNaN(d.getTime())) {
+    let hours = d.getHours();
+    const minutes = d.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    const timeFormatted = `${hours}:${minutes} ${ampm}`;
+    const now = new Date();
+    const isToday = d.toDateString() === now.toDateString();
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const isYesterday = d.toDateString() === yesterday.toDateString();
+
+    if (isToday) {
+      exactTime = `Today at ${timeFormatted} (${relTime})`;
+    } else if (isYesterday) {
+      exactTime = `Yesterday at ${timeFormatted} (${relTime})`;
+    } else {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      exactTime = `${d.getDate()} ${months[d.getMonth()]} at ${timeFormatted} (${relTime})`;
+    }
+  }
 
   const likedBy = Array.isArray(post.likedBy) ? post.likedBy : [];
   const likes = typeof post.likes === 'number' ? post.likes : likedBy.length;
@@ -1306,7 +1344,7 @@ function formatPostOutput(post) {
     likes,
     likedBy,
     comments,
-    time: timeStr
+    time: exactTime
   };
 }
 
