@@ -5,15 +5,15 @@
       "phone": "1316750712",
       "displayPhone": "+880 1316-750712",
       "name": "SAAD RIZWAN",
-      "salt": "0d91c77c61dfcdb45ce178bd7fd06152",
-      "passwordHash": "9f740be637941f990f63af1755b3d18e26a8100ff4eb311a7345bbd2741eb4f28d69834f6849eb55ac48b245ab3425d511144d107f706780f4b071f26cee04d4",
+      "salt": "247fdd9c985dcb67bd0cdfecd2918a1e",
+      "passwordHash": "c7ccc615a4d4b4d9f23df381a864f96d6439f819b8cae0e729687d1d10e449ef2370b25312946a0030eda9af3ab0aac82ea456f32c06387a37b9e38249bc3d54",
       "nidVerified": true,
       "isAdmin": true,
       "isLoggedIn": true,
       "createdAt": "2026-10-12T03:45:26.505Z",
-      "lastLoginAt": "2026-10-14T01:58:59.482Z",
+      "lastLoginAt": "2026-10-14T03:17:18.066Z",
       "lastLogoutAt": "2026-10-12T03:59:10.498Z",
-      "loginCount": 10,
+      "loginCount": 12,
       "contacts": [
         {
           "id": "c1",
@@ -36,6 +36,42 @@
       ],
       "role": "Founder & CEO, SAFE bd",
       "isFounder": true
+    },
+    "1700998877": {
+      "id": "usr_1700998877",
+      "phone": "1700998877",
+      "displayPhone": "+880 1700998877",
+      "name": "Zayan Ahmed",
+      "salt": "f85f858f057550535b0d2a1ff0836280",
+      "passwordHash": "56c9dc95512237bce21b72270253c1408dba07ec9bdbd2c2ab642981710b5395e031ca80726a69139d59b0121dc97943e70d800649d0d32483d54de00b91d1aa",
+      "nidVerified": true,
+      "isAdmin": false,
+      "isFounder": false,
+      "isLoggedIn": true,
+      "createdAt": "2026-10-14T03:17:17.007Z",
+      "lastLoginAt": "2026-10-14T03:17:17.741Z",
+      "lastLogoutAt": null,
+      "loginCount": 3,
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Father",
+          "phone": "",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Mother",
+          "phone": "",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "Guardian",
+          "phone": "",
+          "initial": "G"
+        }
+      ]
     },
     "1711223344": {
       "id": "usr_1711223344",
@@ -259,18 +295,18 @@
       "name": "SHABAB",
       "role": "Citizen Reporter",
       "isFounder": false,
-      "salt": "c2c2d5ee059e705092d49ff77d960114",
-      "passwordHash": "8a3c430c1551ef0633dae0dabcb62c0daebee5ff3a99315152f7a485f71ddd775a2b8be725016f668fbb55ebaec8c48ecc9a2d4e6455c9ec614f1182cb96f6a2",
+      "salt": "4af31c14331af03cc49fe68f2db704fb",
+      "passwordHash": "7b199c35b47a2d56915c31f08e10d7882a8af7cff62ca5b0474c92305bab5151f0d2c2faa2ead7ea32383c9a59823ec7dbf8779af8ccffb4d064a57a25c67460",
       "nidVerified": true,
       "isAdmin": false,
       "permissions": [],
       "adminAssignedAt": "2026-10-13T06:34:06.002Z",
       "adminAssignedBy": "SAAD RIZWAN",
-      "isLoggedIn": false,
+      "isLoggedIn": true,
       "createdAt": "2026-10-13T06:34:06.002Z",
-      "lastLoginAt": null,
+      "lastLoginAt": "2026-10-14T02:48:02.109Z",
       "lastLogoutAt": null,
-      "loginCount": 0,
+      "loginCount": 1,
       "contacts": [
         {
           "id": "c1",
@@ -502,11 +538,56 @@
       "createdAt": "2026-10-14T01:58:59.482Z",
       "expiresAt": 1794535139482,
       "active": true
+    },
+    "safe_token_ab3524f614c49d4622dad3294642fa084bc5a13c6b2ddf73f777d4176b6ad19c": {
+      "token": "safe_token_ab3524f614c49d4622dad3294642fa084bc5a13c6b2ddf73f777d4176b6ad19c",
+      "phone": "1914872060",
+      "userName": "SHABAB",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T02:48:02.109Z",
+      "expiresAt": 1794538082109,
+      "active": true
+    },
+    "safe_token_admin_7b15812b4d8f5d11a4cdfcbab77c7159b6d5d3dfee9355b901cb42afbda0b31f": {
+      "token": "safe_token_admin_7b15812b4d8f5d11a4cdfcbab77c7159b6d5d3dfee9355b901cb42afbda0b31f",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-14T02:48:08.646Z",
+      "expiresAt": 1794538088646,
+      "active": true
+    },
+    "safe_token_fafabe24c5ceeee8b1211dfab284fcf1fcafbe9d527ffef9da179a5f09e56d94": {
+      "token": "safe_token_fafabe24c5ceeee8b1211dfab284fcf1fcafbe9d527ffef9da179a5f09e56d94",
+      "phone": "1700998877",
+      "userName": "Zayan Ahmed",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T03:17:17.007Z",
+      "expiresAt": 1794539837007,
+      "active": true
+    },
+    "safe_token_3c80d55e426fbe0eb904fd8d9a1125196ac24e6aeb77bf8b89dd31de72d50d34": {
+      "token": "safe_token_3c80d55e426fbe0eb904fd8d9a1125196ac24e6aeb77bf8b89dd31de72d50d34",
+      "phone": "1700998877",
+      "userName": "Zayan Ahmed",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T03:17:17.742Z",
+      "expiresAt": 1794539837741,
+      "active": true
+    },
+    "safe_token_admin_109e25484c5b3401f084208afd8cdc3d0dc5d067cde637039139e04a2c8f5050": {
+      "token": "safe_token_admin_109e25484c5b3401f084208afd8cdc3d0dc5d067cde637039139e04a2c8f5050",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-14T03:17:18.066Z",
+      "expiresAt": 1794539838066,
+      "active": true
     }
   },
   "activeJourneys": {
     "1711111111": {
-      "sessionId": "journey_ca8b5c4bed4fcfd5ef6547d1b56225be",
+      "sessionId": "journey_553dbc7ff9076ca959b1c370943a8366",
       "userId": "1711111111",
       "userName": "Citizen Traveler",
       "userPhone": "1711111111",
@@ -515,16 +596,16 @@
       "destCoords": null,
       "travelMode": "walking",
       "estimatedMinutes": 20,
-      "startTime": "2026-10-14T01:50:02.311Z",
+      "startTime": "2026-10-14T03:16:37.501Z",
       "currentCoords": {
         "lat": 23.7388,
         "lon": 90.4143
       },
       "status": "IN_TRANSIT",
-      "lastPing": 1791942602312,
+      "lastPing": 1791947797501,
       "isOverdue": false,
       "overdueUploadedToAdmin": false,
-      "updatedAt": "2026-10-14T01:50:02.312Z"
+      "updatedAt": "2026-10-14T03:16:37.501Z"
     }
   },
   "emergencyEvidence": [
@@ -594,12 +675,13 @@
     "secretKey": "SAFEBD_PRIVATE_VAULT_2026",
     "enabled": true,
     "folderName": "SAFE_BD_VAULT",
-    "lastSyncedAt": "2026-10-14T01:50:27.874Z"
+    "lastSyncedAt": "2026-10-14T03:17:03.666Z",
+    "stateFileId": "1Y_0dAmyTh3PC3NrT2kNP0m6t8xlR9uD3"
   },
   "stats": {
-    "totalLogins": 31,
-    "totalRegistrations": 6,
-    "lastSaved": "2026-10-14T02:44:48.098Z",
-    "totalPosts": 12
+    "totalLogins": 37,
+    "totalRegistrations": 7,
+    "lastSaved": "2026-10-14T03:17:18.178Z",
+    "totalPosts": 3
   }
 }
