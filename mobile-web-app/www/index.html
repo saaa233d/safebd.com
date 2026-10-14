@@ -2090,12 +2090,17 @@
       </div>
 
       <!-- Feed Category Filter Bar -->
-      <div class="feed-filter-bar">
-        <button type="button" class="feed-filter-btn active" onclick="filterFeed('all', this)">
-          <i class="fas fa-layer-group"></i> All Feeds
-        </button>
-        <button type="button" class="feed-filter-btn" onclick="filterFeed('community', this)">
-          <i class="fas fa-users-viewfinder"></i> Citizen Reports
+      <div class="feed-filter-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <button type="button" class="feed-filter-btn active" onclick="filterFeed('all', this)">
+            <i class="fas fa-layer-group"></i> All Feeds
+          </button>
+          <button type="button" class="feed-filter-btn" onclick="filterFeed('community', this)">
+            <i class="fas fa-users-viewfinder"></i> Citizen Reports
+          </button>
+        </div>
+        <button type="button" class="feed-filter-btn" onclick="fetchLiveFeedPosts(1, false)" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); margin-left: auto; white-space: nowrap;" title="Sync and refresh feed">
+          <i class="fas fa-arrows-rotate"></i> Sync
         </button>
       </div>
 
@@ -2607,6 +2612,7 @@
     let feedPage = 1;
     let hasMoreFeedPosts = false;
     let isLoadingFeed = false;
+    let expandedCommentSections = new Set();
 
     // Purge legacy dummy posts & reset initial like counts to 0
     function purgeLegacyDummyPosts() {
@@ -3553,9 +3559,14 @@
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
       }
 
+      const token = localStorage.getItem('safe_bd_token') || sessionStorage.getItem('safe_bd_token') || (currentUser && currentUser.token) || '';
+
       fetch(`${API_BASE}/api/feed/posts`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify(postPayload)
       })
       .then(r => r.json())
@@ -3615,9 +3626,18 @@
             const existingIds = new Set(liveApprovedPosts.map(p => p.id));
             serverPosts.forEach(p => { if (!existingIds.has(p.id)) liveApprovedPosts.push(p); });
           } else {
-            // Intelligent Merge: Preserve all server posts + any local posts created on this phone
+            // Intelligent Merge: Preserve all server posts + any local posts created on this phone,
+            // while preserving any newly submitted local comments if server sync is still in flight
             const mergedMap = new Map();
-            serverPosts.forEach(p => { if (p && p.id) mergedMap.set(p.id, p); });
+            serverPosts.forEach(p => {
+              if (p && p.id) {
+                const existing = liveApprovedPosts.find(lp => lp && lp.id === p.id);
+                if (existing && Array.isArray(existing.comments) && existing.comments.length > (p.comments || []).length) {
+                  p.comments = existing.comments;
+                }
+                mergedMap.set(p.id, p);
+              }
+            });
             liveApprovedPosts.forEach(p => { if (p && p.id && !mergedMap.has(p.id)) mergedMap.set(p.id, p); });
             liveApprovedPosts = Array.from(mergedMap.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
           }
@@ -3999,7 +4019,7 @@
                     </span>
                   ` : ''}
                 </div>
-                <div style="font-size: 10px; color: var(--text-muted);">${p.time || 'Just now'} • <span style="color: ${isSaadRizwan ? '#d4af37' : '#e57373'}; font-weight: ${isSaadRizwan ? '700' : 'normal'};">${escapeHtml(p.category || 'General Safety')}</span></div>
+                <div style="font-size: 10px; color: var(--text-muted);">${formatExactPostTime(p.createdAt || p.approvedAt || p.time)} • <span style="color: ${isSaadRizwan ? '#d4af37' : '#e57373'}; font-weight: ${isSaadRizwan ? '700' : 'normal'};">${escapeHtml(p.category || 'General Safety')}</span></div>
               </div>
             </div>
             ${!isSaadRizwan ? `
@@ -4032,7 +4052,7 @@
           </div>
 
           <!-- Facebook-Style Comments Drawer -->
-          <div id="comments-section-${p.id}" class="post-comments-section" style="display: none;">
+          <div id="comments-section-${p.id}" class="post-comments-section" style="${((Array.isArray(p.comments) && p.comments.length > 0) || expandedCommentSections.has(p.id)) ? 'display: block;' : 'display: none;'}">
             <div class="comments-list" id="comments-list-${p.id}">
               ${renderCommentsListHtml(p.comments || [], p.id)}
             </div>
@@ -4238,10 +4258,12 @@
       if (!sec) return;
       if (sec.style.display === 'none' || !sec.style.display) {
         sec.style.display = 'block';
+        expandedCommentSections.add(postId);
         const inp = document.getElementById(`comment-input-${postId}`);
         if (inp) inp.focus();
       } else {
         sec.style.display = 'none';
+        expandedCommentSections.delete(postId);
       }
     }
 
@@ -4280,7 +4302,7 @@
       if (!text) return;
 
       const authorName = currentUser ? currentUser.name : "Citizen Reporter";
-      const token = localStorage.getItem('safe_bd_token') || '';
+      const token = localStorage.getItem('safe_bd_token') || sessionStorage.getItem('safe_bd_token') || (currentUser && currentUser.token) || '';
 
       inp.value = '';
 
@@ -4289,12 +4311,16 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
           },
           body: JSON.stringify({ text, author: authorName })
         });
         const data = await res.json();
         if (data && data.success && data.comment) {
+          expandedCommentSections.add(postId);
+          const sec = document.getElementById(`comments-section-${postId}`);
+          if (sec) sec.style.display = 'block';
+
           const post = liveApprovedPosts.find(p => p.id === postId);
           if (post) {
             if (!Array.isArray(post.comments)) post.comments = [];
@@ -4319,11 +4345,13 @@
 
     async function deletePostComment(postId, commentId) {
       if (!confirm("Are you sure you want to delete this comment?")) return;
-      const token = localStorage.getItem('safe_bd_token') || '';
+      const token = localStorage.getItem('safe_bd_token') || sessionStorage.getItem('safe_bd_token') || (currentUser && currentUser.token) || '';
       try {
         const res = await fetch(`${API_BASE}/api/feed/posts/${encodeURIComponent(postId)}/comments/${encodeURIComponent(commentId)}`, {
           method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: {
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          }
         });
         const data = await res.json();
         if (data && data.success) {
@@ -4340,18 +4368,71 @@
       } catch (e) {}
     }
 
-    function formatTimeAgo(dateStr) {
+    function formatExactPostTime(dateStr) {
       if (!dateStr) return "Just now";
-      const diffSec = Math.max(0, Math.round((Date.now() - new Date(dateStr).getTime()) / 1000));
-      if (diffSec < 60) return "Just now";
-      if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
-      if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
-      return `${Math.floor(diffSec / 86400)}d ago`;
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) {
+        return dateStr;
+      }
+
+      const now = new Date();
+      const diffMs = now.getTime() - d.getTime();
+      const diffSec = Math.max(0, Math.floor(diffMs / 1000));
+
+      let rel = "Just now";
+      if (diffSec >= 60 && diffSec < 3600) {
+        rel = `${Math.floor(diffSec / 60)}m ago`;
+      } else if (diffSec >= 3600 && diffSec < 86400) {
+        rel = `${Math.floor(diffSec / 3600)}h ago`;
+      } else if (diffSec >= 86400) {
+        const days = Math.floor(diffSec / 86400);
+        rel = `${days}d ago`;
+      }
+
+      let hours = d.getHours();
+      const minutes = d.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12 || 12;
+      const timeStr = `${hours}:${minutes} ${ampm}`;
+
+      const isToday = d.toDateString() === now.toDateString();
+      const yesterday = new Date(now);
+      yesterday.setDate(now.getDate() - 1);
+      const isYesterday = d.toDateString() === yesterday.toDateString();
+
+      let prefix = '';
+      if (isToday) {
+        prefix = `Today at ${timeStr}`;
+      } else if (isYesterday) {
+        prefix = `Yesterday at ${timeStr}`;
+      } else {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const month = months[d.getMonth()];
+        const day = d.getDate();
+        const year = d.getFullYear();
+        if (year === now.getFullYear()) {
+          prefix = `${day} ${month} at ${timeStr}`;
+        } else {
+          prefix = `${day} ${month} ${year} at ${timeStr}`;
+        }
+      }
+
+      return `${prefix} (${rel})`;
+    }
+
+    function formatTimeAgo(dateStr) {
+      return formatExactPostTime(dateStr);
     }
 
     function saveFeedToLocalStorage() {
       try {
-        localStorage.setItem('safe_bd_community_feed', JSON.stringify(liveApprovedPosts.slice(0, 100)));
+        const sanitized = liveApprovedPosts.slice(0, 100).map(p => {
+          if (p && p.media && typeof p.media === 'string' && p.media.startsWith('data:') && p.media.length > 50000) {
+            return { ...p, media: '' };
+          }
+          return p;
+        });
+        localStorage.setItem('safe_bd_community_feed', JSON.stringify(sanitized));
       } catch (e) {}
     }
 
