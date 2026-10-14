@@ -297,6 +297,12 @@ app.post('/api/auth/login', authLimiter, (req, res) => {
   db.markUserLogin(validatedPhone, token);
 
   const { salt: _, passwordHash: __, ...safeUser } = check.user;
+  if (validatedPhone !== '1316750712') {
+    safeUser.isFounder = false;
+    if (safeUser.name && safeUser.name.toUpperCase().includes('SAAD RIZWAN')) {
+      safeUser.name = 'Citizen';
+    }
+  }
   safeUser.contacts = db.getUserContacts(validatedPhone);
   console.log(`[🔐 DIRECT SIGN-IN SUCCESSFUL] ${isAdminUser ? 'Chief Admin' : 'Citizen'} ${safeUser.name} (+880 ${validatedPhone}) logged in.`);
 
@@ -329,6 +335,12 @@ app.get('/api/auth/me', (req, res) => {
   }
 
   const { salt: _, passwordHash: __, ...safeUser } = user;
+  if (session.phone !== '1316750712') {
+    safeUser.isFounder = false;
+    if (safeUser.name && safeUser.name.toUpperCase().includes('SAAD RIZWAN')) {
+      safeUser.name = 'Citizen';
+    }
+  }
   safeUser.contacts = db.getUserContacts(session.phone);
   return res.json({
     success: true,
