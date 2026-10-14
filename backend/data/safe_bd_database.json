@@ -11,9 +11,9 @@
       "isAdmin": true,
       "isLoggedIn": true,
       "createdAt": "2026-10-12T03:45:26.505Z",
-      "lastLoginAt": "2026-10-14T01:38:40.110Z",
+      "lastLoginAt": "2026-10-14T01:58:59.482Z",
       "lastLogoutAt": "2026-10-12T03:59:10.498Z",
-      "loginCount": 9,
+      "loginCount": 10,
       "contacts": [
         {
           "id": "c1",
@@ -493,6 +493,15 @@
       "createdAt": "2026-10-14T01:38:40.946Z",
       "expiresAt": 1794533920946,
       "active": true
+    },
+    "safe_token_admin_0abae2ec4d1b7e79baf3a034f68fd023360f6f9a7afbaa04d2a5037a575c1f76": {
+      "token": "safe_token_admin_0abae2ec4d1b7e79baf3a034f68fd023360f6f9a7afbaa04d2a5037a575c1f76",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-14T01:58:59.482Z",
+      "expiresAt": 1794535139482,
+      "active": true
     }
   },
   "activeJourneys": {
@@ -585,12 +594,12 @@
     "secretKey": "SAFEBD_PRIVATE_VAULT_2026",
     "enabled": true,
     "folderName": "SAFE_BD_VAULT",
-    "lastSyncedAt": "2026-10-14T01:38:58.322Z"
+    "lastSyncedAt": "2026-10-14T01:50:27.874Z"
   },
   "stats": {
-    "totalLogins": 30,
+    "totalLogins": 31,
     "totalRegistrations": 6,
-    "lastSaved": "2026-10-14T01:50:23.297Z",
+    "lastSaved": "2026-10-14T02:03:06.502Z",
     "totalPosts": 12
   }
 }
