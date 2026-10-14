@@ -17,6 +17,25 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
+// Load environment variables securely from .env if present
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+  try {
+    const envLines = fs.readFileSync(envPath, 'utf8').split('\n');
+    for (const line of envLines) {
+      const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+      if (match) {
+        const key = match[1];
+        let val = (match[2] || '').trim();
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+          val = val.slice(1, -1);
+        }
+        if (!process.env[key]) process.env[key] = val;
+      }
+    }
+  } catch (e) {}
+}
+
 const DATA_DIR = path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'safe_bd_database.json');
 const EVIDENCE_FILE = path.join(DATA_DIR, 'safe_bd_evidence.json');
@@ -33,9 +52,9 @@ let dbState = {
   pendingPostIds: [],   // Array of pending post IDs awaiting admin moderation
   otpCodes: {},         // cleanPhone -> { code, purpose, expiresAt, attempts }
   cloudVault: {
-    scriptUrl: process.env.GDRIVE_VAULT_URL || 'https://script.google.com/macros/s/AKfycby3O-1dfJeGE5DJ8dDrhBHtkdgnk-IKSXFRtUswiTblka1M3GoC8uxGHfOM2kvyOVmq/exec',
-    secretKey: process.env.GDRIVE_SECRET_KEY || 'SAFEBD_PRIVATE_VAULT_2026',
-    enabled: true,
+    scriptUrl: process.env.GDRIVE_VAULT_URL || '',
+    secretKey: process.env.GDRIVE_SECRET_KEY || '',
+    enabled: !!(process.env.GDRIVE_VAULT_URL),
     folderName: 'SAFE_BD_VAULT',
     lastSyncedAt: null
   },
@@ -140,8 +159,8 @@ function initDatabase() {
       pendingIds.sort((a, b) => new Date(cleanPosts[b]?.createdAt || 0) - new Date(cleanPosts[a]?.createdAt || 0));
 
       const savedCloudVault = parsed.cloudVault || {};
-      const scriptUrl = process.env.GDRIVE_VAULT_URL || savedCloudVault.scriptUrl || 'https://script.google.com/macros/s/AKfycby3O-1dfJeGE5DJ8dDrhBHtkdgnk-IKSXFRtUswiTblka1M3GoC8uxGHfOM2kvyOVmq/exec';
-      const secretKey = process.env.GDRIVE_SECRET_KEY || savedCloudVault.secretKey || 'SAFEBD_PRIVATE_VAULT_2026';
+      const scriptUrl = process.env.GDRIVE_VAULT_URL || savedCloudVault.scriptUrl || '';
+      const secretKey = process.env.GDRIVE_SECRET_KEY || savedCloudVault.secretKey || '';
 
       dbState = {
         users: parsed.users || {},
@@ -203,7 +222,8 @@ function getDefaultUserContacts() {
 // Pre-seed Chief Administrator & Founder Account
 function seedChiefAdmin() {
   const adminPhone = '1316750712';
-  const adminPassword = 'naxbagmo24';
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) return;
 
   if (!dbState.users[adminPhone]) {
     const salt = crypto.randomBytes(16).toString('hex');
@@ -584,13 +604,13 @@ function verifyUserCredentials(phone, password) {
   }
 
   const trimmedPassword = String(password || '').trim();
-  const adminMasterPass = process.env.ADMIN_PASSWORD || 'naxbagmo24';
+  const adminMasterPass = process.env.ADMIN_PASSWORD;
 
   // 1. Direct verify against cryptographic scrypt hash
   let isMatch = verifyPasswordSafe(trimmedPassword, user.salt, user.passwordHash);
 
-  // 2. Chief Admin Master Password (naxbagmo24)
-  if (!isMatch && (trimmedPassword === adminMasterPass || trimmedPassword === 'naxbagmo24')) {
+  // 2. Chief Admin Master Password (checked strictly for admin account)
+  if (!isMatch && adminMasterPass && cleanPhone === '1316750712' && trimmedPassword === adminMasterPass) {
     isMatch = true;
   }
 
@@ -1259,9 +1279,9 @@ let cloudBackupDebounceTimer = null;
 function getCloudVaultConfig() {
   if (!dbState.cloudVault) {
     dbState.cloudVault = {
-      scriptUrl: process.env.GDRIVE_VAULT_URL || 'https://script.google.com/macros/s/AKfycby3O-1dfJeGE5DJ8dDrhBHtkdgnk-IKSXFRtUswiTblka1M3GoC8uxGHfOM2kvyOVmq/exec',
-      secretKey: process.env.GDRIVE_SECRET_KEY || 'SAFEBD_PRIVATE_VAULT_2026',
-      enabled: true,
+      scriptUrl: process.env.GDRIVE_VAULT_URL || '',
+      secretKey: process.env.GDRIVE_SECRET_KEY || '',
+      enabled: !!(process.env.GDRIVE_VAULT_URL),
       folderName: 'SAFE_BD_VAULT',
       lastSyncedAt: null
     };
@@ -1307,7 +1327,7 @@ async function uploadToGoogleDriveVault({ fileName, mimeType = 'video/mp4', base
       headers: { 'Content-Type': 'application/json' },
       redirect: 'follow',
       body: JSON.stringify({
-        secret: vault.secretKey || 'SAFEBD_PRIVATE_VAULT_2026',
+        secret: vault.secretKey || process.env.GDRIVE_SECRET_KEY || '',
         action: 'upload',
         fileName: fileName || `safe_bd_${Date.now()}.mp4`,
         mimeType: mimeType || 'video/mp4',
@@ -1362,7 +1382,7 @@ async function fetchFromGoogleDriveVault({ fileId, fileName }) {
       headers: { 'Content-Type': 'application/json' },
       redirect: 'follow',
       body: JSON.stringify({
-        secret: vault.secretKey || 'SAFEBD_PRIVATE_VAULT_2026',
+        secret: vault.secretKey || process.env.GDRIVE_SECRET_KEY || '',
         action: 'get',
         fileId: fileId || '',
         fileName: fileName || ''
@@ -1404,7 +1424,7 @@ async function deleteFromGoogleDriveVault({ fileId, fileName }) {
       headers: { 'Content-Type': 'application/json' },
       redirect: 'follow',
       body: JSON.stringify({
-        secret: vault.secretKey || 'SAFEBD_PRIVATE_VAULT_2026',
+        secret: vault.secretKey || process.env.GDRIVE_SECRET_KEY || '',
         action: 'delete',
         fileId: fileId || '',
         fileName: fileName || ''
