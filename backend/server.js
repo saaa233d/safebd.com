@@ -1987,6 +1987,83 @@ app.post('/api/feed/posts/:id/like', (req, res) => {
   return res.json({ success: true, ...result });
 });
 
+// 4.6.1 Facebook-Style Citizen Comments on Safety Feed Posts
+app.post('/api/feed/posts/:id/comment', (req, res) => {
+  try {
+    const authHeader = req.headers['authorization'] || '';
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim() || (req.body && req.body.token);
+    const session = token ? db.getSession(token) : null;
+    const user = session ? db.getUserByPhone(session.phone) : null;
+
+    let author = (req.body && req.body.author) || "Citizen";
+    let authorPhone = "";
+    let isFounder = false;
+    let isAdmin = false;
+
+    if (session && user) {
+      author = user.name || session.userName || "Verified Citizen";
+      authorPhone = session.phone;
+      isFounder = Boolean(user.isFounder || session.phone === '1316750712');
+      isAdmin = Boolean(user.isAdmin || session.isAdmin);
+    } else {
+      let raw = (author || "").trim();
+      if (raw.toUpperCase().includes('SAAD RIZWAN') || raw.toLowerCase().includes('founder') || raw.toLowerCase().includes('admin')) {
+        raw = "Citizen";
+      }
+      author = raw || "Citizen";
+    }
+
+    const { text } = req.body || {};
+    if (!text || !text.trim()) {
+      return res.status(400).json({ error: "MISSING_TEXT", message: "Comment text cannot be empty." });
+    }
+
+    const result = db.addCommentToPost(req.params.id, {
+      author,
+      authorPhone,
+      text,
+      isFounder,
+      isAdmin
+    });
+
+    // Broadcast in real-time over WebSocket
+    broadcastLocationUpdate({
+      type: "NEW_POST_COMMENT",
+      postId: req.params.id,
+      comment: result.comment,
+      totalComments: result.totalComments
+    });
+
+    return res.json({ success: true, ...result });
+  } catch (err) {
+    return res.status(400).json({ error: "COMMENT_FAILED", message: err.message });
+  }
+});
+
+// 4.6.2 Delete Comment
+app.delete('/api/feed/posts/:id/comments/:commentId', (req, res) => {
+  const authHeader = req.headers['authorization'] || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || (req.body && req.body.token);
+  const session = token ? db.getSession(token) : null;
+  const user = session ? db.getUserByPhone(session.phone) : null;
+
+  const userPhone = session ? session.phone : '';
+  const isAdmin = Boolean(session && (session.isAdmin || (user && user.isAdmin)));
+
+  const ok = db.deleteCommentFromPost(req.params.id, req.params.commentId, userPhone, isAdmin);
+  if (!ok) {
+    return res.status(403).json({ error: "FORBIDDEN", message: "You are not authorized to delete this comment." });
+  }
+
+  broadcastLocationUpdate({
+    type: "POST_COMMENT_DELETED",
+    postId: req.params.id,
+    commentId: req.params.commentId
+  });
+
+  return res.json({ success: true, message: "Comment removed." });
+});
+
 // 4.7 Direct Media Streaming & Single-Click Download Endpoint (Backed by 5TB Google Drive Vault)
 app.get(['/api/feed/posts/:id/media', '/api/feed/posts/:id/media.:ext'], async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
