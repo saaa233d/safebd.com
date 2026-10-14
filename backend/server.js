@@ -994,44 +994,105 @@ app.post('/api/walk/finish', (req, res) => {
 });
 
 // Live Specific Location Search (Proxy to Nominatim / Google Maps query)
+// Live Specific Location Search (Dual-Engine: Photon Autocomplete + OpenStreetMap Nominatim with BD bounding box)
 app.get('/api/places/search', async (req, res) => {
   const query = req.query.q;
   if (!query || query.trim().length < 2) {
     return res.json({ success: true, results: [] });
   }
 
-  try {
-    const encoded = encodeURIComponent(query.trim() + ', Bangladesh');
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encoded}&countrycodes=bd&addressdetails=1&limit=6`;
-    const response = await fetch(url, {
-      headers: { 'User-Agent': 'SafeBD-App/1.0 (safebd.official@gmail.com)' }
-    });
-    const data = await response.json();
+  const cleanQuery = query.trim();
+  const searchResults = [];
+  const seenCoords = new Set();
 
-    const results = (data || []).map(item => {
-      const addr = item.address || {};
-      const name = item.name || addr.amenity || addr.building || addr.road || addr.suburb || item.display_name.split(',')[0];
-      const area = [
-        addr.road,
-        addr.suburb || addr.quarter || addr.neighbourhood,
-        addr.city || addr.town || addr.county || "Bangladesh"
-      ].filter(Boolean).join(', ') || item.display_name;
-
-      return {
-        name: name,
-        fullAddress: item.display_name,
-        area: area,
-        lat: parseFloat(item.lat),
-        lon: parseFloat(item.lon),
-        query: item.display_name
-      };
-    });
-
-    return res.json({ success: true, results });
-  } catch (err) {
-    console.error("Place search error:", err.message);
-    return res.json({ success: false, results: [] });
+  function addResult(item) {
+    if (!item || !item.lat || !item.lon || !item.name) return;
+    const key = `${item.lat.toFixed(4)}_${item.lon.toFixed(4)}`;
+    if (seenCoords.has(key)) return;
+    seenCoords.add(key);
+    searchResults.push(item);
   }
+
+  // 1. Fast Photon Autocomplete (Optimized for Bangladesh coordinates & typos)
+  try {
+    const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(cleanQuery)}&lat=23.8103&lon=90.4125&limit=8`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2200);
+    const pRes = await fetch(photonUrl, {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'SafeBD-App/2.0' }
+    });
+    clearTimeout(timeout);
+    if (pRes.ok) {
+      const pData = await pRes.json();
+      if (pData && Array.isArray(pData.features)) {
+        pData.features.forEach(f => {
+          const props = f.properties || {};
+          const coords = f.geometry?.coordinates || [];
+          if (coords.length >= 2) {
+            const lon = coords[0];
+            const lat = coords[1];
+            // Ensure location is inside or near Bangladesh bounds
+            if (lat >= 20.3 && lat <= 26.9 && lon >= 87.8 && lon <= 93.0) {
+              const name = props.name || props.street || props.district || props.city;
+              const area = [props.street, props.district || props.suburb, props.city || props.state || 'Bangladesh'].filter(Boolean).join(', ');
+              addResult({
+                name: name || cleanQuery,
+                fullAddress: `${name}, ${area}`,
+                area: area,
+                lat: lat,
+                lon: lon,
+                category: props.osm_value || 'place',
+                query: `${name}, ${area}`
+              });
+            }
+          }
+        });
+      }
+    }
+  } catch (err) {
+    // Photon fallback
+  }
+
+  // 2. OpenStreetMap Nominatim Search (with Bangladesh country bias)
+  if (searchResults.length < 5) {
+    try {
+      const nomUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanQuery)}&countrycodes=bd&viewbox=88.0,26.7,92.7,20.5&addressdetails=1&limit=8`;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 2500);
+      const nomRes = await fetch(nomUrl, {
+        signal: controller.signal,
+        headers: { 'User-Agent': 'SafeBD-App/2.0 (safebd.official@gmail.com)' }
+      });
+      clearTimeout(timeout);
+      if (nomRes.ok) {
+        const nomData = await nomRes.json();
+        if (Array.isArray(nomData)) {
+          nomData.forEach(item => {
+            const addr = item.address || {};
+            const name = item.name || addr.amenity || addr.building || addr.road || addr.suburb || item.display_name.split(',')[0];
+            const area = [
+              addr.road,
+              addr.suburb || addr.quarter || addr.neighbourhood,
+              addr.city || addr.town || addr.county || 'Bangladesh'
+            ].filter(Boolean).join(', ') || item.display_name;
+
+            addResult({
+              name: name,
+              fullAddress: item.display_name,
+              area: area,
+              lat: parseFloat(item.lat),
+              lon: parseFloat(item.lon),
+              category: item.type || item.class || 'place',
+              query: item.display_name
+            });
+          });
+        }
+      }
+    } catch (e) {}
+  }
+
+  return res.json({ success: true, results: searchResults.slice(0, 10) });
 });
 
 // 3.5 Real-Time Routing & Google Maps Directions Engine (Live Bangladesh Traffic & Transport Mode ETA)
