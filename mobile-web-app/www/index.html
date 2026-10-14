@@ -2794,10 +2794,10 @@
           attributionControl: false
         }).setView([initialLat, initialLon], 16);
 
-        // High resolution Google Maps-styled tiles
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-          maxZoom: 19,
-          subdomains: 'abcd'
+        // Genuine Real Google Maps Tile Engine (Zero watermark, high-speed Dhaka satellite/road tiles)
+        L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+          maxZoom: 20,
+          subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
         }).addTo(navMap);
 
         // Custom Live Green Navigation Puck Icon with Radar Ripple and Live Tag
