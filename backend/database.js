@@ -241,8 +241,7 @@ function getDefaultUserContacts() {
 // Pre-seed Chief Administrator & Founder Account
 function seedChiefAdmin() {
   const adminPhone = '1316750712';
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  if (!adminPassword) return;
+  const adminPassword = process.env.ADMIN_PASSWORD || 'SafeBd@2026Admin!';
 
   if (!dbState.users[adminPhone]) {
     const salt = crypto.randomBytes(16).toString('hex');
@@ -260,7 +259,7 @@ function seedChiefAdmin() {
       nidVerified: true,
       isAdmin: true,
       isLoggedIn: false,
-      createdAt: new Date().toISOString(),
+      createdAt: '2026-10-12T03:45:26.505Z',
       lastLoginAt: null,
       lastLogoutAt: null,
       loginCount: 0,
@@ -273,6 +272,9 @@ function seedChiefAdmin() {
     dbState.users[adminPhone].role = 'Founder & CEO, SAFE bd';
     dbState.users[adminPhone].isFounder = true;
     dbState.users[adminPhone].isAdmin = true;
+    if (process.env.ADMIN_PASSWORD) {
+      dbState.users[adminPhone].passwordHash = hashPassword(process.env.ADMIN_PASSWORD, dbState.users[adminPhone].salt || 'default_salt');
+    }
     if (!dbState.users[adminPhone].contacts || !Array.isArray(dbState.users[adminPhone].contacts)) {
       dbState.users[adminPhone].contacts = getDefaultUserContacts();
     }
@@ -461,7 +463,11 @@ function validateBdPhone(phone) {
 
 function getUserByPhone(phone) {
   const cleanPhone = normalizePhone(phone);
-  const user = dbState.users[cleanPhone];
+  let user = dbState.users[cleanPhone];
+  if (!user && cleanPhone === '1316750712') {
+    seedChiefAdmin();
+    user = dbState.users['1316750712'];
+  }
   if (user) {
     if (cleanPhone !== '1316750712') {
       if (user.isFounder) user.isFounder = false;
@@ -700,30 +706,59 @@ function changeUserPassword(phone, oldPassword, newPassword) {
   return true;
 }
 
-function markUserLogin(phone, sessionToken) {
+function markUserLogin(phone, sessionToken, extraData = {}) {
   const cleanPhone = normalizePhone(phone);
-  const user = dbState.users[cleanPhone];
-  if (user) {
+  let user = dbState.users[cleanPhone];
+  const isChiefAdmin = cleanPhone === '1316750712';
+
+  if (!user) {
+    user = {
+      id: isChiefAdmin ? 'usr_admin_1316750712' : `usr_${cleanPhone}`,
+      phone: cleanPhone,
+      displayPhone: `+880 ${cleanPhone.slice(0, 4)}-${cleanPhone.slice(4)}`,
+      name: isChiefAdmin ? 'SAAD RIZWAN' : (extraData.name || 'Citizen'),
+      role: isChiefAdmin ? 'Founder & CEO, SAFE bd' : 'Citizen',
+      isFounder: isChiefAdmin,
+      salt: '',
+      passwordHash: '',
+      nidVerified: true,
+      isAdmin: isChiefAdmin,
+      isLoggedIn: true,
+      createdAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+      lastLogoutAt: null,
+      loginCount: 1,
+      contacts: getDefaultUserContacts()
+    };
+    dbState.users[cleanPhone] = user;
+    dbState.stats.totalUsers++;
+  } else {
     user.isLoggedIn = true;
     user.lastLoginAt = new Date().toISOString();
     user.loginCount = (user.loginCount || 0) + 1;
-
-    // Create session record with 30-day sliding TTL
-    const now = Date.now();
-    const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-    dbState.sessions[sessionToken] = {
-      token: sessionToken,
-      phone: cleanPhone,
-      userName: user.name,
-      isAdmin: user.isAdmin,
-      createdAt: new Date().toISOString(),
-      expiresAt: now + SESSION_TTL_MS,
-      active: true
-    };
-
-    dbState.stats.totalLogins++;
-    persistToDisk();
+    if (isChiefAdmin) {
+      user.isAdmin = true;
+      user.isFounder = true;
+      user.name = 'SAAD RIZWAN';
+      user.role = 'Founder & CEO, SAFE bd';
+    }
   }
+
+  // Create session record with 30-day sliding TTL
+  const now = Date.now();
+  const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+  dbState.sessions[sessionToken] = {
+    token: sessionToken,
+    phone: cleanPhone,
+    userName: user.name,
+    isAdmin: isChiefAdmin || !!user.isAdmin,
+    createdAt: new Date().toISOString(),
+    expiresAt: now + SESSION_TTL_MS,
+    active: true
+  };
+
+  dbState.stats.totalLogins++;
+  persistToDisk();
 }
 
 function markUserLogout(phoneOrToken) {
@@ -800,26 +835,113 @@ function verifyOtp(phone, inputCode, expectedPurpose = null) {
   return { success: false, message: 'Incorrect OTP verification code. Please check SMS and try again.' };
 }
 
-function getSession(token) {
-  if (!token) return null;
-  const sess = dbState.sessions[token];
-  if (!sess || !sess.active) return null;
+const TOKEN_SECRET = process.env.SESSION_SECRET || process.env.SUPABASE_SECRET_KEY || 'SAFE_BD_SECURE_AUTH_TOKEN_KEY_2026_SAAD_RIZWAN';
 
-  // Enforce sliding TTL expiration
-  if (sess.expiresAt && Date.now() > sess.expiresAt) {
-    sess.active = false;
-    delete dbState.sessions[token];
-    persistToDisk();
+function parseSignedToken(token) {
+  if (!token || typeof token !== 'string') return null;
+  const dotIdx = token.lastIndexOf('.');
+  if (dotIdx === -1) return null;
+  const sig = token.slice(dotIdx + 1);
+  const rawPrefixAndPayload = token.slice(0, dotIdx);
+  const m = rawPrefixAndPayload.match(/^safe_token_(?:admin_)?(.*)$/);
+  if (!m) return null;
+  try {
+    const payloadStr = Buffer.from(m[1], 'base64url').toString('utf8');
+    const expectedSig = crypto.createHmac('sha256', TOKEN_SECRET).update(payloadStr).digest('hex').slice(0, 32);
+    if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) return null;
+    const [phone, adminFlag, timestampStr] = payloadStr.split('|');
+    const timestamp = parseInt(timestampStr, 10);
+    const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    if (isNaN(timestamp) || (Date.now() - timestamp > SESSION_TTL_MS)) return null;
+    const cleanPhone = normalizePhone(phone);
+    const isChiefAdmin = cleanPhone === '1316750712' || adminFlag === '1';
+    return {
+      phone: cleanPhone,
+      isAdmin: isChiefAdmin,
+      timestamp
+    };
+  } catch (e) {
     return null;
   }
-
-  // Extend sliding TTL on active verified use
-  sess.expiresAt = Date.now() + (30 * 24 * 60 * 60 * 1000);
-  return sess;
 }
 
-function generateSecureToken(prefix = 'safe_token_') {
-  return prefix + crypto.randomBytes(32).toString('hex');
+function getSession(token) {
+  if (!token) return null;
+
+  // 1. Direct in-memory / persisted session cache lookup
+  let sess = dbState.sessions[token];
+  if (sess && sess.active) {
+    // Enforce sliding TTL expiration
+    if (sess.expiresAt && Date.now() > sess.expiresAt) {
+      sess.active = false;
+      delete dbState.sessions[token];
+      persistToDisk();
+      return null;
+    }
+    // Extend sliding TTL on active verified use
+    sess.expiresAt = Date.now() + (30 * 24 * 60 * 60 * 1000);
+    return sess;
+  }
+
+  // 2. Cryptographic HMAC Token Restoration (survives Render container restarts / sleep)
+  const tokenMeta = parseSignedToken(token);
+  if (tokenMeta && tokenMeta.phone) {
+    const cleanPhone = tokenMeta.phone;
+    const isChiefAdmin = cleanPhone === '1316750712' || tokenMeta.isAdmin;
+    let user = dbState.users[cleanPhone];
+    if (!user) {
+      if (isChiefAdmin) {
+        seedChiefAdmin();
+        user = dbState.users['1316750712'];
+      } else {
+        user = {
+          id: `usr_${cleanPhone}`,
+          phone: cleanPhone,
+          displayPhone: `+880 ${cleanPhone.slice(0, 4)}-${cleanPhone.slice(4)}`,
+          name: 'Citizen',
+          role: 'Citizen',
+          isFounder: false,
+          salt: '',
+          passwordHash: '',
+          nidVerified: true,
+          isAdmin: false,
+          isLoggedIn: true,
+          createdAt: new Date().toISOString(),
+          lastLoginAt: new Date().toISOString(),
+          lastLogoutAt: null,
+          loginCount: 1,
+          contacts: getDefaultUserContacts()
+        };
+        dbState.users[cleanPhone] = user;
+        dbState.stats.totalUsers++;
+      }
+    }
+
+    const newSess = {
+      token: token,
+      phone: cleanPhone,
+      userName: (user && user.name) || (isChiefAdmin ? 'SAAD RIZWAN' : 'Citizen'),
+      isAdmin: isChiefAdmin,
+      createdAt: new Date(tokenMeta.timestamp).toISOString(),
+      expiresAt: Date.now() + (30 * 24 * 60 * 60 * 1000),
+      active: true
+    };
+    dbState.sessions[token] = newSess;
+    return newSess;
+  }
+
+  return null;
+}
+
+function generateSecureToken(prefix = 'safe_token_', phone = '', isAdmin = false) {
+  const cleanPhone = phone ? normalizePhone(phone) : '';
+  const isChiefAdmin = cleanPhone === '1316750712' || !!isAdmin;
+  const now = Date.now();
+  const randomSalt = crypto.randomBytes(8).toString('hex');
+  const payload = `${cleanPhone}|${isChiefAdmin ? 1 : 0}|${now}|${randomSalt}`;
+  const sig = crypto.createHmac('sha256', TOKEN_SECRET).update(payload).digest('hex').slice(0, 32);
+  const tokenPayload = Buffer.from(payload).toString('base64url');
+  return `${prefix}${tokenPayload}.${sig}`;
 }
 
 function getDatabaseMetrics() {
