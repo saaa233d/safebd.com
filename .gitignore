@@ -1,0 +1,26 @@
+# Environment and sensitive keys
+.env
+*.env
+backend/.env
+.github_sync_config.json
+
+# Live user databases, sessions, SOS covert evidence
+backend/data/*.json
+backend/data/evidence/
+backend/data/evidence/*
+backend/data/*
+!backend/data/.gitkeep
+
+# System generated logs, transcripts and caches
+.system_generated/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependencies
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
