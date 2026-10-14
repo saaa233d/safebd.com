@@ -2550,9 +2550,15 @@
 
     let selectedTravelMode = 'walking'; // 'walking' | 'driving' | 'bicycling'
     let currentDestinationQuery = "";
+    let selectedDestCoords = null;
+    let placeSearchTimer = null;
+    let latestSearchQuery = "";
+    let isOnlineSearchRunning = false;
     let calculatedRouteDistanceKm = 0;
     let calculatedDurationMinutes = 20;
     let activeJourneySessionId = null;
+    let totalJourneyAllocatedSeconds = 0;
+    let secondsOverdueCount = 0;
     let overdueReminderPromptShown = false;
     let overdueAutoEscalated = false;
 
@@ -4241,11 +4247,6 @@
     /* ----------------------------------------------------
        WALK WITH ME COMPANION - LIVE GOOGLE MAPS PLACE SEARCH & ROUTING
     ---------------------------------------------------- */
-    let placeSearchTimer = null;
-    let selectedDestCoords = null;
-    let latestSearchQuery = "";
-    let isOnlineSearchRunning = false;
-
     function escapeHtml(str) {
       if (!str) return '';
       return String(str)
@@ -4735,9 +4736,6 @@
        Each citizen account has their own personal destination,
        active companion timer, and route protection.
     ---------------------------------------------------- */
-    let totalJourneyAllocatedSeconds = 0;
-    let secondsOverdueCount = 0;
-
     function getUserWalkKey(user) {
       if (user && user.phone) {
         return 'user_' + String(user.phone).replace(/\D/g, '').slice(-10);
