@@ -11,9 +11,9 @@
       "isAdmin": true,
       "isLoggedIn": true,
       "createdAt": "2026-10-12T03:45:26.505Z",
-      "lastLoginAt": "2026-10-13T13:03:58.342Z",
+      "lastLoginAt": "2026-10-14T01:38:40.110Z",
       "lastLogoutAt": "2026-10-12T03:59:10.498Z",
-      "loginCount": 7,
+      "loginCount": 9,
       "contacts": [
         {
           "id": "c1",
@@ -42,16 +42,51 @@
       "phone": "1711223344",
       "displayPhone": "+880 1711223344",
       "name": "Rahim Khan",
-      "salt": "bdb95664d7b0a44161d10d651110f54c",
-      "passwordHash": "9dba15d89c193a6c6b9cef79be5a927d268baa1e9f9de31a59c0a83f2070a3a1a45a2eb1728a12dacda3c381ef39494f82596ea49a9dba8df050b75adea384cc",
+      "salt": "87ea2d0a4fc5cfc6e8ec10abf5d51ab7",
+      "passwordHash": "0d4deab202e4f37f9b3f5327f78732e048c5ce74e9ff35675e7e5f6f1dd660ef16f90dc788334e9abc5ca769832c5611e7fac3e9adf9318e37e617ba264320a3",
       "nidVerified": true,
       "isAdmin": false,
       "isLoggedIn": true,
       "createdAt": "2026-10-12T03:48:48.089Z",
-      "lastLoginAt": "2026-10-12T03:57:22.730Z",
+      "lastLoginAt": "2026-10-14T01:38:40.557Z",
       "lastLogoutAt": null,
-      "loginCount": 5,
+      "loginCount": 6,
       "updatedAt": "2026-10-12T03:51:42.166Z",
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Father",
+          "phone": "",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Mother",
+          "phone": "",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "Guardian",
+          "phone": "",
+          "initial": "G"
+        }
+      ]
+    },
+    "1712345678": {
+      "id": "usr_1712345678",
+      "phone": "1712345678",
+      "displayPhone": "+880 1712345678",
+      "name": "Test Citizen",
+      "salt": "01fb7a445483af8c26fed7bf10cf3fab",
+      "passwordHash": "9a0f10dce31d903690e87a1bb95ac85dd5368ce849f1d3820d319f1b29010d59fc2c57368e05dc3ee6fbad3dba630ade77f61ac18da6c14dd72c6c33798e5a67",
+      "nidVerified": true,
+      "isAdmin": false,
+      "isLoggedIn": true,
+      "createdAt": "2026-10-14T01:29:58.646Z",
+      "lastLoginAt": "2026-10-14T01:30:04.838Z",
+      "lastLogoutAt": null,
+      "loginCount": 3,
       "contacts": [
         {
           "id": "c1",
@@ -114,15 +149,15 @@
       "phone": "1799887766",
       "displayPhone": "+880 1799887766",
       "name": "Ashikur Rahman",
-      "salt": "1ef8ee182dfb90f17fa006a0cba14c73",
-      "passwordHash": "64f850346eef6b8882c51765d072fe3ab8d168d7fc09e39ec7a50bfef38676ede6f7a27cfbac4119a9a00ab780a559a6ef6c2e0007fb2656f7ae3594bcc4714d",
+      "salt": "d54110c5d99148c4d462cde08c02248a",
+      "passwordHash": "06c8dc3a18d8d5cafe52e3c5ccca0e6d1f691f210ffca69017a05717a270385ab7d5144a4067acda066ff7bb637cbb08541d5e25a8f016b9b5af2790d21a008c",
       "nidVerified": true,
       "isAdmin": false,
       "isLoggedIn": true,
       "createdAt": "2026-10-13T18:10:40.966Z",
-      "lastLoginAt": "2026-10-13T18:12:22.164Z",
+      "lastLoginAt": "2026-10-14T01:38:40.946Z",
       "lastLogoutAt": null,
-      "loginCount": 2,
+      "loginCount": 3,
       "contacts": [
         {
           "id": "c1",
@@ -404,11 +439,65 @@
       "isAdmin": false,
       "createdAt": "2026-10-13T18:12:22.164Z",
       "active": true
+    },
+    "safe_token_admin_f828c1fd483193d377c987ac48a0a1d91491f273fbcf97c0a3b44fd43fb855f0": {
+      "token": "safe_token_admin_f828c1fd483193d377c987ac48a0a1d91491f273fbcf97c0a3b44fd43fb855f0",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-14T01:28:43.830Z",
+      "expiresAt": 1794533323830,
+      "active": true
+    },
+    "safe_token_b66d2982b1cde40d52868401093af05f49cf80fd434edc95e94d6a9a330363be": {
+      "token": "safe_token_b66d2982b1cde40d52868401093af05f49cf80fd434edc95e94d6a9a330363be",
+      "phone": "1712345678",
+      "userName": "Test Citizen",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T01:29:58.646Z",
+      "expiresAt": 1794533398646,
+      "active": true
+    },
+    "safe_token_896eb901d626b7031f0b6b591ee035915726c0d88a0036c0cdaec51fe51d8d94": {
+      "token": "safe_token_896eb901d626b7031f0b6b591ee035915726c0d88a0036c0cdaec51fe51d8d94",
+      "phone": "1712345678",
+      "userName": "Test Citizen",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T01:30:04.838Z",
+      "expiresAt": 1794533404838,
+      "active": true
+    },
+    "safe_token_admin_b097772640478a0cea135aab521ad9ac985f13d070967d2b0eae094a98209fc3": {
+      "token": "safe_token_admin_b097772640478a0cea135aab521ad9ac985f13d070967d2b0eae094a98209fc3",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-14T01:38:40.110Z",
+      "expiresAt": 1794533920110,
+      "active": true
+    },
+    "safe_token_dc6f5b983c92c66bdeea4ede3f2be1e3e4a053191e8a33f8d9b80cf276d2359b": {
+      "token": "safe_token_dc6f5b983c92c66bdeea4ede3f2be1e3e4a053191e8a33f8d9b80cf276d2359b",
+      "phone": "1711223344",
+      "userName": "Rahim Khan",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T01:38:40.557Z",
+      "expiresAt": 1794533920557,
+      "active": true
+    },
+    "safe_token_1cd964f4750b40769d680d03553c37c4cf20a764a57251b35bcf60888e302fa1": {
+      "token": "safe_token_1cd964f4750b40769d680d03553c37c4cf20a764a57251b35bcf60888e302fa1",
+      "phone": "1799887766",
+      "userName": "Ashikur Rahman",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T01:38:40.946Z",
+      "expiresAt": 1794533920946,
+      "active": true
     }
   },
   "activeJourneys": {
     "1711111111": {
-      "sessionId": "journey_c6e041992412838f5ffbd52126af3318",
+      "sessionId": "journey_195500077d4a43c47c14874c8dcc4970",
       "userId": "1711111111",
       "userName": "Citizen Traveler",
       "userPhone": "1711111111",
@@ -417,16 +506,16 @@
       "destCoords": null,
       "travelMode": "walking",
       "estimatedMinutes": 20,
-      "startTime": "2026-10-14T01:18:33.303Z",
+      "startTime": "2026-10-14T01:38:47.884Z",
       "currentCoords": {
         "lat": 23.7388,
         "lon": 90.4143
       },
       "status": "IN_TRANSIT",
-      "lastPing": 1791940713303,
+      "lastPing": 1791941927884,
       "isOverdue": false,
       "overdueUploadedToAdmin": false,
-      "updatedAt": "2026-10-14T01:18:33.303Z"
+      "updatedAt": "2026-10-14T01:38:47.884Z"
     }
   },
   "emergencyEvidence": [
@@ -665,6 +754,28 @@
       "createdAt": "2026-10-14T01:18:33.291Z",
       "approvedAt": "2026-10-14T01:18:33.291Z",
       "reviewedBy": "Instant Community Feed"
+    },
+    "post_1791941927867_4265": {
+      "id": "post_1791941927867_4265",
+      "author": "Citizen Reporter",
+      "authorPhone": "",
+      "authorRole": "Citizen Reporter",
+      "isFounder": false,
+      "verified": false,
+      "type": "community",
+      "category": "Urgent Alert",
+      "content": "I am claiming to be the founder without logging in.",
+      "media": null,
+      "gdriveFileId": null,
+      "mediaFileName": null,
+      "mediaMimeType": null,
+      "likes": 0,
+      "likedBy": [],
+      "approved": true,
+      "rejected": false,
+      "createdAt": "2026-10-14T01:38:47.868Z",
+      "approvedAt": "2026-10-14T01:38:47.868Z",
+      "reviewedBy": "Instant Community Feed"
     }
   },
   "cloudVault": {
@@ -672,13 +783,13 @@
     "secretKey": "SAFEBD_PRIVATE_VAULT_2026",
     "enabled": true,
     "folderName": "SAFE_BD_VAULT",
-    "lastSyncedAt": "2026-10-14T01:16:52.346Z",
-    "stateFileId": "1zBhNnAKLkyX68a5NCmGALDXs-ThQg0Cy"
+    "lastSyncedAt": "2026-10-14T01:38:46.536Z",
+    "stateFileId": "1c0AX-Xd-U3GP93Hz7O029ffON3BxA2Sp"
   },
   "stats": {
-    "totalLogins": 23,
-    "totalRegistrations": 5,
-    "lastSaved": "2026-10-14T01:18:33.414Z",
-    "totalPosts": 10
+    "totalLogins": 30,
+    "totalRegistrations": 6,
+    "lastSaved": "2026-10-14T01:38:47.987Z",
+    "totalPosts": 11
   }
 }
