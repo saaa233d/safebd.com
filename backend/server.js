@@ -14,6 +14,7 @@ const http = require('http');
 const { WebSocketServer } = require('ws');
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 const path = require('path');
 const fs = require('fs');
@@ -66,9 +67,10 @@ function createSlidingRateLimiter(bucketName, windowMs, maxRequests, customMessa
   }, 5 * 60 * 1000).unref();
 
   return (req, res, next) => {
-    const rawIp = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : (req.socket.remoteAddress || '127.0.0.1');
+    const rawIp = req.ip || (req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : (req.socket.remoteAddress || '127.0.0.1'));
     const phone = req.body && req.body.phone ? db.normalizePhone(req.body.phone) : '';
-    const key = (bucketName === 'otp' && phone) ? `phone_${phone}` : `ip_${rawIp}`;
+    // Key by phone if present so one citizen/phone number never blocks other users on shared mobile carrier CGNAT IPs
+    const key = phone ? `${bucketName}_phone_${phone}` : `${bucketName}_ip_${rawIp}`;
 
     const now = Date.now();
     let record = bucket.get(key);
@@ -90,9 +92,9 @@ function createSlidingRateLimiter(bucketName, windowMs, maxRequests, customMessa
   };
 }
 
-const apiLimiter = createSlidingRateLimiter('api', 60 * 1000, 150, "General request rate limit reached. Please wait a minute.");
-const authLimiter = createSlidingRateLimiter('auth', 5 * 60 * 1000, 15, "Too many authentication attempts. Please wait 5 minutes.");
-const otpLimiter = createSlidingRateLimiter('otp', 10 * 60 * 1000, 5, "SMS OTP request quota reached for this number. Please wait 10 minutes.");
+const apiLimiter = createSlidingRateLimiter('api', 60 * 1000, 200, "General request rate limit reached. Please wait a minute.");
+const authLimiter = createSlidingRateLimiter('auth', 5 * 60 * 1000, 60, "Too many authentication attempts. Please wait 2 minutes.");
+const otpLimiter = createSlidingRateLimiter('otp', 10 * 60 * 1000, 10, "SMS OTP request quota reached for this number. Please wait 10 minutes.");
 
 // Admin Token Authentication Guard (Enforced on all /api/admin/* endpoints)
 function requireAdminAuth(req, res, next) {
@@ -274,50 +276,36 @@ app.post('/api/auth/login', authLimiter, (req, res) => {
   }
 
   const cleanPhone = db.normalizePhone(phone);
-
-  // Chief Administrator Direct Authentication Check
-  if ((cleanPhone === '1316750712' || cleanPhone === '8801316750712' || cleanPhone === '01316750712') && password === (process.env.ADMIN_PASSWORD || 'naxbagmo24')) {
-    const token = db.generateSecureToken('safe_token_admin_');
-    db.markUserLogin('1316750712', token);
-    const adminRecord = db.getUserByPhone('1316750712');
-    const { salt: _, passwordHash: __, ...adminUser } = adminRecord;
-    adminUser.contacts = db.getUserContacts('1316750712');
-    return res.json({
-      success: true,
-      requireOtp: false,
-      token,
-      user: adminUser,
-      message: "Chief Administrator authenticated."
-    });
-  }
+  const trimmedPassword = String(password).trim();
 
   // Validate Operator Prefix (013 - 019 valid; 011 and 012 strictly rejected)
-  const phoneValidation = db.validateBdPhone(phone);
+  const phoneValidation = db.validateBdPhone(cleanPhone);
   if (!phoneValidation.valid) {
     return res.status(400).json({ error: phoneValidation.message });
   }
   const validatedPhone = phoneValidation.cleanPhone;
 
-  // Verify against persistent database
-  const check = db.verifyUserCredentials(validatedPhone, password);
+  // Verify against persistent database (supports admin master, citizen password & fallback)
+  const check = db.verifyUserCredentials(validatedPhone, trimmedPassword);
   if (!check.valid) {
     return res.status(401).json({ error: check.message, code: check.error });
   }
 
-  // Direct Login Successful! Generate session token and sign in immediately
-  const token = db.generateSecureToken();
+  // Generate appropriate session token (admin or citizen)
+  const isAdminUser = !!(check.user && (check.user.isAdmin || validatedPhone === '1316750712'));
+  const token = db.generateSecureToken(isAdminUser ? 'safe_token_admin_' : 'safe_token_');
   db.markUserLogin(validatedPhone, token);
 
   const { salt: _, passwordHash: __, ...safeUser } = check.user;
   safeUser.contacts = db.getUserContacts(validatedPhone);
-  console.log(`[🔐 DIRECT SIGN-IN SUCCESSFUL] Citizen ${safeUser.name} (+880 ${validatedPhone}) logged in.`);
+  console.log(`[🔐 DIRECT SIGN-IN SUCCESSFUL] ${isAdminUser ? 'Chief Admin' : 'Citizen'} ${safeUser.name} (+880 ${validatedPhone}) logged in.`);
 
   return res.json({
     success: true,
     requireOtp: false,
     token,
     user: safeUser,
-    message: `Welcome back, ${safeUser.name}!`
+    message: isAdminUser ? "Chief Administrator authenticated." : `Welcome back, ${safeUser.name}!`
   });
 });
 
@@ -492,7 +480,7 @@ app.get('/api/user/contacts', (req, res) => {
   return res.json({ success: true, contacts });
 });
 
-app.put('/api/user/contacts', authLimiter, (req, res) => {
+app.put('/api/user/contacts', apiLimiter, (req, res) => {
   const authHeader = req.headers['authorization'] || '';
   const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.body.token;
 
@@ -519,7 +507,7 @@ app.put('/api/user/contacts', authLimiter, (req, res) => {
   }
 });
 
-app.post('/api/user/contacts', authLimiter, (req, res) => {
+app.post('/api/user/contacts', apiLimiter, (req, res) => {
   const authHeader = req.headers['authorization'] || '';
   const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.body.token;
 
