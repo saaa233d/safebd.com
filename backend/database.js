@@ -26,6 +26,7 @@ const POSTS_FILE = path.join(DATA_DIR, 'safe_bd_posts.json');
 let dbState = {
   users: {},            // cleanPhone -> User Record
   sessions: {},         // sessionToken -> Session Record
+  activeJourneys: {},   // cleanPhone -> User's Personal Active Walk With Me Session
   emergencyEvidence: [],// List of all covert SOS video evidence records
   posts: {},            // postId -> Post Record (O(1) query)
   approvedPostIds: [],  // Array of approved post IDs sorted newest first (O(limit) pagination for live feed)
@@ -139,6 +140,7 @@ function initDatabase() {
       dbState = {
         users: parsed.users || {},
         sessions: parsed.sessions || {},
+        activeJourneys: parsed.activeJourneys || {},
         emergencyEvidence: combinedEvidence,
         posts: cleanPosts,
         approvedPostIds: approvedIds,
@@ -318,6 +320,7 @@ function persistToDisk() {
       const payload = JSON.stringify({
         users: dbState.users,
         sessions: dbState.sessions,
+        activeJourneys: dbState.activeJourneys || {},
         emergencyEvidence: dbState.emergencyEvidence || [],
         posts: dbState.posts || {},
         cloudVault: dbState.cloudVault || {},
@@ -504,6 +507,48 @@ function getUserContacts(phone) {
     return user.contacts;
   }
   return getDefaultUserContacts();
+}
+
+/**
+ * User-Isolated Walk With Me Companion Journey Storage
+ * Each citizen account has their own personal, private journey.
+ */
+function saveUserActiveJourney(phone, journeyData) {
+  const cleanPhone = normalizePhone(phone);
+  if (!cleanPhone) return null;
+  if (!dbState.activeJourneys) dbState.activeJourneys = {};
+  
+  dbState.activeJourneys[cleanPhone] = {
+    ...journeyData,
+    userPhone: cleanPhone,
+    updatedAt: new Date().toISOString()
+  };
+  persistToDisk();
+  scheduleCloudStateBackup();
+  return dbState.activeJourneys[cleanPhone];
+}
+
+function getUserActiveJourney(phone) {
+  const cleanPhone = normalizePhone(phone);
+  if (!cleanPhone || !dbState.activeJourneys) return null;
+  return dbState.activeJourneys[cleanPhone] || null;
+}
+
+function finishUserActiveJourney(phone) {
+  const cleanPhone = normalizePhone(phone);
+  if (!cleanPhone || !dbState.activeJourneys) return false;
+  if (dbState.activeJourneys[cleanPhone]) {
+    delete dbState.activeJourneys[cleanPhone];
+    persistToDisk();
+    scheduleCloudStateBackup();
+    return true;
+  }
+  return false;
+}
+
+function getAllActiveJourneys() {
+  if (!dbState.activeJourneys) return [];
+  return Object.values(dbState.activeJourneys);
 }
 
 function verifyUserCredentials(phone, password) {
@@ -1418,6 +1463,7 @@ function scheduleCloudStateBackup() {
       const stateSnapshot = JSON.stringify({
         users: dbState.users,
         sessions: dbState.sessions || {},
+        activeJourneys: dbState.activeJourneys || {},
         emergencyEvidence: dbState.emergencyEvidence || [],
         posts: dbState.posts || {},
         deletedPostIds: dbState.deletedPostIds || [],
@@ -1486,6 +1532,17 @@ async function restoreDatabaseFromGoogleDriveVault() {
       for (const [token, sess] of Object.entries(cloudData.sessions)) {
         if (sess && !dbState.sessions[token]) {
           dbState.sessions[token] = sess;
+          updated = true;
+        }
+      }
+    }
+
+    // Merge active user walk journeys
+    if (cloudData.activeJourneys && typeof cloudData.activeJourneys === 'object') {
+      if (!dbState.activeJourneys) dbState.activeJourneys = {};
+      for (const [phone, j] of Object.entries(cloudData.activeJourneys)) {
+        if (j && !dbState.activeJourneys[phone]) {
+          dbState.activeJourneys[phone] = j;
           updated = true;
         }
       }
@@ -1579,6 +1636,10 @@ module.exports = {
   getUserContacts,
   getDefaultUserContacts,
   sanitizeContacts,
+  saveUserActiveJourney,
+  getUserActiveJourney,
+  finishUserActiveJourney,
+  getAllActiveJourneys,
   addEmergencyEvidence,
   getAllEmergencyEvidence,
   getEmergencyEvidenceById,
