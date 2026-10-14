@@ -2132,157 +2132,74 @@
 
         <!-- Auth Form Container (Profile Locked) -->
         <div id="view-auth-forms">
-          <!-- Profile Locked Banner -->
-          <div style="background: rgba(185, 28, 28, 0.12); border: 1px solid rgba(185, 28, 28, 0.35); border-radius: 14px; padding: 12px 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
-            <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(185, 28, 28, 0.25); border: 1px solid rgba(185, 28, 28, 0.5); display: flex; align-items: center; justify-content: center; color: #ef4444; font-size: 15px; flex-shrink: 0;">
-              <i class="fas fa-lock"></i>
+          <!-- Supabase Cloud Badge -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 10px 14px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13.35 2.12c-.67-.78-1.92-.3-1.92.74v7.71H3.66c-.95 0-1.48 1.1-.88 1.83l7.87 9.48c.67.78 1.92.3 1.92-.74v-7.71h7.77c.95 0 1.48-1.1.88-1.83l-7.87-9.48z" fill="#10b981"/>
+              </svg>
+              <div>
+                <div style="font-size: 12.5px; font-weight: 700; color: #fff;">Supabase Cloud Authentication</div>
+                <div style="font-size: 10.5px; color: #a7f3d0;">Encrypted &bull; Direct Phone &amp; Password Matching</div>
+              </div>
             </div>
-            <div>
-              <div style="font-size: 12.5px; font-weight: 700; color: #fca5a5;">CITIZEN PROFILE LOCKED</div>
-              <div style="font-size: 11px; color: var(--text-muted); line-height: 1.35; margin-top: 2px;">Profiles are password-protected. Enter credentials to unlock your profile.</div>
-            </div>
+            <span style="font-size: 9.5px; background: rgba(16, 185, 129, 0.2); color: #10b981; font-weight: 700; padding: 2px 7px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.35);">ACTIVE</span>
           </div>
 
-          <div class="auth-toggle-bar" id="auth-main-tabs">
+          <div class="auth-toggle-bar" id="auth-main-tabs" style="margin-bottom: 16px;">
             <button class="auth-toggle-tab active" id="tab-btn-login" onclick="toggleAuthTab('login')">
-              <i class="fas fa-lock-open" style="font-size: 11px; margin-right: 4px;"></i> Unlock Profile
+              <i class="fas fa-lock-open" style="font-size: 11px; margin-right: 4px;"></i> Log In
             </button>
             <button class="auth-toggle-tab" id="tab-btn-signup" onclick="toggleAuthTab('signup')">
-              <i class="fas fa-user-plus" style="font-size: 11px; margin-right: 4px;"></i> Create Profile
+              <i class="fas fa-user-plus" style="font-size: 11px; margin-right: 4px;"></i> Register
             </button>
           </div>
 
-          <!-- 1. LOGIN (UNLOCK PROFILE) FORM -->
+          <!-- 1. SUPABASE LOGIN FORM -->
           <form id="form-login" onsubmit="handleLoginSubmit(event)">
-            <div id="login-step-1">
-              <div class="form-group">
-                <label class="form-label">Bangladeshi Mobile Number</label>
-                <div class="input-field-wrap">
-                  <span class="prefix-bd">+880</span>
-                  <input type="tel" class="form-input" id="login-phone" placeholder="Enter 11-digit number (e.g. 017...)" autocomplete="tel">
-                </div>
-                <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
-                  Supported operators: 013, 014, 015, 016, 017, 018, 019
-                </div>
+            <div class="form-group">
+              <label class="form-label">Bangladeshi Mobile Number</label>
+              <div class="input-field-wrap">
+                <span class="prefix-bd">+880</span>
+                <input type="tel" class="form-input" id="login-phone" placeholder="Enter 11-digit number (e.g. 017...)" autocomplete="tel" required>
               </div>
-
-              <div class="form-group">
-                <label class="form-label">Profile Password</label>
-                <div class="input-field-wrap">
-                  <input type="password" class="form-input" id="login-password" placeholder="Enter password to unlock" autocomplete="current-password">
-                  <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('login-password', this)" title="Show/Hide Password">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                </div>
+              <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
+                Operators: 013, 014, 015, 016, 017, 018, 019
               </div>
-
-              <div style="display: flex; justify-content: flex-end; margin-bottom: 14px;">
-                <a href="javascript:void(0)" onclick="openForgotPasswordFlow()" style="font-size: 11.5px; color: #60a5fa; text-decoration: none; display: flex; align-items: center; gap: 4px;">
-                  <i class="fas fa-key"></i> Forgot Password?
-                </a>
-              </div>
-
-              <!-- Inline Security & Error Feedback Banner -->
-              <div id="login-error-banner" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; font-size: 11.5px; color: #fca5a5; line-height: 1.45;">
-                <div style="display: flex; align-items: flex-start; gap: 8px;">
-                  <i class="fas fa-circle-exclamation" style="margin-top: 2px; color: #ef4444; font-size: 13px;"></i>
-                  <span id="login-error-msg">Incorrect credentials</span>
-                </div>
-              </div>
-
-              <button type="button" class="btn-submit-action" id="btn-login-submit" onclick="handleLoginSubmit(event)">
-                <i class="fas fa-lock-open"></i> Unlock Profile
-              </button>
             </div>
 
-            <!-- Optional 2FA OTP Fallback -->
-            <div id="login-step-2" style="display: none;">
-              <div style="text-align: center; margin-bottom: 14px;">
-                <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 18px; margin: 0 auto 10px;">
-                  <i class="fas fa-shield-halved"></i>
-                </div>
-                <h4 style="font-size: 13.5px; color: #fff; margin-bottom: 4px;">Two-Factor Verification</h4>
-                <p style="font-size: 11.5px; color: var(--text-muted); line-height: 1.4;">
-                  Enter the 4-digit code dispatched to <strong id="login-otp-target" style="color: #fff;">+880 17XXXXXXXX</strong> to finish unlocking.
-                </p>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <div class="input-field-wrap">
+                <input type="password" class="form-input" id="login-password" placeholder="Enter your password" autocomplete="current-password" required>
+                <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('login-password', this)" title="Show/Hide Password">
+                  <i class="fas fa-eye"></i>
+                </button>
               </div>
-
-              <div class="otp-digits-row">
-                <input type="text" maxlength="1" class="otp-digit" oninput="moveNext(this, 'login-otp2')" id="login-otp1">
-                <input type="text" maxlength="1" class="otp-digit" oninput="moveNext(this, 'login-otp3')" id="login-otp2">
-                <input type="text" maxlength="1" class="otp-digit" oninput="moveNext(this, 'login-otp4')" id="login-otp3">
-                <input type="text" maxlength="1" class="otp-digit" id="login-otp4">
-              </div>
-
-              <button type="button" class="btn-submit-action" onclick="verifyLoginOTPAndFinish()">
-                <i class="fas fa-lock-open"></i> Verify OTP &amp; Unlock
-              </button>
-              <button type="button" class="btn-close-sheet" style="margin-top: 8px;" onclick="backToLoginStep1()">
-                <i class="fas fa-arrow-left"></i> Change Number / Password
-              </button>
             </div>
+
+            <!-- Inline Error Feedback Banner -->
+            <div id="login-error-banner" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; font-size: 11.5px; color: #fca5a5; line-height: 1.45;">
+              <div style="display: flex; align-items: flex-start; gap: 8px;">
+                <i class="fas fa-circle-exclamation" style="margin-top: 2px; color: #ef4444; font-size: 13px;"></i>
+                <span id="login-error-msg">Incorrect credentials</span>
+              </div>
+            </div>
+
+            <button type="button" class="btn-submit-action" id="btn-login-submit" onclick="handleLoginSubmit(event)" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+              <i class="fas fa-lock-open"></i> Log In &amp; Unlock Profile
+            </button>
           </form>
 
-          <!-- 2. FORGOT PASSWORD FORM -->
-          <div id="form-forgot-password" style="display: none;">
-            <div id="forgot-step-1">
-              <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.45;">
-                Enter your registered Bangladeshi mobile number. We will dispatch a 4-digit reset code via SMS.
-              </div>
-              <div class="form-group">
-                <label class="form-label">Registered Mobile Number</label>
-                <div class="input-field-wrap">
-                  <span class="prefix-bd">+880</span>
-                  <input type="tel" class="form-input" id="forgot-phone" placeholder="017XXXXXXXX">
-                </div>
-                <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
-                  Allowed: 013, 014, 015, 016, 017, 018, 019
-                </div>
-              </div>
-              <button type="button" class="btn-submit-action" id="btn-forgot-request" onclick="handleForgotRequestOTP()">
-                <i class="fas fa-paper-plane"></i> Send Reset Code via SMS
-              </button>
-              <button type="button" class="btn-close-sheet" style="margin-top: 8px;" onclick="closeForgotPasswordFlow()">
-                <i class="fas fa-arrow-left"></i> Back to Unlock Profile
-              </button>
-            </div>
-
-            <div id="forgot-step-2" style="display: none;">
-              <p style="font-size: 12px; color: var(--text-muted); text-align: center; margin-bottom: 12px;">
-                Enter the 4-digit reset code sent to <strong id="forgot-otp-target" style="color: #fff;">+880 17XXXXXXXX</strong>
-              </p>
-
-              <div class="otp-digits-row">
-                <input type="text" maxlength="1" class="otp-digit" oninput="moveNext(this, 'forgot-otp2')" id="forgot-otp1">
-                <input type="text" maxlength="1" class="otp-digit" oninput="moveNext(this, 'forgot-otp3')" id="forgot-otp2">
-                <input type="text" maxlength="1" class="otp-digit" oninput="moveNext(this, 'forgot-otp4')" id="forgot-otp3">
-                <input type="text" maxlength="1" class="otp-digit" id="forgot-otp4">
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">New Password</label>
-                <div class="input-field-wrap">
-                  <input type="password" class="form-input" id="forgot-new-password" placeholder="Minimum 6 characters" minlength="6">
-                  <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('forgot-new-password', this)">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                </div>
-              </div>
-
-              <button type="button" class="btn-submit-action" id="btn-forgot-verify" onclick="handleForgotVerifyReset()">
-                <i class="fas fa-key"></i> Verify OTP &amp; Reset Password
-              </button>
-              <button type="button" class="btn-close-sheet" style="margin-top: 8px;" onclick="backToForgotStep1()">
-                <i class="fas fa-arrow-left"></i> Change Number
-              </button>
-            </div>
-          </div>
-
-          <!-- 3. CREATE ACCOUNT (SIGNUP) FORM -->
+          <!-- 2. SUPABASE REGISTER FORM -->
           <form id="form-signup" style="display: none;" onsubmit="handleSignupSubmit(event)">
-            <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.45;">
-              Create your citizen profile with a secure password to unlock personalized emergency protection.
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <div class="input-field-wrap">
+                <input type="text" class="form-input" id="signup-name" placeholder="e.g. Tanvir Hossain" required>
+              </div>
             </div>
+
             <div class="form-group">
               <label class="form-label">Bangladeshi Mobile Number</label>
               <div class="input-field-wrap">
@@ -2290,19 +2207,12 @@
                 <input type="tel" class="form-input" id="signup-phone" placeholder="017XXXXXXXX" required>
               </div>
               <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
-                Valid: 013, 014, 015, 016, 017, 018, 019
+                Operators: 013, 014, 015, 016, 017, 018, 019
               </div>
             </div>
 
             <div class="form-group">
-              <label class="form-label">Full Name</label>
-              <div class="input-field-wrap">
-                <input type="text" class="form-input" id="signup-name" placeholder="e.g. Kazi Rahman" required>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Create Password</label>
+              <label class="form-label">Create Password (min 6 characters)</label>
               <div class="input-field-wrap">
                 <input type="password" class="form-input" id="signup-password" placeholder="Minimum 6 characters" minlength="6" required>
                 <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('signup-password', this)" title="Show/Hide Password">
@@ -2311,22 +2221,16 @@
               </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Confirm Password</label>
-              <div class="input-field-wrap">
-                <input type="password" class="form-input" id="signup-password-confirm" placeholder="Re-enter password" minlength="6" required>
-                <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('signup-password-confirm', this)" title="Show/Hide Password">
-                  <i class="fas fa-eye"></i>
-                </button>
+            <!-- Signup Error Feedback Banner -->
+            <div id="signup-error-banner" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; font-size: 11.5px; color: #fca5a5; line-height: 1.45;">
+              <div style="display: flex; align-items: flex-start; gap: 8px;">
+                <i class="fas fa-circle-exclamation" style="margin-top: 2px; color: #ef4444; font-size: 13px;"></i>
+                <span id="signup-error-msg">Registration error</span>
               </div>
             </div>
 
-            <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; font-size: 11px; color: #a7f3d0; line-height: 1.4;">
-              <i class="fas fa-shield-halved" style="color: #10b981;"></i> <strong>Citizen Privacy:</strong> Your profile credentials and safety data are protected with end-to-end cryptographic hashing.
-            </div>
-
-            <button type="submit" class="btn-submit-action" id="btn-signup-submit">
-              <i class="fas fa-shield-halved"></i> Create Profile &amp; Unlock
+            <button type="submit" class="btn-submit-action" id="btn-signup-submit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+              <i class="fas fa-user-plus"></i> Create Account &amp; Unlock
             </button>
           </form>
         </div>
@@ -6001,15 +5905,12 @@
     function toggleAuthTab(mode) {
       const tabs = document.getElementById('auth-main-tabs');
       if (tabs) tabs.style.display = 'flex';
-      const forgotForm = document.getElementById('form-forgot-password');
-      if (forgotForm) forgotForm.style.display = 'none';
+      hideAuthError();
 
       if (mode === 'login') {
         document.getElementById('tab-btn-login').classList.add('active');
         document.getElementById('tab-btn-signup').classList.remove('active');
         document.getElementById('form-login').style.display = 'block';
-        document.getElementById('login-step-1').style.display = 'block';
-        document.getElementById('login-step-2').style.display = 'none';
         document.getElementById('form-signup').style.display = 'none';
       } else {
         document.getElementById('tab-btn-signup').classList.add('active');
@@ -6104,33 +6005,16 @@
       .then(({ status, ok, data }) => {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-lock-open"></i> Unlock Profile';
+          submitBtn.innerHTML = '<i class="fas fa-lock-open"></i> Log In &amp; Unlock Profile';
         }
 
         if (!ok || (!data.success && data.error)) {
           const errMsg = data.message || data.error || (status === 429 ? "Too many attempts. Please wait 2 minutes." : "Access Denied. Incorrect credentials.");
-          showAuthError(errMsg);
+          showAuthError(errMsg, "login-password");
           return;
         }
 
-        // Two-Factor Authentication OTP Verification Fallback (if configured)
-        if (data.requireOtp) {
-          pendingLoginPhone = cleanPhone;
-          document.getElementById('login-otp-target').innerText = "+880 " + cleanPhone;
-          document.getElementById('login-step-1').style.display = 'none';
-          document.getElementById('login-step-2').style.display = 'block';
-          document.getElementById('login-otp1').value = '';
-          document.getElementById('login-otp2').value = '';
-          document.getElementById('login-otp3').value = '';
-          document.getElementById('login-otp4').value = '';
-          document.getElementById('login-otp1').focus();
-
-          const debugInfo = data.debugOtp ? `\n\n[Security OTP: ${data.debugOtp}]` : '';
-          alert(`📩 Two-Factor Verification Code Dispatched!\n\nPassword verified! An OTP code has been dispatched to +880 ${cleanPhone}.${debugInfo}`);
-          return;
-        }
-
-        // Direct Sign In Authenticated by Backend
+        // Direct Sign In Authenticated by Supabase / Backend
         if (data.user) {
           currentUser = data.user;
           const cleanUserPhone = String(currentUser.phone || cleanPhone).replace(/\D/g, '').slice(-10);
@@ -6162,7 +6046,7 @@
       .catch(err => {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-lock-open"></i> Unlock Profile';
+          submitBtn.innerHTML = '<i class="fas fa-lock-open"></i> Log In &amp; Unlock Profile';
         }
         showAuthError("Connection error verifying credentials. Please ensure backend server is reachable.");
       });
@@ -7698,9 +7582,17 @@
 
     function handleSignupSubmit(e) {
       e.preventDefault();
+      const errBanner = document.getElementById('signup-error-banner');
+      const errMsg = document.getElementById('signup-error-msg');
+      if (errBanner) errBanner.style.display = 'none';
+
       const rawPhone = document.getElementById('signup-phone').value.trim();
       const phoneCheck = validateBangladeshiPhone(rawPhone);
       if (!phoneCheck.valid) {
+        if (errBanner && errMsg) {
+          errMsg.innerText = phoneCheck.message;
+          errBanner.style.display = 'block';
+        }
         alert("⚠️ " + phoneCheck.message);
         document.getElementById('signup-phone').focus();
         return;
@@ -7708,18 +7600,14 @@
       const cleanPhone = phoneCheck.cleanPhone;
       const name = document.getElementById('signup-name').value.trim() || "Verified Citizen";
       const password = document.getElementById('signup-password').value.trim();
-      const confirmPwEl = document.getElementById('signup-password-confirm');
-      const confirmPassword = confirmPwEl ? confirmPwEl.value.trim() : password;
 
       if (!password || password.length < 6) {
+        if (errBanner && errMsg) {
+          errMsg.innerText = "Please create a password of at least 6 characters.";
+          errBanner.style.display = 'block';
+        }
         alert("Please create a password of at least 6 characters.");
         document.getElementById('signup-password').focus();
-        return;
-      }
-
-      if (confirmPassword !== password) {
-        alert("⚠️ Passwords do not match! Please verify your password.");
-        if (confirmPwEl) confirmPwEl.focus();
         return;
       }
 
@@ -7742,7 +7630,7 @@
       .then(data => {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-shield-halved"></i> Create Profile &amp; Unlock';
+          submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account &amp; Unlock';
         }
 
         if (!data.success && data.error) {
@@ -7753,6 +7641,10 @@
             document.getElementById('login-password').value = '';
             document.getElementById('login-password').focus();
             return;
+          }
+          if (errBanner && errMsg) {
+            errMsg.innerText = data.error;
+            errBanner.style.display = 'block';
           }
           alert("⚠️ " + data.error);
           return;
@@ -7775,12 +7667,19 @@
         const titleEl = document.getElementById('auth-title');
         if (titleEl) titleEl.innerText = "Citizen Profile (Unlocked)";
 
+        // Dismiss modal so user can immediately use all features
+        closeAuthModal();
+
         alert(`🎉 Citizen Profile Created & Unlocked!\n\nWelcome, ${currentUser.name}!\nMobile: +880 ${cleanPhone}`);
       })
       .catch(err => {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-shield-halved"></i> Create Profile &amp; Unlock';
+          submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account &amp; Unlock';
+        }
+        if (errBanner && errMsg) {
+          errMsg.innerText = "Connection error creating account. Please ensure server is reachable.";
+          errBanner.style.display = 'block';
         }
         alert("⚠️ Connection error creating account. Please ensure backend server is reachable.");
       });
@@ -7903,9 +7802,7 @@
       if (titleEl) titleEl.innerText = "Unlock Citizen Profile";
 
       toggleAuthTab('login');
-      document.getElementById('login-step-1').style.display = 'block';
-      document.getElementById('login-step-2').style.display = 'none';
-      document.getElementById('login-password').value = '';
+      if (document.getElementById('login-password')) document.getElementById('login-password').value = '';
       switchTab('screen-sos', document.querySelectorAll('.nav-tab-btn')[0]);
       openAuthModal();
       alert("🔒 Citizen Profile Locked.\n\nYou have signed out. All emergency contacts and personal records are securely locked.");
