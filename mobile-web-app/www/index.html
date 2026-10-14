@@ -1722,6 +1722,16 @@
             </div>
           </div>
 
+          <!-- Personal Citizen Companion Indicator -->
+          <div id="walk-user-badge" style="font-size: 11px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; padding: 5px 10px; background: rgba(255, 255, 255, 0.04); border-radius: 8px; border: 1px solid var(--border-quiet);">
+            <div id="walk-user-badge-text" style="color: #94a3b8; font-size: 10.5px; display: flex; align-items: center; gap: 5px;">
+              <i class="fas fa-user-shield" style="color: #38bdf8;"></i> Personal Route Guardian
+            </div>
+            <div id="walk-user-auth-indicator" style="font-size: 10px; font-weight: 700; color: #10b981;">
+              ● Profile Active
+            </div>
+          </div>
+
           <div class="route-input-group">
             <div class="route-input-box">
               <i class="fas fa-location-crosshairs" style="color: #10b981;"></i>
@@ -2541,6 +2551,9 @@
       if (typeof renderContactsList === 'function') {
         renderContactsList();
       }
+      if (typeof loadUserWalkSession === 'function') {
+        loadUserWalkSession(user);
+      }
     }
 
     let activeContact = null;
@@ -3212,6 +3225,9 @@
     window.addEventListener('load', () => {
       // Connect directly to device hardware GPS
       acquireRealLocation(false);
+      if (typeof updateWalkUserBadge === 'function') {
+        updateWalkUserBadge();
+      }
     });
 
     /* ----------------------------------------------------
@@ -4614,12 +4630,194 @@
     });
 
     /* ----------------------------------------------------
-       JOURNEY COMPANION WITH 10-MIN OVERDUE OBSERVATION
+       USER-ISOLATED WALK WITH ME COMPANION ENGINE
+       Each citizen account has their own personal destination,
+       active companion timer, and route protection.
     ---------------------------------------------------- */
     let totalJourneyAllocatedSeconds = 0;
     let secondsOverdueCount = 0;
 
+    function getUserWalkKey(user) {
+      if (user && user.phone) {
+        return 'user_' + String(user.phone).replace(/\D/g, '').slice(-10);
+      }
+      return 'guest_' + getOrCreateDeviceId();
+    }
+
+    function updateWalkUserBadge() {
+      const badgeText = document.getElementById('walk-user-badge-text');
+      const authIndicator = document.getElementById('walk-user-auth-indicator');
+      if (!badgeText || !authIndicator) return;
+
+      if (currentUser) {
+        badgeText.innerHTML = `<i class="fas fa-shield-halved" style="color: #10b981;"></i> Dedicated Guard for <strong>${escapeHtml(currentUser.name)}</strong>`;
+        authIndicator.innerHTML = `<span style="color: #10b981;">● Profile Active</span>`;
+      } else {
+        badgeText.innerHTML = `<i class="fas fa-user-lock" style="color: #f59e0b;"></i> Guest Mode • Tap to unlock Citizen Profile`;
+        authIndicator.innerHTML = `<span style="color: #f59e0b; cursor: pointer; text-decoration: underline;" onclick="openAuthModal()">Sign In</span>`;
+      }
+    }
+
+    function resetWalkUI() {
+      if (walkTimerInterval) {
+        clearInterval(walkTimerInterval);
+        walkTimerInterval = null;
+      }
+
+      const dock = document.getElementById('walk-dock');
+      if (dock) dock.style.display = 'none';
+
+      const hud = document.getElementById('transit-live-hud');
+      if (hud) hud.style.display = 'none';
+
+      const overlay = document.getElementById('walk-overlay-panel');
+      if (overlay) overlay.style.display = 'block';
+
+      const toggleBtn = document.getElementById('btn-toggle-route-view');
+      if (toggleBtn) toggleBtn.style.display = 'none';
+
+      const destInput = document.getElementById('walk-destination');
+      if (destInput) destInput.value = '';
+
+      const clearBtn = document.getElementById('btn-clear-dest');
+      if (clearBtn) clearBtn.style.display = 'none';
+
+      const banner = document.getElementById('route-estimate-banner');
+      if (banner) banner.style.display = 'none';
+
+      if (navDestMarker && navMap) {
+        navMap.removeLayer(navDestMarker);
+        navDestMarker = null;
+      }
+      if (navRoutePolyline && navMap) {
+        navMap.removeLayer(navRoutePolyline);
+        navRoutePolyline = null;
+      }
+
+      activeJourneySessionId = null;
+      currentDestinationQuery = "";
+      selectedDestCoords = null;
+      calculatedRouteDistanceKm = 0;
+      calculatedDurationMinutes = 20;
+      walkSecondsRemaining = 1200;
+      secondsOverdueCount = 0;
+      overdueReminderPromptShown = false;
+      overdueAutoEscalated = false;
+
+      updateWalkUserBadge();
+    }
+
+    function loadUserWalkSession(user) {
+      resetWalkUI();
+
+      if (!user) {
+        return;
+      }
+
+      const userKey = getUserWalkKey(user);
+      const token = localStorage.getItem('safe_bd_token');
+
+      // 1. Check local user storage for instant offline restoration
+      const localCachedRaw = localStorage.getItem('safe_bd_walk_' + userKey);
+      let localSession = null;
+      if (localCachedRaw) {
+        try {
+          localSession = JSON.parse(localCachedRaw);
+        } catch(e) {}
+      }
+
+      // 2. Fetch authenticated user journey from backend database (backed by Google Drive)
+      const fetchHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+      fetch(`${API_BASE}/api/walk/my-session?phone=${encodeURIComponent(user.phone || '')}`, {
+        headers: fetchHeaders
+      })
+      .then(r => r.json())
+      .then(data => {
+        const session = (data && data.session) || localSession;
+        if (session && session.status === 'IN_TRANSIT' && session.destination) {
+          restoreActiveWalkSession(session);
+        }
+      })
+      .catch(() => {
+        if (localSession && localSession.status === 'IN_TRANSIT' && localSession.destination) {
+          restoreActiveWalkSession(localSession);
+        }
+      });
+    }
+
+    function restoreActiveWalkSession(session) {
+      if (!session) return;
+      activeJourneySessionId = session.sessionId;
+      currentDestinationQuery = session.destination;
+      selectedDestCoords = session.destCoords || null;
+      selectedTravelMode = session.travelMode || 'walking';
+      calculatedDurationMinutes = session.estimatedMinutes || 20;
+
+      // Calculate elapsed or remaining seconds
+      if (session.startTime) {
+        const elapsedSec = Math.floor((Date.now() - new Date(session.startTime).getTime()) / 1000);
+        const totalSec = calculatedDurationMinutes * 60;
+        if (elapsedSec < totalSec) {
+          walkSecondsRemaining = totalSec - elapsedSec;
+          secondsOverdueCount = 0;
+        } else {
+          walkSecondsRemaining = 0;
+          secondsOverdueCount = elapsedSec - totalSec;
+        }
+      }
+
+      const destInput = document.getElementById('walk-destination');
+      if (destInput) destInput.value = session.destination;
+
+      const overlay = document.getElementById('walk-overlay-panel');
+      if (overlay) overlay.style.display = 'none';
+
+      const hud = document.getElementById('transit-live-hud');
+      if (hud) hud.style.display = 'block';
+
+      const toggleBtn = document.getElementById('btn-toggle-route-view');
+      if (toggleBtn) toggleBtn.style.display = 'flex';
+
+      const destTargetEl = document.getElementById('transit-target-dest');
+      if (destTargetEl) destTargetEl.innerText = session.destination;
+
+      const modeTitle = selectedTravelMode === 'driving' ? 'Car / CNG Companion' : (selectedTravelMode === 'bicycling' ? 'Bike Companion' : 'Walk Companion');
+      const modeBadge = document.getElementById('transit-mode-badge');
+      if (modeBadge) {
+        const modeIcon = selectedTravelMode === 'driving' ? 'fa-car-side' : (selectedTravelMode === 'bicycling' ? 'fa-motorcycle' : 'fa-person-walking');
+        modeBadge.innerHTML = `<i class="fas ${modeIcon}"></i> ${modeTitle}`;
+      }
+
+      const dock = document.getElementById('walk-dock');
+      if (dock) {
+        document.getElementById('walk-dock-dest-text').innerText = 
+          `${modeTitle} active to ${session.destination}. Dedicated to ${session.userName}.`;
+        dock.style.display = 'block';
+      }
+
+      if (walkTimerInterval) clearInterval(walkTimerInterval);
+      walkTimerInterval = setInterval(() => {
+        handleJourneyTimerTick(session.destination);
+      }, 1000);
+
+      // Restore map route
+      if (currentCoords.lat && selectedDestCoords) {
+        updateNavDestinationRoute(currentCoords.lat, currentCoords.lon, selectedDestCoords.lat, selectedDestCoords.lon);
+      }
+    }
+
     function startWalkWithMe() {
+      // REQUIRE CITIZEN PROFILE SO COMPANION IS DEDICATED TO THIS CITIZEN
+      if (!currentUser) {
+        const proceed = confirm(
+          `🔒 Citizen Profile Required\n\nWalk With Me Companion provides personalized satellite GPS protection, personal 24/7 route observation, and direct escalation to your personal emergency circle.\n\nTap OK to Unlock or Create your Citizen Profile now.`
+        );
+        if (proceed) {
+          openAuthModal();
+        }
+        return;
+      }
+
       const destination = document.getElementById('walk-destination').value.trim();
       if (!destination) {
         alert("Please search or select your destination in Bangladesh.");
@@ -4634,38 +4832,55 @@
       overdueAutoEscalated = false;
 
       const origin = currentCoords.address;
-      const userName = currentUser ? currentUser.name : "Citizen Traveler";
-      const userPhone = currentUser ? currentUser.phone : "Unknown";
+      const userName = currentUser.name;
+      const userPhone = currentUser.phone;
+      const userKey = getUserWalkKey(currentUser);
+      const token = localStorage.getItem('safe_bd_token');
 
-      // Register session with backend
+      const sessionPayload = {
+        userId: userPhone,
+        userName,
+        userPhone,
+        origin,
+        destination,
+        destCoords: selectedDestCoords,
+        travelMode: selectedTravelMode,
+        estimatedMinutes: calculatedDurationMinutes,
+        currentCoords
+      };
+
+      // Register session with backend database and 5TB Google Drive Vault
       fetch(`${API_BASE}/api/walk/start`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: currentUser ? currentUser.phone : "guest_" + Date.now(),
-          userName,
-          userPhone,
-          origin,
-          destination,
-          travelMode: selectedTravelMode,
-          estimatedMinutes: calculatedDurationMinutes,
-          currentCoords
-        })
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify(sessionPayload)
       })
       .then(r => r.json())
       .then(data => {
-        if (data.session) activeJourneySessionId = data.session.sessionId;
+        if (data.session) {
+          activeJourneySessionId = data.session.sessionId;
+          localStorage.setItem('safe_bd_walk_' + userKey, JSON.stringify(data.session));
+        }
       })
       .catch(() => {
         activeJourneySessionId = "local_journey_" + Date.now();
+        localStorage.setItem('safe_bd_walk_' + userKey, JSON.stringify({
+          ...sessionPayload,
+          sessionId: activeJourneySessionId,
+          startTime: new Date().toISOString(),
+          status: 'IN_TRANSIT'
+        }));
       });
 
       const modeTitle = selectedTravelMode === 'driving' ? 'Car / CNG Companion' : (selectedTravelMode === 'bicycling' ? 'Bike Companion' : 'Walk Companion');
       document.getElementById('walk-dock-dest-text').innerText = 
-        `${modeTitle} active to ${destination} (${calculatedRouteDistanceKm} km). Dynamic safety timer set to ${calculatedDurationMinutes} mins.`;
+        `${modeTitle} active to ${destination} (${calculatedRouteDistanceKm} km). Dedicated to ${userName}.`;
       document.getElementById('walk-dock').style.display = 'block';
 
-      // Switch top header from heavy input panel to Sleek Live Transit HUD
+      // Switch top header from input panel to Sleek Live Transit HUD
       const overlay = document.getElementById('walk-overlay-panel');
       if (overlay) overlay.style.display = 'none';
 
@@ -4703,7 +4918,7 @@
         handleJourneyTimerTick(destination);
       }, 1000);
 
-      alert(`🛡️ Live Companion Active!\n\nMode: ${selectedTravelMode.toUpperCase()}\nEstimated Route Time: ${calculatedDurationMinutes} mins\nDestination: ${destination}\n\nSAFE BD is guarding your journey.`);
+      alert(`🛡️ Personal Walk Companion Activated!\n\nGuarding: ${userName}\nMode: ${selectedTravelMode.toUpperCase()}\nEstimated Route: ${calculatedDurationMinutes} mins\nDestination: ${destination}\n\nYour companion is private to your profile and backed up to your 5TB Google Drive Vault.`);
     }
 
     function handleJourneyTimerTick(destination) {
@@ -4752,12 +4967,17 @@
       document.getElementById('walk-dock-dest-text').innerHTML = 
         `<span style="color:#ef4444; font-weight:700;"><i class="fas fa-triangle-exclamation"></i> Expected transit time exceeded (+10m).</span> Please check in when safe.`;
 
+      const token = localStorage.getItem('safe_bd_token');
       // Silently dispatch live coordinates to Backend & Admin Command Portal in background
       fetch(`${API_BASE}/api/walk/report-overdue`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({
           sessionId: activeJourneySessionId,
+          phone: currentUser ? currentUser.phone : "",
           lat: currentCoords.lat,
           lon: currentCoords.lon,
           address: currentCoords.address
@@ -4766,37 +4986,27 @@
     }
 
     function finishWalkWithMe() {
-      if (walkTimerInterval) clearInterval(walkTimerInterval);
-      document.getElementById('walk-dock').style.display = 'none';
+      const userKey = getUserWalkKey(currentUser);
+      localStorage.removeItem('safe_bd_walk_' + userKey);
 
-      const overlay = document.getElementById('walk-overlay-panel');
-      if (overlay) overlay.style.display = 'block';
+      const sessId = activeJourneySessionId;
+      const phone = currentUser ? currentUser.phone : "";
+      const token = localStorage.getItem('safe_bd_token');
 
-      const hud = document.getElementById('transit-live-hud');
-      if (hud) hud.style.display = 'none';
+      resetWalkUI();
 
-      const toggleBtn = document.getElementById('btn-toggle-route-view');
-      if (toggleBtn) toggleBtn.style.display = 'none';
-
-      if (navDestMarker && navMap) {
-        navMap.removeLayer(navDestMarker);
-        navDestMarker = null;
-      }
-      if (navRoutePolyline && navMap) {
-        navMap.removeLayer(navRoutePolyline);
-        navRoutePolyline = null;
-      }
-
-      if (activeJourneySessionId) {
+      if (sessId || phone) {
         fetch(`${API_BASE}/api/walk/finish`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: activeJourneySessionId })
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify({ sessionId: sessId, phone: phone })
         }).catch(() => {});
-        activeJourneySessionId = null;
       }
 
-      alert("✅ Glad you arrived safely! Your journey companion session has ended.");
+      alert("✅ Glad you arrived safely! Your personal journey companion has ended.");
     }
 
     /* ----------------------------------------------------
@@ -7342,6 +7552,9 @@
 
       if (typeof updateProfileCircleUI === 'function') {
         updateProfileCircleUI();
+      }
+      if (typeof updateWalkUserBadge === 'function') {
+        updateWalkUserBadge();
       }
 
       // Toggle Admin UI elements
