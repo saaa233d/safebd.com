@@ -2225,7 +2225,7 @@
                 <label class="form-label">Bangladeshi Mobile Number</label>
                 <div class="input-field-wrap">
                   <span class="prefix-bd">+880</span>
-                  <input type="tel" class="form-input" id="login-phone" placeholder="017XXXXXXXX" required>
+                  <input type="tel" class="form-input" id="login-phone" placeholder="Enter 11-digit number (e.g. 017...)" autocomplete="tel">
                 </div>
                 <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
                   Supported operators: 013, 014, 015, 016, 017, 018, 019
@@ -2235,7 +2235,7 @@
               <div class="form-group">
                 <label class="form-label">Profile Password</label>
                 <div class="input-field-wrap">
-                  <input type="password" class="form-input" id="login-password" placeholder="Enter password to unlock" required>
+                  <input type="password" class="form-input" id="login-password" placeholder="Enter password to unlock" autocomplete="current-password">
                   <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('login-password', this)" title="Show/Hide Password">
                     <i class="fas fa-eye"></i>
                   </button>
@@ -2256,7 +2256,7 @@
                 </div>
               </div>
 
-              <button type="submit" class="btn-submit-action" id="btn-login-submit" onclick="handleLoginSubmit(event)">
+              <button type="button" class="btn-submit-action" id="btn-login-submit" onclick="handleLoginSubmit(event)">
                 <i class="fas fa-lock-open"></i> Unlock Profile
               </button>
             </div>
@@ -5515,6 +5515,13 @@
         document.getElementById('view-profile-active').style.display = 'none';
         const titleEl = document.getElementById('auth-title');
         if (titleEl) titleEl.innerText = "Unlock Citizen Profile";
+        try {
+          const lastPhone = localStorage.getItem('safe_bd_last_phone');
+          const phoneInp = document.getElementById('login-phone');
+          if (lastPhone && phoneInp && !phoneInp.value) {
+            phoneInp.value = lastPhone;
+          }
+        } catch(e) {}
       }
     }
 
@@ -5874,12 +5881,20 @@
 
     let pendingLoginPhone = "";
 
-    function showAuthError(msg) {
+    function showAuthError(msg, targetInputId = null) {
       const banner = document.getElementById('login-error-banner');
       const text = document.getElementById('login-error-msg');
       if (banner && text) {
         text.innerText = msg;
         banner.style.display = 'block';
+      }
+      if (targetInputId) {
+        const inp = document.getElementById(targetInputId);
+        if (inp) {
+          inp.style.borderColor = '#ef4444';
+          inp.style.boxShadow = '0 0 10px rgba(239, 68, 68, 0.5)';
+          inp.focus();
+        }
       }
       try {
         alert("⚠️ " + msg);
@@ -5889,6 +5904,13 @@
     function hideAuthError() {
       const banner = document.getElementById('login-error-banner');
       if (banner) banner.style.display = 'none';
+      ['login-phone', 'login-password'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.style.borderColor = '';
+          el.style.boxShadow = '';
+        }
+      });
     }
 
     function handleLoginSubmit(e) {
@@ -5900,20 +5922,28 @@
       if (!phoneInput || !passInput) return;
 
       const rawPhone = phoneInput.value.trim();
+      if (!rawPhone) {
+        showAuthError("Please enter your Bangladeshi mobile number above.", "login-phone");
+        return;
+      }
+
       const phoneCheck = validateBangladeshiPhone(rawPhone);
       if (!phoneCheck.valid) {
-        showAuthError(phoneCheck.message);
-        phoneInput.focus();
+        showAuthError(phoneCheck.message, "login-phone");
         return;
       }
       const cleanPhone = phoneCheck.cleanPhone;
       const password = passInput.value.trim();
 
       if (!password) {
-        showAuthError("Please enter your account password to unlock your profile.");
-        passInput.focus();
+        showAuthError("Please enter your account password.", "login-password");
         return;
       }
+
+      // Remember phone number locally for fast subsequent unlocks
+      try {
+        localStorage.setItem('safe_bd_last_phone', cleanPhone);
+      } catch(e) {}
 
       // Authenticate with Persistent Database Engine
       const submitBtn = document.getElementById('btn-login-submit');
