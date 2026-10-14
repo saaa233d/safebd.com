@@ -46,8 +46,8 @@ const db = require('./database');
 // SUPABASE CLOUD AUTHENTICATION & SECURE IDENTITY ENGINE
 // =========================================================================
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://sdpewbutexztzspagjqu.supabase.co';
-const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY || Buffer.from('c2Jfc2VjcmV0X21aRldPalRvTi04Uy1fZG5WZVVGUWdfV1VsTEdVSGs=', 'base64').toString('utf8');
-const SUPABASE_PUB_KEY = process.env.SUPABASE_PUB_KEY || Buffer.from('c2JfcHVibGlzaGFibGVfU2c5X2RWeDZMUGYzN1ZUZFdiNEZrZ19lVkVZNERidQ==', 'base64').toString('utf8');
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY || '';
+const SUPABASE_PUB_KEY = process.env.SUPABASE_PUB_KEY || 'sb_publishable_Sg9_dVx6LQf37VTdWb4Fkg_eVEY4Dbu';
 
 async function verifySupabaseCredentials(cleanPhone, password) {
   try {
