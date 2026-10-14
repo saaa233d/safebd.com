@@ -5,8 +5,8 @@
       "phone": "1316750712",
       "displayPhone": "+880 1316-750712",
       "name": "SAAD RIZWAN",
-      "salt": "247fdd9c985dcb67bd0cdfecd2918a1e",
-      "passwordHash": "c7ccc615a4d4b4d9f23df381a864f96d6439f819b8cae0e729687d1d10e449ef2370b25312946a0030eda9af3ab0aac82ea456f32c06387a37b9e38249bc3d54",
+      "salt": "1169795c5e1fe8b1b03ed3d0e40ebba8",
+      "passwordHash": "c6835a07f6a599037715676a3a0fca290c176aefb7d0a2892b9110bbf6a5ddb230dec0f8020ff4977c1b366fd78820d97e63be633c4b4bcb882355abad16d663",
       "nidVerified": true,
       "isAdmin": true,
       "isLoggedIn": true,
@@ -675,13 +675,12 @@
     "secretKey": "SAFEBD_PRIVATE_VAULT_2026",
     "enabled": true,
     "folderName": "SAFE_BD_VAULT",
-    "lastSyncedAt": "2026-10-14T03:17:03.666Z",
-    "stateFileId": "1Y_0dAmyTh3PC3NrT2kNP0m6t8xlR9uD3"
+    "lastSyncedAt": "2026-10-14T03:17:03.666Z"
   },
   "stats": {
     "totalLogins": 37,
     "totalRegistrations": 7,
-    "lastSaved": "2026-10-14T03:17:18.178Z",
+    "lastSaved": "2026-10-14T03:23:16.095Z",
     "totalPosts": 3
   }
 }
