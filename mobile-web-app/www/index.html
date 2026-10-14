@@ -2248,7 +2248,15 @@
                 </a>
               </div>
 
-              <button type="submit" class="btn-submit-action" id="btn-login-submit">
+              <!-- Inline Security & Error Feedback Banner -->
+              <div id="login-error-banner" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; font-size: 11.5px; color: #fca5a5; line-height: 1.45;">
+                <div style="display: flex; align-items: flex-start; gap: 8px;">
+                  <i class="fas fa-circle-exclamation" style="margin-top: 2px; color: #ef4444; font-size: 13px;"></i>
+                  <span id="login-error-msg">Incorrect credentials</span>
+                </div>
+              </div>
+
+              <button type="submit" class="btn-submit-action" id="btn-login-submit" onclick="handleLoginSubmit(event)">
                 <i class="fas fa-lock-open"></i> Unlock Profile
               </button>
             </div>
@@ -5502,6 +5510,7 @@
         if (titleEl) titleEl.innerText = "Citizen Profile (Unlocked)";
         updateProfileCircleUI();
       } else {
+        if (typeof hideAuthError === 'function') hideAuthError();
         document.getElementById('view-auth-forms').style.display = 'block';
         document.getElementById('view-profile-active').style.display = 'none';
         const titleEl = document.getElementById('auth-title');
@@ -5865,21 +5874,44 @@
 
     let pendingLoginPhone = "";
 
+    function showAuthError(msg) {
+      const banner = document.getElementById('login-error-banner');
+      const text = document.getElementById('login-error-msg');
+      if (banner && text) {
+        text.innerText = msg;
+        banner.style.display = 'block';
+      }
+      try {
+        alert("⚠️ " + msg);
+      } catch(e) {}
+    }
+
+    function hideAuthError() {
+      const banner = document.getElementById('login-error-banner');
+      if (banner) banner.style.display = 'none';
+    }
+
     function handleLoginSubmit(e) {
-      e.preventDefault();
-      const rawPhone = document.getElementById('login-phone').value.trim();
+      if (e && e.preventDefault) e.preventDefault();
+      hideAuthError();
+
+      const phoneInput = document.getElementById('login-phone');
+      const passInput = document.getElementById('login-password');
+      if (!phoneInput || !passInput) return;
+
+      const rawPhone = phoneInput.value.trim();
       const phoneCheck = validateBangladeshiPhone(rawPhone);
       if (!phoneCheck.valid) {
-        alert("⚠️ " + phoneCheck.message);
-        document.getElementById('login-phone').focus();
+        showAuthError(phoneCheck.message);
+        phoneInput.focus();
         return;
       }
       const cleanPhone = phoneCheck.cleanPhone;
-      const password = document.getElementById('login-password').value.trim();
+      const password = passInput.value.trim();
 
       if (!password) {
-        alert("Please enter your account password to unlock your profile.");
-        document.getElementById('login-password').focus();
+        showAuthError("Please enter your account password to unlock your profile.");
+        passInput.focus();
         return;
       }
 
@@ -5895,15 +5927,19 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: cleanPhone, password: password })
       })
-      .then(r => r.json())
-      .then(data => {
+      .then(async r => {
+        const data = await r.json().catch(() => ({}));
+        return { status: r.status, ok: r.ok, data };
+      })
+      .then(({ status, ok, data }) => {
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.innerHTML = '<i class="fas fa-lock-open"></i> Unlock Profile';
         }
 
-        if (!data.success && data.error) {
-          alert(`❌ Access Denied: ${data.error}\n\nProfile remains locked. Please verify your phone and password.`);
+        if (!ok || (!data.success && data.error)) {
+          const errMsg = data.message || data.error || (status === 429 ? "Too many attempts. Please wait 2 minutes." : "Access Denied. Incorrect credentials.");
+          showAuthError(errMsg);
           return;
         }
 
@@ -5938,6 +5974,9 @@
           const titleEl = document.getElementById('auth-title');
           if (titleEl) titleEl.innerText = "Citizen Profile (Unlocked)";
 
+          // Immediately dismiss modal so unlocked screens and features are responsive
+          closeAuthModal();
+
           if (currentUser.isAdmin) {
             alert(`🛡️ Profile Unlocked: Welcome Chief Admin!\nAdmin Command Portal unlocked. Opening Moderation Queue.`);
             openAdminPortal();
@@ -5951,7 +5990,7 @@
           submitBtn.disabled = false;
           submitBtn.innerHTML = '<i class="fas fa-lock-open"></i> Unlock Profile';
         }
-        alert("⚠️ Connection error verifying credentials. Please ensure backend server is reachable.");
+        showAuthError("Connection error verifying credentials. Please ensure backend server is reachable.");
       });
     }
 
