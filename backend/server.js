@@ -1635,6 +1635,7 @@ app.post('/api/feed/posts', postCreateLimiter, async (req, res) => {
         const mediaBuf = Buffer.from(base64Clean, 'base64');
         if (!fs.existsSync(EVIDENCE_DIR)) fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
         fs.writeFileSync(path.join(EVIDENCE_DIR, mediaFileName), mediaBuf);
+        storedMediaUrl = `/api/feed/posts/${postId}/media.${ext}`;
       } catch (diskErr) {}
 
       // Upload to 5TB Google Drive Vault (SAFE_BD_VAULT)
