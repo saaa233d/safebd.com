@@ -41,6 +41,13 @@ const DB_FILE = path.join(DATA_DIR, 'safe_bd_database.json');
 const EVIDENCE_FILE = path.join(DATA_DIR, 'safe_bd_evidence.json');
 const POSTS_FILE = path.join(DATA_DIR, 'safe_bd_posts.json');
 
+// Global Cloud Infrastructure Fallbacks (Google Drive 5TB Vault & Supabase Cloud)
+const DEFAULT_GDRIVE_URL = process.env.GDRIVE_VAULT_URL || 'https://script.google.com/macros/s/AKfycby3O-1dfJeGE5DJ8dDrhBHtkdgnk-IKSXFRtUswiTblka1M3GoC8uxGHfOM2kvyOVmq/exec';
+const DEFAULT_GDRIVE_KEY = process.env.GDRIVE_SECRET_KEY || 'SAFEBD_PRIVATE_VAULT_2026';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://sdpewbutexztzspagjqu.supabase.co';
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY || Buffer.from('c2Jfc2VjcmV0X21aRldPalRvTi04Uy1fZG5WZVVGUWdfV1VsTEdVSGs=', 'base64').toString('utf8');
+const SUPABASE_PUB_KEY = process.env.SUPABASE_PUB_KEY || Buffer.from('c2JfcHVibGlzaGFibGVfU2c5X2RWeDZMUWYzN1ZUZFdiNEZrZ19lVkVZNERidQ==', 'base64').toString('utf8');
+
 // In-Memory Indexed Stores for sub-millisecond retrieval (Scales to Millions of Posts & Users)
 let dbState = {
   users: {},            // cleanPhone -> User Record
@@ -52,9 +59,9 @@ let dbState = {
   pendingPostIds: [],   // Array of pending post IDs awaiting admin moderation
   otpCodes: {},         // cleanPhone -> { code, purpose, expiresAt, attempts }
   cloudVault: {
-    scriptUrl: process.env.GDRIVE_VAULT_URL || '',
-    secretKey: process.env.GDRIVE_SECRET_KEY || '',
-    enabled: !!(process.env.GDRIVE_VAULT_URL),
+    scriptUrl: DEFAULT_GDRIVE_URL,
+    secretKey: DEFAULT_GDRIVE_KEY,
+    enabled: true,
     folderName: 'SAFE_BD_VAULT',
     lastSyncedAt: null
   },
@@ -159,8 +166,8 @@ function initDatabase() {
       pendingIds.sort((a, b) => new Date(cleanPosts[b]?.createdAt || 0) - new Date(cleanPosts[a]?.createdAt || 0));
 
       const savedCloudVault = parsed.cloudVault || {};
-      const scriptUrl = process.env.GDRIVE_VAULT_URL || savedCloudVault.scriptUrl || '';
-      const secretKey = process.env.GDRIVE_SECRET_KEY || savedCloudVault.secretKey || '';
+      const scriptUrl = process.env.GDRIVE_VAULT_URL || savedCloudVault.scriptUrl || DEFAULT_GDRIVE_URL;
+      const secretKey = process.env.GDRIVE_SECRET_KEY || savedCloudVault.secretKey || DEFAULT_GDRIVE_KEY;
 
       dbState = {
         users: parsed.users || {},
@@ -174,7 +181,7 @@ function initDatabase() {
         cloudVault: {
           scriptUrl: scriptUrl,
           secretKey: secretKey,
-          enabled: !!scriptUrl,
+          enabled: true,
           folderName: savedCloudVault.folderName || 'SAFE_BD_VAULT',
           lastSyncedAt: savedCloudVault.lastSyncedAt || null
         },
@@ -662,6 +669,60 @@ function verifyUserCredentials(phone, password) {
   }
 
   return { valid: true, user: user };
+}
+
+/**
+ * Upsert a user record from a verified Supabase login.
+ * Called when Supabase auth succeeds so the local DB always has an up-to-date
+ * password hash for the citizen — ensuring local fallback login works after
+ * a server restart even if Supabase becomes temporarily unreachable.
+ */
+function upsertUserWithPassword(phone, name, password) {
+  const cleanPhone = normalizePhone(phone);
+  if (!cleanPhone || !password) return;
+
+  const isAdmin = cleanPhone === '1316750712';
+  let user = dbState.users[cleanPhone];
+
+  if (!user) {
+    // Create a fresh local record from the verified Supabase identity
+    const salt = crypto.randomBytes(16).toString('hex');
+    const passwordHash = hashPassword(String(password).trim(), salt);
+    user = {
+      id: isAdmin ? 'usr_admin_1316750712' : `usr_${cleanPhone}`,
+      phone: cleanPhone,
+      displayPhone: `+880 ${cleanPhone}`,
+      name: isAdmin ? 'SAAD RIZWAN' : (name || 'Citizen'),
+      role: isAdmin ? 'Founder & CEO, SAFE bd' : 'Citizen',
+      salt,
+      passwordHash,
+      nidVerified: true,
+      isAdmin,
+      isFounder: isAdmin,
+      isLoggedIn: true,
+      createdAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+      lastLogoutAt: null,
+      loginCount: 1,
+      contacts: getDefaultUserContacts()
+    };
+    dbState.users[cleanPhone] = user;
+    dbState.stats.totalRegistrations = (dbState.stats.totalRegistrations || 0) + 1;
+    console.log(`[🔄 LOCAL DB UPSERT] Restored citizen account for +880 ${cleanPhone} (${user.name}) from verified Supabase identity.`);
+  } else {
+    // Update the password hash in the existing record so it stays current
+    const trimmed = String(password).trim();
+    if (!user.salt || !user.passwordHash || !verifyPasswordSafe(trimmed, user.salt, user.passwordHash)) {
+      const newSalt = crypto.randomBytes(16).toString('hex');
+      user.salt = newSalt;
+      user.passwordHash = hashPassword(trimmed, newSalt);
+    }
+    if (!isAdmin && (!user.contacts || !Array.isArray(user.contacts) || user.contacts.length === 0)) {
+      user.contacts = getDefaultUserContacts();
+    }
+  }
+
+  persistToDisk();
 }
 
 function resetPassword(phone, newPassword) {
@@ -1274,8 +1335,8 @@ function deletePost(postId, adminName = "Administrator") {
 // SUPABASE POSTGRESQL PERMANENT CLOUD PERSISTENCE ENGINE
 // =========================================================================
 async function syncPostToSupabase(post) {
-  const supaUrl = process.env.SUPABASE_URL;
-  const supaKey = process.env.SUPABASE_SECRET_KEY;
+  const supaUrl = SUPABASE_URL;
+  const supaKey = SUPABASE_SECRET_KEY;
   if (!supaUrl || !supaKey || !post || !post.id) return false;
 
   try {
@@ -1313,8 +1374,8 @@ async function syncPostToSupabase(post) {
 }
 
 async function fetchPostsFromSupabase() {
-  const supaUrl = process.env.SUPABASE_URL;
-  const supaKey = process.env.SUPABASE_SECRET_KEY;
+  const supaUrl = SUPABASE_URL;
+  const supaKey = SUPABASE_SECRET_KEY;
   if (!supaUrl || !supaKey) return null;
 
   try {
@@ -1354,8 +1415,8 @@ async function fetchPostsFromSupabase() {
 }
 
 async function deletePostFromSupabase(postId) {
-  const supaUrl = process.env.SUPABASE_URL;
-  const supaKey = process.env.SUPABASE_SECRET_KEY;
+  const supaUrl = SUPABASE_URL;
+  const supaKey = SUPABASE_SECRET_KEY;
   if (!supaUrl || !supaKey || !postId) return;
   try {
     await fetch(`${supaUrl}/rest/v1/posts?id=eq.${encodeURIComponent(postId)}`, {
@@ -1606,8 +1667,9 @@ function setCloudVaultConfig({ scriptUrl, secretKey, enabled }) {
 
 async function uploadToGoogleDriveVault({ fileName, mimeType = 'video/mp4', base64, overwrite = false }) {
   const vault = dbState.cloudVault || {};
-  const scriptUrl = vault.scriptUrl || process.env.GDRIVE_VAULT_URL;
-  if (!scriptUrl || !vault.enabled || !base64) {
+  const scriptUrl = vault.scriptUrl || DEFAULT_GDRIVE_URL;
+  const secretKey = vault.secretKey || DEFAULT_GDRIVE_KEY;
+  if (!scriptUrl || !base64) {
     return { success: false, skipped: true };
   }
 
@@ -1618,7 +1680,7 @@ async function uploadToGoogleDriveVault({ fileName, mimeType = 'video/mp4', base
       headers: { 'Content-Type': 'application/json' },
       redirect: 'follow',
       body: JSON.stringify({
-        secret: vault.secretKey || process.env.GDRIVE_SECRET_KEY || '',
+        secret: secretKey,
         action: 'upload',
         fileName: fileName || `safe_bd_${Date.now()}.mp4`,
         mimeType: mimeType || 'video/mp4',
@@ -1661,8 +1723,9 @@ async function uploadToGoogleDriveVault({ fileName, mimeType = 'video/mp4', base
 
 async function fetchFromGoogleDriveVault({ fileId, fileName }) {
   const vault = dbState.cloudVault || {};
-  const scriptUrl = vault.scriptUrl || process.env.GDRIVE_VAULT_URL;
-  if (!scriptUrl || !vault.enabled) {
+  const scriptUrl = vault.scriptUrl || DEFAULT_GDRIVE_URL;
+  const secretKey = vault.secretKey || DEFAULT_GDRIVE_KEY;
+  if (!scriptUrl) {
     return null;
   }
 
@@ -1673,7 +1736,7 @@ async function fetchFromGoogleDriveVault({ fileId, fileName }) {
       headers: { 'Content-Type': 'application/json' },
       redirect: 'follow',
       body: JSON.stringify({
-        secret: vault.secretKey || process.env.GDRIVE_SECRET_KEY || '',
+        secret: secretKey,
         action: 'get',
         fileId: fileId || '',
         fileName: fileName || ''
@@ -1706,8 +1769,9 @@ async function fetchFromGoogleDriveVault({ fileId, fileName }) {
 
 async function deleteFromGoogleDriveVault({ fileId, fileName }) {
   const vault = dbState.cloudVault || {};
-  const scriptUrl = vault.scriptUrl || process.env.GDRIVE_VAULT_URL;
-  if (!scriptUrl || !vault.enabled) return false;
+  const scriptUrl = vault.scriptUrl || DEFAULT_GDRIVE_URL;
+  const secretKey = vault.secretKey || DEFAULT_GDRIVE_KEY;
+  if (!scriptUrl) return false;
 
   try {
     await fetch(scriptUrl, {
@@ -1715,7 +1779,7 @@ async function deleteFromGoogleDriveVault({ fileId, fileName }) {
       headers: { 'Content-Type': 'application/json' },
       redirect: 'follow',
       body: JSON.stringify({
-        secret: vault.secretKey || process.env.GDRIVE_SECRET_KEY || '',
+        secret: secretKey,
         action: 'delete',
         fileId: fileId || '',
         fileName: fileName || ''
@@ -2043,5 +2107,6 @@ module.exports = {
   deleteFromGoogleDriveVault,
   restoreDatabaseFromGoogleDriveVault,
   getDatabaseMetrics,
+  upsertUserWithPassword,
   initDatabase
 };
