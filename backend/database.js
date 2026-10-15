@@ -242,6 +242,50 @@ function initDatabase() {
     }
   }).catch(() => {});
 
+  // Asynchronously restore permanent citizen profiles and contacts from Supabase PostgreSQL
+  fetchUsersFromSupabase().then(supaUsers => {
+    if (Array.isArray(supaUsers) && supaUsers.length > 0) {
+      let restoredCount = 0;
+      for (const su of supaUsers) {
+        const meta = su.user_metadata || {};
+        const rawPhone = meta.phone || (su.email || '').replace('@safebd.com', '');
+        const phone = normalizePhone(rawPhone);
+        if (!phone) continue;
+
+        if (!dbState.users[phone]) {
+          dbState.users[phone] = {
+            id: 'usr_' + phone,
+            phone: phone,
+            displayPhone: '+880 ' + phone,
+            name: meta.name || 'Citizen',
+            role: phone === '1316750712' ? 'Founder & CEO, SAFE bd' : 'Citizen Member',
+            isFounder: phone === '1316750712',
+            isAdmin: phone === '1316750712' || Boolean(meta.isAdmin),
+            nidVerified: true,
+            createdAt: su.created_at || new Date().toISOString(),
+            contacts: Array.isArray(meta.contacts) && meta.contacts.length ? meta.contacts : getDefaultUserContacts()
+          };
+          restoredCount++;
+        } else {
+          // If local user has no contacts but Supabase has configured contacts, restore them!
+          if (Array.isArray(meta.contacts) && meta.contacts.some(c => c && c.phone && c.phone.trim() && c.phone !== '01XXXXXXXXX')) {
+            const localHasContacts = Array.isArray(dbState.users[phone].contacts) && dbState.users[phone].contacts.some(c => c && c.phone && c.phone.trim() && c.phone !== '01XXXXXXXXX');
+            if (!localHasContacts) {
+              dbState.users[phone].contacts = meta.contacts;
+              restoredCount++;
+            }
+          }
+        }
+      }
+      if (restoredCount > 0) {
+        persistToDisk();
+        console.log(`[⚡ SUPABASE USER RESTORE] Restored/Synced ${restoredCount} citizen accounts & contacts from Supabase PostgreSQL.`);
+      }
+    }
+    // Mirror any remaining local users to Supabase in background
+    syncAllUsersToSupabase().catch(() => {});
+  }).catch(() => {});
+
   // If 5TB Google Drive Vault is configured, asynchronously pull and merge any newer records from cloud vault
   if (dbState.cloudVault && dbState.cloudVault.enabled && dbState.cloudVault.scriptUrl) {
     setTimeout(() => {
@@ -567,6 +611,7 @@ function createUser({ phone, name, password, nidVerified = true, contacts = null
   dbState.stats.totalLogins++;
 
   persistToDisk();
+  syncUserToSupabase(newUser).catch(() => {});
   return newUser;
 }
 
@@ -581,6 +626,7 @@ function updateUserContacts(phone, newContacts) {
   user.updatedAt = new Date().toISOString();
   persistToDisk();
   scheduleCloudStateBackup();
+  syncUserToSupabase(user).catch(() => {});
   return user.contacts;
 }
 
@@ -1479,6 +1525,110 @@ async function deletePostFromSupabase(postId) {
   } catch (e) {}
 }
 
+// =========================================================================
+// SUPABASE POSTGRESQL CITIZEN & EMERGENCY CONTACTS SYNC ENGINE
+// =========================================================================
+
+async function syncUserToSupabase(user) {
+  const supaUrl = SUPABASE_URL;
+  const supaKey = SUPABASE_SECRET_KEY;
+  if (!supaUrl || !supaKey || !user || !user.phone) return false;
+
+  const cleanPhone = normalizePhone(user.phone);
+  const email = `${cleanPhone}@safebd.com`;
+
+  try {
+    const listRes = await fetch(`${supaUrl}/auth/v1/admin/users?per_page=1000`, {
+      headers: {
+        'apikey': supaKey,
+        'Authorization': `Bearer ${supaKey}`
+      }
+    });
+    if (!listRes.ok) return false;
+    const listData = await listRes.json();
+    const existing = (listData.users || []).find(u => u.email === email || u.email === `${user.phone}@safebd.com`);
+
+    if (existing) {
+      await fetch(`${supaUrl}/auth/v1/admin/users/${existing.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supaKey,
+          'Authorization': `Bearer ${supaKey}`
+        },
+        body: JSON.stringify({
+          user_metadata: {
+            ...existing.user_metadata,
+            name: user.name || 'Citizen',
+            phone: cleanPhone,
+            isFounder: cleanPhone === '1316750712',
+            isAdmin: Boolean(user.isAdmin),
+            contacts: user.contacts || []
+          }
+        })
+      });
+      return true;
+    } else {
+      const createRes = await fetch(`${supaUrl}/auth/v1/admin/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supaKey,
+          'Authorization': `Bearer ${supaKey}`
+        },
+        body: JSON.stringify({
+          email,
+          password: 'CitizenSafeBD2026!',
+          email_confirm: true,
+          user_metadata: {
+            name: user.name || 'Citizen',
+            phone: cleanPhone,
+            isFounder: cleanPhone === '1316750712',
+            isAdmin: Boolean(user.isAdmin),
+            contacts: user.contacts || []
+          }
+        })
+      });
+      return createRes.ok;
+    }
+  } catch (err) {
+    return false;
+  }
+}
+
+async function fetchUsersFromSupabase() {
+  const supaUrl = SUPABASE_URL;
+  const supaKey = SUPABASE_SECRET_KEY;
+  if (!supaUrl || !supaKey) return [];
+
+  try {
+    const listRes = await fetch(`${supaUrl}/auth/v1/admin/users?per_page=1000`, {
+      headers: {
+        'apikey': supaKey,
+        'Authorization': `Bearer ${supaKey}`
+      }
+    });
+    if (!listRes.ok) return [];
+    const listData = await listRes.json();
+    return listData.users || [];
+  } catch (err) {
+    return [];
+  }
+}
+
+async function syncAllUsersToSupabase() {
+  const supaUrl = SUPABASE_URL;
+  const supaKey = SUPABASE_SECRET_KEY;
+  if (!supaUrl || !supaKey) return;
+
+  const allUsers = Object.values(dbState.users || {});
+  for (const u of allUsers) {
+    if (u && u.phone) {
+      await syncUserToSupabase(u).catch(() => {});
+    }
+  }
+}
+
 function getAllPostsAdmin({ search = '', status = 'all', category = 'all', page = 1, limit = 50 } = {}) {
   const p = Math.max(1, parseInt(page, 10) || 1);
   const lim = Math.min(100, Math.max(1, parseInt(limit, 10) || 50));
@@ -2168,5 +2318,8 @@ module.exports = {
   restoreDatabaseFromGoogleDriveVault,
   getDatabaseMetrics,
   upsertUserWithPassword,
+  syncUserToSupabase,
+  fetchUsersFromSupabase,
+  syncAllUsersToSupabase,
   initDatabase
 };
