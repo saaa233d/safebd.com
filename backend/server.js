@@ -1737,12 +1737,17 @@ function handlePostDeletion(req, res) {
 
   const postId = req.params.id;
   const post = db.getPostById(postId);
+  const isAdmin = !!(req.adminUser || (session && session.isAdmin) || (user && user.isAdmin) || (session && session.phone === '1316750712') || (user && user.phone === '1316750712'));
+  const callerPhone = (user && user.phone) || (session && session.phone) || '';
+
   if (!post) {
+    if (isAdmin) {
+      db.deletePost(postId, (user && user.name) || (session && session.userName) || "Chief Administrator");
+      return res.json({ success: true, message: "Post permanently deleted from system." });
+    }
     return res.status(404).json({ error: "NOT_FOUND", message: "Post not found or already deleted." });
   }
 
-  const isAdmin = !!(req.adminUser || (session && session.isAdmin) || (user && user.isAdmin) || (session && session.phone === '1316750712') || (user && user.phone === '1316750712'));
-  const callerPhone = (user && user.phone) || (session && session.phone) || '';
   const isAuthor = !!(callerPhone && post.authorPhone && (db.normalizePhone(callerPhone) === db.normalizePhone(post.authorPhone)));
 
   if (!isAdmin && !isAuthor) {
