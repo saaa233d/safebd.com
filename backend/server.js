@@ -752,33 +752,47 @@ app.get('/api/database/metrics', requireAdminAuth, (req, res) => {
 ========================================================== */
 
 app.post('/api/emergency/sos-trigger', (req, res) => {
-  const { userId, location, emergencyType } = req.body;
-  const incidentId = "BD-EMG-999-" + Math.floor(100000 + Math.random() * 900000);
+  const { userId, location, emergencyType, userName, userPhone } = req.body;
+
+  const savedAlert = db.addSosAlert({
+    userId,
+    userName,
+    userPhone,
+    emergencyType,
+    location
+  });
 
   const incident = {
-    incidentId,
-    userId: userId || "anonymous_citizen",
-    status: "DISPATCHED_TO_999",
-    timestamp: new Date().toISOString(),
-    emergencyType: emergencyType || "POLICE_THREAT",
-    location: location || { lat: 23.7925, lon: 90.4078, address: "Banani 11, Dhaka" },
-    cadUnitAssigned: "Dhaka North Quick Response Unit #4"
+    incidentId: savedAlert.incidentId,
+    id: savedAlert.id,
+    userId: savedAlert.userId,
+    userName: savedAlert.userName,
+    userPhone: savedAlert.userPhone,
+    displayPhone: savedAlert.displayPhone,
+    status: savedAlert.status,
+    timestamp: savedAlert.timestamp,
+    emergencyType: savedAlert.emergencyType,
+    location: savedAlert.location,
+    cadUnitAssigned: "Dhaka North Quick Response Unit #4",
+    googleMapsUrl: savedAlert.googleMapsUrl
   };
 
-  liveIncidents.set(incidentId, incident);
-  console.log(`[🚨 999 DISPATCH CAD] Incident ${incidentId} received. Routing units to:`, incident.location);
+  liveIncidents.set(savedAlert.incidentId, incident);
+  console.log(`[🚨 999 DISPATCH CAD] Incident ${savedAlert.incidentId} received from ${savedAlert.userName} (${savedAlert.displayPhone}). Routing units to:`, incident.location);
 
-  // Broadcast to all active emergency circle listeners via WebSocket
+  // Broadcast to all active emergency circle listeners & admin consoles via WebSocket
   broadcastLocationUpdate({
     type: "EMERGENCY_SOS_ALERT",
-    incident
+    incident,
+    alert: savedAlert
   });
 
   return res.json({
     success: true,
-    incidentId,
+    incidentId: savedAlert.incidentId,
     message: "Distress signal accepted by Bangladesh 999 Emergency CAD.",
-    incident
+    incident,
+    alert: savedAlert
   });
 });
 
@@ -1114,6 +1128,21 @@ app.post('/api/admin/emergency-evidence/:id/review', (req, res) => {
     return res.json({ success: true, message: "Emergency evidence marked reviewed & dispatched.", evidence: updated });
   }
   return res.status(404).json({ error: "NOT_FOUND", message: "Evidence record not found." });
+});
+
+// 2.5 Admin Live SOS Distress Locations Engine (Direct Exact Coordinates Feed)
+app.get('/api/admin/sos-alerts', (req, res) => {
+  const alerts = db.getAllSosAlerts();
+  return res.json({ success: true, alerts });
+});
+
+app.post('/api/admin/sos-alerts/:id/resolve', (req, res) => {
+  const adminName = (req.body && req.body.adminName) || 'Chief Administrator';
+  const resolved = db.resolveSosAlert(req.params.id, adminName);
+  if (resolved) {
+    return res.json({ success: true, message: "SOS incident marked resolved.", alert: resolved });
+  }
+  return res.status(404).json({ error: "NOT_FOUND", message: "SOS alert not found." });
 });
 
 /* ==========================================================
@@ -1803,7 +1832,11 @@ app.get('/api/admin/portal-template', requireAdminAuth, (req, res) => {
       </div>
 
       <!-- Quick Metrics Strip -->
-      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 16px;">
+      <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 16px;">
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1.5px solid #ef4444; border-radius: 12px; padding: 8px 10px; cursor: pointer;" onclick="switchAdminSection('sos')" title="View Live SOS Emergency Locations">
+          <div style="font-size: 9.5px; color: #ef4444; font-weight: 700;"><i class="fas fa-tower-broadcast fa-fade"></i> Live SOS</div>
+          <div style="font-size: 18px; font-weight: 800; color: #ef4444; margin-top: 2px;" id="admin-sos-stat">0</div>
+        </div>
         <div style="background: var(--black-subtle); border: 1px solid var(--burgundy-border); border-radius: 12px; padding: 8px 10px; cursor: pointer;" onclick="switchAdminSection('reports')">
           <div style="font-size: 9.5px; color: var(--text-muted);">Pending</div>
           <div style="font-size: 18px; font-weight: 800; color: #f59e0b; margin-top: 2px;" id="admin-pending-stat">0</div>
@@ -1824,6 +1857,9 @@ app.get('/api/admin/portal-template', requireAdminAuth, (req, res) => {
 
       <!-- Admin Sub-Navigation Tabs -->
       <div style="display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;" class="admin-nav-scroll">
+        <button type="button" class="auth-toggle-tab" id="admin-tab-sos" style="padding: 7px 11px; font-size: 11px; border-color: rgba(239, 68, 68, 0.6); color: #ef4444; font-weight: 700; white-space: nowrap;" onclick="switchAdminSection('sos')">
+          <i class="fas fa-tower-broadcast"></i> Live SOS Locations <span id="admin-sos-count-badge" style="background: #ef4444; color: #fff; padding: 1px 6px; border-radius: 10px; font-size: 9.5px; font-weight: 700; margin-left: 2px;">0</span>
+        </button>
         <button type="button" class="auth-toggle-tab active" id="admin-tab-reports" style="padding: 7px 11px; font-size: 11px; white-space: nowrap;" onclick="switchAdminSection('reports')">
           <i class="fas fa-inbox"></i> Pending Review (<span id="admin-pending-tab-badge">0</span>)
         </button>
@@ -1842,6 +1878,27 @@ app.get('/api/admin/portal-template', requireAdminAuth, (req, res) => {
         <button type="button" class="auth-toggle-tab" id="admin-tab-journeys" style="padding: 7px 11px; font-size: 11px; border-color: rgba(245, 158, 11, 0.4); color: #f59e0b; white-space: nowrap;" onclick="switchAdminSection('journeys')">
           <i class="fas fa-satellite-dish"></i> Live Routes <span id="admin-overdue-count-badge" style="background: #ef4444; color: #fff; padding: 1px 6px; border-radius: 10px; font-size: 9.5px; font-weight: 700; margin-left: 2px;">0</span>
         </button>
+      </div>
+
+      <!-- URGENT LIVE SOS EMERGENCY BANNER (Pops up automatically across Admin Portal when distress signal is active) -->
+      <div id="admin-urgent-sos-container" style="display: none; margin-bottom: 16px;"></div>
+
+      <!-- SECTION S: LIVE SOS DISTRESS SIGNALS & EXACT USER COORDINATES -->
+      <div id="admin-section-sos" style="display: none;">
+        <div class="module-header" style="margin-bottom: 12px;">
+          <span style="color: #ef4444; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-tower-broadcast fa-fade"></i> Live SOS Distress Signals &amp; Exact Coordinates
+          </span>
+          <button class="btn-gps-refresh" onclick="fetchAdminSosAlerts(true)" style="font-size: 11px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171;">
+            <i class="fas fa-arrows-rotate"></i> Refresh SOS
+          </button>
+        </div>
+        <div id="admin-sos-alerts-container">
+          <div style="text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 12.5px;">
+            <i class="fas fa-satellite-dish" style="font-size: 26px; color: rgba(239, 68, 68, 0.4); display: block; margin-bottom: 10px;"></i>
+            Listening for real-time SOS distress signals...
+          </div>
+        </div>
       </div>
 
       <!-- SECTION A: POST MODERATION QUEUE (With Urgent SOS Evidence on top) -->
