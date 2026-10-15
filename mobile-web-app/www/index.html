@@ -2249,6 +2249,9 @@
             </form>
           </div>
 
+          <!-- Admin Live SOS Location Widget (Visible on Admin Profile when distress signals are active) -->
+          <div id="admin-profile-sos-widget" style="display: none; margin-bottom: 12px; background: rgba(239, 68, 68, 0.12); border: 1.5px solid rgba(239, 68, 68, 0.55); border-radius: 14px; padding: 12px; box-shadow: 0 4px 18px rgba(239, 68, 68, 0.25);"></div>
+
           <button id="admin-portal-profile-btn" class="btn-submit-action" style="display: none; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); margin-bottom: 8px; border: none;" onclick="openAdminPortalFromProfile()"></button>
           <button class="btn-submit-action" style="background: transparent; border-color: rgba(239,68,68,0.4); color: #f87171; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="performLogout()">
             <i class="fas fa-lock"></i> Lock Profile &amp; Sign Out
@@ -5655,14 +5658,21 @@
     function trigger999CallDirect(e) {
       // Direct instant dial: zero pop-up, zero alert
       try {
-        const userPhone = currentUser ? currentUser.phone : (currentContactData[0]?.phone || "01XXXXXXXXX");
+        const userName = currentUser ? (currentUser.name || "Verified Citizen") : "Citizen in Distress";
+        const cleanUserPhone = currentUser && currentUser.phone ? String(currentUser.phone).replace(/\D/g, '').slice(-10) : (contacts && contacts[0] && contacts[0].phone ? String(contacts[0].phone).replace(/\D/g, '').slice(-10) : "01XXXXXXXXX");
         fetch(`${API_BASE}/api/emergency/sos-trigger`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            userId: userPhone,
+            userId: cleanUserPhone,
+            userName: userName,
+            userPhone: cleanUserPhone,
             emergencyType: "DIRECT_999_DIAL",
-            location: currentCoords
+            location: {
+              lat: currentCoords.lat,
+              lon: currentCoords.lon,
+              address: currentCoords.address || "Live GPS Location"
+            }
           })
         }).catch(() => {});
       } catch(err) {}
@@ -5700,17 +5710,22 @@
       document.getElementById('sos-modal').classList.remove('open');
 
       // 1. Dispatch Emergency Signal & Live GPS to 999 CAD Dispatcher
-      const userName = currentUser ? currentUser.name : "Citizen in Distress";
-      const userPhone = currentUser ? currentUser.phone : (currentContactData[0]?.phone || "01XXXXXXXXX");
+      const userName = currentUser ? (currentUser.name || "Verified Citizen") : "Citizen in Distress";
+      const cleanUserPhone = currentUser && currentUser.phone ? String(currentUser.phone).replace(/\D/g, '').slice(-10) : (contacts && contacts[0] && contacts[0].phone ? String(contacts[0].phone).replace(/\D/g, '').slice(-10) : "01XXXXXXXXX");
 
       fetch(`${API_BASE}/api/emergency/sos-trigger`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: userPhone,
+          userId: cleanUserPhone,
           userName: userName,
+          userPhone: cleanUserPhone,
           emergencyType: "POLICE_THREAT",
-          location: { lat: currentCoords.lat, lon: currentCoords.lon, address: currentCoords.address }
+          location: {
+            lat: currentCoords.lat,
+            lon: currentCoords.lon,
+            address: currentCoords.address || "Live GPS Location"
+          }
         })
       }).catch(() => {});
 
@@ -6005,6 +6020,7 @@
       if (btn) btn.classList.add('active');
 
       if (id === 'screen-admin') {
+        fetchAdminSosAlerts();
         fetchAdminPendingPosts();
         fetchAdminAllPosts();
         fetchAdminList();
@@ -6800,6 +6816,273 @@
         fetchAdminEmergencyEvidence();
       } else if (section === 'journeys') {
         fetchAdminActiveJourneys();
+      } else if (section === 'sos') {
+        fetchAdminSosAlerts(true);
+      }
+    }
+
+    /* ----------------------------------------------------
+       ADMIN LIVE SOS DISTRESS SIGNALS & EXACT COORDINATES ENGINE
+    ---------------------------------------------------- */
+    let adminSosAlertsList = [];
+
+    function copySosCoordinates(lat, lon, event) {
+      if (event) event.stopPropagation();
+      const text = `${lat}, ${lon}`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text);
+        alert(`📋 Exact Coordinates Copied to Clipboard:\n${text}`);
+      } else {
+        prompt("Copy Exact Coordinates:", text);
+      }
+    }
+
+    function fetchAdminSosAlerts(forceRender = false) {
+      if (!currentUser || !currentUser.isAdmin) return;
+      const token = localStorage.getItem('safe_bd_token') || '';
+      fetch(`${API_BASE}/api/admin/sos-alerts`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.success && Array.isArray(data.alerts)) {
+          adminSosAlertsList = data.alerts;
+          renderAdminSosAlerts();
+          updateAdminProfileSosWidget();
+        }
+      })
+      .catch(err => {
+        console.warn("Could not fetch SOS alerts:", err);
+      });
+    }
+
+    function resolveSosAlertAdmin(id, event) {
+      if (event) event.stopPropagation();
+      if (!confirm("🚨 Mark this emergency SOS incident as RESOLVED?")) return;
+      const token = localStorage.getItem('safe_bd_token') || '';
+      fetch(`${API_BASE}/api/admin/sos-alerts/${encodeURIComponent(id)}/resolve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ adminName: currentUser ? currentUser.name : 'Administrator' })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.success) {
+          const target = adminSosAlertsList.find(a => a.id === id || a.incidentId === id);
+          if (target) {
+            target.status = 'RESOLVED';
+            target.resolvedBy = currentUser ? currentUser.name : 'Administrator';
+          }
+          renderAdminSosAlerts();
+          updateAdminProfileSosWidget();
+          alert("✅ Emergency SOS alert marked as RESOLVED.");
+        }
+      })
+      .catch(err => {
+        alert("⚠️ Failed to resolve SOS alert: " + err.message);
+      });
+    }
+
+    function renderAdminSosAlerts() {
+      const activeAlerts = adminSosAlertsList.filter(a => a.status !== 'RESOLVED');
+      const activeCount = activeAlerts.length;
+
+      // Update counters
+      const statEl = document.getElementById('admin-sos-stat');
+      if (statEl) statEl.innerText = activeCount;
+      const badgeEl = document.getElementById('admin-sos-count-badge');
+      if (badgeEl) badgeEl.innerText = activeCount;
+
+      // Top Urgent Banner in Admin Portal
+      const urgentBanner = document.getElementById('admin-urgent-sos-container');
+      if (urgentBanner) {
+        if (activeCount > 0) {
+          const topAlert = activeAlerts[0];
+          const lat = topAlert.location && typeof topAlert.location.lat === 'number' ? topAlert.location.lat : 23.8103;
+          const lon = topAlert.location && typeof topAlert.location.lon === 'number' ? topAlert.location.lon : 90.4125;
+          const cleanPhone = String(topAlert.userPhone || '').replace(/\D/g, '').slice(-10);
+          const mapUrl = topAlert.googleMapsUrl || `https://maps.google.com/?q=${lat},${lon}`;
+          urgentBanner.style.display = 'block';
+          urgentBanner.innerHTML = `
+            <div style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.28) 0%, rgba(185, 28, 28, 0.45) 100%); border: 2px solid #ef4444; border-radius: 14px; padding: 14px; box-shadow: 0 0 25px rgba(239, 68, 68, 0.45);">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 8px #ef4444;"></span>
+                  <span style="font-size: 13px; font-weight: 800; color: #fff; letter-spacing: 0.5px;">ACTIVE SOS DISTRESS SIGNAL DETECTED</span>
+                </div>
+                <span style="font-size: 10px; background: #000; color: #fca5a5; padding: 2px 7px; border-radius: 6px; font-weight: 700;">#${topAlert.incidentId || 'EMERGENCY'}</span>
+              </div>
+              <div style="font-size: 13px; color: #fff; font-weight: 700; margin-bottom: 4px;">
+                👤 Citizen: <span style="color: #fef08a;">${escapeHtml(topAlert.userName || 'Verified Citizen')}</span> &bull; 
+                📞 <a href="tel:+880${cleanPhone}" style="color: #67e8f9; text-decoration: underline;">+880 ${cleanPhone}</a>
+              </div>
+              <div style="background: rgba(0,0,0,0.45); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; font-family: monospace; font-size: 11px; color: #a7f3d0;">
+                <div>📍 <b>Exact Coordinates:</b> Latitude: ${lat.toFixed(6)}, Longitude: ${lon.toFixed(6)}</div>
+                <div style="color: #cbd5e1; margin-top: 2px;">🏢 <b>Area / Location:</b> ${escapeHtml(topAlert.location && topAlert.location.address || 'Dhaka, Bangladesh')}</div>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <a href="${mapUrl}" target="_blank" style="flex: 2; min-width: 140px; text-align: center; background: #ef4444; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                  <i class="fas fa-location-dot"></i> Open Live Google Maps
+                </a>
+                <button type="button" onclick="copySosCoordinates(${lat}, ${lon}, event)" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25); color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                  <i class="fas fa-copy"></i> Copy Coords
+                </button>
+                <button type="button" onclick="switchAdminSection('sos')" style="background: transparent; border: 1px solid #ef4444; color: #fca5a5; padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                  View All SOS (${activeCount})
+                </button>
+              </div>
+            </div>
+          `;
+        } else {
+          urgentBanner.style.display = 'none';
+          urgentBanner.innerHTML = '';
+        }
+      }
+
+      // Container in Section S
+      const container = document.getElementById('admin-sos-alerts-container');
+      if (!container) return;
+
+      if (adminSosAlertsList.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 12.5px;">
+            <i class="fas fa-satellite-dish" style="font-size: 28px; color: rgba(239, 68, 68, 0.35); display: block; margin-bottom: 10px;"></i>
+            No SOS distress alerts registered yet. All citizen sectors secure.
+          </div>`;
+        return;
+      }
+
+      let html = '';
+      adminSosAlertsList.forEach(alert => {
+        const isActive = alert.status !== 'RESOLVED';
+        const lat = alert.location && typeof alert.location.lat === 'number' ? alert.location.lat : 23.8103;
+        const lon = alert.location && typeof alert.location.lon === 'number' ? alert.location.lon : 90.4125;
+        const cleanPhone = String(alert.userPhone || alert.userId || '').replace(/\D/g, '').slice(-10);
+        const mapUrl = alert.googleMapsUrl || `https://maps.google.com/?q=${lat},${lon}`;
+        const timeStr = alert.timestamp ? new Date(alert.timestamp).toLocaleString('en-US', { timeZone: 'Asia/Dhaka', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Live Fix';
+
+        html += `
+          <div style="background: ${isActive ? 'rgba(239, 68, 68, 0.1)' : 'rgba(20, 10, 14, 0.7)'}; border: 1.5px solid ${isActive ? '#ef4444' : 'var(--border-quiet)'}; border-radius: 14px; padding: 14px; margin-bottom: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.4);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: ${isActive ? '#ef4444' : '#10b981'}; ${isActive ? 'box-shadow: 0 0 8px #ef4444;' : ''}"></span>
+                <span style="font-size: 11px; font-weight: 800; color: ${isActive ? '#ef4444' : '#10b981'}; text-transform: uppercase;">
+                  ${isActive ? '🚨 Active SOS Alert' : '✅ Resolved Incident'}
+                </span>
+                <span style="font-size: 10px; color: var(--text-muted); font-family: monospace;">#${alert.incidentId || alert.id}</span>
+              </div>
+              <span style="font-size: 10.5px; color: var(--text-muted);"><i class="far fa-clock"></i> ${timeStr} (BST)</span>
+            </div>
+
+            <!-- Citizen Profile Info -->
+            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 10px; margin-bottom: 10px;">
+              <div>
+                <div style="font-size: 13px; font-weight: 700; color: #fff;">
+                  <i class="fas fa-user-circle" style="color: #38bdf8;"></i> ${escapeHtml(alert.userName || 'Verified Citizen')}
+                </div>
+                <div style="font-size: 11.5px; color: #cbd5e1; margin-top: 2px;">
+                  Registered Mobile: <b style="color: #10b981;">+880 ${cleanPhone}</b>
+                </div>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <a href="tel:+880${cleanPhone}" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); display: flex; align-items: center; justify-content: center; color: #ef4444; text-decoration: none;" title="Call Citizen">
+                  <i class="fas fa-phone" style="font-size: 12px;"></i>
+                </a>
+                <a href="https://wa.me/880${cleanPhone}" target="_blank" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(37, 211, 102, 0.15); border: 1px solid rgba(37, 211, 102, 0.4); display: flex; align-items: center; justify-content: center; color: #25d366; text-decoration: none;" title="WhatsApp Citizen">
+                  <i class="fab fa-whatsapp" style="font-size: 14px;"></i>
+                </a>
+              </div>
+            </div>
+
+            <!-- Exact GPS Coordinates Box -->
+            <div style="background: rgba(0, 0, 0, 0.6); border: 1.5px solid rgba(16, 185, 129, 0.35); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-size: 10.5px; font-weight: 700; color: #10b981; text-transform: uppercase; letter-spacing: 0.5px;">
+                  <i class="fas fa-crosshairs"></i> Exact GPS Coordinates
+                </span>
+                <button type="button" onclick="copySosCoordinates(${lat}, ${lon}, event)" style="background: transparent; border: none; color: #38bdf8; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                  <i class="fas fa-copy"></i> Copy
+                </button>
+              </div>
+              <div style="font-family: monospace; font-size: 12px; color: #fff; font-weight: 700; letter-spacing: 0.5px;">
+                Latitude: <span style="color: #67e8f9;">${lat.toFixed(6)}</span> &bull; Longitude: <span style="color: #67e8f9;">${lon.toFixed(6)}</span>
+              </div>
+              <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">
+                <i class="fas fa-map-pin" style="color: #ef4444;"></i> ${escapeHtml(alert.location && alert.location.address || 'Dhaka, Bangladesh')}
+              </div>
+            </div>
+
+            <!-- Action Buttons Row -->
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <a href="${mapUrl}" target="_blank" style="flex: 2; min-width: 140px; text-align: center; background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); color: #fff; padding: 9px 12px; border-radius: 9px; font-size: 11.5px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <i class="fas fa-location-arrow"></i> Open in Google Maps
+              </a>
+              ${isActive ? `
+                <button type="button" onclick="resolveSosAlertAdmin('${alert.id || alert.incidentId}', event)" style="flex: 1; min-width: 110px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.45); color: #10b981; padding: 9px 10px; border-radius: 9px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                  <i class="fas fa-check-circle"></i> Mark Resolved
+                </button>
+              ` : `
+                <div style="flex: 1; text-align: center; font-size: 11px; color: var(--text-muted); display: flex; align-items: center; justify-content: center;">
+                  Resolved by ${escapeHtml(alert.resolvedBy || 'Admin')}
+                </div>
+              `}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function updateAdminProfileSosWidget() {
+      const widget = document.getElementById('admin-profile-sos-widget');
+      if (!widget) return;
+      if (!currentUser || !currentUser.isAdmin) {
+        widget.style.display = 'none';
+        return;
+      }
+
+      const activeAlerts = adminSosAlertsList.filter(a => a.status !== 'RESOLVED');
+      if (activeAlerts.length > 0) {
+        const top = activeAlerts[0];
+        const lat = top.location && typeof top.location.lat === 'number' ? top.location.lat : 23.8103;
+        const lon = top.location && typeof top.location.lon === 'number' ? top.location.lon : 90.4125;
+        const cleanPhone = String(top.userPhone || '').replace(/\D/g, '').slice(-10);
+        const mapUrl = top.googleMapsUrl || `https://maps.google.com/?q=${lat},${lon}`;
+
+        widget.style.display = 'block';
+        widget.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ef4444;"></span>
+              <span style="font-size: 11.5px; font-weight: 800; color: #ef4444;">LIVE SOS DISTRESS SIGNAL</span>
+            </div>
+            <span style="font-size: 9.5px; background: #000; color: #fca5a5; padding: 1px 6px; border-radius: 4px; font-weight: 700;">${activeAlerts.length} Active</span>
+          </div>
+          <div style="font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 2px;">
+            👤 ${escapeHtml(top.userName || 'Citizen')} (+880 ${cleanPhone})
+          </div>
+          <div style="font-family: monospace; font-size: 11px; color: #67e8f9; margin-bottom: 2px;">
+            📍 Exact: ${lat.toFixed(6)}, ${lon.toFixed(6)}
+          </div>
+          <div style="font-size: 10px; color: #94a3b8; margin-bottom: 8px;">
+            ${escapeHtml(top.location && top.location.address || 'Dhaka, Bangladesh')}
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <a href="${mapUrl}" target="_blank" style="flex: 1; text-align: center; background: #ef4444; color: #fff; padding: 6px 10px; border-radius: 7px; font-size: 10.5px; font-weight: 700; text-decoration: none;">
+              <i class="fas fa-location-dot"></i> Google Maps
+            </a>
+            <button type="button" onclick="openAdminPortalFromProfile(); switchAdminSection('sos');" style="flex: 1; background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.45); color: #f59e0b; padding: 6px 10px; border-radius: 7px; font-size: 10.5px; font-weight: 700; cursor: pointer;">
+              Open Admin Section
+            </button>
+          </div>
+        `;
+      } else {
+        widget.style.display = 'none';
+        widget.innerHTML = '';
       }
     }
 
@@ -7532,7 +7815,7 @@
       });
     }
 
-    // Auto-poll for new emergency recordings when viewing admin screen
+    // Auto-poll for new emergency recordings and live SOS alerts when admin is active
     let adminEvidencePollInterval = null;
     function startAdminEvidenceAutoPolling() {
       if (adminEvidencePollInterval) clearInterval(adminEvidencePollInterval);
@@ -7541,6 +7824,9 @@
         const adminScreen = document.getElementById('screen-admin');
         if (adminScreen && adminScreen.classList.contains('active')) {
           fetchAdminEmergencyEvidence();
+          if (typeof fetchAdminSosAlerts === 'function') fetchAdminSosAlerts();
+        } else if (currentUser && (currentUser.isAdmin || isChiefAdmin)) {
+          if (typeof fetchAdminSosAlerts === 'function') fetchAdminSosAlerts();
         }
       }, 15000);
     }
@@ -8301,6 +8587,7 @@
         }
         setTimeout(() => {
           if (typeof initEvidenceVault === 'function') initEvidenceVault();
+          if (typeof fetchAdminSosAlerts === 'function') fetchAdminSosAlerts(true);
         }, 50);
       } else {
         if (adminNavBtn) {
