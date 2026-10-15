@@ -2570,6 +2570,36 @@
       ];
     }
 
+    const KNOWN_DUMMY_PHONES = ['1711223344', '1811223344', '1911223344', '1712345678', '1812345678', '1912345678', '1999887766', '1855667788', '1633221100', '1234567890'];
+
+    function isDummyPhone(phone) {
+      if (!phone) return true;
+      const str = String(phone).trim();
+      if (!str || str === '01XXXXXXXXX') return true;
+      const clean = str.replace(/\D/g, '').slice(-10);
+      return clean.length < 10 || KNOWN_DUMMY_PHONES.includes(clean);
+    }
+
+    function sanitizeContactList(list) {
+      if (!Array.isArray(list) || list.length === 0) return getDefaultContacts();
+      const defaults = getDefaultContacts();
+      const sanitized = list.slice(0, 5).map((c, idx) => {
+        const defaultName = (idx === 0 ? "Father" : idx === 1 ? "Mother" : "Guardian");
+        const name = (c && c.name && c.name.trim()) ? c.name.trim() : defaultName;
+        const phone = (c && c.phone && !isDummyPhone(c.phone)) ? String(c.phone).replace(/\D/g, '').slice(-10) : "";
+        return {
+          id: (c && c.id) || `c${idx + 1}`,
+          name: name,
+          phone: phone, // Blank phone renders as 01XXXXXXXXX
+          initial: (c && c.initial) || name.charAt(0).toUpperCase()
+        };
+      });
+      while (sanitized.length < 3) {
+        sanitized.push(defaults[sanitized.length]);
+      }
+      return sanitized;
+    }
+
     let defaultContacts = getDefaultContacts();
     let contacts = getDefaultContacts();
 
@@ -2591,65 +2621,48 @@
     }
 
     function loadUserContacts(user) {
-      let loaded = null;
       const userKey = user && user.phone ? String(user.phone).replace(/\D/g, '').slice(-10) : (localStorage.getItem('safe_bd_last_phone') || '');
+      let loaded = null;
 
-      // 1. If user object from server has actual phone numbers configured, use them
-      if (user && Array.isArray(user.contacts) && user.contacts.some(c => c && c.phone && String(c.phone).trim() && String(c.phone) !== '01XXXXXXXXX')) {
-        loaded = user.contacts;
+      // 1. If citizen is logged in and has contacts in their profile, use them (sanitized)
+      if (user && Array.isArray(user.contacts) && user.contacts.length > 0) {
+        loaded = sanitizeContactList(user.contacts);
       }
 
-      // 2. Check user-specific localStorage cache if server was empty or on restart
+      // 2. If user contacts was not in user object, check user-specific cache (sanitized)
       if (!loaded && userKey) {
         try {
           const cachedUser = localStorage.getItem('safe_bd_contacts_' + userKey);
           if (cachedUser) {
             const parsed = JSON.parse(cachedUser);
-            if (Array.isArray(parsed) && parsed.some(c => c && c.phone && String(c.phone).trim() && String(c.phone) !== '01XXXXXXXXX')) {
-              loaded = parsed;
-              if (user) {
-                user.contacts = loaded;
-                syncContactsToServer(userKey, loaded);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              const sanitized = sanitizeContactList(parsed);
+              if (sanitized.some(c => c.phone && c.phone.trim() !== '')) {
+                loaded = sanitized;
               }
             }
           }
         } catch(e) {}
       }
 
-      // 3. Fallback to universal device-level localStorage cache (persists across reloads/sessions)
-      if (!loaded) {
-        try {
-          const universalCached = localStorage.getItem('safe_bd_contacts');
-          if (universalCached) {
-            const parsed = JSON.parse(universalCached);
-            if (Array.isArray(parsed) && parsed.some(c => c && c.phone && String(c.phone).trim() && String(c.phone) !== '01XXXXXXXXX')) {
-              loaded = parsed;
-              if (userKey) {
-                localStorage.setItem('safe_bd_contacts_' + userKey, JSON.stringify(loaded));
-                if (user) {
-                  user.contacts = loaded;
-                  syncContactsToServer(userKey, loaded);
-                }
-              }
-            }
-          }
-        } catch(e) {}
-      }
-
-      // 4. Default contacts template if nothing was ever configured
+      // 3. Fallback to default contacts (01XXXXXXXXX placeholders for Father, Mother, Guardian)
       if (!loaded || !Array.isArray(loaded) || loaded.length === 0) {
         loaded = getDefaultContacts();
       }
 
-      contacts = loaded;
+      contacts = sanitizeContactList(loaded);
 
-      // Always save to universal device cache so it never vanishes
+      // Clean device cache of any stale dummy numbers immediately
       try {
         localStorage.setItem('safe_bd_contacts', JSON.stringify(contacts));
         if (userKey) {
           localStorage.setItem('safe_bd_contacts_' + userKey, JSON.stringify(contacts));
         }
       } catch(e) {}
+
+      if (user) {
+        user.contacts = contacts;
+      }
 
       if (typeof renderContactsList === 'function') {
         renderContactsList();
@@ -4540,7 +4553,7 @@
         card.className = 'contact-item-card';
 
         // Check if phone number is configured or shows placeholder 01XXXXXXXXX
-        const isConfigured = c.phone && String(c.phone).trim() !== '' && c.phone !== '01XXXXXXXXX';
+        const isConfigured = c.phone && String(c.phone).trim() !== '' && c.phone !== '01XXXXXXXXX' && !isDummyPhone(c.phone);
         const displayPhone = isConfigured ? `+880 ${String(c.phone).replace(/\D/g, '').slice(-10)}` : '01XXXXXXXXX';
         const phoneStyle = isConfigured ? '' : 'color: #94a3b8; font-family: monospace; letter-spacing: 0.5px;';
 
@@ -4570,7 +4583,7 @@
       if (!c) return;
 
       document.getElementById('edit-contact-name').value = c.name;
-      const isConfigured = c.phone && String(c.phone).trim() !== '' && c.phone !== '01XXXXXXXXX';
+      const isConfigured = c.phone && String(c.phone).trim() !== '' && c.phone !== '01XXXXXXXXX' && !isDummyPhone(c.phone);
       document.getElementById('edit-contact-phone').value = isConfigured ? String(c.phone).replace(/\D/g, '').slice(-10) : '';
       document.getElementById('edit-contact-modal').classList.add('open');
       document.getElementById('edit-contact-name').focus();
@@ -4672,7 +4685,7 @@
       if (!c) return;
       activeContact = c;
 
-      const isConfigured = c.phone && String(c.phone).trim() !== '' && c.phone !== '01XXXXXXXXX';
+      const isConfigured = c.phone && String(c.phone).trim() !== '' && c.phone !== '01XXXXXXXXX' && !isDummyPhone(c.phone);
       const displayPhone = isConfigured ? `+880 ${String(c.phone).replace(/\D/g, '').slice(-10)}` : '01XXXXXXXXX';
 
       document.getElementById('sheet-avatar-initial').innerText = c.initial || (c.name ? c.name.charAt(0).toUpperCase() : '?');
@@ -4690,7 +4703,7 @@
     function sendWhatsAppLocation(e) {
       e.preventDefault();
       if (!activeContact) return;
-      const isConfigured = activeContact.phone && String(activeContact.phone).trim() !== '' && activeContact.phone !== '01XXXXXXXXX';
+      const isConfigured = activeContact.phone && String(activeContact.phone).trim() !== '' && activeContact.phone !== '01XXXXXXXXX' && !isDummyPhone(activeContact.phone);
       if (!isConfigured) {
         alert(`⚠️ No phone number configured for ${activeContact.name} yet (currently 01XXXXXXXXX).\n\nPlease tap the edit button (pencil icon) to enter their real Bangladeshi mobile number.`);
         return;
@@ -4713,7 +4726,7 @@
     function dialSIMCall(e) {
       e.preventDefault();
       if (!activeContact) return;
-      const isConfigured = activeContact.phone && String(activeContact.phone).trim() !== '' && activeContact.phone !== '01XXXXXXXXX';
+      const isConfigured = activeContact.phone && String(activeContact.phone).trim() !== '' && activeContact.phone !== '01XXXXXXXXX' && !isDummyPhone(activeContact.phone);
       if (!isConfigured) {
         alert(`⚠️ No phone number configured for ${activeContact.name} yet (currently 01XXXXXXXXX).\n\nPlease tap the edit button (pencil icon) to enter their real mobile number.`);
         return;
@@ -6067,10 +6080,10 @@
 
       roles.forEach((r, idx) => {
         const contact = (contacts && contacts[idx]) ? contacts[idx] : { name: r.label, phone: '' };
-        const hasNumber = contact.phone && String(contact.phone).trim() !== '' && contact.phone !== '01XXXXXXXXX';
+        const hasNumber = contact.phone && String(contact.phone).trim() !== '' && contact.phone !== '01XXXXXXXXX' && !isDummyPhone(contact.phone);
         const cleanNum = hasNumber ? String(contact.phone).replace(/\D/g, '').slice(-10) : '';
-        const displayPhone = hasNumber ? `+880 ${cleanNum}` : '01XXXXXXXXX (Not Set)';
-        const phoneStyle = hasNumber ? 'color: #f1f5f9; font-weight: 600;' : 'color: #94a3b8; font-style: italic;';
+        const displayPhone = hasNumber ? `+880 ${cleanNum}` : '01XXXXXXXXX';
+        const phoneStyle = hasNumber ? 'color: #f1f5f9; font-weight: 600;' : 'color: #94a3b8; font-family: monospace; letter-spacing: 0.5px;';
 
         const row = document.createElement('div');
         row.className = 'profile-contact-row';
