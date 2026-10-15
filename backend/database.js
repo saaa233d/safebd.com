@@ -54,6 +54,7 @@ let dbState = {
   sessions: {},         // sessionToken -> Session Record
   activeJourneys: {},   // cleanPhone -> User's Personal Active Walk With Me Session
   emergencyEvidence: [],// List of all covert SOS video evidence records
+  sosAlerts: [],        // Live SOS emergency triggers with exact user coordinates for Admin
   posts: {},            // postId -> Post Record (O(1) query)
   approvedPostIds: [],  // Array of approved post IDs sorted newest first (O(limit) pagination for live feed)
   pendingPostIds: [],   // Array of pending post IDs awaiting admin moderation
@@ -174,6 +175,7 @@ function initDatabase() {
         sessions: parsed.sessions || {},
         activeJourneys: parsed.activeJourneys || {},
         emergencyEvidence: combinedEvidence,
+        sosAlerts: parsed.sosAlerts || [],
         posts: cleanPosts,
         approvedPostIds: approvedIds,
         pendingPostIds: pendingIds,
@@ -432,6 +434,7 @@ function persistToDisk() {
         sessions: dbState.sessions,
         activeJourneys: dbState.activeJourneys || {},
         emergencyEvidence: dbState.emergencyEvidence || [],
+        sosAlerts: dbState.sosAlerts || [],
         posts: dbState.posts || {},
         cloudVault: dbState.cloudVault || {},
         stats: dbState.stats
@@ -1130,6 +1133,79 @@ function markEmergencyEvidenceReviewed(id, notes = "") {
     if (notes) item.adminNotes = notes;
     persistToDisk();
     return item;
+  }
+  return null;
+}
+
+/* =========================================================================
+   LIVE SOS EMERGENCY INCIDENT DISPATCH ENGINE
+   Captures exact GPS coordinates, timestamps, and citizen profile metadata
+   for real-time dispatch and display in the Administrator Control Portal.
+========================================================================= */
+
+function addSosAlert({ userId, userName, userPhone, emergencyType, location }) {
+  if (!dbState.sosAlerts) {
+    dbState.sosAlerts = [];
+  }
+
+  const rawPhone = userPhone || userId || '';
+  const cleanPhone = normalizePhone(rawPhone);
+  const registeredUser = cleanPhone ? dbState.users[cleanPhone] : null;
+
+  const incidentId = "BD-EMG-999-" + Math.floor(100000 + Math.random() * 900000);
+  const rawLat = location && (typeof location.lat === 'number' ? location.lat : parseFloat(location.lat));
+  const rawLon = location && (typeof location.lon === 'number' ? location.lon : parseFloat(location.lon));
+  const lat = !isNaN(rawLat) ? rawLat : 23.8103;
+  const lon = !isNaN(rawLon) ? rawLon : 90.4125;
+  const address = (location && location.address) || "Dhaka, Bangladesh";
+
+  const resolvedName = registeredUser ? registeredUser.name : (userName || "Verified Citizen");
+  const resolvedPhone = registeredUser ? registeredUser.phone : (cleanPhone || rawPhone || "01XXXXXXXXX");
+  const displayPhone = registeredUser ? registeredUser.displayPhone : (cleanPhone ? `+880 ${cleanPhone}` : (rawPhone ? String(rawPhone) : "01XXXXXXXXX"));
+
+  const alertRecord = {
+    id: "sos_" + Date.now() + "_" + Math.floor(1000 + Math.random() * 9000),
+    incidentId,
+    userId: cleanPhone || userId || "anonymous_citizen",
+    userName: resolvedName,
+    userPhone: resolvedPhone,
+    displayPhone: displayPhone,
+    emergencyType: emergencyType || "POLICE_THREAT",
+    location: {
+      lat: parseFloat(lat.toFixed(6)),
+      lon: parseFloat(lon.toFixed(6)),
+      address: address
+    },
+    status: "ACTIVE_DISTRESS",
+    timestamp: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    googleMapsUrl: `https://maps.google.com/?q=${lat},${lon}`
+  };
+
+  dbState.sosAlerts.unshift(alertRecord);
+  if (dbState.sosAlerts.length > 100) {
+    dbState.sosAlerts = dbState.sosAlerts.slice(0, 100);
+  }
+
+  persistToDisk();
+  scheduleCloudStateBackup();
+  return alertRecord;
+}
+
+function getAllSosAlerts() {
+  return dbState.sosAlerts || [];
+}
+
+function resolveSosAlert(id, adminName = "Chief Administrator") {
+  if (!dbState.sosAlerts) return null;
+  const alert = dbState.sosAlerts.find(a => a.id === id || a.incidentId === id);
+  if (alert) {
+    alert.status = "RESOLVED";
+    alert.resolvedBy = adminName;
+    alert.resolvedAt = new Date().toISOString();
+    persistToDisk();
+    scheduleCloudStateBackup();
+    return alert;
   }
   return null;
 }
@@ -2097,6 +2173,7 @@ function scheduleCloudStateBackup() {
         sessions: dbState.sessions || {},
         activeJourneys: dbState.activeJourneys || {},
         emergencyEvidence: dbState.emergencyEvidence || [],
+        sosAlerts: dbState.sosAlerts || [],
         posts: dbState.posts || {},
         deletedPostIds: dbState.deletedPostIds || [],
         stats: dbState.stats,
@@ -2215,6 +2292,21 @@ async function restoreDatabaseFromGoogleDriveVault() {
       }
     }
 
+    // Merge Live SOS Distress Signals
+    if (Array.isArray(cloudData.sosAlerts)) {
+      const sosMap = new Map();
+      (dbState.sosAlerts || []).forEach(s => { if (s && s.id) sosMap.set(s.id, s); });
+      cloudData.sosAlerts.forEach(s => {
+        if (s && s.id && !sosMap.has(s.id)) {
+          sosMap.set(s.id, s);
+          updated = true;
+        }
+      });
+      if (updated) {
+        dbState.sosAlerts = Array.from(sosMap.values()).sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+      }
+    }
+
     // Merge posts (and remove any deleted posts)
     for (const delId of deletedSet) {
       if (dbState.posts[delId]) {
@@ -2326,5 +2418,8 @@ module.exports = {
   syncUserToSupabase,
   fetchUsersFromSupabase,
   syncAllUsersToSupabase,
+  addSosAlert,
+  getAllSosAlerts,
+  resolveSosAlert,
   initDatabase
 };
