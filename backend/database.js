@@ -1137,11 +1137,14 @@ function getApprovedPosts({ page = 1, limit = 20, category = 'all' } = {}) {
   const p = Math.max(1, parseInt(page, 10) || 1);
   const lim = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
 
-  let candidateIds = dbState.approvedPostIds;
+  let candidateIds = (dbState.approvedPostIds || []).filter(id => {
+    const post = dbState.posts[id];
+    return post && post.approved && !post.rejected;
+  });
   if (category && category !== 'all') {
     candidateIds = candidateIds.filter(id => {
       const post = dbState.posts[id];
-      return post && post.approved && (post.category || '').toLowerCase() === category.toLowerCase();
+      return post && (post.category || '').toLowerCase() === category.toLowerCase();
     });
   }
 
@@ -1350,15 +1353,23 @@ function formatPostOutput(post) {
 
 function deletePost(postId, adminName = "Administrator") {
   const post = dbState.posts[postId];
-  if (!post) return false;
+  if (!post) {
+    dbState.approvedPostIds = (dbState.approvedPostIds || []).filter(id => id !== postId);
+    dbState.pendingPostIds = (dbState.pendingPostIds || []).filter(id => id !== postId);
+    if (!Array.isArray(dbState.deletedPostIds)) dbState.deletedPostIds = [];
+    if (!dbState.deletedPostIds.includes(postId)) dbState.deletedPostIds.push(postId);
+    persistToDisk();
+    deletePostFromSupabase(postId).catch(() => {});
+    return true;
+  }
 
   if (post.gdriveFileId) {
     deleteFromGoogleDriveVault({ fileId: post.gdriveFileId }).catch(() => {});
   }
 
   delete dbState.posts[postId];
-  dbState.approvedPostIds = dbState.approvedPostIds.filter(id => id !== postId);
-  dbState.pendingPostIds = dbState.pendingPostIds.filter(id => id !== postId);
+  dbState.approvedPostIds = (dbState.approvedPostIds || []).filter(id => id !== postId);
+  dbState.pendingPostIds = (dbState.pendingPostIds || []).filter(id => id !== postId);
   if (!Array.isArray(dbState.deletedPostIds)) dbState.deletedPostIds = [];
   if (!dbState.deletedPostIds.includes(postId)) dbState.deletedPostIds.push(postId);
   dbState.stats.totalPosts = Object.keys(dbState.posts).length;
