@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SAFE bd — Founder's Master Guidebook: Basics of Code & Platform Architecture</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+
+    @page {
+      size: A4 portrait;
+      margin: 10mm 14mm 10mm 14mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #1e293b;
+      background: #ffffff;
+      font-size: 8.8pt;
+      line-height: 1.42;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .page {
+      width: 100%;
+      height: 272mm;
+      max-height: 272mm;
+      overflow: hidden;
+      page-break-after: always;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .page:last-child {
+      page-break-after: avoid;
+    }
+
+    /* Cover Page */
+    .cover {
+      background: linear-gradient(135deg, #090d16 0%, #1e1b4b 60%, #31102b 100%);
+      color: #ffffff;
+      padding: 24mm 18mm;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+    }
+
+    .cover-badge {
+      display: inline-block;
+      background: #dc2626;
+      color: #ffffff;
+      font-size: 8pt;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .cover-title {
+      font-size: 26pt;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+
+    .cover-title span {
+      color: #f87171;
+    }
+
+    .cover-subtitle {
+      font-size: 11.5pt;
+      font-weight: 400;
+      color: #cbd5e1;
+      line-height: 1.4;
+      max-width: 95%;
+      margin-bottom: 20px;
+    }
+
+    .cover-meta {
+      border-top: 1px solid rgba(255,255,255,0.15);
+      padding-top: 12px;
+      font-size: 8.5pt;
+      color: #94a3b8;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .cover-meta strong {
+      color: #ffffff;
+    }
+
+    /* Standard Headers */
+    .header {
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .header-title {
+      font-size: 13pt;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .header-meta {
+      font-size: 7.5pt;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    /* Section Styles */
+    .section {
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: 10pt;
+      font-weight: 800;
+      color: #0f172a;
+      border-left: 3.5px solid #dc2626;
+      padding-left: 7px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .section-title.blue { border-left-color: #0284c7; }
+    .section-title.emerald { border-left-color: #059669; }
+    .section-title.purple { border-left-color: #7c3aed; }
+
+    p {
+      margin-bottom: 6px;
+      color: #334155;
+      font-size: 8.5pt;
+      line-height: 1.42;
+    }
+
+    /* Callout Boxes */
+    .callout {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 3.5px solid #0284c7;
+      padding: 8px 10px;
+      border-radius: 6px;
+      margin: 8px 0;
+      font-size: 8.2pt;
+      line-height: 1.38;
+    }
+
+    .callout.tip {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+      border-left-color: #16a34a;
+    }
+
+    .callout.important {
+      background: #fff1f2;
+      border-color: #fecdd3;
+      border-left-color: #e11d48;
+    }
+
+    .callout-title {
+      font-weight: 700;
+      font-size: 8.8pt;
+      margin-bottom: 2px;
+      color: #0f172a;
+    }
+
+    /* Visual Architecture Box */
+    .arch-diagram {
+      background: #0f172a;
+      color: #f8fafc;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 7.2pt;
+      line-height: 1.38;
+      margin: 8px 0;
+    }
+
+    /* Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 7px;
+      margin-bottom: 8px;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 8px 10px;
+    }
+
+    .card.blue { border-top: 3px solid #0284c7; }
+    .card.red { border-top: 3px solid #dc2626; }
+    .card.emerald { border-top: 3px solid #059669; }
+    .card.amber { border-top: 3px solid #d97706; }
+
+    .card-title {
+      font-size: 8.8pt;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 3px;
+    }
+
+    .card-body {
+      font-size: 7.8pt;
+      color: #475569;
+      line-height: 1.38;
+    }
+
+    /* Tables */
+    .table-container {
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      overflow: hidden;
+      margin: 6px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 7.6pt;
+      text-align: left;
+    }
+
+    th {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 5px 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    td {
+      padding: 4.5px 8px;
+      border-bottom: 1px solid #e2e8f0;
+      color: #334155;
+    }
+
+    tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Code Tags */
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 7.2pt;
+      background: #f1f5f9;
+      color: #be123c;
+      padding: 1px 3px;
+      border-radius: 3px;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid #cbd5e1;
+      padding-top: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 7pt;
+      color: #64748b;
+    }
+
+    .footer-left {
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .footer-page {
+      font-weight: 700;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== PAGE 1: COVER ==================== -->
+  <div class="page">
+    <div class="cover">
+      <div>
+        <span class="cover-badge">Executive Engineering Primer</span>
+        <div class="cover-title">
+          SAFE bd <span>Founder's Master Guidebook</span>
+        </div>
+        <div class="cover-subtitle">
+          A non-technical founder’s plain-English explanation of coding basics, platform architecture, and how your website and mobile app work under the hood.
+        </div>
+      </div>
+
+      <div>
+        <div class="callout" style="background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.2); color: #e2e8f0;">
+          <div class="callout-title" style="color: #38bdf8;">💡 Why This Guide Exists:</div>
+          As the Founder and CEO of SAFE bd, you do not need to memorize hundreds of lines of code. However, understanding the core anatomy—how buttons trigger alarms, how databases store family contacts, and how servers talk to phones—empowers you to lead technical meetings with government officials and software engineers with complete confidence.
+        </div>
+        
+        <div class="cover-meta">
+          <div>
+            <strong>Author &amp; Platform:</strong> Saad Rizwan (Founder &amp; CEO, SAFE bd)<br>
+            <strong>Target Audience:</strong> Founders &amp; Executive Leadership<br>
+            <strong>Release Version:</strong> 2.0 (PostgreSQL &amp; Cloud Vault Connected)
+          </div>
+          <div>
+            <strong>Core Modules Covered:</strong><br>
+            1. The 3 Building Blocks (HTML, CSS, JS)<br>
+            2. Frontend vs. Backend vs. Database<br>
+            3. How the SOS &amp; Walk Features Work<br>
+            4. Founder's Glossary of Terms
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== PAGE 2: THE 3 BUILDING BLOCKS ==================== -->
+  <div class="page">
+    <div>
+      <div class="header">
+        <div class="header-title">Module 1: The Three Languages of the Web</div>
+        <div class="header-meta">SAFE bd Architecture Series • Page 2 of 4</div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">The Universal Analogy: A Human Body</div>
+        <p>
+          Every website and mobile application in the world—from Google to Facebook to SAFE bd—is built using three primary coding languages working together in harmony. Think of them as the <strong>Skeleton</strong>, the <strong>Skin</strong>, and the <strong>Muscles</strong> of a human body.
+        </p>
+
+        <div class="grid-3">
+          <div class="card red">
+            <div class="card-title">1. HTML (The Skeleton)</div>
+            <div class="card-body">
+              <strong>HyperText Markup Language:</strong> Defines the raw structure. It tells the phone: <em>"Put a big red SOS button here, put a text input box for the father's phone number here, and put a map container below."</em> Without HTML, the page is empty space.
+            </div>
+          </div>
+
+          <div class="card blue">
+            <div class="card-title">2. CSS (The Skin &amp; Style)</div>
+            <div class="card-body">
+              <strong>Cascading Style Sheets:</strong> Controls how everything looks. It makes the SOS button glow red, rounds the corners of your profile card, creates the sleek dark-mode background, and ensures fonts look crisp and modern on both Android and iPhone.
+            </div>
+          </div>
+
+          <div class="card emerald">
+            <div class="card-title">3. JavaScript (The Brain &amp; Muscles)</div>
+            <div class="card-body">
+              <strong>JavaScript (JS):</strong> Makes the app alive and interactive. It says: <em>"When the citizen taps the SOS button, turn on the GPS, start a 10-second timer, record a covert video, and send the coordinates to the police dispatch."</em>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title blue">Where These Live in Your Project</div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 25%;">File / Folder</th>
+                <th style="width: 25%;">What Technology It Uses</th>
+                <th style="width: 50%;">What It Does For SAFE bd</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>mobile-web-app/www/index.html</code></td>
+                <td>HTML + CSS + JavaScript</td>
+                <td><strong>The Entire Front Face of Your App:</strong> Contains the red SOS button, the Walk With Me journey interface, the Emergency Contact forms, the Community Awareness feed, and the Admin CAD portal.</td>
+              </tr>
+              <tr>
+                <td><code>backend/server.js</code></td>
+                <td>Node.js (JavaScript on Server)</td>
+                <td><strong>The Central Dispatcher:</strong> Listens 24/7 in the cloud on Render, routes emergency alarms, sends SMS, and checks passwords.</td>
+              </tr>
+              <tr>
+                <td><code>backend/database.js</code></td>
+                <td>JavaScript + SQL Connector</td>
+                <td><strong>The Vault Keeper:</strong> Connects to Supabase PostgreSQL and Google Drive to save citizen profiles and contacts permanently.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title emerald">How a Click Travels Through Your Project</div>
+        <div class="arch-diagram">
+          [ Citizen Taps "Save Contacts" on Phone ]
+                     │
+                     ▼ (1. JavaScript validates: Is the phone number a valid 11-digit BD number?)
+          [ index.html sends HTTP PUT request over HTTPS ]
+                     │
+                     ▼ (2. Request travels over the internet to Render Cloud Server)
+          [ server.js receives: verifies token and calls database.js ]
+                     │
+                     ▼ (3. database.js connects to Supabase PostgreSQL)
+          [ Supabase saves Father & Mother into permanent SQL database ]
+                     │
+                     ▼ (4. Server responds: "200 OK — Contacts Secured!")
+          [ index.html shows green checkmark: "✅ Emergency Circle Updated" ]
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-left">SAFE bd Founder's Primer • Understanding Code &amp; Systems</div>
+      <div class="footer-page">Page 2 of 4</div>
+    </div>
+  </div>
+
+  <!-- ==================== PAGE 3: FRONTEND VS BACKEND VS DATABASE ==================== -->
+  <div class="page">
+    <div>
+      <div class="header">
+        <div class="header-title">Module 2: The Three Tiers of Your Architecture</div>
+        <div class="header-meta">SAFE bd Architecture Series • Page 3 of 4</div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">The Restaurant Analogy</div>
+        <p>
+          Software engineers often throw around terms like <em>"Frontend"</em>, <em>"Backend"</em>, and <em>"Database"</em>. The easiest way to understand this is to imagine a high-end restaurant:
+        </p>
+
+        <div class="grid-3">
+          <div class="card blue">
+            <div class="card-title">1. The Dining Room (Frontend)</div>
+            <div class="card-body">
+              This is the tables, menu, and lights that the customer sees. In SAFE bd, this is the <strong>mobile screen</strong> displaying the map, buttons, and safety feed. It runs on the user's phone.
+            </div>
+          </div>
+
+          <div class="card red">
+            <div class="card-title">2. The Kitchen (Backend Server)</div>
+            <div class="card-body">
+              The customer never enters the kitchen, but the chefs cook the food and fulfill orders. In SAFE bd, this is <strong>Node.js on Render</strong>, processing emergency signals and calculating ETAs.
+            </div>
+          </div>
+
+          <div class="card emerald">
+            <div class="card-title">3. The Pantry &amp; Safe (Database)</div>
+            <div class="card-body">
+              Where all ingredients and recipe books are locked permanently. In SAFE bd, this is <strong>Supabase PostgreSQL and Google Drive</strong>, holding citizen passwords, contacts, and video evidence.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title purple">How SAFE bd's 4 Core Features Work Under the Hood</div>
+        
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">🚨 1. Instant SOS &amp; Location Broadcast</div>
+            <div class="card-body">
+              When the citizen presses the red SOS circle:
+              <br>• The browser's <code>navigator.geolocation</code> sensor reads GPS coordinates.
+              <br>• A high-speed <strong>WebSocket</strong> connection instantly bursts latitude and longitude to the server in less than 50 milliseconds.
+              <br>• The server immediately pings the Admin CAD map and dispatches SMS alerts.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">📹 2. Covert Evidence Recording</div>
+            <div class="card-body">
+              To catch attackers without risking the citizen's life:
+              <br>• JavaScript activates <code>navigator.mediaDevices.getUserMedia</code>.
+              <br>• The camera records video silently in the background <strong>without preview or flash</strong>.
+              <br>• The video clip is packaged into a compressed binary file and uploaded straight to your 5TB Google Drive Vault.
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">🚶 3. "Walk With Me" Virtual Companion</div>
+            <div class="card-body">
+              Designed for night commuters and women:
+              <br>• The user selects an ETA (e.g., 20 minutes).
+              <br>• A JavaScript background timer (<code>setInterval</code>) counts down every second.
+              <br>• <strong>Dead-Man's Switch:</strong> If the timer reaches 0 and the user hasn't entered their secret 4-digit PIN, an escalating distress alert triggers automatically!
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">🛡️ 4. Triple-Shield Contact Persistence</div>
+            <div class="card-body">
+              Why your contacts never disappear anymore:
+              <br>• <strong>Shield 1:</strong> Saved immediately into the phone's physical chip (<code>localStorage</code>).
+              <br>• <strong>Shield 2:</strong> Synced to <strong>Supabase PostgreSQL</strong> cloud database.
+              <br>• <strong>Shield 3:</strong> Backed up into the <strong>5TB Google Drive Vault</strong>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-title">🔒 Why Security Matters: Zero-Knowledge Passwords</div>
+        When a user creates a password on SAFE bd, you as the owner cannot see their plaintext password. The system passes it through an algorithm called <strong>PBKDF2</strong>, which turns <code>"MyPassword123"</code> into an irreversible 64-character hash: <code>e8b4c9...</code>. Even if a cyber-attacker stole the database, citizen passwords cannot be read!
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-left">SAFE bd Founder's Primer • Understanding Code &amp; Systems</div>
+      <div class="footer-page">Page 3 of 4</div>
+    </div>
+  </div>
+
+  <!-- ==================== PAGE 4: FOUNDER'S CHEATSHEET ==================== -->
+  <div class="page">
+    <div>
+      <div class="header">
+        <div class="header-title">Module 3: The Founder's Technical Dictionary</div>
+        <div class="header-meta">SAFE bd Architecture Series • Page 4 of 4</div>
+      </div>
+
+      <div class="section" style="margin-bottom: 6px;">
+        <div class="section-title">10 Tech Terms You Will Hear in Meetings (Explained Simply)</div>
+        
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 22%;">Technical Term</th>
+                <th style="width: 38%;">What It Actually Means</th>
+                <th style="width: 40%;">How to Use It in Conversation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>API</strong><br>(Application Programming Interface)</td>
+                <td>A digital messenger that takes requests from a phone and delivers them to a server, then brings the response back.</td>
+                <td><em>"Our mobile app communicates with 999 dispatchers through secure REST APIs."</em></td>
+              </tr>
+              <tr>
+                <td><strong>WebSocket</strong></td>
+                <td>A continuous two-way live phone line between the server and the phone, instead of hanging up after each message.</td>
+                <td><em>"We use WebSockets so emergency location pings stream in sub-50 milliseconds."</em></td>
+              </tr>
+              <tr>
+                <td><strong>PostgreSQL</strong></td>
+                <td>An enterprise-grade, indestructible cloud database engine that stores data in structured SQL tables.</td>
+                <td><em>"All citizen accounts and emergency contacts are secured inside a managed PostgreSQL database."</em></td>
+              </tr>
+              <tr>
+                <td><strong>PWA</strong><br>(Progressive Web App)</td>
+                <td>A website engineered so well that it can be installed on an Android or iPhone like an app from the Play Store.</td>
+                <td><em>"SAFE bd is built as an offline-resilient PWA, requiring zero heavy downloads."</em></td>
+              </tr>
+              <tr>
+                <td><strong>Render</strong></td>
+                <td>The cloud hosting company that runs your backend Node.js server 24 hours a day, 365 days a year.</td>
+                <td><em>"Our backend service is hosted on Render's cloud infrastructure in Singapore."</em></td>
+              </tr>
+              <tr>
+                <td><strong>GitHub</strong></td>
+                <td>A secure cloud vault for code files with complete history tracking and version control.</td>
+                <td><em>"Our codebase is version-controlled on GitHub and protected by automated security checks."</em></td>
+              </tr>
+              <tr>
+                <td><strong>Bearer Token</strong></td>
+                <td>A digital VIP wristband given to a user when they log in. Proves identity without asking for the password again.</td>
+                <td><em>"All emergency evidence requests require a cryptographically signed Bearer token."</em></td>
+              </tr>
+              <tr>
+                <td><strong>IDOR Defense</strong></td>
+                <td>A security mechanism ensuring Citizen A can never access or modify Citizen B’s emergency contacts.</td>
+                <td><em>"Our API passed 10/10 automated penetration tests, including strict IDOR defense."</em></td>
+              </tr>
+              <tr>
+                <td><strong>Latency</strong></td>
+                <td>The delay between clicking a button on the phone and the server receiving it (measured in milliseconds).</td>
+                <td><em>"Our telemetry payload is under 15 KB, keeping mobile data latency under 100ms."</em></td>
+              </tr>
+              <tr>
+                <td><strong>CAD Console</strong><br>(Computer-Aided Dispatch)</td>
+                <td>The live dashboard used by police officers and 999 operators to see incoming emergencies on a map.</td>
+                <td><em>"SAFE bd includes a dedicated 999 CAD Dispatcher Console for law enforcement."</em></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section" style="margin-bottom: 6px;">
+        <div class="section-title emerald">How to Speak to Engineers &amp; Government Officials</div>
+        <div class="grid-2">
+          <div class="card emerald" style="padding: 6px 8px;">
+            <div class="card-title" style="font-size: 8.2pt;">When Speaking to Government Officials:</div>
+            <div class="card-body" style="font-size: 7.4pt; line-height: 1.35;">
+              Focus on <strong>outcomes, resilience, and sovereignty</strong>:<br>
+              • <em>"The system works silently when a victim cannot speak."</em><br>
+              • <em>"Evidence is preserved in the cloud even if the phone is destroyed."</em><br>
+              • <em>"The platform operates offline and supports direct 999 CAD integration."</em>
+            </div>
+          </div>
+
+          <div class="card blue" style="padding: 6px 8px;">
+            <div class="card-title" style="font-size: 8.2pt;">When Speaking to Software Engineers:</div>
+            <div class="card-body" style="font-size: 7.4pt; line-height: 1.35;">
+              Focus on <strong>architecture, decoupling, and security</strong>:<br>
+              • <em>"We have a decoupled architecture: Node.js web tier, Supabase PostgreSQL, and Google Drive BLOB vault."</em><br>
+              • <em>"All citizen endpoints enforce strict JWT Bearer token authentication."</em><br>
+              • <em>"State persistence is triple-shielded across local cache and cloud database."</em>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout tip" style="margin-top: 4px; padding: 6px 10px;">
+        <div class="callout-title" style="font-size: 8.2pt;">🏆 Founder's Closing Rule:</div>
+        <div style="font-size: 7.8pt;">
+          You don't need to write every line of code to be a great tech founder. Steve Jobs and Brian Chesky (Airbnb) weren't the primary programmers of their platforms—their genius was understanding what the software does, why it matters to the user, and ensuring the architecture is built to win. You now understand the full blueprint of SAFE bd.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-left">SAFE bd Founder's Primer • Official Reference Guidebook</div>
+      <div class="footer-page">Page 4 of 4</div>
+    </div>
+  </div>
+
+</body>
+</html>
