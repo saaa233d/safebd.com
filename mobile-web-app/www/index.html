@@ -3626,20 +3626,24 @@
             const existingIds = new Set(liveApprovedPosts.map(p => p.id));
             serverPosts.forEach(p => { if (!existingIds.has(p.id)) liveApprovedPosts.push(p); });
           } else {
-            // Intelligent Merge: Preserve all server posts + any local posts created on this phone,
-            // while preserving any newly submitted local comments if server sync is still in flight
-            const mergedMap = new Map();
-            serverPosts.forEach(p => {
-              if (p && p.id) {
-                const existing = liveApprovedPosts.find(lp => lp && lp.id === p.id);
-                if (existing && Array.isArray(existing.comments) && existing.comments.length > (p.comments || []).length) {
-                  p.comments = existing.comments;
+            // Intelligent Merge: Server is the authoritative source of truth across all profiles!
+            // Preserve newer local comments if cloud sync is momentarily in flight.
+            const mergedPosts = serverPosts.map(sp => {
+              if (sp && sp.id) {
+                const localExisting = liveApprovedPosts.find(lp => lp && lp.id === sp.id);
+                if (localExisting && Array.isArray(localExisting.comments) && localExisting.comments.length > (sp.comments || []).length) {
+                  const existingCommentIds = new Set((sp.comments || []).map(c => c.id));
+                  localExisting.comments.forEach(c => {
+                    if (!existingCommentIds.has(c.id)) {
+                      if (!Array.isArray(sp.comments)) sp.comments = [];
+                      sp.comments.push(c);
+                    }
+                  });
                 }
-                mergedMap.set(p.id, p);
               }
+              return sp;
             });
-            liveApprovedPosts.forEach(p => { if (p && p.id && !mergedMap.has(p.id)) mergedMap.set(p.id, p); });
-            liveApprovedPosts = Array.from(mergedMap.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+            liveApprovedPosts = mergedPosts;
           }
 
           feedPage = page;
@@ -3961,9 +3965,9 @@
 
     function canDeletePost(p) {
       if (!p) return false;
-      if (currentUser && (currentUser.isAdmin || currentUser.isFounder || (currentUser.name && currentUser.name.toUpperCase().includes('SAAD RIZWAN')))) return true;
-      if (currentUser && currentUser.phone && p.authorPhone) {
-        const cPhone = String(currentUser.phone).replace(/\D/g, '').slice(-10);
+      const cPhone = currentUser && currentUser.phone ? String(currentUser.phone).replace(/\D/g, '').slice(-10) : '';
+      if (currentUser && (currentUser.isAdmin || currentUser.isFounder || cPhone === '1316750712' || (currentUser.name && currentUser.name.toUpperCase().includes('SAAD RIZWAN')))) return true;
+      if (cPhone && p.authorPhone) {
         const aPhone = String(p.authorPhone).replace(/\D/g, '').slice(-10);
         if (cPhone && aPhone && cPhone === aPhone) return true;
       }
@@ -3976,8 +3980,11 @@
       container.innerHTML = '';
       updatePendingBadge();
 
-      // Live Public Feed: STRICTLY SHOWS ONLY APPROVED POSTS
-      const postsToRender = liveApprovedPosts;
+      // Live Public Feed: Filter by active tab (All Feeds vs Citizen Reports)
+      let postsToRender = liveApprovedPosts;
+      if (activeFeedFilter === 'community') {
+        postsToRender = liveApprovedPosts.filter(p => p.type === 'community' || (!p.isFounder && !(p.author && p.author.toUpperCase().includes('SAAD RIZWAN'))));
+      }
 
       if (postsToRender.length === 0) {
         container.innerHTML = `
@@ -6219,6 +6226,7 @@
             localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
             loadUserContacts(currentUser);
             setLoggedInState();
+            renderCommunityPosts();
           } else {
             throw new Error("INVALID_PAYLOAD");
           }
@@ -6421,6 +6429,7 @@
           if (data.token) localStorage.setItem('safe_bd_token', data.token);
           loadUserContacts(currentUser);
           setLoggedInState();
+          renderCommunityPosts();
 
           document.getElementById('view-auth-forms').style.display = 'none';
           document.getElementById('view-profile-active').style.display = 'block';
@@ -6692,40 +6701,83 @@
       if (!confirm("🚨 Are you sure you want to permanently delete this post?\n\nThis will remove it completely from the database and live awareness feeds.")) {
         return;
       }
-      const token = localStorage.getItem('safe_bd_token') || '';
+
+      // Instant optimistic UI response (zero lag!)
+      const targetBtn = event && event.target ? (event.target.closest('.post-action-btn') || event.target.closest('button')) : null;
+      const cardEl = event && event.target ? event.target.closest('.feed-card') : null;
+      if (targetBtn) {
+        targetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+        targetBtn.style.pointerEvents = 'none';
+      }
+      if (cardEl) {
+        cardEl.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+        cardEl.style.opacity = '0.35';
+        cardEl.style.pointerEvents = 'none';
+      }
+
+      // Immediately purge from in-memory arrays and local storage cache
+      liveApprovedPosts = liveApprovedPosts.filter(p => p.id !== id);
+      if (Array.isArray(adminPendingPostsList)) {
+        adminPendingPostsList = adminPendingPostsList.filter(p => p.id !== id);
+      }
+      if (Array.isArray(adminAllPostsList)) {
+        adminAllPostsList = adminAllPostsList.filter(p => p.id !== id);
+      }
+      saveFeedToLocalStorage();
+
+      const token = localStorage.getItem('safe_bd_token') || sessionStorage.getItem('safe_bd_token') || (currentUser && currentUser.token) || '';
       try {
         const res = await fetch(`${API_BASE}/api/posts/${encodeURIComponent(id)}/delete`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
           },
           body: JSON.stringify({
             adminName: currentUser ? currentUser.name : 'Administrator',
             phone: currentUser ? currentUser.phone : ''
           })
         });
-        const data = await res.json();
-        if (data && data.success) {
-          liveApprovedPosts = liveApprovedPosts.filter(p => p.id !== id);
-          if (Array.isArray(adminPendingPostsList)) {
-            adminPendingPostsList = adminPendingPostsList.filter(p => p.id !== id);
+        const data = await res.json().catch(() => ({}));
+
+        // Both success: true AND 404 (already deleted) confirm post is gone
+        if (data && (data.success || res.status === 404)) {
+          if (cardEl) {
+            cardEl.style.transform = 'scale(0.95)';
+            cardEl.style.opacity = '0';
+            setTimeout(() => {
+              if (cardEl && cardEl.parentNode) cardEl.parentNode.removeChild(cardEl);
+              renderCommunityPosts();
+            }, 250);
+          } else {
+            renderCommunityPosts();
           }
-          if (Array.isArray(adminAllPostsList)) {
-            adminAllPostsList = adminAllPostsList.filter(p => p.id !== id);
-          }
-          try {
-            localStorage.setItem('safe_bd_approved_posts', JSON.stringify(liveApprovedPosts.slice(0, 50)));
-          } catch(e) {}
-          renderCommunityPosts();
           if (typeof renderAdminPendingPosts === 'function') renderAdminPendingPosts();
           if (typeof renderAdminAllPosts === 'function') renderAdminAllPosts();
-          alert("✅ Post has been permanently deleted from the system.");
         } else {
-          alert("⚠️ Failed to delete post: " + (data ? data.message : "Unknown error"));
+          // Revert if rejected
+          if (cardEl) {
+            cardEl.style.opacity = '1';
+            cardEl.style.pointerEvents = 'auto';
+          }
+          if (targetBtn) {
+            targetBtn.innerHTML = '<i class="fas fa-trash-can"></i> Delete';
+            targetBtn.style.pointerEvents = 'auto';
+          }
+          alert("⚠️ Failed to delete post: " + (data ? (data.message || data.error) : "Server rejected request."));
+          fetchLiveFeedPosts(1, false);
         }
       } catch (err) {
-        alert("⚠️ Error deleting post: " + err.message);
+        if (cardEl) {
+          cardEl.style.opacity = '1';
+          cardEl.style.pointerEvents = 'auto';
+        }
+        if (targetBtn) {
+          targetBtn.innerHTML = '<i class="fas fa-trash-can"></i> Delete';
+          targetBtn.style.pointerEvents = 'auto';
+        }
+        alert("⚠️ Network error deleting post: " + err.message);
+        fetchLiveFeedPosts(1, false);
       }
     }
     window.deletePost = deletePostAdmin;
@@ -8173,6 +8225,7 @@
 
       // Revert contacts to Father, Mother, Guardian with 01XXXXXXXXX
       loadUserContacts(null);
+      renderCommunityPosts();
 
       const adminNavBtn = document.getElementById('nav-btn-admin');
       const adminProfileBtn = document.getElementById('admin-portal-profile-btn');
