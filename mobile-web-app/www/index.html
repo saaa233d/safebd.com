@@ -2573,18 +2573,89 @@
     let defaultContacts = getDefaultContacts();
     let contacts = getDefaultContacts();
 
+    function syncContactsToServer(userKey, contactList) {
+      const token = localStorage.getItem('safe_bd_token');
+      if (!token || !userKey || !Array.isArray(contactList)) return;
+      fetch(`${API_BASE}/api/user/contacts`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          phone: userKey,
+          token: token,
+          contacts: contactList
+        })
+      }).catch(() => {});
+    }
+
     function loadUserContacts(user) {
-      if (user && Array.isArray(user.contacts) && user.contacts.length) {
-        contacts = user.contacts;
-      } else if (user) {
-        const userKey = user && user.phone ? String(user.phone).replace(/\D/g, '').slice(-10) : '';
-        const cached = userKey ? localStorage.getItem('safe_bd_contacts_' + userKey) : null;
-        contacts = cached ? JSON.parse(cached) : getDefaultContacts();
-      } else {
-        contacts = getDefaultContacts();
+      let loaded = null;
+      const userKey = user && user.phone ? String(user.phone).replace(/\D/g, '').slice(-10) : (localStorage.getItem('safe_bd_last_phone') || '');
+
+      // 1. If user object from server has actual phone numbers configured, use them
+      if (user && Array.isArray(user.contacts) && user.contacts.some(c => c && c.phone && String(c.phone).trim() && String(c.phone) !== '01XXXXXXXXX')) {
+        loaded = user.contacts;
       }
+
+      // 2. Check user-specific localStorage cache if server was empty or on restart
+      if (!loaded && userKey) {
+        try {
+          const cachedUser = localStorage.getItem('safe_bd_contacts_' + userKey);
+          if (cachedUser) {
+            const parsed = JSON.parse(cachedUser);
+            if (Array.isArray(parsed) && parsed.some(c => c && c.phone && String(c.phone).trim() && String(c.phone) !== '01XXXXXXXXX')) {
+              loaded = parsed;
+              if (user) {
+                user.contacts = loaded;
+                syncContactsToServer(userKey, loaded);
+              }
+            }
+          }
+        } catch(e) {}
+      }
+
+      // 3. Fallback to universal device-level localStorage cache (persists across reloads/sessions)
+      if (!loaded) {
+        try {
+          const universalCached = localStorage.getItem('safe_bd_contacts');
+          if (universalCached) {
+            const parsed = JSON.parse(universalCached);
+            if (Array.isArray(parsed) && parsed.some(c => c && c.phone && String(c.phone).trim() && String(c.phone) !== '01XXXXXXXXX')) {
+              loaded = parsed;
+              if (userKey) {
+                localStorage.setItem('safe_bd_contacts_' + userKey, JSON.stringify(loaded));
+                if (user) {
+                  user.contacts = loaded;
+                  syncContactsToServer(userKey, loaded);
+                }
+              }
+            }
+          }
+        } catch(e) {}
+      }
+
+      // 4. Default contacts template if nothing was ever configured
+      if (!loaded || !Array.isArray(loaded) || loaded.length === 0) {
+        loaded = getDefaultContacts();
+      }
+
+      contacts = loaded;
+
+      // Always save to universal device cache so it never vanishes
+      try {
+        localStorage.setItem('safe_bd_contacts', JSON.stringify(contacts));
+        if (userKey) {
+          localStorage.setItem('safe_bd_contacts_' + userKey, JSON.stringify(contacts));
+        }
+      } catch(e) {}
+
       if (typeof renderContactsList === 'function') {
         renderContactsList();
+      }
+      if (typeof updateProfileCircleUI === 'function') {
+        updateProfileCircleUI();
       }
       if (typeof loadUserWalkSession === 'function') {
         loadUserWalkSession(user);
@@ -4539,17 +4610,29 @@
         c.phone = cleanPhone; // Empty string displays as 01XXXXXXXXX
         c.initial = newName.charAt(0).toUpperCase();
 
+        // ALWAYS save to universal device cache immediately so it never vanishes
+        try {
+          localStorage.setItem('safe_bd_contacts', JSON.stringify(contacts));
+        } catch(e) {}
+
         renderContactsList();
         if (typeof updateProfileCircleUI === 'function') {
           updateProfileCircleUI();
         }
 
+        const userKey = currentUser && currentUser.phone ? String(currentUser.phone).replace(/\D/g, '').slice(-10) : (localStorage.getItem('safe_bd_last_phone') || '');
+        if (userKey) {
+          try {
+            localStorage.setItem('safe_bd_contacts_' + userKey, JSON.stringify(contacts));
+          } catch(e) {}
+        }
+
         // If user is logged in, upload and save to their profile database!
         if (currentUser) {
-          const userKey = (currentUser.phone || '').replace(/\D/g, '').slice(-10);
-          localStorage.setItem('safe_bd_contacts_' + userKey, JSON.stringify(contacts));
           currentUser.contacts = contacts;
-          localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+          try {
+            localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+          } catch(e) {}
 
           const token = localStorage.getItem('safe_bd_token');
           fetch(`${API_BASE}/api/user/contacts`, {
@@ -6069,27 +6152,39 @@
       contacts[1] = { id: 'c2', name: 'Mother', phone: mCheck.clean, initial: 'M' };
       contacts[2] = { id: 'c3', name: 'Guardian', phone: gCheck.clean, initial: 'G' };
 
+      // ALWAYS save to universal device cache immediately so contacts NEVER disappear!
+      try {
+        localStorage.setItem('safe_bd_contacts', JSON.stringify(contacts));
+      } catch(e) {}
+
       renderContactsList();
       updateProfileCircleUI();
+
+      const userKey = currentUser && currentUser.phone ? String(currentUser.phone).replace(/\D/g, '').slice(-10) : (localStorage.getItem('safe_bd_last_phone') || '');
+      if (userKey) {
+        try {
+          localStorage.setItem('safe_bd_contacts_' + userKey, JSON.stringify(contacts));
+        } catch(e) {}
+      }
 
       const saveBtn = document.getElementById('btn-save-quick-contacts');
       if (saveBtn) {
         saveBtn.disabled = true;
-        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing to 5TB Cloud Vault...';
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving Contacts...';
       }
 
       if (currentUser) {
         currentUser.contacts = contacts;
-        const userKey = (currentUser.phone || '').replace(/\D/g, '').slice(-10);
-        localStorage.setItem('safe_bd_contacts_' + userKey, JSON.stringify(contacts));
-        localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+        try {
+          localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+        } catch(e) {}
 
         const token = localStorage.getItem('safe_bd_token');
         fetch(`${API_BASE}/api/user/contacts`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': token ? `Bearer ${token}` : ''
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
           },
           body: JSON.stringify({
             phone: userKey,
@@ -6105,7 +6200,7 @@
           }
           if (data.success && data.contacts) {
             currentUser.contacts = data.contacts;
-            localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+            try { localStorage.setItem('safe_bd_user', JSON.stringify(currentUser)); } catch(e) {}
           }
           toggleQuickContactsEditor();
           alert("✅ Emergency Circle Updated & Synced!\n\nFather, Mother, and Guardian contact records have been secured to your profile and backed up to the 5TB Google Drive Vault.");
@@ -6116,7 +6211,7 @@
             saveBtn.innerHTML = '<i class="fas fa-cloud-arrow-up"></i> Save &amp; Sync to 5TB Cloud Vault';
           }
           toggleQuickContactsEditor();
-          alert("⚠️ Contacts saved locally. Will mirror to 5TB Google Drive Vault on next connection.");
+          alert("✅ Emergency Contacts Saved Locally!\n\nContacts are saved to this device and will sync to the Cloud Vault on next connection.");
         });
       } else {
         if (saveBtn) {
@@ -6124,7 +6219,7 @@
           saveBtn.innerHTML = '<i class="fas fa-cloud-arrow-up"></i> Save &amp; Sync to 5TB Cloud Vault';
         }
         toggleQuickContactsEditor();
-        alert("✅ Emergency Circle updated for this session!\nTip: Unlock or create your profile to permanently secure records to the 5TB Cloud Vault.");
+        alert("✅ Emergency Circle Updated & Saved!\n\nFather, Mother, and Guardian contact records are permanently saved to this device.");
       }
     }
 
