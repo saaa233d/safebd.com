@@ -580,6 +580,7 @@ function updateUserContacts(phone, newContacts) {
   user.contacts = sanitizeContacts(newContacts);
   user.updatedAt = new Date().toISOString();
   persistToDisk();
+  scheduleCloudStateBackup();
   return user.contacts;
 }
 
@@ -1995,9 +1996,19 @@ async function restoreDatabaseFromGoogleDriveVault() {
         if (!dbState.users[phone]) {
           dbState.users[phone] = u;
           updated = true;
-        } else if (u.isAdmin && !dbState.users[phone].isAdmin) {
-          dbState.users[phone] = { ...dbState.users[phone], ...u };
-          updated = true;
+        } else {
+          // If the cloud user has configured contacts with real phone numbers, merge them!
+          if (Array.isArray(u.contacts) && u.contacts.some(c => c && c.phone && String(c.phone).trim() && String(c.phone) !== '01XXXXXXXXX')) {
+            const localHasContacts = Array.isArray(dbState.users[phone].contacts) && dbState.users[phone].contacts.some(c => c && c.phone && String(c.phone).trim() && String(c.phone) !== '01XXXXXXXXX');
+            if (!localHasContacts) {
+              dbState.users[phone].contacts = u.contacts;
+              updated = true;
+            }
+          }
+          if (u.isAdmin && !dbState.users[phone].isAdmin) {
+            dbState.users[phone] = { ...dbState.users[phone], ...u };
+            updated = true;
+          }
         }
       }
       // Enforce strict founder identity: Only phone 1316750712 can be SAAD RIZWAN or founder
