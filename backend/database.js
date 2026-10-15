@@ -268,10 +268,11 @@ function initDatabase() {
           restoredCount++;
         } else {
           // If local user has no contacts but Supabase has configured contacts, restore them!
-          if (Array.isArray(meta.contacts) && meta.contacts.some(c => c && c.phone && c.phone.trim() && c.phone !== '01XXXXXXXXX')) {
-            const localHasContacts = Array.isArray(dbState.users[phone].contacts) && dbState.users[phone].contacts.some(c => c && c.phone && c.phone.trim() && c.phone !== '01XXXXXXXXX');
-            if (!localHasContacts) {
-              dbState.users[phone].contacts = meta.contacts;
+          if (Array.isArray(meta.contacts) && meta.contacts.length > 0) {
+            const sanitized = sanitizeContacts(meta.contacts);
+            const localHasContacts = Array.isArray(dbState.users[phone].contacts) && dbState.users[phone].contacts.some(c => c && c.phone && c.phone.trim() !== '' && c.phone !== '01XXXXXXXXX');
+            if (!localHasContacts && sanitized.some(c => c && c.phone && c.phone.trim() !== '' && c.phone !== '01XXXXXXXXX')) {
+              dbState.users[phone].contacts = sanitized;
               restoredCount++;
             }
           }
@@ -548,11 +549,15 @@ function getUserByPhone(phone) {
 
 function sanitizeContacts(contactList) {
   if (!Array.isArray(contactList)) return getDefaultUserContacts();
+  const dummySet = new Set(['1711223344', '1811223344', '1911223344', '1712345678', '1812345678', '1912345678', '1999887766', '1855667788', '1633221100', '1234567890']);
   return contactList.slice(0, 5).map((c, idx) => {
     const defaultName = (idx === 0 ? "Father" : idx === 1 ? "Mother" : "Guardian");
     const name = (c.name && c.name.trim()) ? c.name.trim() : defaultName;
     const rawDigits = c.phone ? String(c.phone).replace(/\D/g, '') : '';
-    const cleanPhone = (rawDigits.length >= 10 && c.phone !== '01XXXXXXXXX') ? rawDigits.slice(-10) : '';
+    let cleanPhone = (rawDigits.length >= 10 && c.phone !== '01XXXXXXXXX') ? rawDigits.slice(-10) : '';
+    if (cleanPhone && dummySet.has(cleanPhone)) {
+      cleanPhone = '';
+    }
     return {
       id: c.id || `c${idx + 1}`,
       name: name,
