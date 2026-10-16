@@ -1553,7 +1553,7 @@
       position: absolute;
       inset: 0;
       background: rgba(0, 0, 0, 0.88);
-      z-index: 150;
+      z-index: 2500;
       justify-content: center;
       align-items: flex-end;
       backdrop-filter: blur(10px);
@@ -1797,7 +1797,7 @@
       position: fixed;
       bottom: 76px;
       left: 14px;
-      z-index: 998;
+      z-index: 25;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -1811,6 +1811,26 @@
       cursor: pointer;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       user-select: none;
+    }
+    @media (min-width: 600px) {
+      .shurokha-fab {
+        left: calc(50% - 220px + 14px);
+        bottom: calc(50% - 430px + 76px);
+      }
+    }
+    /* Strictly suppress shurokhaAI FAB whenever any modal, sheet, or overlay is open */
+    body:has(.contact-modal-backdrop.open) .shurokha-fab,
+    body:has(.auth-modal-backdrop.open) .shurokha-fab,
+    body:has(.edit-contact-modal-backdrop.open) .shurokha-fab,
+    body:has(.sos-modal-backdrop.open) .shurokha-fab,
+    body:has(.author-profile-modal-backdrop.open) .shurokha-fab,
+    body:has(.shurokha-modal-backdrop.open) .shurokha-fab,
+    body:has(#evidence-player-modal.open) .shurokha-fab,
+    body:has(#evidence-player-modal[style*="display: flex"]) .shurokha-fab {
+      display: none !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      visibility: hidden !important;
     }
     .shurokha-fab:hover {
       transform: translateY(-2px) scale(1.03);
@@ -4583,6 +4603,7 @@
       `;
 
       modal.classList.add('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
       if (isVid) {
         setTimeout(() => {
           const v = document.getElementById('evidence-modal-video');
@@ -4599,6 +4620,7 @@
           try { v.pause(); v.src = ''; } catch(err) {}
         }
         if (modal) modal.classList.remove('open');
+        if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
       }
     }
 
@@ -4794,12 +4816,14 @@
         `;
       }
       modal.classList.add('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
     }
 
     function closeAuthorProfileModal(e) {
       if (!e || e.target.id === 'author-profile-modal' || e.target.classList.contains('modal-close-x') || e.target.closest('.modal-close-x') || e.target.classList.contains('btn-founder-action') || e.target.closest('.btn-founder-action')) {
         const modal = document.getElementById('author-profile-modal');
         if (modal) modal.classList.remove('open');
+        if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
       }
     }
 
@@ -5141,12 +5165,14 @@
       const isConfigured = c.phone && String(c.phone).trim() !== '' && c.phone !== '01XXXXXXXXX' && !isDummyPhone(c.phone);
       document.getElementById('edit-contact-phone').value = isConfigured ? String(c.phone).replace(/\D/g, '').slice(-10) : '';
       document.getElementById('edit-contact-modal').classList.add('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
       document.getElementById('edit-contact-name').focus();
     }
 
     function closeEditContactModal(e) {
       if (!e || e.target.id === 'edit-contact-modal' || e.target.classList.contains('modal-close-x') || e.target.closest('.modal-close-x') || e.target.classList.contains('btn-close-sheet')) {
         document.getElementById('edit-contact-modal').classList.remove('open');
+        if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
       }
     }
 
@@ -5247,11 +5273,13 @@
       document.getElementById('sheet-contact-name').innerText = c.name;
       document.getElementById('sheet-contact-phone').innerText = displayPhone;
       document.getElementById('contact-action-sheet').classList.add('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
     }
 
     function closeContactSheet(e) {
       if (!e || e.target.id === 'contact-action-sheet' || e.target.classList.contains('btn-close-sheet') || e.target.classList.contains('modal-close-x') || e.target.closest('.modal-close-x')) {
         document.getElementById('contact-action-sheet').classList.remove('open');
+        if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
       }
     }
 
@@ -6240,6 +6268,7 @@
       sosCount = 5;
       document.getElementById('sos-countdown-val').innerText = sosCount;
       document.getElementById('sos-modal').classList.add('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
 
       if (sosTimer) clearInterval(sosTimer);
       sosTimer = setInterval(() => {
@@ -6255,11 +6284,13 @@
     function abortEmergencySOS() {
       clearInterval(sosTimer);
       document.getElementById('sos-modal').classList.remove('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
     }
 
     function finishEmergencySOS() {
       clearInterval(sosTimer);
       document.getElementById('sos-modal').classList.remove('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
 
       // 1. Dispatch Emergency Signal & Live GPS to 999 CAD Dispatcher
       const userName = currentUser ? (currentUser.name || "Verified Citizen") : "Citizen in Distress";
@@ -6593,6 +6624,7 @@
           }
         }, 150);
       }
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
     }
 
     /* ----------------------------------------------------
@@ -6602,6 +6634,7 @@
       const modal = document.getElementById('auth-modal');
       if (!modal) return;
       modal.classList.add('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
       if (currentUser) {
         document.getElementById('view-auth-forms').style.display = 'none';
         document.getElementById('view-profile-active').style.display = 'block';
@@ -6943,6 +6976,7 @@
     function closeAuthModal(e) {
       if (!e || e.target.id === 'auth-modal' || e.target.classList.contains('modal-close-x') || e.target.closest('.modal-close-x')) {
         document.getElementById('auth-modal').classList.remove('open');
+        if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
       }
     }
 
@@ -8446,6 +8480,7 @@
       `;
 
       modal.classList.add('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
       setTimeout(() => {
         const v = document.getElementById('evidence-modal-video');
         if (!v) return;
@@ -9210,10 +9245,48 @@
     let shurokhaSpeechRecognition = null;
     let isShurokhaListening = false;
 
+    // Helper: Enforce that shurokhaAI FAB ONLY appears on the SOS screen and strictly stays beneath/hidden when ANY modal or sheet is open
+    function updateShurokhaFabVisibility() {
+      const fab = document.getElementById('shurokha-ai-trigger');
+      if (!fab) return;
+      const sosScreen = document.getElementById('screen-sos');
+      const isSosActive = sosScreen && (sosScreen.classList.contains('active') || (sosScreen.style.display !== 'none' && getComputedStyle(sosScreen).display !== 'none'));
+      const hasAnyModalOpen = !!document.querySelector(
+        '.contact-modal-backdrop.open, .auth-modal-backdrop.open, .edit-contact-modal-backdrop.open, .sos-modal-backdrop.open, .author-profile-modal-backdrop.open, .shurokha-modal-backdrop.open, #evidence-player-modal.open'
+      );
+      if (isSosActive && !hasAnyModalOpen) {
+        fab.style.display = 'flex';
+        fab.style.visibility = 'visible';
+        fab.style.opacity = '1';
+        fab.style.pointerEvents = 'auto';
+      } else {
+        fab.style.display = 'none';
+        fab.style.visibility = 'hidden';
+        fab.style.opacity = '0';
+        fab.style.pointerEvents = 'none';
+      }
+    }
+
+    try {
+      if (typeof MutationObserver !== 'undefined') {
+        const shurokhaObserver = new MutationObserver(() => {
+          updateShurokhaFabVisibility();
+        });
+        if (document.body) {
+          shurokhaObserver.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class', 'style'] });
+        } else {
+          document.addEventListener('DOMContentLoaded', () => {
+            shurokhaObserver.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class', 'style'] });
+          });
+        }
+      }
+    } catch (e) {}
+
     function openShurokhaChat() {
       const modal = document.getElementById('shurokha-ai-modal');
       if (modal) {
         modal.classList.add('open');
+        updateShurokhaFabVisibility();
         setTimeout(() => {
           const input = document.getElementById('shurokha-input');
           if (input) input.focus();
@@ -9231,6 +9304,7 @@
         const mic = document.getElementById('shurokha-voice-btn');
         if (mic) mic.classList.remove('listening');
       }
+      updateShurokhaFabVisibility();
     }
 
     function closeShurokhaChatOnBackdrop(e) {
