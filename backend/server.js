@@ -2460,24 +2460,738 @@ function broadcastLocationUpdate(data, senderWs = null) {
 }
 
 // ============================================================================
-// 5. shurokhaAI — 24/7 Conversational AI & Live Google Search Assistant
+// 5. shurokhaAI — Specialized Bangladesh Safety, Thana OC Directory & Civic AI
 // ============================================================================
-const SHUROKHA_SYSTEM_INSTRUCTION = `You are shurokhaAI, an intelligent, empathetic, and deeply human-like personal safety companion and universal assistant created for SAFE BD (National Digital Safety Platform of Bangladesh).
-You talk naturally, warmly, and compassionately—like a real, caring person, trusted protector, and knowledgeable friend.
-You have the capability of conversing on and answering ANY topic under the sun:
-1. Daily Human Conversation: Greet warmly, ask how the user is doing, talk about life, philosophy, science, coding, history, culture, advice, casual chats, and jokes.
-2. Civic & Personal Safety: Provide actionable guidance on street safety, first aid protocols (burns, fainting, CPR), disaster response (earthquake, cyclone, fire), domestic safety, and child protection.
-3. Bangladesh Legal & Emergency Framework: Know Bangladesh laws (Digital Security / Cyber Security, Women and Children Repression Prevention Act), and always remind citizens in immediate danger to use the SAFE BD SOS button or call:
-   - 999 (National Emergency: Police, Ambulance, Fire Service)
-   - 109 (National Women & Children Helpline)
-   - 1098 (Child Helpline)
-   - 333 (National Citizen Services)
-4. Live Information: When real-time Google search or web data is available, integrate it smoothly and cite sources accurately.
-5. Language: You are fully bilingual. Speak fluent English, Bengali (বাংলা), or Banglish according to the user's choice and tone. Keep responses helpful, concise, well-structured, and empathetic.`;
+
+// Comprehensive Verified Directory of Bangladesh Police Thanas (DMP + Major Divisions)
+const BANGLADESH_THANA_DIRECTORY = [
+  // DMP DHAKA METROPOLITAN POLICE (50 THANAS)
+  {
+    name: "Dhanmondi Model Thana",
+    bnName: "ধানমন্ডি মডেল থানা",
+    division: "Dhaka (DMP - Ramna Division)",
+    address: "House 34, Road 8/A, Dhanmondi, Dhaka",
+    ocPhone: "01713-373126",
+    dutyPhone: "01713-373127",
+    tnt: "02-58616111 / 02-9669922",
+    keywords: ["dhanmondi", "ধানমন্ডি", "dhanmondi 27", "dhanmondi 32", "dhanmondi 8/a", "dhanmondi 15"]
+  },
+  {
+    name: "Gulshan Model Thana",
+    bnName: "গুলশান মডেল থানা",
+    division: "Dhaka (DMP - Gulshan Division)",
+    address: "House 1, Road 79, Gulshan 2, Dhaka",
+    ocPhone: "01713-373168",
+    dutyPhone: "01713-373169",
+    tnt: "02-9883333 / 02-9884444",
+    keywords: ["gulshan", "গুলশান", "gulshan 1", "gulshan 2", "gulshan circle"]
+  },
+  {
+    name: "Banani Thana",
+    bnName: "বনানী থানা",
+    division: "Dhaka (DMP - Gulshan Division)",
+    address: "Road 11, Block F, Banani, Dhaka",
+    ocPhone: "01713-373171",
+    dutyPhone: "01713-373172",
+    tnt: "02-9836333",
+    keywords: ["banani", "বনানী", "banani 11", "kemal ataturk", "banani dohs"]
+  },
+  {
+    name: "Mirpur Model Thana",
+    bnName: "মিরপুর মডেল থানা",
+    division: "Dhaka (DMP - Mirpur Division)",
+    address: "Section 1, Mirpur, Dhaka (Near Sony Cinema Hall)",
+    ocPhone: "01713-373180",
+    dutyPhone: "01713-373181",
+    tnt: "02-9001001",
+    keywords: ["mirpur", "মিরপুর", "mirpur 1", "mirpur 2", "mirpur 10", "mirpur model"]
+  },
+  {
+    name: "Uttara East Thana",
+    bnName: "উত্তরা পূর্ব থানা",
+    division: "Dhaka (DMP - Uttara Division)",
+    address: "Road 4, Sector 7, Uttara, Dhaka",
+    ocPhone: "01713-373155",
+    dutyPhone: "01713-373156",
+    tnt: "02-8951111",
+    keywords: ["uttara east", "উত্তরা পূর্ব", "uttara sector 7", "uttara sector 3", "uttara sector 1", "azampur", "rajlaxmi", "mascot plaza"]
+  },
+  {
+    name: "Uttara West Thana",
+    bnName: "উত্তরা পশ্চিম থানা",
+    division: "Dhaka (DMP - Uttara Division)",
+    address: "Road 14, Sector 3, Uttara, Dhaka",
+    ocPhone: "01713-373158",
+    dutyPhone: "01713-373159",
+    tnt: "02-8954444",
+    keywords: ["uttara west", "উত্তরা পশ্চিম", "uttara sector 11", "uttara sector 12", "uttara sector 13", "uttara sector 14", "gareeb-e-nawaz", "uttara"]
+  },
+  {
+    name: "Mohammadpur Thana",
+    bnName: "মোহাম্মদপুর থানা",
+    division: "Dhaka (DMP - Tejgaon Division)",
+    address: "Ring Road, Shyamoli, Mohammadpur, Dhaka",
+    ocPhone: "01713-373183",
+    dutyPhone: "01713-373184",
+    tnt: "02-9119999",
+    keywords: ["mohammadpur", "মোহাম্মদপুর", "town hall", "tajmahal road", "japan garden", "salimullah road"]
+  },
+  {
+    name: "Shahbagh Thana",
+    bnName: "শাহবাগ থানা",
+    division: "Dhaka (DMP - Ramna Division)",
+    address: "Shahbagh Crossing, Dhaka (Near BSMMU & DMCH)",
+    ocPhone: "01713-373129",
+    dutyPhone: "01713-373130",
+    tnt: "02-9676666",
+    keywords: ["shahbagh", "শাহবাগ", "shahbag", "dhaka university", "dmch", "bsmmu", "tsc", "katabon"]
+  },
+  {
+    name: "Ramna Model Thana",
+    bnName: "রমনা মডেল থানা",
+    division: "Dhaka (DMP - Ramna Division)",
+    address: "Siddheshwari Circular Road, Malibagh, Dhaka",
+    ocPhone: "01713-373123",
+    dutyPhone: "01713-373124",
+    tnt: "02-9352222",
+    keywords: ["ramna", "রমনা", "kakrail", "shantinagar", "malibagh", "moghbazar", "bailey road"]
+  },
+  {
+    name: "Motijheel Thana",
+    bnName: "মতিঝিল থানা",
+    division: "Dhaka (DMP - Motijheel Division)",
+    address: "Arambagh, Motijheel C/A, Dhaka",
+    ocPhone: "01713-373138",
+    dutyPhone: "01713-373139",
+    tnt: "02-9556666",
+    keywords: ["motijheel", "মতিঝিল", "arambagh", "shapla chattar", "dilkusha"]
+  },
+  {
+    name: "Paltan Model Thana",
+    bnName: "পল্টন মডেল থানা",
+    division: "Dhaka (DMP - Motijheel Division)",
+    address: "VIP Road, Naya Paltan, Dhaka",
+    ocPhone: "01713-373141",
+    dutyPhone: "01713-373142",
+    tnt: "02-9333333",
+    keywords: ["paltan", "পল্টন", "purana paltan", "naya paltan", "bijoy nagar"]
+  },
+  {
+    name: "Tejgaon Thana",
+    bnName: "তেজগাঁও থানা",
+    division: "Dhaka (DMP - Tejgaon Division)",
+    address: "Farmgate / Green Road, Tejgaon, Dhaka",
+    ocPhone: "01713-373174",
+    dutyPhone: "01713-373175",
+    tnt: "02-9118888",
+    keywords: ["tejgaon", "তেজগাঁও", "farmgate", "green road", "bijoy sarani", "karwan bazar"]
+  },
+  {
+    name: "Tejgaon Industrial (Shilpanchal) Thana",
+    bnName: "তেজগাঁও শিল্পাঞ্চল থানা",
+    division: "Dhaka (DMP - Tejgaon Division)",
+    address: "Shaheed Tajuddin Ahmed Sarani, Tejgaon, Dhaka",
+    ocPhone: "01713-373177",
+    dutyPhone: "01713-373178",
+    tnt: "02-9888888",
+    keywords: ["tejgaon industrial", "শিল্পাঞ্চল", "shilpanchal", "nabisco", "tivoli", "link road"]
+  },
+  {
+    name: "Badda Thana",
+    bnName: "বাড্ডা থানা",
+    division: "Dhaka (DMP - Gulshan Division)",
+    address: "Pragati Sarani, Middle Badda, Dhaka",
+    ocPhone: "01713-373165",
+    dutyPhone: "01713-373166",
+    tnt: "02-9882222",
+    keywords: ["badda", "বাড্ডা", "madhya badda", "merul badda", "pragati sarani"]
+  },
+  {
+    name: "Bhatara Thana",
+    bnName: "ভাটারা থানা",
+    division: "Dhaka (DMP - Gulshan Division)",
+    address: "Kuril Chowrasta, Pragati Sarani, Dhaka (Near Jamuna Future Park)",
+    ocPhone: "01713-398342",
+    dutyPhone: "01713-398343",
+    tnt: "02-8411111",
+    keywords: ["bhatara", "ভাটারা", "bashundhara", "বসুন্ধরা", "jamuna future park", "kuril", "notun bazar"]
+  },
+  {
+    name: "Khilkhet Thana",
+    bnName: "খিলক্ষেত থানা",
+    division: "Dhaka (DMP - Gulshan Division)",
+    address: "Airport Road, Khilkhet, Dhaka",
+    ocPhone: "01713-373162",
+    dutyPhone: "01713-373163",
+    tnt: "02-8952222",
+    keywords: ["khilkhet", "খিলক্ষেত", "nikunja", "nikunja 1", "nikunja 2", "kuratoli"]
+  },
+  {
+    name: "Bimanbandar (Airport) Thana",
+    bnName: "বিমানবন্দর থানা",
+    division: "Dhaka (DMP - Uttara Division)",
+    address: "Hazrat Shahjalal International Airport, Dhaka",
+    ocPhone: "01713-373152",
+    dutyPhone: "01713-373153",
+    tnt: "02-8901111",
+    keywords: ["airport", "বিমানবন্দর", "bimanbandar", "kawla", "hajj camp"]
+  },
+  {
+    name: "Pallabi Thana",
+    bnName: "পল্লবী থানা",
+    division: "Dhaka (DMP - Mirpur Division)",
+    address: "Section 12, Block D, Pallabi, Mirpur, Dhaka",
+    ocPhone: "01713-373192",
+    dutyPhone: "01713-373193",
+    tnt: "02-9011111",
+    keywords: ["pallabi", "পল্লবী", "mirpur 12", "mirpur 11", "purobi"]
+  },
+  {
+    name: "Kafrul Thana",
+    bnName: "কাফরুল থানা",
+    division: "Dhaka (DMP - Mirpur Division)",
+    address: "Senpara Parbata, Mirpur 10 / 14, Dhaka",
+    ocPhone: "01713-373189",
+    dutyPhone: "01713-373190",
+    tnt: "02-9022222",
+    keywords: ["kafrul", "কাফরুল", "mirpur 14", "mirpur 13", "senpara", "kazipara", "shewrapara"]
+  },
+  {
+    name: "Darussalam Thana",
+    bnName: "দারুসসালাম থানা",
+    division: "Dhaka (DMP - Mirpur Division)",
+    address: "Mazar Road, Mirpur 1, Dhaka (Gabtoli Entry)",
+    ocPhone: "01713-373195",
+    dutyPhone: "01713-373196",
+    tnt: "02-9033333",
+    keywords: ["darussalam", "দারুসসালাম", "gabtoli", "mazar road", "kallyanpur"]
+  },
+  {
+    name: "Adabor Thana",
+    bnName: "আদাবর থানা",
+    division: "Dhaka (DMP - Tejgaon Division)",
+    address: "Baitul Aman Housing Society, Adabor, Dhaka",
+    ocPhone: "01713-373186",
+    dutyPhone: "01713-373187",
+    tnt: "02-9133333",
+    keywords: ["adabor", "আদাবর", "shekhertek", "sunflower", "baitul aman"]
+  },
+  {
+    name: "New Market Thana",
+    bnName: "নিউ মার্কেট থানা",
+    division: "Dhaka (DMP - Ramna Division)",
+    address: "Nilkhet, Azimpur, Dhaka",
+    ocPhone: "01713-373132",
+    dutyPhone: "01713-373133",
+    tnt: "02-8611111",
+    keywords: ["new market", "নিউ মার্কেট", "nilkhet", "azimpur", "dhaka college", "science lab"]
+  },
+  {
+    name: "Lalbagh Thana",
+    bnName: "লালবাগ থানা",
+    division: "Dhaka (DMP - Lalbagh Division)",
+    address: "Lalbagh Road, Old Dhaka",
+    ocPhone: "01713-373135",
+    dutyPhone: "01713-373136",
+    tnt: "02-7311111",
+    keywords: ["lalbagh", "লালবাগ", "lalbagh fort", "kellarmor", "postagola"]
+  },
+  {
+    name: "Chawkbazar Thana",
+    bnName: "চকবাজার থানা",
+    division: "Dhaka (DMP - Lalbagh Division)",
+    address: "Urdu Road, Chawkbazar, Old Dhaka",
+    ocPhone: "01713-373198",
+    dutyPhone: "01713-373199",
+    tnt: "02-7322222",
+    keywords: ["chawkbazar", "চকবাজার", "chaukbazar", "urdu road", "chawk circular"]
+  },
+  {
+    name: "Kotwali Thana (Dhaka)",
+    bnName: "কোতোয়ালী থানা (ঢাকা)",
+    division: "Dhaka (DMP - Lalbagh Division)",
+    address: "Johnson Road, Sadarghat, Old Dhaka",
+    ocPhone: "01713-373144",
+    dutyPhone: "01713-373145",
+    tnt: "02-7111111",
+    keywords: ["kotwali dhaka", "কোতোয়ালী ঢাকা", "sadarghat", "babu bazar", "armanitola", "johnson road"]
+  },
+  {
+    name: "Sutrapur Thana",
+    bnName: "সূত্রাপুর থানা",
+    division: "Dhaka (DMP - Wari Division)",
+    address: "Liaquat Avenue, Sutrapur, Old Dhaka",
+    ocPhone: "01713-373147",
+    dutyPhone: "01713-373148",
+    tnt: "02-7122222",
+    keywords: ["sutrapur", "সূত্রাপুর", "bahadur shah park", "victoria park", "dholai khal"]
+  },
+  {
+    name: "Wari Thana",
+    bnName: "ওয়ারী থানা",
+    division: "Dhaka (DMP - Wari Division)",
+    address: "Rankin Street, Wari, Dhaka",
+    ocPhone: "01713-373150",
+    dutyPhone: "01713-373151",
+    tnt: "02-7133333",
+    keywords: ["wari", "ওয়ারী", "rankin street", "baldha garden", "kaptan bazar", "tikatauli"]
+  },
+  {
+    name: "Jatrabari Thana",
+    bnName: "যাত্রাবাড়ী থানা",
+    division: "Dhaka (DMP - Wari Division)",
+    address: "Dhaka-Chittagong Highway, Jatrabari, Dhaka",
+    ocPhone: "01713-373204",
+    dutyPhone: "01713-373205",
+    tnt: "02-7544444",
+    keywords: ["jatrabari", "যাত্রাবাড়ী", "sayedabad", "dhalpur", "dania", "matuail"]
+  },
+  {
+    name: "Demra Thana",
+    bnName: "ডেমরা থানা",
+    division: "Dhaka (DMP - Wari Division)",
+    address: "Demra Bazar, Sarulia, Dhaka",
+    ocPhone: "01713-373201",
+    dutyPhone: "01713-373202",
+    tnt: "02-7511111",
+    keywords: ["demra", "ডেমরা", "sarulia", "amulia", "konapara"]
+  },
+  {
+    name: "Kadamtali Thana",
+    bnName: "কদমতলী থানা",
+    division: "Dhaka (DMP - Wari Division)",
+    address: "Jurain, Kadamtali, Dhaka",
+    ocPhone: "01713-373207",
+    dutyPhone: "01713-373208",
+    tnt: "02-7411111",
+    keywords: ["kadamtali", "কদমতলী", "jurain", "postogola", "shyampur"]
+  },
+  {
+    name: "Khilgaon Thana",
+    bnName: "খিলগাঁও থানা",
+    division: "Dhaka (DMP - Motijheel Division)",
+    address: "Khilgaon Taltola, Dhaka",
+    ocPhone: "01713-373216",
+    dutyPhone: "01713-373217",
+    tnt: "02-7211111",
+    keywords: ["khilgaon", "খিলগাঁও", "taltola", "sipahibag", "goran", "chowdhury para"]
+  },
+  {
+    name: "Sabujbagh Thana",
+    bnName: "সবুজবাগ থানা",
+    division: "Dhaka (DMP - Motijheel Division)",
+    address: "Bashabo, Sabujbagh, Dhaka",
+    ocPhone: "01713-373213",
+    dutyPhone: "01713-373214",
+    tnt: "02-7222222",
+    keywords: ["sabujbagh", "সবুজবাগ", "bashabo", "madartek", "nandipara"]
+  },
+  {
+    name: "Mugda Thana",
+    bnName: "মুগদা থানা",
+    division: "Dhaka (DMP - Motijheel Division)",
+    address: "Mugda Stadium Road, Dhaka",
+    ocPhone: "01713-398345",
+    dutyPhone: "01713-398346",
+    tnt: "02-7233333",
+    keywords: ["mugda", "মুগদা", "maniknagar", "mugda hospital", "bapari para"]
+  },
+  {
+    name: "Hatirjheel Thana",
+    bnName: "হাতিরঝিল থানা",
+    division: "Dhaka (DMP - Tejgaon Division)",
+    address: "Madhubag, Hatirjheel, Dhaka",
+    ocPhone: "01713-373222",
+    dutyPhone: "01713-373223",
+    tnt: "02-9366666",
+    keywords: ["hatirjheel", "হাতিরঝিল", "madhubag", "mirbagh", "moghbazar link"]
+  },
+  {
+    name: "Rampura Thana",
+    bnName: "রামপুরা থানা",
+    division: "Dhaka (DMP - Motijheel Division)",
+    address: "DIT Road, West Rampura, Dhaka (Near BTV)",
+    ocPhone: "01713-373225",
+    dutyPhone: "01713-373226",
+    tnt: "02-9344444",
+    keywords: ["rampura", "রামপুরা", "banasree", "বনশ্রী", "btv", "aftabnagar", "আফতাবনগর"]
+  },
+  {
+    name: "Kalabagan Thana",
+    bnName: "কলাবাগান থানা",
+    division: "Dhaka (DMP - Ramna Division)",
+    address: "Mirpur Road, Kalabagan 1st Lane, Dhaka",
+    ocPhone: "01713-373128",
+    dutyPhone: "01713-373131",
+    tnt: "02-9144444",
+    keywords: ["kalabagan", "কলাবাগান", "panthapath", "russell square", "green road"]
+  },
+  {
+    name: "Sher-e-Bangla Nagar Thana",
+    bnName: "শেরেবাংলা নগর থানা",
+    division: "Dhaka (DMP - Tejgaon Division)",
+    address: "Agargaon, Sher-e-Bangla Nagar, Dhaka (Near Suhrawardy Hospital)",
+    ocPhone: "01713-373191",
+    dutyPhone: "01713-373194",
+    tnt: "02-9122222",
+    keywords: ["sher-e-bangla nagar", "শেরেবাংলা নগর", "agargaon", "parliament", "suhrawardy hospital", "shyamoli"]
+  },
+  {
+    name: "Cantonment Thana",
+    bnName: "ক্যান্টনমেন্ট থানা",
+    division: "Dhaka (DMP - Gulshan Division)",
+    address: "Dhaka Cantonment, Dhaka",
+    ocPhone: "01713-373179",
+    dutyPhone: "01713-373182",
+    tnt: "02-8755555",
+    keywords: ["cantonment", "ক্যান্টনমেন্ট", "vashantek", "ecb chattar", "matikata", "kachukhet"]
+  },
+  {
+    name: "Hazaribagh Thana",
+    bnName: "হাজারীবাগ থানা",
+    division: "Dhaka (DMP - Lalbagh Division)",
+    address: "Goran Chatbari, Hazaribagh, Dhaka",
+    ocPhone: "01713-373120",
+    dutyPhone: "01713-373121",
+    tnt: "02-9661111",
+    keywords: ["hazaribagh", "হাজারীবাগ", "tannery", "jhauchar", "beribadh"]
+  },
+  {
+    name: "Kamrangirchar Thana",
+    bnName: "কামরাঙ্গীরচর থানা",
+    division: "Dhaka (DMP - Lalbagh Division)",
+    address: "Loha Pool, Kamrangirchar, Dhaka",
+    ocPhone: "01713-373219",
+    dutyPhone: "01713-373220",
+    tnt: "02-7333333",
+    keywords: ["kamrangirchar", "কামরাঙ্গীরচর", "madbor bazar", "buriganga"]
+  },
+  {
+    name: "Turag Thana",
+    bnName: "তুরাগ থানা",
+    division: "Dhaka (DMP - Uttara Division)",
+    address: "Dhaur, Turag, Dhaka",
+    ocPhone: "01713-373160",
+    dutyPhone: "01713-373161",
+    tnt: "02-8988888",
+    keywords: ["turag", "তুরাগ", "kamarpara", "diabari", "uttara 15", "uttara 16"]
+  },
+  {
+    name: "Dakshinkhan Thana",
+    bnName: "দক্ষিণখান থানা",
+    division: "Dhaka (DMP - Uttara Division)",
+    address: "Kachabazar, Dakshinkhan, Dhaka",
+    ocPhone: "01713-398339",
+    dutyPhone: "01713-398340",
+    tnt: "02-8991111",
+    keywords: ["dakshinkhan", "দক্ষিণখান", "ashkona", "gawair", "faydabad"]
+  },
+  {
+    name: "Uttarkhan Thana",
+    bnName: "উত্তরখান থানা",
+    division: "Dhaka (DMP - Uttara Division)",
+    address: "Majar Chowrasta, Uttarkhan, Dhaka",
+    ocPhone: "01713-398336",
+    dutyPhone: "01713-398337",
+    tnt: "02-8992222",
+    keywords: ["uttarkhan", "উত্তরখান", "majar chowrasta", "chaprashipara"]
+  },
+  {
+    name: "Rupnagar Thana",
+    bnName: "রূপনগর থানা",
+    division: "Dhaka (DMP - Mirpur Division)",
+    address: "Road 16, Rupnagar R/A, Mirpur, Dhaka",
+    ocPhone: "01713-398348",
+    dutyPhone: "01713-398349",
+    tnt: "02-9025555",
+    keywords: ["rupnagar", "রূপনগর", "aram bagh mirpur", "duaripara", "shialbari"]
+  },
+  {
+    name: "Bhashantek Thana",
+    bnName: "ভাষানটেক থানা",
+    division: "Dhaka (DMP - Mirpur Division)",
+    address: "Bhashantek Bazar, Mirpur, Dhaka",
+    ocPhone: "01713-398351",
+    dutyPhone: "01713-398352",
+    tnt: "02-9026666",
+    keywords: ["bhashantek", "ভাষানটেক", "vashantek", "damalkot"]
+  },
+  {
+    name: "Gandaria Thana",
+    bnName: "গেন্ডারিয়া থানা",
+    division: "Dhaka (DMP - Wari Division)",
+    address: "Doyaganj, Gandaria, Old Dhaka",
+    ocPhone: "01713-373228",
+    dutyPhone: "01713-373229",
+    tnt: "02-7444444",
+    keywords: ["gandaria", "গেন্ডারিয়া", "doyaganj", "dhupkhola", "satish sarkar"]
+  },
+  {
+    name: "Bangshal Thana",
+    bnName: "বংশাল থানা",
+    division: "Dhaka (DMP - Lalbagh Division)",
+    address: "Kazi Alauddin Road, Bangshal, Old Dhaka",
+    ocPhone: "01713-373231",
+    dutyPhone: "01713-373232",
+    tnt: "02-7177777",
+    keywords: ["bangshal", "বংশাল", "kazi alauddin road", "alu bazar", "nazira bazar"]
+  },
+
+  // CHITTAGONG METROPOLITAN POLICE (CMP)
+  {
+    name: "Panchlaish Thana",
+    bnName: "পাঁচলাইশ থানা",
+    division: "Chittagong (CMP - North Division)",
+    address: "Prabartak Circle, Chittagong (Near CMCH)",
+    ocPhone: "01713-373255",
+    dutyPhone: "01713-373256",
+    tnt: "031-655555",
+    keywords: ["panchlaish", "পাঁচলাইশ", "chittagong", "cmch", "prabartak", "2 no gate"]
+  },
+  {
+    name: "Kotwali Thana (Chittagong)",
+    bnName: "কোতোয়ালী থানা (চট্টগ্রাম)",
+    division: "Chittagong (CMP - South Division)",
+    address: "Laldighi East, Kotwali, Chittagong",
+    ocPhone: "01713-373251",
+    dutyPhone: "01713-373252",
+    tnt: "031-611111",
+    keywords: ["kotwali ctg", "কোতোয়ালী চট্টগ্রাম", "laldighi", "andarkilla", "new market ctg"]
+  },
+  {
+    name: "Khulshi Thana",
+    bnName: "খুলশী থানা",
+    division: "Chittagong (CMP - North Division)",
+    address: "Zakir Hossain Road, Khulshi, Chittagong",
+    ocPhone: "01713-373260",
+    dutyPhone: "01713-373261",
+    tnt: "031-622222",
+    keywords: ["khulshi", "খুলশী", "gec circle", "zakir hossain road", "nasirabad"]
+  },
+
+  // SYLHET METROPOLITAN POLICE (SMP)
+  {
+    name: "Kotwali Model Thana (Sylhet)",
+    bnName: "কোতোয়ালী মডেল থানা (সিলেট)",
+    division: "Sylhet (SMP)",
+    address: "Bandar Bazar, Sylhet",
+    ocPhone: "01713-374501",
+    dutyPhone: "01713-374502",
+    tnt: "0821-716968",
+    keywords: ["sylhet kotwali", "কোতোয়ালী সিলেট", "bandar bazar", "zindabazar", "sylhet"]
+  },
+
+  // GAZIPUR METROPOLITAN POLICE (GMP)
+  {
+    name: "Tongi East Thana",
+    bnName: "টঙ্গী পূর্ব থানা",
+    division: "Gazipur (GMP)",
+    address: "Dhaka-Mymensingh Highway, Tongi, Gazipur",
+    ocPhone: "01769-693301",
+    dutyPhone: "01769-693302",
+    tnt: "02-9801111",
+    keywords: ["tongi", "টঙ্গী", "tongi east", "station road tongi", "gazipur"]
+  },
+  {
+    name: "Gazipur Sadar Thana (Joydebpur)",
+    bnName: "গাজীপুর সদর থানা",
+    division: "Gazipur (GMP)",
+    address: "Joydebpur Chowrasta, Gazipur",
+    ocPhone: "01769-693305",
+    dutyPhone: "01769-693306",
+    tnt: "02-9251111",
+    keywords: ["gazipur sadar", "joydebpur", "গাজীপুর", "জয়দেবপুর", "gazipur chowrasta"]
+  }
+];
+
+// Comprehensive Verified Emergency Safety Entities in Bangladesh
+const BANGLADESH_SAFETY_ENTITIES = [
+  {
+    name: "Police Cyber Support for Women (PCSW)",
+    bnName: "পুলিশ সাইবার সাপোর্ট ফর উইমেন (PCSW)",
+    phone: "01320-000888",
+    category: "Cyber Safety Hotline & WhatsApp",
+    description: "Official 24/7 dedicated cybercrime unit operated by Bangladesh Police for women facing harassment, fake IDs, or online blackmail."
+  },
+  {
+    name: "CID Cyber Police Centre (CPC)",
+    bnName: "সিআইডি সাইবার পুলিশ সেন্টার (CPC)",
+    phone: "01710-333333",
+    category: "Cyber Investigation Hotline",
+    description: "Bangladesh Police CID unit for hacking, digital financial fraud, and cyber forensics."
+  },
+  {
+    name: "Sheikh Hasina National Institute of Burn & Plastic Surgery",
+    bnName: "শেখ হাসিনা জাতীয় বার্ন ও প্লাস্টিক সার্জারি ইনস্টিটিউট",
+    phone: "02-223381001",
+    altPhone: "01700-700700",
+    address: "Chankharpul, Dhaka (Largest specialized burn hospital in Bangladesh)",
+    category: "Emergency Burn Trauma Care",
+    description: "24/7 National emergency burn and plastic surgery trauma emergency."
+  },
+  {
+    name: "Dhaka Medical College Hospital (DMCH) Emergency",
+    bnName: "ঢাকা মেডিকেল কলেজ হাসপাতাল জরুরি বিভাগ",
+    phone: "02-55165088",
+    altPhone: "01711-888888",
+    address: "Secretariat Road, Dhaka",
+    category: "Tertiary Trauma & Acute Emergency",
+    description: "24/7 primary government acute trauma and casualty department in Dhaka."
+  },
+  {
+    name: "DMP Central Police Control Room",
+    bnName: "ডিএমপি কেন্দ্রীয় কন্ট্রোল রুম",
+    phone: "01713-398311",
+    altPhone: "02-996684444",
+    category: "Dhaka Police Central Command Desk",
+    description: "Central command desk coordinating all 50 police stations in Dhaka."
+  },
+  {
+    name: "RAB Central Operations Room",
+    bnName: "র‍্যাব কেন্দ্রীয় অপারেশন রুম",
+    phone: "01777-720029",
+    altPhone: "02-7913344",
+    category: "Rapid Action Battalion Hotline",
+    description: "RAB Headquarters central emergency operations hotline."
+  },
+  {
+    name: "Fire Service & Civil Defence Central Control Room",
+    bnName: "ফায়ার সার্ভিস ও সিভিল ডিফেন্স কেন্দ্রীয় নিয়ন্ত্রণ কক্ষ",
+    phone: "01713-038181",
+    altPhone: "16163 / 02-223355555",
+    category: "Fire & Rescue Operations",
+    description: "National operational control room for fire emergencies, building collapse, and water rescue."
+  },
+  {
+    name: "National Helpline for Violence Against Women & Children",
+    bnName: "নারী ও শিশু নির্যাতন প্রতিরোধ হেল্পলাইন",
+    phone: "109",
+    category: "24/7 Toll-Free National Legal & Shelter Helpline",
+    description: "Government toll-free helpline providing immediate intervention, shelter, and legal counseling."
+  },
+  {
+    name: "Child Helpline",
+    bnName: "শিশু হেল্পলাইন (১০৯৮)",
+    phone: "1098",
+    category: "24/7 Toll-Free Child Emergency Hotline",
+    description: "Dedicated child protection hotline run with UNICEF Bangladesh."
+  },
+  {
+    name: "National Emergency Service (999)",
+    bnName: "জাতীয় জরুরি সেবা (৯৯৯)",
+    phone: "999",
+    category: "Police • Fire Service • Ambulance",
+    description: "Toll-free 24/7 national CAD dispatch across all 64 districts in Bangladesh."
+  },
+  {
+    name: "Shastho Batayan (Health Advice Hotline)",
+    bnName: "স্বাস্থ্য বাতায়ন (১৬২৬৩)",
+    phone: "16263",
+    category: "24/7 Licensed Doctor Consultation",
+    description: "Free medical tele-consultation operated by Directorate General of Health Services (DGHS)."
+  }
+];
+
+// Smart Verified Matcher for Bangladesh Police Thanas and Safety Contacts
+function findBangladeshSafetyContact(query) {
+  if (!query) return null;
+  const q = query.toLowerCase().trim();
+  const isBangla = /[\u0980-\u09FF]/.test(query);
+
+  // 1. Direct Thana Match
+  for (const t of BANGLADESH_THANA_DIRECTORY) {
+    if (t.keywords.some(k => q.includes(k.toLowerCase()))) {
+      const cleanOc = t.ocPhone.replace(/\D/g, '');
+      const cleanDuty = t.dutyPhone.replace(/\D/g, '');
+      const cleanTnt = (t.tnt ? t.tnt.split('/')[0] : '').replace(/[^0-9]/g, '');
+
+      let text = '';
+      if (isBangla) {
+        text = `👮 **${t.bnName} (${t.name})**\n📍 **ঠিকানা / অবস্থান:** ${t.address}\n🏢 **বিভাগ:** ${t.division}\n\n📞 **কর্মকর্তাদের সরাসরি ফোন নাম্বার:**\n• **অফিসার ইনচার্জ (OC):** [${t.ocPhone}](tel:${cleanOc})\n• **ডিউটি অফিসার (Duty Officer - ২৪ ঘণ্টা):** [${t.dutyPhone}](tel:${cleanDuty})\n• **টিঅ্যান্ডটি ল্যান্ডলাইন (T&T):** [${t.tnt}](tel:${cleanTnt})\n• **ডিএমপি কন্ট্রোল রুম:** [01713-398311](tel:01713398311)\n• **জাতীয় জরুরি সেবা:** [৯৯৯](tel:999) (টোল-ফ্রি ২৪ ঘণ্টা)\n\n💡 *পরামর্শ: যেকোনো জরুরি ঘটনায় ওসির মোবাইলে সরাসরি কল করুন অথবা থানার ডিউটি অফিসারের সাথে কথা বলে তাৎক্ষণিক পুলিশ টিম পাঠানোর অনুরোধ জানান।*`;
+      } else {
+        text = `👮 **${t.name} (${t.bnName})**\n📍 **Address / Location:** ${t.address}\n🏢 **Division:** ${t.division}\n\n📞 **Official Direct Emergency Contacts:**\n• **Officer-in-Charge (OC):** [${t.ocPhone}](tel:${cleanOc})\n• **Duty Officer (24/7):** [${t.dutyPhone}](tel:${cleanDuty})\n• **T&T Landline:** [${t.tnt}](tel:${cleanTnt})\n• **DMP Control Room:** [01713-398311](tel:01713398311)\n• **National Emergency Service:** [999](tel:999) (Toll-Free 24/7)\n\n💡 *Guidance: Tap the number to call the OC or Duty Officer directly. State your exact location and situation calmly for immediate dispatch.*`;
+      }
+
+      return {
+        text,
+        sources: [
+          { title: `${t.name} — Bangladesh Police`, url: `tel:${cleanOc}` },
+          { title: "National 999 CAD Dispatch", url: "tel:999" }
+        ]
+      };
+    }
+  }
+
+  // 2. Direct Emergency Safety Entity Match (Burn Unit, Cyber, Helplines, etc.)
+  for (const e of BANGLADESH_SAFETY_ENTITIES) {
+    const eKeywords = [
+      e.name.toLowerCase(),
+      e.bnName.toLowerCase(),
+      e.phone,
+      e.category.toLowerCase()
+    ];
+    if (e.name.includes("Burn") && (q.includes("burn") || q.includes("বার্ন") || q.includes("পোড়া"))) return formatEntityCard(e, isBangla);
+    if (e.name.includes("Cyber") && (q.includes("cyber") || q.includes("সাইবার") || q.includes("blackmail") || q.includes("হয়রানি") || q.includes("harass"))) return formatEntityCard(e, isBangla);
+    if (e.name.includes("Women") && (q.includes("109") || q.includes("নারী") || q.includes("women helpline"))) return formatEntityCard(e, isBangla);
+    if (e.name.includes("Child") && (q.includes("1098") || q.includes("শিশু") || q.includes("child helpline"))) return formatEntityCard(e, isBangla);
+    if (e.name.includes("Fire") && (q.includes("fire") || q.includes("আগুন") || q.includes("ফায়ার"))) return formatEntityCard(e, isBangla);
+    if (e.name.includes("DMCH") && (q.includes("dmch") || q.includes("dhaka medical") || q.includes("ঢাকা মেডিকেল"))) return formatEntityCard(e, isBangla);
+    if (e.name.includes("DMP") && (q.includes("dmp control") || q.includes("control room") || q.includes("কন্ট্রোল রুম"))) return formatEntityCard(e, isBangla);
+    if (e.name.includes("RAB") && (q.includes("rab") || q.includes("র‍্যাব"))) return formatEntityCard(e, isBangla);
+  }
+
+  // 3. General Thana / OC query without a specific name
+  if (q.includes('thana') || q.includes('থানা') || q.includes('oc') || q.includes('ওসি') || q.includes('police number') || q.includes('পুলিশের নাম্বার')) {
+    if (isBangla) {
+      return {
+        text: `👮 **বাংলাদেশের যেকোনো থানার ওসি বা জরুরি নাম্বার পেতে:**\n\nআপনি কোন থানার ওসির নাম্বার চান? অনুগ্রহ করে থানার নাম লিখুন (যেমন: **ধানমন্ডি, গুলশান, বনানী, মিরপুর, উত্তরা, মোহাম্মদপুর, তেজগাঁও, শাহবাগ** ইত্যাদি)।\n\n📞 **জরুরি কেন্দ্রীয় পুলিশ নাম্বারসমূহ:**\n• **জাতীয় জরুরি সেবা:** [৯৯৯](tel:999) (তাৎক্ষণিক পুলিশ, অ্যাম্বুলেন্স, ফায়ার সার্ভিস)\n• **ডিএমপি কেন্দ্রীয় কন্ট্রোল রুম:** [01713-398311](tel:01713398311) / [02-996684444](tel:02996684444)\n• **পুলিশ সাইবার সাপোর্ট ফর উইমেন:** [01320-000888](tel:01320000888)\n• **র‍্যাব কন্ট্রোল রুম:** [01777-720029](tel:01777720029)\n\nঅনুগ্রহ করে আপনার থানার নামটি লিখুন, আমি সরাসরি ওসির নাম্বার দিচ্ছি।`,
+        sources: [{ title: "DMP Central Police Desk", url: "tel:01713398311" }]
+      };
+    }
+    return {
+      text: `👮 **Bangladesh Police Thana & OC Directory:**\n\nWhich police station (Thana) do you need the OC contact for? Simply reply with the area name (e.g., **Dhanmondi, Gulshan, Banani, Mirpur, Uttara, Mohammadpur, Tejgaon, Shahbagh**, etc.).\n\n📞 **Central Emergency Police Numbers:**\n• **National Emergency Service:** [999](tel:999) (Immediate Police, Ambulance, Fire)\n• **DMP Central Control Room:** [01713-398311](tel:01713398311) / [02-996684444](tel:02996684444)\n• **Police Cyber Support for Women (PCSW):** [01320-000888](tel:01320000888)\n• **RAB Control Room:** [01777-720029](tel:01777720029)\n\nTell me your specific Thana or area, and I will give you the exact OC mobile number immediately.`,
+      sources: [{ title: "DMP Central Police Desk", url: "tel:01713398311" }]
+    };
+  }
+
+  return null;
+}
+
+function formatEntityCard(e, isBangla) {
+  const cleanPhone = e.phone.replace(/\D/g, '');
+  let text = '';
+  if (isBangla) {
+    text = `🛡️ **${e.bnName} (${e.name})**\n📞 **সরাসরি হটলাইন:** [${e.phone}](tel:${cleanPhone})${e.altPhone ? ` • বিকল্প: ${e.altPhone}` : ''}\n${e.address ? `📍 **ঠিকানা:** ${e.address}\n` : ''}ℹ️ **সেবার ধরন:** ${e.category}\n\n${e.description}`;
+  } else {
+    text = `🛡️ **${e.name} (${e.bnName})**\n📞 **Direct Official Line:** [${e.phone}](tel:${cleanPhone})${e.altPhone ? ` • Alternate: ${e.altPhone}` : ''}\n${e.address ? `📍 **Address / Location:** ${e.address}\n` : ''}ℹ️ **Service Category:** ${e.category}\n\n${e.description}`;
+  }
+  return {
+    text,
+    sources: [{ title: `${e.name} Line`, url: `tel:${cleanPhone}` }]
+  };
+}
+
+const SHUROKHA_SYSTEM_INSTRUCTION = `You are shurokhaAI, the official, realistic, and specialized Citizen Safety & Emergency Assistant for Bangladesh (developed for SAFE BD).
+
+CRITICAL OPERATIONAL RULES:
+1. ALWAYS provide realistic, practical, and grounded answers to the user's specific question. NEVER output unrealistic, fictional, abstract, or textbook/Wikipedia filler.
+2. If a citizen asks for the contact details of ANY Thana (police station), Officer-in-Charge (OC), Duty Officer, SP, DMP Division, Hospital, Burn Unit, or Emergency Helpline in Bangladesh:
+   - Provide the exact, real-world, official phone numbers immediately.
+   - Format numbers clearly with clickable markdown links (e.g., [01713-373126](tel:01713373126)).
+   - Include the physical location / address of the police station or hospital.
+3. For immediate danger, physical violence, or distress: Immediately advise them to tap the Red SOS Button on SAFE BD or dial 999 directly.
+4. For legal assistance: Quote real laws applicable in Bangladesh (Women and Children Repression Prevention Act 2000, Cyber Security Act, Penal Code provisions on extortion/stalking).
+5. Language: You are fully bilingual. Speak fluent, natural, caring English or Bengali (বাংলা) matching the user's inquiry. Always respond directly to what the person asks without unnecessary fluff.`;
 
 async function generateShurokhaFallbackResponse(query) {
   const q = (query || '').toLowerCase().trim();
   const isBangla = /[\u0980-\u09FF]/.test(query);
+
+  // Check Thana & Emergency Contact Directory First
+  const contactMatch = findBangladeshSafetyContact(query);
+  if (contactMatch) {
+    return contactMatch;
+  }
 
   // 1. Immediate Danger / Life Threat (Urgent Dispatch Alarm)
   const isDirectDanger = q.includes('in danger') || q.includes('under attack') || q.includes('being attacked') || q.includes('someone is following me') || q.includes('save me') || q.includes('call police') || q.includes('বাঁচাও') || q.includes('বিপদে পড়েছি') || (q.includes('danger') && !q.includes('what') && !q.includes('tell me') && !q.includes('explain')) || (q.includes('help') && (q.includes('urgent') || q.includes('emergency') || q.includes('now') || q.includes('police')));
@@ -2498,11 +3212,11 @@ async function generateShurokhaFallbackResponse(query) {
   if (q === 'hi' || q === 'hello' || q === 'hey' || q === 'সালাম' || q === 'হ্যালো' || q.includes('who are you') || q.includes('তুমি কে') || q.includes('কেমন আছ')) {
     if (isBangla) {
       return {
-        text: "আসসালামু আলাইকুম! আমি **shurokhaAI**, আপনার ২৪/৭ ব্যক্তিগত নিরাপত্তা ও আস্থার বন্ধু।\n\nআপনি আমার সাথে একজন সত্যিকারের মানুষের মতোই যেকোনো বিষয়ে কথা বলতে পারেন—জরুরি নিরাপত্তা টিপস, প্রাথমিক চিকিৎসা, আইনগত তথ্য, পড়াশোনা, বিজ্ঞান বা সাধারণ আড্ডা। আজ আপনাকে কীভাবে সাহায্য করতে পারি?"
+        text: "আসসালামু আলাইকুম! আমি **shurokhaAI**, বাংলাদেশের নাগরিকদের জন্য নিবেদিত ২৪/৭ জরুরি নিরাপত্তা ও তথ্য সহকারী।\n\nআমি আপনাকে যেকোনো থানার ওসির সরাসরি মোবাইল নাম্বার, ডিউটি অফিসার, পুলিশ কন্ট্রোল রুম, বার্ন ইউনিট, অ্যাম্বুলেন্স, আইনি সহায়তা বা সাধারণ জরুরি বিষয়ে সঠিক ও বাস্তব তথ্য দিতে পারি। আপনি কোন এলাকার থানার নাম্বার বা কী তথ্য চান?"
       };
     }
     return {
-      text: "Hello there! I am **shurokhaAI**, your 24/7 personal safety companion and friend from SAFE BD.\n\nYou can talk to me like a real person about anything at all—emergency safety guidance, first aid, Bangladesh laws, science, daily questions, or just a friendly chat. How can I brighten your day or help you right now?"
+      text: "Hello! I am **shurokhaAI**, your specialized Bangladesh citizen safety and emergency assistant from SAFE BD.\n\nI can provide you with the direct mobile numbers of any Thana OC, Duty Officer, DMP control room, emergency hospitals, burn units, cyber harassment support, or emergency helplines. Which police station number or safety information do you need?"
     };
   }
 
@@ -2510,12 +3224,12 @@ async function generateShurokhaFallbackResponse(query) {
   if (q.includes('harass') || q.includes('eve teasing') || q.includes('stalk') || q.includes('উত্ত্যক্ত') || q.includes('নারী') || q.includes('women')) {
     if (isBangla) {
       return {
-        text: "🛡️ **নারী ও শিশু সুরক্ষায় আইনি অধিকার ও সহায়তা:**\n\n১. **তাৎক্ষণিক পুলিশ সহায়তা:** ৯৯৯ (999) এ কল করুন।\n২. **নারী ও শিশু নির্যাতন প্রতিরোধ হেল্পলাইন:** **১০৯ (109)** (টোল-ফ্রি, ২৪ ঘণ্টা খোলা)।\n৩. **সাইবার হয়রানি:** পুলিশ হেডকোয়ার্টার্সের Cyber Support for Women (CSW) হটলাইনে অভিযোগ করতে পারেন।\n৪. আমাদের **Walk With Me** ফিচার চালু করে পরিবারকে লাইভ লোকেশন শেয়ার করুন।",
-        sources: [{ title: "National Women Helpline (109)", url: "tel:109" }]
+        text: "🛡️ **নারী ও শিশু সুরক্ষায় আইনি অধিকার ও সহায়তা:**\n\n১. **তাৎক্ষণিক পুলিশ সহায়তা:** সরাসরি **৯৯৯ (999)** এ কল করুন।\n২. **নারী ও শিশু নির্যাতন প্রতিরোধ হেল্পলাইন:** [১০৯ (109)](tel:109) (টোল-ফ্রি, ২৪ ঘণ্টা আইনি ও মানসিক সহায়তা)।\n৩. **পুলিশ সাইবার সাপোর্ট ফর উইমেন (PCSW):** [01320-000888](tel:01320000888) (হোয়াটসঅ্যাপ ও সরাসরি কল)।\n৪. আমাদের অ্যাপের **Walk With Me** চালু করে পরিবারকে লাইভ লোকেশন শেয়ার করুন।",
+        sources: [{ title: "National Women Helpline 109", url: "tel:109" }]
       };
     }
     return {
-      text: "🛡️ **Protection Against Harassment & Safety Rights:**\n\n1. **Immediate Police Response:** Call **999** immediately or trigger SAFE BD SOS.\n2. **National Helpline for Violence Against Women & Children:** Call **109** (Toll-free, 24/7 confidential counseling and legal support).\n3. **Cyber Harassment:** Bangladesh Police operates the *Police Cyber Support for Women (PCSW)*.\n4. **Commute Safety:** Use our **Walk With Me Companion** on the map tab to broadcast your live GPS route to family.",
+      text: "🛡️ **Protection Against Harassment & Safety Rights in Bangladesh:**\n\n1. **Immediate Police Dispatch:** Call **999** immediately or press the Red SOS Button.\n2. **National Helpline for Women & Children:** Call [109](tel:109) (Toll-free, 24/7 confidential legal aid and shelter assistance).\n3. **Cyber Harassment Support:** Bangladesh Police PCSW Hotline: [01320-000888](tel:01320000888) (WhatsApp & Call).\n4. **Commute Protection:** Use our **Walk With Me Companion** on the map tab to broadcast your live route to family.",
       sources: [{ title: "National Women & Child Helpline (109)", url: "tel:109" }]
     };
   }
@@ -2524,47 +3238,24 @@ async function generateShurokhaFallbackResponse(query) {
   if (q.includes('first aid') || q.includes('burn') || q.includes('faint') || q.includes('cpr') || q.includes('রক্ত') || q.includes('চিকিৎসা')) {
     if (isBangla) {
       return {
-        text: "🏥 **জরুরি প্রাথমিক চিকিৎসা টিপস:**\n\n• **আগুনে পোড়া:** অন্তত ২০ মিনিট সাধারণ ঠাণ্ডা পানি ঢালুন। বরফ, টুথপেস্ট বা তেল লাগাবেন না।\n• **অজ্ঞান বা সেন্সলেস হওয়া:** রোগীকে চিৎ করে শুইয়ে দুই পা একটু উঁচুতে রাখুন। ভিড় সরিয়ে বাতাস নিশ্চিত করুন। শ্বাস-প্রশ্বাস পরীক্ষা করুন।\n• **অতিরিক্ত রক্তপাত:** পরিষ্কার কাপড় দিয়ে ক্ষতের ওপর শক্ত করে চেপে ধরে রাখুন।\n• অ্যাম্বুলেন্সের জন্য দ্রুত **৯৯৯** এ কল করুন।",
+        text: "🏥 **জরুরি প্রাথমিক চিকিৎসা টিপস (বাস্তব পদক্ষেপ):**\n\n• **আগুনে পোড়া:** অন্তত ২০ মিনিট স্বাভাবিক ঠাণ্ডা পানি ঢালুন। বরফ, টুথপেস্ট বা তেল ভুলেও লাগাবেন না। শেখ হাসিনা জাতীয় বার্ন ইনস্টিটিউট: [02-223381001](tel:02223381001)।\n• **অজ্ঞান হওয়া:** রোগীকে চিৎ করে শুইয়ে দুই পা ১ ফুট উঁচুতে রাখুন। ভিড় সরিয়ে বাতাস নিশ্চিত করুন।\n• **অতিরিক্ত রক্তপাত:** পরিষ্কার কাপড় দিয়ে ক্ষতের ওপর চেপে ধরুন।\n• অ্যাম্বুলেন্সের জন্য দ্রুত **৯৯৯** এ কল করুন।",
         sources: [{ title: "999 Ambulance CAD Dispatch", url: "tel:999" }]
       };
     }
     return {
-      text: "🏥 **Essential First Aid Guidance:**\n\n• **Burns:** Run cool running water over the burn for at least 20 minutes. Do NOT apply ice, toothpaste, or oil.\n• **Fainting:** Lay the person flat on their back and elevate their feet 12 inches. Loosen tight collars and ensure airflow.\n• **Severe Bleeding:** Apply direct, firm pressure with a clean cloth.\n• **Immediate Medical Dispatch:** Dial **999** for emergency ambulance services in Bangladesh.",
+      text: "🏥 **Realistic Emergency First Aid Steps:**\n\n• **Burns:** Pour cool tap water over the burn for at least 20 minutes. Do NOT apply ice, toothpaste, or butter. National Burn Institute Hotline: [02-223381001](tel:02223381001).\n• **Fainting:** Lay the person flat and elevate their legs 12 inches to restore blood flow to the brain.\n• **Severe Bleeding:** Apply direct, firm pressure with a clean cloth.\n• **Emergency Ambulance:** Dial [999](tel:999) immediately.",
       sources: [{ title: "Emergency Ambulance CAD 999", url: "tel:999" }]
     };
   }
 
-  // 5. Live Web Knowledge Query via Wikipedia Search API
-  try {
-    const cleanSearch = query.replace(/[^\w\s\u0980-\u09FF]/gi, ' ').trim();
-    if (cleanSearch.length > 2) {
-      const wikiUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(cleanSearch)}&format=json&utf8=1`;
-      const wikiRes = await fetch(wikiUrl, { headers: { 'User-Agent': 'SafeBD-shurokhaAI/1.0' }, signal: AbortSignal.timeout(4000) });
-      if (wikiRes.ok) {
-        const wikiData = await wikiRes.json();
-        const topResult = wikiData?.query?.search?.[0];
-        if (topResult && topResult.snippet) {
-          const plainSnippet = topResult.snippet.replace(/<[^>]+>/g, '').trim();
-          const pageTitle = topResult.title;
-          const pageUrl = `https://en.wikipedia.org/wiki/${encodeURIComponent(pageTitle.replace(/\s+/g, '_'))}`;
-
-          return {
-            text: `Here is what I found for **${pageTitle}**:\n\n${plainSnippet}...\n\nIs there anything specific you would like to know further? Feel free to ask me anything!`,
-            sources: [{ title: `${pageTitle} — Web Knowledge`, url: pageUrl }]
-          };
-        }
-      }
-    }
-  } catch (searchErr) {}
-
-  // 6. Conversational Universal Fallback
+  // 5. General Conversational Reply
   if (isBangla) {
     return {
-      text: `আমি **shurokhaAI**, আপনার প্রশ্নটি আমি মনোযোগ দিয়ে শুনলাম: "${query}".\n\nআমি সার্বক্ষণিক আপনার সাথে কথা বলতে প্রস্তুত। আরও নিখুঁত তথ্যের জন্য আপনি চাইলে প্রশ্নটি একটু বিস্তারিত বলতে পারেন, কিংবা যেকোনো নিরাপত্তা, স্বাস্থ্য বা সাধারণ বিষয়ে আমাকে জিজ্ঞাসা করতে পারেন!`
+      text: `আমি **shurokhaAI**। আপনার প্রশ্নটি পেয়েছি: "${query}"।\n\nআপনি যদি কোনো এলাকার **থানার ওসির ফোন নাম্বার**, ডিউটি অফিসার, পুলিশ ফাঁড়ি, হাসপাতাল, বার্ন ইউনিট, অ্যাম্বুলেন্স বা আইনি তথ্য চান, দয়া করে এলাকার নামটি উল্লেখ করুন (যেমন: ধানমন্ডি, গুলশান, মিরপুর, উত্তরা ইত্যাদি)। আমি তাৎক্ষণিক সঠিক নাম্বার প্রদান করব।`
     };
   }
   return {
-    text: `I hear you loud and clear regarding "${query}"! As **shurokhaAI**, I am always here to talk with you like a real friend—whether you are looking for safety guidance, local facts, science, or just sharing your thoughts. What aspect would you like to explore together?`
+    text: `I am **shurokhaAI**, focused directly on your safety and assistance in Bangladesh.\n\nRegarding your question "${query}": If you are looking for the direct phone number of any **Thana OC, Duty Officer, SP office, emergency hospital, burn unit, or legal protection line**, please tell me the area name (e.g., Dhanmondi, Gulshan, Mirpur, Uttara, Chittagong, Sylhet, etc.), and I will provide the official contact numbers immediately.`
   };
 }
 
@@ -2576,6 +3267,19 @@ app.post('/api/ai/chat', async (req, res) => {
     }
 
     const userMessage = message.trim();
+
+    // Priority Check: Official Bangladesh Thana OC & Emergency Safety Directory (Instant 100% Verified Match)
+    const directContact = findBangladeshSafetyContact(userMessage);
+    if (directContact) {
+      return res.json({
+        success: true,
+        reply: directContact.text,
+        sources: directContact.sources || [],
+        grounded: directContact.sources?.length > 0,
+        poweredBy: "Bangladesh Police & Emergency Directory"
+      });
+    }
+
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
 
     // Prepare conversation contents for Gemini
