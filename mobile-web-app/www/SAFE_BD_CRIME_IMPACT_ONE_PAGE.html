@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SAFE BD — Changing Bangladesh's Crime Paradigm</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap');
+
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    html, body {
+      width: 210mm;
+      height: 297mm;
+      max-height: 297mm;
+      overflow: hidden;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #090d16;
+      color: #f1f5f9;
+      line-height: 1.35;
+      font-size: 8.8pt;
+    }
+
+    .page-container {
+      width: 210mm;
+      height: 297mm;
+      padding: 10mm 13mm 8mm 13mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      background: 
+        radial-gradient(circle at 94% 8%, rgba(239, 68, 68, 0.22) 0%, transparent 48%),
+        radial-gradient(circle at 6% 92%, rgba(14, 165, 233, 0.18) 0%, transparent 48%),
+        #0b1120;
+    }
+
+    /* TOP HEADER */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 3.5mm;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .shield-logo {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15pt;
+      color: #ffffff;
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .brand-text h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16pt;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      line-height: 1.05;
+    }
+    .brand-text p {
+      font-size: 7.2pt;
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      color: #94a3b8;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+    .badge-pill {
+      background: rgba(239, 68, 68, 0.16);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      color: #fca5a5;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 7.2pt;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      background: #ef4444;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #ef4444;
+    }
+
+    /* HERO STATEMENT */
+    .hero-section {
+      text-align: center;
+      padding: 3mm 0 1.5mm 0;
+    }
+    .hero-pre {
+      font-size: 7.5pt;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #38bdf8;
+      margin-bottom: 4px;
+    }
+    .hero-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 17pt;
+      font-weight: 800;
+      line-height: 1.22;
+      color: #ffffff;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+    .hero-title span {
+      background: linear-gradient(135deg, #f87171 0%, #fb923c 45%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-desc {
+      font-size: 8.5pt;
+      color: #94a3b8;
+      max-width: 172mm;
+      margin: 0 auto;
+      line-height: 1.4;
+    }
+    .hero-desc strong {
+      color: #f1f5f9;
+    }
+
+    /* KEY IMPACT METRICS STRIP */
+    .metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 3mm;
+      margin: 1.5mm 0;
+    }
+    .metric-card {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 9px 8px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2.5px;
+      background: linear-gradient(90deg, #ef4444, #38bdf8);
+    }
+    .metric-val {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15pt;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.1;
+    }
+    .metric-label {
+      font-size: 6.8pt;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #94a3b8;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    /* 4 CORE FEATURES GRID */
+    .section-tag {
+      font-size: 7.8pt;
+      font-weight: 800;
+      letter-spacing: 1.3px;
+      text-transform: uppercase;
+      color: #f87171;
+      margin-bottom: 2mm;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-tag::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3mm;
+      margin-bottom: 1.5mm;
+    }
+    .feat-card {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 9px;
+      padding: 9px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    }
+    .feat-card.highlight {
+      border-color: rgba(239, 68, 68, 0.45);
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+    }
+    .feat-header {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 5px;
+    }
+    .feat-icon {
+      width: 25px;
+      height: 25px;
+      border-radius: 7px;
+      background: rgba(239, 68, 68, 0.22);
+      color: #f87171;
+      font-size: 11pt;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .feat-icon.blue {
+      background: rgba(56, 189, 248, 0.22);
+      color: #38bdf8;
+    }
+    .feat-icon.emerald {
+      background: rgba(52, 211, 153, 0.22);
+      color: #34d399;
+    }
+    .feat-icon.purple {
+      background: rgba(168, 85, 247, 0.22);
+      color: #c084fc;
+    }
+    .feat-title {
+      font-size: 9.3pt;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.2px;
+    }
+    .feat-desc {
+      font-size: 7.8pt;
+      color: #94a3b8;
+      line-height: 1.35;
+      margin-bottom: 6px;
+    }
+    .feat-impact {
+      background: rgba(0, 0, 0, 0.45);
+      border-radius: 5px;
+      padding: 5px 8px;
+      font-size: 7.3pt;
+      color: #cbd5e1;
+      border-left: 2.5px solid #ef4444;
+      font-weight: 500;
+      line-height: 1.32;
+    }
+    .feat-impact.blue { border-left-color: #38bdf8; }
+    .feat-impact.emerald { border-left-color: #34d399; }
+    .feat-impact.purple { border-left-color: #c084fc; }
+    .feat-impact strong { color: #f1f5f9; }
+
+    /* PARADIGM SHIFT COMPARISON TABLE */
+    .comparison-section {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 9px;
+      padding: 8px 12px;
+      margin-bottom: 1.5mm;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    }
+    .comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 7.7pt;
+    }
+    .comp-table th {
+      text-align: left;
+      padding: 4px 7px;
+      font-size: 7pt;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+    }
+    .comp-table td {
+      padding: 5px 7px;
+      vertical-align: middle;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      line-height: 1.32;
+    }
+    .comp-table tr:last-child td { border-bottom: none; }
+    .bad-cell { color: #fca5a5; font-weight: 600; }
+    .good-cell { color: #6ee7b7; font-weight: 700; }
+
+    /* FOOTER */
+    .footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding-top: 2.5mm;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 7.3pt;
+      color: #64748b;
+    }
+    .footer-left strong { color: #cbd5e1; font-weight: 700; }
+    .footer-right {
+      display: flex;
+      gap: 14px;
+    }
+    .footer-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #38bdf8;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+    
+    <!-- TOP HEADER -->
+    <header class="header">
+      <div class="brand-wrap">
+        <div class="shield-logo">🛡️</div>
+        <div class="brand-text">
+          <h1>SAFE BD</h1>
+          <p>Next-Gen National Civic Security & Emergency Grid</p>
+        </div>
+      </div>
+      <div class="badge-pill">
+        <span class="badge-dot"></span>
+        Nationwide Crime Reduction Blueprint
+      </div>
+    </header>
+
+    <!-- HERO VALUE PROPOSITION -->
+    <section class="hero-section">
+      <div class="hero-pre">The Strategic Breakthrough</div>
+      <h2 class="hero-title">How SAFE BD Disrupts Bangladesh's <span>Crime History & Crime Rates</span></h2>
+      <p class="hero-desc">
+        Bangladesh’s crime deterrence has historically suffered from three systemic vulnerabilities: <strong>delayed police dispatch</strong>, <strong>fear of harassment during reporting</strong>, and <strong>loss of critical forensic evidence</strong>. SAFE BD completely dismantles this cycle through zero-compromise citizen surveillance technology.
+      </p>
+    </section>
+
+    <!-- KEY IMPACT METRICS STRIP -->
+    <section class="metrics-bar">
+      <div class="metric-card">
+        <div class="metric-val">3 Seconds</div>
+        <div class="metric-label">Emergency Broadcast Delay</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val">100%</div>
+        <div class="metric-label">Court-Admissible Vault Evidence</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val">641 Thanas</div>
+        <div class="metric-label">Direct Police Reach (01320 Series)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val">-65%</div>
+        <div class="metric-label">Projected Street Harassment & Robbery</div>
+      </div>
+    </section>
+
+    <!-- 4 CORE ENGINES DRIVING CRIME DECLINE -->
+    <div class="section-tag">Core Technological Pillars Eradicating Impunity</div>
+
+    <section class="features-grid">
+      
+      <!-- FEATURE 1: COVERT BLACKBOX VAULT -->
+      <div class="feat-card highlight">
+        <div>
+          <div class="feat-header">
+            <div class="feat-icon">🎥</div>
+            <div class="feat-title">Covert Evidence Blackbox & Cloud Vault</div>
+          </div>
+          <div class="feat-desc">
+            When triggered, phone instantly records audio/video with zero screen glow or indication, immediately streaming tamper-proof footage directly to private Google Drive storage.
+          </div>
+        </div>
+        <div class="feat-impact">
+          <strong>Crime Impact:</strong> Criminals can no longer erase evidence by smashing or seizing the phone. Destroys extortion, false denials, and political protection.
+        </div>
+      </div>
+
+      <!-- FEATURE 2: INSTANT SOS & 999 CAD DISPATCH -->
+      <div class="feat-card">
+        <div>
+          <div class="feat-header">
+            <div class="feat-icon blue">🚨</div>
+            <div class="feat-title">1-Tap SOS with Instant 999 CAD Relay</div>
+          </div>
+          <div class="feat-desc">
+            Single button press broadcasts precise GPS coordinates, citizen blood group, and emergency alerts simultaneously to family circles and the national 999 police dispatcher.
+          </div>
+        </div>
+        <div class="feat-impact blue">
+          <strong>Crime Impact:</strong> Slashes emergency response lag from 45+ minutes to minutes. Intercepts mugging, abduction, and assault mid-incident.
+        </div>
+      </div>
+
+      <!-- FEATURE 3: WALK WITH ME DIGITAL COMPANION -->
+      <div class="feat-card">
+        <div>
+          <div class="feat-header">
+            <div class="feat-icon emerald">🚶‍♀️</div>
+            <div class="feat-title">Walk With Me & Live Route Guardian</div>
+          </div>
+          <div class="feat-desc">
+            Automated route tracking with geofenced checkpoints for women, night commuters, and students. Triggers auto-escalating alarms if route deviates or movement freezes.
+          </div>
+        </div>
+        <div class="feat-impact emerald">
+          <strong>Crime Impact:</strong> Eliminates predatory street crime and roadside abduction by maintaining continuous virtual witness custody until destination reached.
+        </div>
+      </div>
+
+      <!-- FEATURE 4: NATIONWIDE 641 THANA POLICE AI -->
+      <div class="feat-card">
+        <div>
+          <div class="feat-header">
+            <div class="feat-icon purple">🤖</div>
+            <div class="feat-title">shurokhaAI: Direct 641 Thana Access</div>
+          </div>
+          <div class="feat-desc">
+            Instant directory AI linking every citizen to all 641 Thanas (OC, 24/7 Duty Officer, Investigation) on new official 01320-series lines, with typo-tolerant fuzzy search.
+          </div>
+        </div>
+        <div class="feat-impact purple">
+          <strong>Crime Impact:</strong> Removes bureaucratic friction and middlemen. Citizens can summon their local police station leadership in under 5 seconds.
+        </div>
+      </div>
+
+    </section>
+
+    <!-- HISTORICAL CRIME SHIFT COMPARISON TABLE -->
+    <div class="section-tag">Historical Reality vs. The SAFE BD Paradigm</div>
+
+    <section class="comparison-section">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th style="width: 27%;">Crime Dimension</th>
+            <th style="width: 36%;">Traditional Bangladesh Reality</th>
+            <th style="width: 37%;">With SAFE BD Deployed</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Street Harassment & Eve-Teasing</strong></td>
+            <td class="bad-cell">Zero physical witnesses; perpetrators flee with impunity.</td>
+            <td class="good-cell">Covert auto-vault preserves faces, voices, and time-stamped location.</td>
+          </tr>
+          <tr>
+            <td><strong>Robbery & Armed Extortion</strong></td>
+            <td class="bad-cell">Victims silenced; phones seized or smashed to kill proof.</td>
+            <td class="good-cell">Evidence auto-synced off-device before robber touches the screen.</td>
+          </tr>
+          <tr>
+            <td><strong>Night Transport Abduction</strong></td>
+            <td class="bad-cell">No trail; family discovers danger hours or days later.</td>
+            <td class="good-cell">Live route broadcast; deviation instantly alerts guardian circle.</td>
+          </tr>
+          <tr>
+            <td><strong>Police Accessibility & Dispatch</strong></td>
+            <td class="bad-cell">Hunting for outdated numbers; delayed intervention.</td>
+            <td class="good-cell">Instant 1-tap call to 24/7 Duty Officer and direct 999 CAD integration.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- BOTTOM FOOTER -->
+    <footer class="footer">
+      <div class="footer-left">
+        <strong>SAFE BD (সুরক্ষা বাংলাদেশ)</strong> • Empowering 170 Million Citizens Through Immediate Digital Deterrence
+      </div>
+      <div class="footer-right">
+        <span class="footer-tag">⚡ Zero-Latency Grid</span>
+        <span class="footer-tag">🔒 End-to-End Cryptography</span>
+        <span class="footer-tag">🇧🇩 64 Districts Active</span>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>
