@@ -2907,22 +2907,25 @@
           </div>
         </div>
 
-        <!-- Quick Safety & Knowledge Pills -->
+        <!-- Quick Safety & Bangladesh Thana Directory Pills -->
         <div class="shurokha-quick-pills">
-          <button type="button" class="shurokha-pill" onclick="sendShurokhaQuick('What are my legal rights if harassed on the street in Bangladesh?')">
-            ⚖️ Legal Rights in BD
+          <button type="button" class="shurokha-pill" onclick="sendShurokhaQuick('ধানমন্ডি থানার ওসির নাম্বার দিন')">
+            👮 ধানমন্ডি থানা (OC)
           </button>
-          <button type="button" class="shurokha-pill" onclick="sendShurokhaQuick('What is the emergency first aid procedure for sudden burns or fainting?')">
-            🏥 First Aid Guide
+          <button type="button" class="shurokha-pill" onclick="sendShurokhaQuick('গুলশান ও বনানী থানার ওসির ফোন নাম্বার')">
+            👮 গুলশান / বনানী ওসি
           </button>
-          <button type="button" class="shurokha-pill" onclick="sendShurokhaQuick('How do I report online cyber harassment to Bangladesh Police?')">
-            🛡️ Cyber Safety Help
+          <button type="button" class="shurokha-pill" onclick="sendShurokhaQuick('মিরপুর ও উত্তরা থানার ওসির নাম্বার কত?')">
+            👮 মিরপুর / উত্তরা ওসি
           </button>
-          <button type="button" class="shurokha-pill" onclick="sendShurokhaQuick('What is the latest weather and disaster forecast in Bangladesh?')">
-            🌧️ Live Weather Search
+          <button type="button" class="shurokha-pill" onclick="sendShurokhaQuick('শেখ হাসিনা জাতীয় বার্ন ইউনিট ও জরুরি হাসপাতালের নাম্বার')">
+            🏥 বার্ন ইউনিট ও হাসপাতাল
           </button>
-          <button type="button" class="shurokha-pill" onclick="sendShurokhaQuick('কেমন আছেন? আপনি কীভাবে আমাকে সাহায্য করতে পারেন?')">
-            🇧🇩 বাংলায় কথা বলুন
+          <button type="button" class="shurokha-pill" onclick="sendShurokhaQuick('পুলিশ সাইবার সাপোর্ট ফর উইমেন (PCSW) ও নারী হেল্পলাইন ১০৯')">
+            🛡️ সাইবার সাপোর্ট ও ১০৯
+          </button>
+          <button type="button" class="shurokha-pill" onclick="sendShurokhaQuick('জাতীয় জরুরি সেবা ৯৯৯ কল')">
+            🚨 জরুরি সেবা ৯৯৯
           </button>
         </div>
 
@@ -2932,11 +2935,12 @@
             <div class="shurokha-msg-avatar"><i class="fas fa-robot"></i></div>
             <div class="shurokha-msg-bubble">
               <div class="shurokha-msg-text">
-                Hello! I am <strong>shurokhaAI</strong>, your 24/7 personal safety companion and friend from SAFE BD. You can talk to me like a real person about anything—emergency safety protocols in Bangladesh, first aid, live facts searched on Google, or just a friendly conversation.<br><br>How can I help you today? / কেমন আছেন? কীভাবে সাহায্য করতে পারি?
+                Hello! I am <strong>shurokhaAI</strong>, your 24/7 specialized Bangladesh Citizen Safety & Emergency Directory Assistant from SAFE BD.<br><br>
+                I can immediately provide you with the <strong>direct official mobile numbers of any Thana OC (Officer-in-Charge)</strong>, Duty Officer, DMP Control Room, emergency hospitals, Sheikh Hasina Burn Unit, and safety helplines.<br><br>
+                যেকোনো থানার ওসির মোবাইল নাম্বার বা জরুরি তথ্য জানতে আমাকে জিজ্ঞাসা করুন।
               </div>
               <div class="shurokha-bubble-footer">
                 <span class="shurokha-msg-time">Just now</span>
-                <button type="button" class="shurokha-speak-btn" onclick="speakShurokhaReply(this)" title="Read aloud"><i class="fas fa-volume-high"></i></button>
               </div>
             </div>
           </div>
@@ -2948,16 +2952,13 @@
           <div class="shurokha-typing-dots">
             <span></span><span></span><span></span>
           </div>
-          <span style="font-size: 11px; color: var(--text-muted); margin-left: 6px;">shurokhaAI is thinking...</span>
+          <span style="font-size: 11px; color: var(--text-muted); margin-left: 6px;">shurokhaAI is searching verified directory...</span>
         </div>
 
         <!-- Input Bar -->
         <div class="shurokha-input-bar">
           <div class="shurokha-input-wrap">
-            <textarea id="shurokha-input" rows="1" placeholder="Talk to shurokhaAI... (English or বাংলা)" onkeydown="handleShurokhaInputKey(event)" oninput="autoExpandShurokhaInput(this)"></textarea>
-            <button type="button" id="shurokha-voice-btn" class="shurokha-action-btn" onclick="toggleShurokhaVoiceInput()" title="Voice Dictation">
-              <i class="fas fa-microphone"></i>
-            </button>
+            <textarea id="shurokha-input" rows="1" placeholder="Ask for any Thana OC, emergency hospital, helpline... (English বা বাংলা)" onkeydown="handleShurokhaInputKey(event)" oninput="autoExpandShurokhaInput(this)"></textarea>
           </div>
           <button type="button" id="shurokha-send-btn" class="shurokha-send-button" onclick="sendShurokhaMessage()" title="Send">
             <i class="fas fa-paper-plane"></i>
@@ -9268,11 +9269,12 @@
               <div class="shurokha-msg-avatar"><i class="fas fa-robot"></i></div>
               <div class="shurokha-msg-bubble">
                 <div class="shurokha-msg-text">
-                  Hello! I am <strong>shurokhaAI</strong>, your 24/7 personal safety companion and friend from SAFE BD. You can talk to me like a real person about anything—emergency safety protocols in Bangladesh, first aid, live facts searched on Google, or just a friendly conversation.<br><br>How can I help you today? / কেমন আছেন? কীভাবে সাহায্য করতে পারি?
+                  Hello! I am <strong>shurokhaAI</strong>, your 24/7 specialized Bangladesh Citizen Safety & Emergency Directory Assistant from SAFE BD.<br><br>
+                  I can immediately provide you with the <strong>direct official mobile numbers of any Thana OC (Officer-in-Charge)</strong>, Duty Officer, DMP Control Room, emergency hospitals, Sheikh Hasina Burn Unit, and safety helplines.<br><br>
+                  যেকোনো থানার ওসির মোবাইল নাম্বার বা জরুরি তথ্য জানতে আমাকে জিজ্ঞাসা করুন।
                 </div>
                 <div class="shurokha-bubble-footer">
                   <span class="shurokha-msg-time">Just now</span>
-                  <button type="button" class="shurokha-speak-btn" onclick="speakShurokhaReply(this)" title="Read aloud"><i class="fas fa-volume-high"></i></button>
                 </div>
               </div>
             </div>
@@ -9302,7 +9304,7 @@
 
       let sourcesHtml = '';
       if (Array.isArray(sources) && sources.length > 0) {
-        sourcesHtml = `<div class="shurokha-sources-wrap"><span class="shurokha-source-head"><i class="fas fa-link"></i> Live Web Sources:</span>`;
+        sourcesHtml = `<div class="shurokha-sources-wrap"><span class="shurokha-source-head"><i class="fas fa-link"></i> Live Emergency Sources:</span>`;
         sources.slice(0, 3).forEach(s => {
           sourcesHtml += `<a href="${escapeHtml(s.url)}" target="_blank" class="shurokha-source-link">${escapeHtml(s.title || 'Source')} <i class="fas fa-external-link-alt"></i></a>`;
         });
@@ -9311,10 +9313,8 @@
 
       let poweredHtml = '';
       if (!isUser && poweredBy) {
-        poweredHtml = `<div class="shurokha-powered-tag"><i class="fas fa-wand-magic-sparkles"></i> ${escapeHtml(poweredBy)}</div>`;
+        poweredHtml = `<div class="shurokha-powered-tag"><i class="fas fa-shield-halved"></i> ${escapeHtml(poweredBy)}</div>`;
       }
-
-      const speakBtn = !isUser ? `<button type="button" class="shurokha-speak-btn" onclick="speakShurokhaReply(this)" title="Read aloud"><i class="fas fa-volume-high"></i></button>` : '';
 
       const row = document.createElement('div');
       row.className = `shurokha-msg-row ${isUser ? 'user' : 'ai'}`;
@@ -9326,7 +9326,6 @@
           ${poweredHtml}
           <div class="shurokha-bubble-footer">
             <span class="shurokha-msg-time">${timeStr}</span>
-            ${speakBtn}
           </div>
         </div>
         ${isUser ? `<div class="shurokha-msg-avatar user"><i class="fas fa-user"></i></div>` : ''}
@@ -9334,35 +9333,6 @@
 
       container.appendChild(row);
       container.scrollTop = container.scrollHeight;
-    }
-
-    function speakShurokhaReply(btn) {
-      if (!('speechSynthesis' in window)) {
-        alert("Speech synthesis not supported on this browser.");
-        return;
-      }
-      const bubble = btn.closest('.shurokha-msg-bubble');
-      if (!bubble) return;
-      const textEl = bubble.querySelector('.shurokha-msg-text');
-      if (!textEl) return;
-
-      if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel();
-        btn.innerHTML = '<i class="fas fa-volume-high"></i>';
-        return;
-      }
-
-      const textToSpeak = textEl.innerText.replace(/[\*\#\_]/g, '');
-      const utterance = new SpeechSynthesisUtterance(textToSpeak);
-      const isBangla = /[\u0980-\u09FF]/.test(textToSpeak);
-      utterance.lang = isBangla ? 'bn-BD' : 'en-US';
-      utterance.rate = 1.0;
-
-      btn.innerHTML = '<i class="fas fa-stop" style="color: #ef4444;"></i>';
-      utterance.onend = () => { btn.innerHTML = '<i class="fas fa-volume-high"></i>'; };
-      utterance.onerror = () => { btn.innerHTML = '<i class="fas fa-volume-high"></i>'; };
-
-      window.speechSynthesis.speak(utterance);
     }
 
     function toggleShurokhaVoiceInput() {
