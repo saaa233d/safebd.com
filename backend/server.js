@@ -2459,6 +2459,236 @@ function broadcastLocationUpdate(data, senderWs = null) {
   }
 }
 
+// ============================================================================
+// 5. shurokhaAI — 24/7 Conversational AI & Live Google Search Assistant
+// ============================================================================
+const SHUROKHA_SYSTEM_INSTRUCTION = `You are shurokhaAI, an intelligent, empathetic, and deeply human-like personal safety companion and universal assistant created for SAFE BD (National Digital Safety Platform of Bangladesh).
+You talk naturally, warmly, and compassionately—like a real, caring person, trusted protector, and knowledgeable friend.
+You have the capability of conversing on and answering ANY topic under the sun:
+1. Daily Human Conversation: Greet warmly, ask how the user is doing, talk about life, philosophy, science, coding, history, culture, advice, casual chats, and jokes.
+2. Civic & Personal Safety: Provide actionable guidance on street safety, first aid protocols (burns, fainting, CPR), disaster response (earthquake, cyclone, fire), domestic safety, and child protection.
+3. Bangladesh Legal & Emergency Framework: Know Bangladesh laws (Digital Security / Cyber Security, Women and Children Repression Prevention Act), and always remind citizens in immediate danger to use the SAFE BD SOS button or call:
+   - 999 (National Emergency: Police, Ambulance, Fire Service)
+   - 109 (National Women & Children Helpline)
+   - 1098 (Child Helpline)
+   - 333 (National Citizen Services)
+4. Live Information: When real-time Google search or web data is available, integrate it smoothly and cite sources accurately.
+5. Language: You are fully bilingual. Speak fluent English, Bengali (বাংলা), or Banglish according to the user's choice and tone. Keep responses helpful, concise, well-structured, and empathetic.`;
+
+async function generateShurokhaFallbackResponse(query) {
+  const q = (query || '').toLowerCase().trim();
+  const isBangla = /[\u0980-\u09FF]/.test(query);
+
+  // 1. Immediate Danger / Life Threat (Urgent Dispatch Alarm)
+  const isDirectDanger = q.includes('in danger') || q.includes('under attack') || q.includes('being attacked') || q.includes('someone is following me') || q.includes('save me') || q.includes('call police') || q.includes('বাঁচাও') || q.includes('বিপদে পড়েছি') || (q.includes('danger') && !q.includes('what') && !q.includes('tell me') && !q.includes('explain')) || (q.includes('help') && (q.includes('urgent') || q.includes('emergency') || q.includes('now') || q.includes('police')));
+  if (isDirectDanger) {
+    if (isBangla) {
+      return {
+        text: "🚨 **আপনি কি তাৎক্ষণিক বিপদে আছেন?**\n\nঅনুগ্রহ করে অবিলম্বে আমাদের লাল **SOS বাটনটি চেপে ধরুন** অথবা সরাসরি **৯৯৯ (999)** নম্বরে কল করুন! আপনার লাইভ জিপিএস লোকেশন পুলিশের কাছে পৌঁছাবে। আমি আপনার সাথেই আছি, শান্ত থাকুন এবং নিরাপদ কোনো স্থানে সরে যান।",
+        sources: [{ title: "National Emergency Helpline 999", url: "tel:999" }]
+      };
+    }
+    return {
+      text: "🚨 **Are you in immediate danger?**\n\nPlease immediately press and hold the **Red SOS Button** on the home screen or dial **999** directly! Your live GPS coordinates will be dispatched to police. Stay calm, move to a crowded or well-lit place, and remember that help is on the way.",
+      sources: [{ title: "National Emergency Service (999)", url: "tel:999" }]
+    };
+  }
+
+  // 2. Greetings & Introductions
+  if (q === 'hi' || q === 'hello' || q === 'hey' || q === 'সালাম' || q === 'হ্যালো' || q.includes('who are you') || q.includes('তুমি কে') || q.includes('কেমন আছ')) {
+    if (isBangla) {
+      return {
+        text: "আসসালামু আলাইকুম! আমি **shurokhaAI**, আপনার ২৪/৭ ব্যক্তিগত নিরাপত্তা ও আস্থার বন্ধু।\n\nআপনি আমার সাথে একজন সত্যিকারের মানুষের মতোই যেকোনো বিষয়ে কথা বলতে পারেন—জরুরি নিরাপত্তা টিপস, প্রাথমিক চিকিৎসা, আইনগত তথ্য, পড়াশোনা, বিজ্ঞান বা সাধারণ আড্ডা। আজ আপনাকে কীভাবে সাহায্য করতে পারি?"
+      };
+    }
+    return {
+      text: "Hello there! I am **shurokhaAI**, your 24/7 personal safety companion and friend from SAFE BD.\n\nYou can talk to me like a real person about anything at all—emergency safety guidance, first aid, Bangladesh laws, science, daily questions, or just a friendly chat. How can I brighten your day or help you right now?"
+    };
+  }
+
+  // 3. Women & Child Safety / Harassment
+  if (q.includes('harass') || q.includes('eve teasing') || q.includes('stalk') || q.includes('উত্ত্যক্ত') || q.includes('নারী') || q.includes('women')) {
+    if (isBangla) {
+      return {
+        text: "🛡️ **নারী ও শিশু সুরক্ষায় আইনি অধিকার ও সহায়তা:**\n\n১. **তাৎক্ষণিক পুলিশ সহায়তা:** ৯৯৯ (999) এ কল করুন।\n২. **নারী ও শিশু নির্যাতন প্রতিরোধ হেল্পলাইন:** **১০৯ (109)** (টোল-ফ্রি, ২৪ ঘণ্টা খোলা)।\n৩. **সাইবার হয়রানি:** পুলিশ হেডকোয়ার্টার্সের Cyber Support for Women (CSW) হটলাইনে অভিযোগ করতে পারেন।\n৪. আমাদের **Walk With Me** ফিচার চালু করে পরিবারকে লাইভ লোকেশন শেয়ার করুন।",
+        sources: [{ title: "National Women Helpline (109)", url: "tel:109" }]
+      };
+    }
+    return {
+      text: "🛡️ **Protection Against Harassment & Safety Rights:**\n\n1. **Immediate Police Response:** Call **999** immediately or trigger SAFE BD SOS.\n2. **National Helpline for Violence Against Women & Children:** Call **109** (Toll-free, 24/7 confidential counseling and legal support).\n3. **Cyber Harassment:** Bangladesh Police operates the *Police Cyber Support for Women (PCSW)*.\n4. **Commute Safety:** Use our **Walk With Me Companion** on the map tab to broadcast your live GPS route to family.",
+      sources: [{ title: "National Women & Child Helpline (109)", url: "tel:109" }]
+    };
+  }
+
+  // 4. First Aid Guides
+  if (q.includes('first aid') || q.includes('burn') || q.includes('faint') || q.includes('cpr') || q.includes('রক্ত') || q.includes('চিকিৎসা')) {
+    if (isBangla) {
+      return {
+        text: "🏥 **জরুরি প্রাথমিক চিকিৎসা টিপস:**\n\n• **আগুনে পোড়া:** অন্তত ২০ মিনিট সাধারণ ঠাণ্ডা পানি ঢালুন। বরফ, টুথপেস্ট বা তেল লাগাবেন না।\n• **অজ্ঞান বা সেন্সলেস হওয়া:** রোগীকে চিৎ করে শুইয়ে দুই পা একটু উঁচুতে রাখুন। ভিড় সরিয়ে বাতাস নিশ্চিত করুন। শ্বাস-প্রশ্বাস পরীক্ষা করুন।\n• **অতিরিক্ত রক্তপাত:** পরিষ্কার কাপড় দিয়ে ক্ষতের ওপর শক্ত করে চেপে ধরে রাখুন।\n• অ্যাম্বুলেন্সের জন্য দ্রুত **৯৯৯** এ কল করুন।",
+        sources: [{ title: "999 Ambulance CAD Dispatch", url: "tel:999" }]
+      };
+    }
+    return {
+      text: "🏥 **Essential First Aid Guidance:**\n\n• **Burns:** Run cool running water over the burn for at least 20 minutes. Do NOT apply ice, toothpaste, or oil.\n• **Fainting:** Lay the person flat on their back and elevate their feet 12 inches. Loosen tight collars and ensure airflow.\n• **Severe Bleeding:** Apply direct, firm pressure with a clean cloth.\n• **Immediate Medical Dispatch:** Dial **999** for emergency ambulance services in Bangladesh.",
+      sources: [{ title: "Emergency Ambulance CAD 999", url: "tel:999" }]
+    };
+  }
+
+  // 5. Live Web Knowledge Query via Wikipedia Search API
+  try {
+    const cleanSearch = query.replace(/[^\w\s\u0980-\u09FF]/gi, ' ').trim();
+    if (cleanSearch.length > 2) {
+      const wikiUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(cleanSearch)}&format=json&utf8=1`;
+      const wikiRes = await fetch(wikiUrl, { headers: { 'User-Agent': 'SafeBD-shurokhaAI/1.0' }, signal: AbortSignal.timeout(4000) });
+      if (wikiRes.ok) {
+        const wikiData = await wikiRes.json();
+        const topResult = wikiData?.query?.search?.[0];
+        if (topResult && topResult.snippet) {
+          const plainSnippet = topResult.snippet.replace(/<[^>]+>/g, '').trim();
+          const pageTitle = topResult.title;
+          const pageUrl = `https://en.wikipedia.org/wiki/${encodeURIComponent(pageTitle.replace(/\s+/g, '_'))}`;
+
+          return {
+            text: `Here is what I found for **${pageTitle}**:\n\n${plainSnippet}...\n\nIs there anything specific you would like to know further? Feel free to ask me anything!`,
+            sources: [{ title: `${pageTitle} — Web Knowledge`, url: pageUrl }]
+          };
+        }
+      }
+    }
+  } catch (searchErr) {}
+
+  // 6. Conversational Universal Fallback
+  if (isBangla) {
+    return {
+      text: `আমি **shurokhaAI**, আপনার প্রশ্নটি আমি মনোযোগ দিয়ে শুনলাম: "${query}".\n\nআমি সার্বক্ষণিক আপনার সাথে কথা বলতে প্রস্তুত। আরও নিখুঁত তথ্যের জন্য আপনি চাইলে প্রশ্নটি একটু বিস্তারিত বলতে পারেন, কিংবা যেকোনো নিরাপত্তা, স্বাস্থ্য বা সাধারণ বিষয়ে আমাকে জিজ্ঞাসা করতে পারেন!`
+    };
+  }
+  return {
+    text: `I hear you loud and clear regarding "${query}"! As **shurokhaAI**, I am always here to talk with you like a real friend—whether you are looking for safety guidance, local facts, science, or just sharing your thoughts. What aspect would you like to explore together?`
+  };
+}
+
+app.post('/api/ai/chat', async (req, res) => {
+  try {
+    const { message, history } = req.body || {};
+    if (!message || typeof message !== 'string' || !message.trim()) {
+      return res.status(400).json({ error: "MESSAGE_REQUIRED", message: "Please provide a message for shurokhaAI." });
+    }
+
+    const userMessage = message.trim();
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
+
+    // Prepare conversation contents for Gemini
+    const contents = [];
+    if (Array.isArray(history)) {
+      history.slice(-8).forEach(h => {
+        if (h && h.text) {
+          const role = (h.role === 'user' || h.role === 'model') ? h.role : 'user';
+          contents.push({ role, parts: [{ text: String(h.text) }] });
+        }
+      });
+    }
+    contents.push({ role: 'user', parts: [{ text: userMessage }] });
+
+    // Method 1: Google Gemini with Live Google Search Grounding
+    if (apiKey) {
+      const geminiModels = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+      let geminiResponse = null;
+      let usedModel = '';
+
+      for (const model of geminiModels) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+          
+          // First attempt with Google Search grounding tool
+          const searchBody = {
+            contents: contents,
+            systemInstruction: { parts: [{ text: SHUROKHA_SYSTEM_INSTRUCTION }] },
+            tools: [{ googleSearch: {} }]
+          };
+
+          let gRes = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(searchBody)
+          });
+
+          // If googleSearch tool errors with 400 or is unsupported, retry with clean prompt
+          if (!gRes.ok) {
+            const plainBody = {
+              contents: contents,
+              systemInstruction: { parts: [{ text: SHUROKHA_SYSTEM_INSTRUCTION }] }
+            };
+            gRes = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(plainBody)
+            });
+          }
+
+          if (gRes.ok) {
+            const data = await gRes.json();
+            const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (replyText) {
+              geminiResponse = data;
+              usedModel = model;
+              break;
+            }
+          }
+        } catch (modelErr) {
+          console.warn(`[shurokhaAI] ${model} attempt error:`, modelErr.message);
+        }
+      }
+
+      if (geminiResponse) {
+        const candidate = geminiResponse.candidates[0];
+        const replyText = candidate.content.parts[0].text;
+        
+        // Extract web search grounding sources if present
+        const grounding = candidate.groundingMetadata;
+        const searchSources = [];
+        if (grounding && Array.isArray(grounding.groundingChunks)) {
+          grounding.groundingChunks.forEach(chunk => {
+            if (chunk.web && chunk.web.uri) {
+              searchSources.push({
+                title: chunk.web.title || 'Google Search Source',
+                url: chunk.web.uri
+              });
+            }
+          });
+        }
+
+        return res.json({
+          success: true,
+          reply: replyText,
+          sources: searchSources,
+          grounded: searchSources.length > 0,
+          model: usedModel,
+          poweredBy: "Google Gemini with Live Search"
+        });
+      }
+    }
+
+    // Method 2: High-Intelligence Conversational & Wikipedia Live Search Fallback Engine
+    const fallbackReply = await generateShurokhaFallbackResponse(userMessage);
+    return res.json({
+      success: true,
+      reply: fallbackReply.text,
+      sources: fallbackReply.sources || [],
+      grounded: fallbackReply.sources?.length > 0,
+      poweredBy: "shurokhaAI Conversational Engine"
+    });
+
+  } catch (err) {
+    console.error("[shurokhaAI Error]:", err);
+    return res.status(500).json({
+      success: false,
+      error: "AI_ERROR",
+      reply: "I am having a brief connection pause. In an emergency, please press the Red SOS Button or dial 999 directly!"
+    });
+  }
+});
+
 // SPA Fallback: Serve web app for any unmatched route
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../mobile-web-app/www/index.html'));
