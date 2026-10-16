@@ -19,6 +19,7 @@ const PORT = process.env.PORT || 5000;
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const policeDirectory = require('./policeDirectoryService');
 
 // Process Crash Resilience: Prevent uncaught network/socket exceptions from killing the server
 process.on('uncaughtException', (err) => {
@@ -3421,10 +3422,21 @@ async function searchGoogleThanaContact(thanaQuery) {
 // Smart Verified Matcher for Bangladesh Police Thanas, Districts and Emergency Contacts
 function findBangladeshSafetyContact(query) {
   if (!query) return null;
+
+  // 1. Full Official Nationwide Police Directory & Intelligent Fuzzy Matcher (641 Thanas, 64 Districts, New 01320- Numbers)
+  try {
+    const masterMatch = policeDirectory.resolvePoliceQuery(query);
+    if (masterMatch) {
+      return masterMatch;
+    }
+  } catch (err) {
+    console.error('[AI] policeDirectory lookup error:', err.message);
+  }
+
   const q = query.toLowerCase().trim();
   const isBangla = /[\u0980-\u09FF]/.test(query);
 
-  // 1. Direct Thana Match
+  // 2. Fallback Legacy Thana Match
   for (const t of BANGLADESH_THANA_DIRECTORY) {
     if (t.keywords.some(k => q.includes(k.toLowerCase()))) {
       const cleanOc = t.ocPhone.replace(/\D/g, '');
@@ -3626,7 +3638,7 @@ app.post('/api/ai/chat', async (req, res) => {
         reply: directContact.text,
         sources: directContact.sources || [],
         grounded: directContact.sources?.length > 0,
-        poweredBy: "Bangladesh Emergency & Police Directory"
+        poweredBy: "Official Bangladesh Police Master Directory (01320 Series)"
       });
     }
 
