@@ -1419,30 +1419,65 @@ app.get('/api/routing/directions', async (req, res) => {
     oLon = 90.4125;
   }
 
-  // If destination coordinates missing, attempt geocoding from destQuery
+  // If destination coordinates missing, attempt multi-engine geocoding from destQuery
   if ((isNaN(dLat) || isNaN(dLon)) && destQuery) {
-    try {
-      const geoUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destQuery.trim() + ', Bangladesh')}&countrycodes=bd&limit=1`;
-      const geoRes = await fetch(geoUrl, {
-        headers: { 'User-Agent': 'SafeBD-App/1.0 (safebd.official@gmail.com)' },
-        signal: AbortSignal.timeout(4000)
-      });
-      const geoData = await geoRes.json();
-      if (geoData && geoData[0]) {
-        dLat = parseFloat(geoData[0].lat);
-        dLon = parseFloat(geoData[0].lon);
-      }
-    } catch (e) {
-      // ignore
+    const cleanDestQuery = destQuery.trim();
+
+    // 1. If Google Maps API key configured, use Google Geocoding first
+    const googleApiKey = process.env.GOOGLE_MAPS_API_KEY || (req.query && req.query.apiKey) || '';
+    if (googleApiKey) {
+      try {
+        const gGeoUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(cleanDestQuery + ', Bangladesh')}&key=${googleApiKey}`;
+        const gGeoRes = await fetch(gGeoUrl, { signal: AbortSignal.timeout(3500) });
+        const gGeoData = await gGeoRes.json();
+        if (gGeoData && gGeoData.results && gGeoData.results[0] && gGeoData.results[0].geometry) {
+          dLat = gGeoData.results[0].geometry.location.lat;
+          dLon = gGeoData.results[0].geometry.location.lng;
+        }
+      } catch (e) {}
+    }
+
+    // 2. Fast Photon Autocomplete Geocoder
+    if (isNaN(dLat) || isNaN(dLon)) {
+      try {
+        const pUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(cleanDestQuery)}&lat=23.8103&lon=90.4125&limit=1`;
+        const pRes = await fetch(pUrl, {
+          headers: { 'User-Agent': 'SafeBD-App/2.0' },
+          signal: AbortSignal.timeout(2500)
+        });
+        if (pRes.ok) {
+          const pData = await pRes.json();
+          if (pData && pData.features && pData.features[0] && pData.features[0].geometry) {
+            const coords = pData.features[0].geometry.coordinates;
+            if (coords && coords.length >= 2) {
+              dLat = coords[1];
+              dLon = coords[0];
+            }
+          }
+        }
+      } catch (e) {}
+    }
+
+    // 3. OpenStreetMap Nominatim
+    if (isNaN(dLat) || isNaN(dLon)) {
+      try {
+        const geoUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanDestQuery + ', Bangladesh')}&countrycodes=bd&limit=1`;
+        const geoRes = await fetch(geoUrl, {
+          headers: { 'User-Agent': 'SafeBD-App/2.0 (safebd.official@gmail.com)' },
+          signal: AbortSignal.timeout(2500)
+        });
+        if (geoRes.ok) {
+          const geoData = await geoRes.json();
+          if (geoData && geoData[0]) {
+            dLat = parseFloat(geoData[0].lat);
+            dLon = parseFloat(geoData[0].lon);
+          }
+        }
+      } catch (e) {}
     }
   }
 
-  // Fallback destination if still invalid (e.g. Dhanmondi)
-  if (isNaN(dLat) || isNaN(dLon)) {
-    dLat = 23.7461;
-    dLon = 90.3742;
-  }
-
+  const cleanDestName = destQuery ? destQuery.trim() : '';
   const travelMode = (mode === 'driving' || mode === 'bicycling' || mode === 'walking') ? mode : 'walking';
   
   // Calculate Bangladesh Standard Time (UTC+6) for live peak traffic modeling
@@ -1457,7 +1492,6 @@ app.get('/api/routing/directions', async (req, res) => {
   let modeLabel = "";
 
   // 1. Attempt Live Direct Google Maps Directions API if API key configured
-  // 1. Attempt Live Direct Google Maps Directions API if API key configured
   let routeGeometry = null;
   let turnSteps = [];
   let durationFormatted = "";
@@ -1468,13 +1502,14 @@ app.get('/api/routing/directions', async (req, res) => {
     try {
       // In South Asia/Bangladesh, Google Maps provides dedicated 'two_wheeler' for motorcycle/bike
       let gMode = travelMode === 'bicycling' ? 'bicycling' : (travelMode === 'driving' ? 'driving' : 'walking');
-      let gUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${oLat},${oLon}&destination=${dLat},${dLon}&mode=${gMode}&departure_time=now&traffic_model=best_guess&key=${googleApiKey}`;
+      const gDestParam = (!isNaN(dLat) && !isNaN(dLon)) ? `${dLat},${dLon}` : encodeURIComponent(cleanDestName + ', Bangladesh');
+      let gUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${oLat},${oLon}&destination=${gDestParam}&mode=${gMode}&departure_time=now&traffic_model=best_guess&key=${googleApiKey}`;
       let gRes = await fetch(gUrl, { signal: AbortSignal.timeout(5000) });
       let gData = await gRes.json();
 
       // If bicycling route not indexed in region, fallback to two_wheeler or driving
       if (travelMode === 'bicycling' && (!gData || gData.status !== 'OK')) {
-        const altUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${oLat},${oLon}&destination=${dLat},${dLon}&mode=two_wheeler&departure_time=now&traffic_model=best_guess&key=${googleApiKey}`;
+        const altUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${oLat},${oLon}&destination=${gDestParam}&mode=two_wheeler&departure_time=now&traffic_model=best_guess&key=${googleApiKey}`;
         const altRes = await fetch(altUrl, { signal: AbortSignal.timeout(5000) });
         const altData = await altRes.json();
         if (altData && altData.status === 'OK') gData = altData;
@@ -1482,6 +1517,10 @@ app.get('/api/routing/directions', async (req, res) => {
 
       if (gData && gData.status === 'OK' && gData.routes && gData.routes[0] && gData.routes[0].legs && gData.routes[0].legs[0]) {
         const leg = gData.routes[0].legs[0];
+        if (leg.end_location) {
+          dLat = leg.end_location.lat;
+          dLon = leg.end_location.lng;
+        }
         distanceKm = Math.round((leg.distance.value / 1000) * 10) / 10;
         // Priority to Google's duration_in_traffic if available (Exact Google Maps Live Traffic Time)
         const liveDur = leg.duration_in_traffic || leg.duration;
@@ -1508,7 +1547,7 @@ app.get('/api/routing/directions', async (req, res) => {
   }
 
   // 2. High-Accuracy Turn-by-Turn Road Geometry Engine (Pedestrian Walkway, Bike & Street Network)
-  if (!googleDirectionsSuccess) {
+  if (!googleDirectionsSuccess && !isNaN(dLat) && !isNaN(dLon)) {
     try {
       let routeUrl = '';
       if (travelMode === 'walking') {
@@ -1553,14 +1592,18 @@ app.get('/api/routing/directions', async (req, res) => {
 
   // Fallback Haversine road distance calculation if road query was offline
   if (!distanceKm || distanceKm < 0.1) {
-    const R = 6371; // Earth radius in km
-    const dLatRad = (dLat - oLat) * Math.PI / 180;
-    const dLonRad = (dLon - oLon) * Math.PI / 180;
-    const a = Math.sin(dLatRad / 2) * Math.sin(dLatRad / 2) +
-              Math.cos(oLat * Math.PI / 180) * Math.cos(dLat * Math.PI / 180) *
-              Math.sin(dLonRad / 2) * Math.sin(dLonRad / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    distanceKm = Math.max(0.3, Math.round(R * c * 1.35 * 10) / 10);
+    if (!isNaN(dLat) && !isNaN(dLon)) {
+      const R = 6371; // Earth radius in km
+      const dLatRad = (dLat - oLat) * Math.PI / 180;
+      const dLonRad = (dLon - oLon) * Math.PI / 180;
+      const a = Math.sin(dLatRad / 2) * Math.sin(dLatRad / 2) +
+                Math.cos(oLat * Math.PI / 180) * Math.cos(dLat * Math.PI / 180) *
+                Math.sin(dLonRad / 2) * Math.sin(dLonRad / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      distanceKm = Math.max(0.3, Math.round(R * c * 1.35 * 10) / 10);
+    } else {
+      distanceKm = 4.5;
+    }
   }
 
   // 3. Precise Google Maps Dhaka Traffic & Speed Matrix (Matches Google Maps Live GPS Time)
@@ -1611,13 +1654,17 @@ app.get('/api/routing/directions', async (req, res) => {
     }
   }
 
-  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${oLat},${oLon}&destination=${dLat},${dLon}&travelmode=${travelMode}&dir_action=navigate`;
-  const embedUrl = `https://maps.google.com/maps?saddr=${oLat},${oLon}&daddr=${dLat},${dLon}&directionsmode=${travelMode}&t=&z=14&ie=UTF8&iwloc=B&output=embed`;
+  const destTarget = (!isNaN(dLat) && !isNaN(dLon))
+    ? `${dLat},${dLon}`
+    : encodeURIComponent(cleanDestName + (cleanDestName.toLowerCase().includes('bangladesh') ? '' : ', Bangladesh'));
+
+  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${oLat},${oLon}&destination=${destTarget}&travelmode=${travelMode}&dir_action=navigate`;
+  const embedUrl = `https://maps.google.com/maps?saddr=${oLat},${oLon}&daddr=${destTarget}&directionsmode=${travelMode}&t=&z=14&ie=UTF8&iwloc=B&output=embed`;
 
   return res.json({
     success: true,
     origin: { lat: oLat, lon: oLon },
-    destination: { lat: dLat, lon: dLon },
+    destination: (!isNaN(dLat) && !isNaN(dLon)) ? { lat: dLat, lon: dLon, name: cleanDestName } : { query: cleanDestName },
     mode: travelMode,
     modeLabel,
     distanceKm,
