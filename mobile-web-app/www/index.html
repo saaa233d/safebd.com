@@ -2472,8 +2472,8 @@
 
             <div style="position: relative;">
               <div class="route-input-box">
-                <i class="fas fa-location-dot" style="color: #f87171;"></i>
-                <input type="text" class="route-input" id="walk-destination" placeholder="Destination (e.g. Dhanmondi, Airport, Gulshan...)" data-i18n-placeholder="walk_dest_placeholder" oninput="handleLocationSearch(this.value)" onfocus="if (this.value.trim()) handleLocationSearch(this.value)" autocomplete="off">
+                <i class="fas fa-location-dot" style="color: #f87171; cursor: pointer;" onclick="onDestinationEnterPressed()" title="Search destination"></i>
+                <input type="text" class="route-input" id="walk-destination" placeholder="Destination (e.g. Dhanmondi, Airport, Gulshan...)" data-i18n-placeholder="walk_dest_placeholder" oninput="handleLocationSearch(this.value)" onfocus="if (this.value.trim()) handleLocationSearch(this.value)" onkeydown="if (event.key === 'Enter') { event.preventDefault(); onDestinationEnterPressed(); }" autocomplete="off">
                 <button id="btn-clear-dest" onclick="clearDestinationInput()" style="display: none; background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px 6px;">
                   <i class="fas fa-xmark"></i>
                 </button>
@@ -2519,7 +2519,7 @@
             <button class="btn-start-walk" onclick="startWalkWithMe()">
               <i class="fas fa-shield-heart"></i> <span data-i18n="walk_btn_start">Start Companion Guard</span>
             </button>
-            <a id="btn-external-gmaps" class="btn-open-gmaps" href="https://maps.google.com" target="_blank" title="Open full Google Maps">
+            <a id="btn-external-gmaps" class="btn-open-gmaps" href="https://maps.google.com" target="_blank" onclick="openGoogleMapsDestinationDirect(event)" title="Open full Google Maps">
               <i class="fas fa-arrow-up-right-from-square"></i>
             </a>
           </div>
@@ -2562,7 +2562,7 @@
           <button type="button" class="btn-map-control" onclick="toggleMapOverviewRoute()" id="btn-toggle-route-view" title="Toggle Route / Live Pin View" style="display: none;">
             <i class="fas fa-route" style="color: #10b981;"></i>
           </button>
-          <a id="btn-floating-navigate" class="btn-map-control" href="https://maps.google.com" target="_blank" title="Start Live Google Maps Navigation" style="text-decoration: none;">
+          <a id="btn-floating-navigate" class="btn-map-control" href="https://maps.google.com" target="_blank" onclick="openGoogleMapsDestinationDirect(event)" title="Start Live Google Maps Navigation" style="text-decoration: none;">
             <i class="fas fa-diamond-turn-right" style="color: #f59e0b;"></i>
           </a>
         </div>
@@ -2598,7 +2598,7 @@
             <button type="button" onclick="centerOnUserLiveLocation(true)" style="flex: 1; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; padding: 7px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
               <i class="fas fa-crosshairs"></i> <span data-i18n="dock_btn_track">Track Live Pin</span>
             </button>
-            <a id="btn-dock-external-nav" href="https://maps.google.com" target="_blank" style="flex: 1; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #f59e0b; padding: 7px; border-radius: 8px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px;">
+            <a id="btn-dock-external-nav" href="https://maps.google.com" target="_blank" onclick="openGoogleMapsDestinationDirect(event)" style="flex: 1; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #f59e0b; padding: 7px; border-radius: 8px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px;">
               <i class="fas fa-diamond-turn-right"></i> <span data-i18n="dock_btn_nav">Live Google Nav</span>
             </a>
           </div>
@@ -4490,7 +4490,12 @@
       }
 
       // Update external Google Maps live navigation URLs (turn-by-turn navigation)
-      const destParam = currentDestinationQuery ? encodeURIComponent(currentDestinationQuery) : '';
+      let destParam = '';
+      if (selectedDestCoords && selectedDestCoords.lat && selectedDestCoords.lon) {
+        destParam = `${selectedDestCoords.lat},${selectedDestCoords.lon}`;
+      } else if (currentDestinationQuery) {
+        destParam = encodeURIComponent(currentDestinationQuery);
+      }
       const modeParam = selectedTravelMode === 'driving' ? 'driving' : (selectedTravelMode === 'bicycling' ? 'bicycling' : 'walking');
       const liveNavUrl = destParam 
         ? `https://www.google.com/maps/dir/?api=1&origin=${lat},${lon}&destination=${destParam}&travelmode=${modeParam}&dir_action=navigate`
@@ -6068,8 +6073,92 @@
       computeLiveGoogleMapsRoute(currentDestinationQuery, selectedDestCoords, true);
     }
 
+    function findBestLocationMatch(query) {
+      if (!query || typeof query !== 'string') return null;
+      const cleanQ = query.split(',')[0].trim().toLowerCase();
+      if (!cleanQ) return null;
+
+      // 1. Exact match
+      let match = BANGLADESH_LOCATIONS.find(l => l.name.toLowerCase() === cleanQ);
+      if (match) return match;
+
+      // 2. Starts with or prefix match
+      match = BANGLADESH_LOCATIONS.find(l => l.name.toLowerCase().startsWith(cleanQ) || cleanQ.startsWith(l.name.toLowerCase()));
+      if (match) return match;
+
+      // 3. Includes match
+      match = BANGLADESH_LOCATIONS.find(l => l.name.toLowerCase().includes(cleanQ) || cleanQ.includes(l.name.toLowerCase()));
+      if (match) return match;
+
+      // 4. Token matches in keywords, name, or area
+      const tokens = cleanQ.split(/\s+/).filter(t => t.length > 1);
+      if (tokens.length > 0) {
+        match = BANGLADESH_LOCATIONS.find(l => {
+          const corpus = `${l.name} ${l.area} ${l.keywords || ''}`.toLowerCase();
+          return tokens.every(t => corpus.includes(t));
+        });
+        if (match) return match;
+
+        match = BANGLADESH_LOCATIONS.find(l => {
+          const corpus = `${l.name} ${l.area} ${l.keywords || ''}`.toLowerCase();
+          return tokens.some(t => corpus.includes(t));
+        });
+        if (match) return match;
+      }
+      return null;
+    }
+
+    function onDestinationEnterPressed() {
+      const destInput = document.getElementById('walk-destination');
+      const val = destInput ? destInput.value.trim() : '';
+      if (!val) return;
+      const dropdown = document.getElementById('bd-location-dropdown');
+      if (dropdown) dropdown.classList.remove('open');
+      selectCustomLocation(val);
+    }
+
+    function openGoogleMapsDestinationDirect(e) {
+      const destInput = document.getElementById('walk-destination');
+      const typed = destInput ? destInput.value.trim() : '';
+      const targetQuery = typed || currentDestinationQuery;
+      const oLat = currentCoords.lat || 23.8103;
+      const oLon = currentCoords.lon || 90.4125;
+      const mode = selectedTravelMode === 'driving' ? 'driving' : (selectedTravelMode === 'bicycling' ? 'bicycling' : 'walking');
+
+      let destParam = '';
+      if (selectedDestCoords && selectedDestCoords.lat && selectedDestCoords.lon) {
+        destParam = `${selectedDestCoords.lat},${selectedDestCoords.lon}`;
+      } else if (targetQuery) {
+        const match = findBestLocationMatch(targetQuery);
+        if (match && match.lat && match.lon) {
+          destParam = `${match.lat},${match.lon}`;
+        } else {
+          destParam = encodeURIComponent(targetQuery + (targetQuery.toLowerCase().includes('bangladesh') ? '' : ', Bangladesh'));
+        }
+      }
+
+      let finalUrl = '';
+      if (destParam) {
+        finalUrl = `https://www.google.com/maps/dir/?api=1&origin=${oLat},${oLon}&destination=${destParam}&travelmode=${mode}&dir_action=navigate`;
+      } else {
+        finalUrl = `https://www.google.com/maps?q=${oLat},${oLon}`;
+      }
+
+      if (e && e.currentTarget) {
+        e.currentTarget.href = finalUrl;
+      }
+      return true;
+    }
+
     function selectCustomLocation(rawQuery) {
-      selectLocation(rawQuery, `${rawQuery}, Bangladesh`, null, null);
+      if (!rawQuery || !rawQuery.trim()) return;
+      const cleanQ = rawQuery.trim();
+      const match = findBestLocationMatch(cleanQ);
+      if (match && match.lat && match.lon) {
+        selectLocation(match.name, match.query || `${match.name}, Bangladesh`, match.lat, match.lon);
+      } else {
+        selectLocation(cleanQ, `${cleanQ}, Bangladesh`, null, null);
+      }
     }
 
     function clearDestinationInput() {
@@ -6131,8 +6220,8 @@
       let dLon = explicitCoords && explicitCoords.lon ? explicitCoords.lon : (selectedDestCoords && selectedDestCoords.lon ? selectedDestCoords.lon : null);
 
       if (!dLat || !dLon) {
-        const match = BANGLADESH_LOCATIONS.find(l => l.name.toLowerCase() === cleanDest.split(',')[0].trim().toLowerCase());
-        if (match && match.lat) {
+        const match = findBestLocationMatch(cleanDest);
+        if (match && match.lat && match.lon) {
           dLat = match.lat;
           dLon = match.lon;
           selectedDestCoords = { lat: dLat, lon: dLon };
@@ -6140,7 +6229,7 @@
       }
 
       // Construct optimal target embed URL
-      const daddrParam = (dLat && dLon) ? `${dLat},${dLon}` : encodeURIComponent(cleanDest);
+      const daddrParam = (dLat && dLon) ? `${dLat},${dLon}` : encodeURIComponent(cleanDest + (cleanDest.toLowerCase().includes('bangladesh') ? '' : ', Bangladesh'));
       const targetEmbedUrl = `https://maps.google.com/maps?saddr=${encodeURIComponent(originParam)}&daddr=${daddrParam}&directionsmode=${modeParam}&t=&z=14&ie=UTF8&iwloc=B&output=embed`;
 
       if (forceMapReload) {
@@ -6159,7 +6248,7 @@
 
       const extGmaps = document.getElementById('btn-external-gmaps');
       if (extGmaps) {
-        const extDest = (dLat && dLon) ? `${dLat},${dLon}` : encodeURIComponent(cleanDest);
+        const extDest = (dLat && dLon) ? `${dLat},${dLon}` : encodeURIComponent(cleanDest + (cleanDest.toLowerCase().includes('bangladesh') ? '' : ', Bangladesh'));
         extGmaps.href = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originParam)}&destination=${extDest}&travelmode=${modeParam}`;
       }
 
@@ -6189,7 +6278,7 @@
           if (data && data.success) {
             calculatedRouteDistanceKm = data.distanceKm;
             calculatedDurationMinutes = data.durationMinutes;
-            if (data.destination && data.destination.lat) {
+            if (data.destination && data.destination.lat && !isNaN(data.destination.lat)) {
               selectedDestCoords = data.destination;
             }
 
@@ -6692,6 +6781,13 @@
         alert("Please search or select your destination in Bangladesh.");
         document.getElementById('walk-destination').focus();
         return;
+      }
+
+      if (!selectedDestCoords) {
+        const match = findBestLocationMatch(destination);
+        if (match && match.lat && match.lon) {
+          selectedDestCoords = { lat: match.lat, lon: match.lon };
+        }
       }
 
       // Read user-configured timer or input
