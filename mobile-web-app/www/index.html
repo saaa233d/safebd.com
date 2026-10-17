@@ -1548,7 +1548,7 @@
     }
 
     /* Modals & Sheets */
-    .auth-modal-backdrop, .contact-modal-backdrop, .edit-contact-modal-backdrop, .sos-modal-backdrop {
+    .auth-modal-backdrop, .contact-modal-backdrop, .edit-contact-modal-backdrop, .sos-modal-backdrop, .walk-timer-modal-backdrop {
       display: none;
       position: absolute;
       inset: 0;
@@ -1558,7 +1558,7 @@
       align-items: flex-end;
       backdrop-filter: blur(10px);
     }
-    .auth-modal-backdrop.open, .contact-modal-backdrop.open, .edit-contact-modal-backdrop.open, .sos-modal-backdrop.open {
+    .auth-modal-backdrop.open, .contact-modal-backdrop.open, .edit-contact-modal-backdrop.open, .sos-modal-backdrop.open, .walk-timer-modal-backdrop.open {
       display: flex;
     }
     .sos-modal-backdrop {
@@ -1823,6 +1823,7 @@
     body:has(.auth-modal-backdrop.open) .shurokha-fab,
     body:has(.edit-contact-modal-backdrop.open) .shurokha-fab,
     body:has(.sos-modal-backdrop.open) .shurokha-fab,
+    body:has(.walk-timer-modal-backdrop.open) .shurokha-fab,
     body:has(.author-profile-modal-backdrop.open) .shurokha-fab,
     body:has(.shurokha-modal-backdrop.open) .shurokha-fab,
     body:has(#evidence-player-modal.open) .shurokha-fab,
@@ -2435,13 +2436,35 @@
               <div class="location-dropdown-popup" id="bd-location-dropdown"></div>
             </div>
 
-            <!-- Live Google Maps Route Estimate Bar -->
-            <div id="route-estimate-banner" style="display: none; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 10px; padding: 7px 12px; margin-top: 6px; justify-content: space-between; align-items: center;">
-              <div style="display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: #10b981;">
-                <i class="fas fa-route"></i>
-                <span id="route-est-distance">Calculating...</span>
+            <!-- User Safety Timer Control (Set Before Starting) -->
+            <div id="walk-timer-setting-box" style="margin-top: 10px; background: rgba(12, 11, 14, 0.85); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 14px; padding: 11px 12px; box-shadow: 0 4px 18px rgba(0,0,0,0.4);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px;">
+                <div style="display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: #fff; font-weight: 700;">
+                  <i class="fas fa-stopwatch" style="color: #38bdf8; font-size: 15px;"></i>
+                  <span>Set Journey Safety Timer</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                  <button type="button" onclick="adjustCustomTimerMinutes(-5)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; width: 28px; height: 28px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Minus 5 mins">-5</button>
+                  <input type="number" id="user-custom-timer-mins" min="1" max="720" value="20" oninput="onCustomTimerInputChange(this.value)" style="width: 52px; text-align: center; background: rgba(56, 189, 248, 0.16); border: 1.5px solid #38bdf8; border-radius: 8px; color: #38bdf8; font-weight: 800; font-size: 14px; padding: 4px 0;">
+                  <span style="font-size: 11.5px; color: #94a3b8; font-weight: 700;">mins</span>
+                  <button type="button" onclick="adjustCustomTimerMinutes(+5)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; width: 28px; height: 28px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Plus 5 mins">+5</button>
+                </div>
               </div>
-              <div style="font-size: 11.5px; font-weight: 700; color: #fff;" id="route-est-time">-- mins</div>
+
+              <!-- Quick Preset Minute Chips -->
+              <div style="display: flex; gap: 5px; margin-bottom: 7px;">
+                <button type="button" class="walk-timer-chip" id="chip-timer-10" onclick="setTimerPreset(10)" style="flex: 1; padding: 6px 2px; font-size: 11px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-weight: 700; cursor: pointer;">10m</button>
+                <button type="button" class="walk-timer-chip" id="chip-timer-15" onclick="setTimerPreset(15)" style="flex: 1; padding: 6px 2px; font-size: 11px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-weight: 700; cursor: pointer;">15m</button>
+                <button type="button" class="walk-timer-chip active" id="chip-timer-20" onclick="setTimerPreset(20)" style="flex: 1; padding: 6px 2px; font-size: 11px; border-radius: 8px; background: rgba(56, 189, 248, 0.22); border: 1.5px solid #38bdf8; color: #38bdf8; font-weight: 800; cursor: pointer;">20m</button>
+                <button type="button" class="walk-timer-chip" id="chip-timer-30" onclick="setTimerPreset(30)" style="flex: 1; padding: 6px 2px; font-size: 11px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-weight: 700; cursor: pointer;">30m</button>
+                <button type="button" class="walk-timer-chip" id="chip-timer-45" onclick="setTimerPreset(45)" style="flex: 1; padding: 6px 2px; font-size: 11px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-weight: 700; cursor: pointer;">45m</button>
+                <button type="button" class="walk-timer-chip" id="chip-timer-60" onclick="setTimerPreset(60)" style="flex: 1; padding: 6px 2px; font-size: 11px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-weight: 700; cursor: pointer;">60m</button>
+              </div>
+
+              <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #94a3b8; padding: 0 2px;">
+                <span style="display: flex; align-items: center; gap: 4px;"><i class="fas fa-shield-halved" style="color: #10b981;"></i> Auto-alerts emergency circle if overdue</span>
+                <span style="color: #38bdf8;"><i class="fas fa-satellite-dish"></i> Runs automatically in background</span>
+              </div>
             </div>
           </div>
 
@@ -2466,6 +2489,9 @@
               <div style="font-size: 11px; color: #10b981; font-weight: 700; background: rgba(16, 185, 129, 0.15); padding: 2px 8px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);" id="transit-speed-badge">
                 ⚡ 0 km/h
               </div>
+              <button type="button" onclick="openEditTimerModal()" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; border-radius: 6px; padding: 2px 6px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 3px;" title="Edit Timer">
+                <i class="fas fa-stopwatch"></i>
+              </button>
               <button type="button" onclick="editWalkDestination()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px 4px; font-size: 11px;" title="Edit route">
                 <i class="fas fa-pen-to-square"></i>
               </button>
@@ -2477,7 +2503,7 @@
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 10.5px; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.08); padding-top: 6px;">
             <div>To: <strong style="color: #fff;" id="transit-target-dest">--</strong></div>
-            <div id="transit-eta-metric" style="color: #38bdf8; font-weight: 600;">Remaining: ~-- mins</div>
+            <div id="transit-eta-metric" onclick="openEditTimerModal()" style="color: #38bdf8; font-weight: 600; cursor: pointer;" title="Tap to edit timer">Remaining: ~-- mins</div>
           </div>
         </div>
 
@@ -2498,7 +2524,12 @@
         <div id="walk-dock" class="walk-active-dock">
           <div class="dock-stat-row">
             <div class="dock-stat-title"><i class="fas fa-shield-halved" style="color: #10b981;"></i> Companion Guard Active</div>
-            <div class="dock-timer-badge" id="walk-timer-display">20:00</div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <div class="dock-timer-badge" id="walk-timer-display" onclick="openEditTimerModal()" title="Tap to edit timer" style="cursor: pointer;">20:00</div>
+              <button type="button" onclick="openEditTimerModal()" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; border-radius: 8px; padding: 4px 8px; font-size: 10.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Edit Timer">
+                <i class="fas fa-clock-rotate-left"></i> Edit
+              </button>
+            </div>
           </div>
           <div class="dock-subtext" id="walk-dock-dest-text">
             Guarding route. An alert triggers if stationary or off-route for &gt; 3 mins.
@@ -2601,6 +2632,51 @@
       <button class="nav-tab-btn" onclick="switchTab('screen-feed', this)">Awareness</button>
       <button class="nav-tab-btn" id="nav-btn-admin" style="display: none; color: #f59e0b;" onclick="switchTab('screen-admin', this)"></button>
       <button class="nav-tab-btn" onclick="openAuthModal()">Profile</button>
+    </div>
+
+    <!-- ========================================================
+         MODAL 0: EDIT COMPANION TIMER MODAL (BACKGROUND ACTIVE)
+    ======================================================== -->
+    <div id="edit-walk-timer-modal" class="walk-timer-modal-backdrop" onclick="closeEditTimerModal(event)">
+      <div class="edit-sheet" onclick="event.stopPropagation()">
+        <div class="sheet-handle"></div>
+        <div class="modal-head-row">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-stopwatch" style="color: #38bdf8; font-size: 18px;"></i>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 700;">Edit Companion Timer</h3>
+          </div>
+          <button class="modal-close-x" onclick="closeEditTimerModal()"><i class="fas fa-xmark"></i></button>
+        </div>
+        
+        <p style="font-size: 12px; color: var(--text-muted); margin: 6px 0 14px 0;">
+          Add or adjust time for your journey. The timer automatically runs in the background even if your device is locked or minimized.
+        </p>
+
+        <!-- Quick Delta Add / Subtract Pills -->
+        <div style="margin-bottom: 14px;">
+          <label class="form-label" style="font-size: 11px; color: #cbd5e1; margin-bottom: 6px; display: block;">QUICK ADJUSTMENT</label>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
+            <button type="button" onclick="applyRunningTimerDelta(5)" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; padding: 9px 4px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">+5 mins</button>
+            <button type="button" onclick="applyRunningTimerDelta(10)" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; padding: 9px 4px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">+10 mins</button>
+            <button type="button" onclick="applyRunningTimerDelta(15)" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; padding: 9px 4px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">+15 mins</button>
+            <button type="button" onclick="applyRunningTimerDelta(-5)" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; padding: 9px 4px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">-5 mins</button>
+          </div>
+        </div>
+
+        <!-- Set Exact Remaining Minutes -->
+        <div style="margin-bottom: 16px;">
+          <label class="form-label" style="font-size: 11px; color: #cbd5e1; margin-bottom: 6px; display: block;">SET EXACT REMAINING TIME</label>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <div class="input-field-wrap" style="flex: 1;">
+              <input type="number" id="edit-running-timer-input" class="form-input" min="1" max="720" placeholder="e.g. 25" style="font-weight: 800; font-size: 15px; color: #38bdf8;">
+            </div>
+            <span style="font-size: 12.5px; color: var(--text-muted); font-weight: 600;">minutes</span>
+            <button type="button" onclick="applyRunningTimerExactInput()" style="background: #38bdf8; border: none; color: #0f172a; padding: 11px 16px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer;">Apply</button>
+          </div>
+        </div>
+
+        <button type="button" class="btn-close-sheet" onclick="closeEditTimerModal()">Close</button>
+      </div>
     </div>
 
     <!-- ========================================================
@@ -3341,6 +3417,9 @@
     let isOnlineSearchRunning = false;
     let calculatedRouteDistanceKm = 0;
     let calculatedDurationMinutes = 20;
+    let userConfiguredTimerMinutes = 20;
+    let userTimerMode = 'custom';
+    let walkTargetEndTime = 0; // Epoch timestamp (ms) for exact background tracking
 
     function formatDurationGoogleMaps(mins) {
       if (!mins || isNaN(mins)) return "5 mins";
@@ -5542,6 +5621,7 @@
       const destText = (currentDestinationQuery || (destInput ? destInput.value.trim() : '')).trim();
       if (destText) {
         currentDestinationQuery = destText;
+        isRouteCalculating = false;
         computeLiveGoogleMapsRoute(currentDestinationQuery, selectedDestCoords, true);
       }
     }
@@ -5660,20 +5740,6 @@
         extGmaps.href = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originParam)}&destination=${extDest}&travelmode=${modeParam}`;
       }
 
-      // Smooth green banner display (NO FLICKER: never wipe existing valid ETA to '-- mins')
-      const banner = document.getElementById('route-estimate-banner');
-      if (banner) {
-        banner.style.display = 'flex';
-        const distEl = document.getElementById('route-est-distance');
-        const timeEl = document.getElementById('route-est-time');
-
-        // Only show placeholder if banner has no estimate yet
-        if (!timeEl || !timeEl.innerText || timeEl.innerText.trim() === '-- mins' || timeEl.innerText.trim() === '') {
-          if (distEl) distEl.innerHTML = `<i class="fas ${modeIcon}" style="color: #10b981;"></i> <span>Calculating ${modeTitle} route...</span>`;
-          if (timeEl) timeEl.innerHTML = `<span style="opacity: 0.7; font-size: 11px;">Estimating...</span>`;
-        }
-      }
-
       lastRouteCalculatedCoords = { lat: currentCoords.lat, lon: currentCoords.lon };
       lastRouteCalculatedTime = Date.now();
 
@@ -5681,7 +5747,7 @@
       if (isRouteCalculating) return;
       isRouteCalculating = true;
 
-      // Request live routing, road network distance, and BD traffic index from backend
+      // Request live routing and road network geometry for map rendering
       const queryParams = new URLSearchParams({
         originLat: currentCoords.lat,
         originLon: currentCoords.lon,
@@ -5728,33 +5794,20 @@
             if (extGmaps && data.googleMapsUrl) {
               extGmaps.href = data.googleMapsUrl;
             }
-
-            renderRouteEstimateBanner(data);
           } else {
             fallbackLocalEta(cleanDest, dLat, dLon, modeParam);
           }
         })
         .catch(err => {
           isRouteCalculating = false;
-          console.warn("[ROUTING] Live backend route fetch failed, using realistic fallback:", err);
           fallbackLocalEta(cleanDest, dLat, dLon, modeParam);
         });
     }
 
     function renderRouteEstimateBanner(data) {
-      const banner = document.getElementById('route-estimate-banner');
-      if (!banner) return;
-      banner.style.display = 'flex';
-
-      const modeIcon = data.mode === 'driving' ? 'fa-car-side' : (data.mode === 'bicycling' ? 'fa-motorcycle' : 'fa-person-walking');
-      const distEl = document.getElementById('route-est-distance');
-      if (distEl) {
-        distEl.innerHTML = `<i class="fas ${modeIcon}" style="color: #10b981; font-size: 13px;"></i> <span style="font-size: 11.5px; color: #e2e8f0;">${data.distanceKm} km • <strong style="color: #fff;">${data.modeLabel}</strong> <span style="font-size: 10px; color: #a1a1aa; margin-left: 3px;">(${data.trafficStatus || 'Live route'})</span></span>`;
-      }
-      const timeEl = document.getElementById('route-est-time');
-      if (timeEl) {
-        const timeDisplay = data.durationFormatted || formatDurationGoogleMaps(data.durationMinutes);
-        timeEl.innerHTML = `<span style="color: #10b981; font-weight: 800; font-size: 12px;">ETA ~${timeDisplay}</span>`;
+      const extGmaps = document.getElementById('btn-external-gmaps');
+      if (extGmaps && data && data.googleMapsUrl) {
+        extGmaps.href = data.googleMapsUrl;
       }
     }
 
@@ -5767,7 +5820,8 @@
 
       const now = new Date();
       const bdHour = (now.getUTCHours() + 6) % 24;
-      const isPeak = (bdHour >= 8 && bdHour <= 11) || (bdHour >= 16 && bdHour <= 21);
+      const isSeverePeak = (bdHour >= 8 && bdHour <= 11) || (bdHour >= 16 && bdHour <= 21);
+      const isModerateDay = (bdHour >= 12 && bdHour <= 15) || (bdHour >= 21 && bdHour <= 22);
 
       let modeLabel = "Walk";
       let durationMins = 0;
@@ -5775,22 +5829,33 @@
 
       if (modeParam === 'walking') {
         modeLabel = "Walk";
-        // Google Maps Standard Walking Speed: 4.8 km/h (~12.5 mins per km)
-        durationMins = Math.max(5, Math.round((km / 4.8) * 60));
-        trafficStatus = "Pedestrian walkway • Steady pace";
+        // Google Maps Standard Dhaka Walking Pace: 4.4 km/h (~13.6 mins/km) + pedestrian crossing delays
+        const crossingDelayMins = Math.round((km / 2) * 1.0);
+        durationMins = Math.max(4, Math.round((km / 4.4) * 60) + crossingDelayMins);
+        trafficStatus = "Google Maps Walk • 4.4 km/h Pace";
       } else if (modeParam === 'bicycling') {
         modeLabel = "Bike";
-        // Motorbike / cycling: ~26 km/h in Dhaka traffic
-        durationMins = Math.max(3, Math.round((km / 26) * 60));
-        trafficStatus = "Bike transit";
+        // Google Maps Dhaka Bike / Two-Wheeler Speed:
+        // Peak: 19 km/h, Moderate: 21.5 km/h, Off-peak: 27 km/h + signal filter delays
+        const bikeSpeed = isSeverePeak ? 19.0 : (isModerateDay ? 21.5 : 27.0);
+        const signalDelayMins = Math.round((km / 3) * 0.8);
+        durationMins = Math.max(3, Math.round((km / bikeSpeed) * 60) + signalDelayMins);
+        trafficStatus = isSeverePeak ? "Google Maps Bike • Rapid Lane Splitting" : "Google Maps Bike • Free Flow";
       } else { // driving (Car / CNG)
         modeLabel = "Car / CNG";
-        const speed = isPeak ? 12 : 20; // Dhaka live traffic model
-        durationMins = Math.max(5, Math.round((km / speed) * 60));
-        trafficStatus = isPeak ? "Heavy Dhaka traffic" : "City traffic";
+        // Google Maps Dhaka Driving Live Traffic:
+        // Severe Peak: 11.5 km/h, Moderate: 15.5 km/h, Off-peak: 28 km/h + junction delays
+        const carSpeed = isSeverePeak ? 11.5 : (isModerateDay ? 15.5 : 28.0);
+        const junctionDelayMins = Math.round((km / 2) * 1.2);
+        durationMins = Math.max(5, Math.round((km / carSpeed) * 60) + junctionDelayMins);
+        trafficStatus = isSeverePeak ? "Google Maps Live Traffic • Heavy Congestion" : (isModerateDay ? "Google Maps Traffic • City Flow" : "Google Maps • Clear Roads");
       }
 
       calculatedDurationMinutes = durationMins;
+
+      const originStr = (currentCoords.lat && currentCoords.lon) ? `${currentCoords.lat},${currentCoords.lon}` : 'Dhaka, Bangladesh';
+      const destStr = (dLat && dLon) ? `${dLat},${dLon}` : encodeURIComponent(destQuery || 'Dhaka');
+      const gmapsLiveUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originStr)}&destination=${destStr}&travelmode=${modeParam}&dir_action=navigate`;
 
       renderRouteEstimateBanner({
         distanceKm: km,
@@ -5798,7 +5863,8 @@
         durationFormatted: formatDurationGoogleMaps(durationMins),
         mode: modeParam,
         modeLabel: modeLabel,
-        trafficStatus: trafficStatus
+        trafficStatus: trafficStatus,
+        googleMapsUrl: gmapsLiveUrl
       });
     }
 
@@ -5881,10 +5947,15 @@
       selectedDestCoords = null;
       calculatedRouteDistanceKm = 0;
       calculatedDurationMinutes = 20;
+      userConfiguredTimerMinutes = 20;
+      userTimerMode = 'custom';
+      walkTargetEndTime = 0;
       walkSecondsRemaining = 1200;
       secondsOverdueCount = 0;
       overdueReminderPromptShown = false;
       overdueAutoEscalated = false;
+      clearBackgroundWalkTimerSession();
+      if (typeof setTimerPreset === 'function') setTimerPreset(20);
 
       updateWalkUserBadge();
     }
@@ -5927,6 +5998,177 @@
       });
     }
 
+    /* ----------------------------------------------------
+       COMPANION SAFETY TIMER ENGINE (USER-EDITABLE & BACKGROUND RUNNING)
+    ---------------------------------------------------- */
+    function setTimerPreset(val) {
+      document.querySelectorAll('.walk-timer-chip').forEach(c => {
+        c.style.background = 'rgba(255,255,255,0.05)';
+        c.style.borderColor = 'rgba(255,255,255,0.12)';
+        c.style.color = '#cbd5e1';
+      });
+
+      userTimerMode = 'custom';
+      const mins = parseInt(val, 10);
+      userConfiguredTimerMinutes = (isNaN(mins) || mins < 1) ? 20 : mins;
+      const input = document.getElementById('user-custom-timer-mins');
+      if (input) input.value = userConfiguredTimerMinutes;
+      const chip = document.getElementById(`chip-timer-${userConfiguredTimerMinutes}`);
+      if (chip) {
+        chip.style.background = 'rgba(56, 189, 248, 0.22)';
+        chip.style.borderColor = '#38bdf8';
+        chip.style.color = '#38bdf8';
+      }
+    }
+
+    function adjustCustomTimerMinutes(delta) {
+      userTimerMode = 'custom';
+      let current = parseInt(userConfiguredTimerMinutes || 20, 10);
+      if (isNaN(current)) current = 20;
+      let next = Math.max(1, Math.min(720, current + delta));
+      userConfiguredTimerMinutes = next;
+      const input = document.getElementById('user-custom-timer-mins');
+      if (input) input.value = next;
+      highlightMatchingTimerChip(next);
+    }
+
+    function onCustomTimerInputChange(val) {
+      userTimerMode = 'custom';
+      let mins = parseInt(val, 10);
+      if (isNaN(mins) || mins < 1) mins = 1;
+      if (mins > 720) mins = 720;
+      userConfiguredTimerMinutes = mins;
+      highlightMatchingTimerChip(mins);
+    }
+
+    function highlightMatchingTimerChip(mins) {
+      document.querySelectorAll('.walk-timer-chip').forEach(c => {
+        c.style.background = 'rgba(255,255,255,0.05)';
+        c.style.borderColor = 'rgba(255,255,255,0.12)';
+        c.style.color = '#cbd5e1';
+      });
+      const chip = document.getElementById(`chip-timer-${mins}`);
+      if (chip) {
+        chip.style.background = 'rgba(56, 189, 248, 0.22)';
+        chip.style.borderColor = '#38bdf8';
+        chip.style.color = '#38bdf8';
+      }
+    }
+
+    function saveBackgroundWalkTimerSession(updates = {}) {
+      try {
+        const key = 'safe_bd_walk_background_timer';
+        const existingRaw = localStorage.getItem(key);
+        const existing = existingRaw ? JSON.parse(existingRaw) : {};
+        const merged = { ...existing, ...updates, lastSaved: Date.now() };
+        localStorage.setItem(key, JSON.stringify(merged));
+      } catch (e) {}
+    }
+
+    function getBackgroundWalkTimerSession() {
+      try {
+        const raw = localStorage.getItem('safe_bd_walk_background_timer');
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function clearBackgroundWalkTimerSession() {
+      try {
+        localStorage.removeItem('safe_bd_walk_background_timer');
+      } catch (e) {}
+    }
+
+    function openEditTimerModal() {
+      const modal = document.getElementById('edit-walk-timer-modal');
+      if (!modal) return;
+      
+      const now = Date.now();
+      const remSec = (walkTargetEndTime && walkTargetEndTime > now)
+        ? Math.round((walkTargetEndTime - now) / 1000)
+        : walkSecondsRemaining;
+      const remMins = Math.max(1, Math.ceil(remSec / 60));
+      
+      const input = document.getElementById('edit-running-timer-input');
+      if (input) input.value = remMins;
+
+      modal.classList.add('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+      if (input) input.focus();
+    }
+
+    function closeEditTimerModal(e) {
+      if (!e || e.target.id === 'edit-walk-timer-modal' || e.target.classList.contains('modal-close-x') || e.target.closest('.modal-close-x') || e.target.classList.contains('btn-close-sheet')) {
+        const modal = document.getElementById('edit-walk-timer-modal');
+        if (modal) modal.classList.remove('open');
+        if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+      }
+    }
+
+    function applyRunningTimerDelta(deltaMins) {
+      const now = Date.now();
+      const currentTarget = (walkTargetEndTime && walkTargetEndTime > now) ? walkTargetEndTime : now;
+      const newTarget = Math.max(now + 60000, currentTarget + (deltaMins * 60 * 1000));
+      updateRunningWalkTargetEndTime(newTarget);
+      closeEditTimerModal();
+    }
+
+    function applyRunningTimerExactInput() {
+      const input = document.getElementById('edit-running-timer-input');
+      const mins = input ? parseInt(input.value, 10) : 0;
+      if (isNaN(mins) || mins < 1) {
+        alert("Please enter a valid number of minutes (1-720).");
+        return;
+      }
+      const now = Date.now();
+      const newTarget = now + (mins * 60 * 1000);
+      updateRunningWalkTargetEndTime(newTarget);
+      closeEditTimerModal();
+    }
+
+    function updateRunningWalkTargetEndTime(newTargetMs) {
+      walkTargetEndTime = newTargetMs;
+      const now = Date.now();
+      const diffSec = Math.max(0, Math.round((walkTargetEndTime - now) / 1000));
+      walkSecondsRemaining = diffSec;
+      secondsOverdueCount = 0;
+      overdueReminderPromptShown = false;
+
+      // Update background persistence
+      saveBackgroundWalkTimerSession({
+        targetEndTime: walkTargetEndTime,
+        totalAllocatedSeconds: totalJourneyAllocatedSeconds
+      });
+
+      const destInput = document.getElementById('walk-destination');
+      const destination = (destInput ? destInput.value.trim() : '') || currentDestinationQuery || 'Destination';
+      handleJourneyTimerTick(destination);
+    }
+
+    function syncBackgroundWalkTimer() {
+      const destInput = document.getElementById('walk-destination');
+      const destination = (destInput ? destInput.value.trim() : '') || currentDestinationQuery || 'Destination';
+      handleJourneyTimerTick(destination);
+    }
+
+    // Background lifecycle listeners: auto-sync timer on wake, focus, or tab switch
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && walkTargetEndTime > 0) {
+        syncBackgroundWalkTimer();
+      }
+    });
+    window.addEventListener('focus', () => {
+      if (walkTargetEndTime > 0) {
+        syncBackgroundWalkTimer();
+      }
+    });
+    window.addEventListener('pageshow', () => {
+      if (walkTargetEndTime > 0) {
+        syncBackgroundWalkTimer();
+      }
+    });
+
     function restoreActiveWalkSession(session) {
       if (!session) return;
       activeJourneySessionId = session.sessionId;
@@ -5935,17 +6177,26 @@
       selectedTravelMode = session.travelMode || 'walking';
       calculatedDurationMinutes = session.estimatedMinutes || 20;
 
-      // Calculate elapsed or remaining seconds
-      if (session.startTime) {
-        const elapsedSec = Math.floor((Date.now() - new Date(session.startTime).getTime()) / 1000);
-        const totalSec = calculatedDurationMinutes * 60;
-        if (elapsedSec < totalSec) {
-          walkSecondsRemaining = totalSec - elapsedSec;
-          secondsOverdueCount = 0;
-        } else {
-          walkSecondsRemaining = 0;
-          secondsOverdueCount = elapsedSec - totalSec;
-        }
+      // Calculate elapsed or remaining seconds accurately using absolute epoch timestamps
+      const totalSec = (calculatedDurationMinutes || 20) * 60;
+      totalJourneyAllocatedSeconds = totalSec;
+
+      const bgSaved = getBackgroundWalkTimerSession();
+      if (bgSaved && bgSaved.targetEndTime && bgSaved.targetEndTime > 0) {
+        walkTargetEndTime = bgSaved.targetEndTime;
+      } else if (session.startTime) {
+        walkTargetEndTime = new Date(session.startTime).getTime() + (totalSec * 1000);
+      } else {
+        walkTargetEndTime = Date.now() + (totalSec * 1000);
+      }
+
+      const diffSec = Math.round((walkTargetEndTime - Date.now()) / 1000);
+      if (diffSec > 0) {
+        walkSecondsRemaining = diffSec;
+        secondsOverdueCount = 0;
+      } else {
+        walkSecondsRemaining = 0;
+        secondsOverdueCount = Math.abs(diffSec);
       }
 
       const destInput = document.getElementById('walk-destination');
@@ -6007,8 +6258,16 @@
         return;
       }
 
-      totalJourneyAllocatedSeconds = calculatedDurationMinutes * 60;
+      // Read user-configured timer or input
+      const timerInput = document.getElementById('user-custom-timer-mins');
+      const inputVal = timerInput ? parseInt(timerInput.value, 10) : null;
+      const finalMinutes = (inputVal && !isNaN(inputVal) && inputVal > 0)
+        ? inputVal
+        : (userConfiguredTimerMinutes || calculatedDurationMinutes || 20);
+
+      totalJourneyAllocatedSeconds = finalMinutes * 60;
       walkSecondsRemaining = totalJourneyAllocatedSeconds;
+      walkTargetEndTime = Date.now() + (totalJourneyAllocatedSeconds * 1000);
       secondsOverdueCount = 0;
       overdueReminderPromptShown = false;
       overdueAutoEscalated = false;
@@ -6027,9 +6286,21 @@
         destination,
         destCoords: selectedDestCoords,
         travelMode: selectedTravelMode,
-        estimatedMinutes: calculatedDurationMinutes,
+        estimatedMinutes: finalMinutes,
         currentCoords
       };
+
+      // Save background session state immediately for offline & tab survival
+      saveBackgroundWalkTimerSession({
+        sessionId: activeJourneySessionId || ('walk_' + Date.now()),
+        destination,
+        targetEndTime: walkTargetEndTime,
+        totalAllocatedSeconds: totalJourneyAllocatedSeconds,
+        travelMode: selectedTravelMode,
+        destCoords: selectedDestCoords,
+        userName,
+        userPhone
+      });
 
       // Register session with backend database and 5TB Google Drive Vault
       fetch(`${API_BASE}/api/walk/start`, {
@@ -6045,6 +6316,7 @@
         if (data.session) {
           activeJourneySessionId = data.session.sessionId;
           localStorage.setItem('safe_bd_walk_' + userKey, JSON.stringify(data.session));
+          saveBackgroundWalkTimerSession({ sessionId: activeJourneySessionId });
         }
       })
       .catch(() => {
@@ -6082,7 +6354,7 @@
       }
 
       const etaMetric = document.getElementById('transit-eta-metric');
-      const etaDurationFormatted = formatDurationGoogleMaps(calculatedDurationMinutes);
+      const etaDurationFormatted = formatDurationGoogleMaps(finalMinutes);
       if (etaMetric) etaMetric.innerText = `Remaining: ~${etaDurationFormatted} (${calculatedRouteDistanceKm} km)`;
 
       // Immediately focus Google Maps on user's live moving location
@@ -6101,25 +6373,56 @@
         handleJourneyTimerTick(destination);
       }, 1000);
 
-      alert(`🛡️ Personal Walk Companion Activated!\n\nGuarding: ${userName}\nMode: ${selectedTravelMode.toUpperCase()}\nEstimated Route: ${etaDurationFormatted}\nDestination: ${destination}\n\nYour companion is private to your profile and backed up to your 5TB Google Drive Vault.`);
+      alert(`🛡️ Personal Walk Companion Activated!\n\nGuarding: ${userName}\nMode: ${selectedTravelMode.toUpperCase()}\nCompanion Timer: ${etaDurationFormatted}\nDestination: ${destination}\n\nYour companion timer runs automatically in the background even if your device is locked.`);
     }
 
     function handleJourneyTimerTick(destination) {
+      const now = Date.now();
+      if (walkTargetEndTime && walkTargetEndTime > 0) {
+        const diffSec = Math.round((walkTargetEndTime - now) / 1000);
+        if (diffSec > 0) {
+          walkSecondsRemaining = diffSec;
+          secondsOverdueCount = 0;
+        } else {
+          walkSecondsRemaining = 0;
+          secondsOverdueCount = Math.abs(diffSec);
+        }
+      } else {
+        if (walkSecondsRemaining > 0) walkSecondsRemaining--;
+        else secondsOverdueCount++;
+      }
+
+      const displayEl = document.getElementById('walk-timer-display');
+      const hudMetric = document.getElementById('transit-eta-metric');
+
       if (walkSecondsRemaining > 0) {
-        walkSecondsRemaining--;
         const mins = Math.floor(walkSecondsRemaining / 60);
         const secs = walkSecondsRemaining % 60;
-        document.getElementById('walk-timer-display').innerText = 
-          `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        document.getElementById('walk-timer-display').style.color = "#10b981";
+        const text = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        if (displayEl) {
+          displayEl.innerText = text;
+          displayEl.style.color = "#10b981";
+        }
+        if (hudMetric) {
+          hudMetric.innerText = `Remaining: ~${mins}m ${secs}s`;
+        }
       } else {
         // ETA Reached -> Overdue Timer counting up
-        secondsOverdueCount++;
         const overMins = Math.floor(secondsOverdueCount / 60);
         const overSecs = secondsOverdueCount % 60;
-        document.getElementById('walk-timer-display').innerText = 
-          `+${overMins.toString().padStart(2, '0')}:${overSecs.toString().padStart(2, '0')}`;
-        document.getElementById('walk-timer-display').style.color = "#ef4444";
+        const text = `+${overMins.toString().padStart(2, '0')}:${overSecs.toString().padStart(2, '0')}`;
+        if (displayEl) {
+          displayEl.innerText = text;
+          displayEl.style.color = "#ef4444";
+        }
+        if (hudMetric) {
+          hudMetric.innerText = `Overdue: +${overMins}m ${overSecs}s`;
+        }
+
+        // Haptic feedback pulse on arrival of timer
+        if (secondsOverdueCount === 1 && navigator.vibrate) {
+          try { navigator.vibrate([300, 200, 300]); } catch (e) {}
+        }
 
         // Prompt at 10 minutes overdue (600 seconds)
         if (secondsOverdueCount >= 600 && !overdueReminderPromptShown) {
@@ -9252,7 +9555,7 @@
       const sosScreen = document.getElementById('screen-sos');
       const isSosActive = sosScreen && (sosScreen.classList.contains('active') || (sosScreen.style.display !== 'none' && getComputedStyle(sosScreen).display !== 'none'));
       const hasAnyModalOpen = !!document.querySelector(
-        '.contact-modal-backdrop.open, .auth-modal-backdrop.open, .edit-contact-modal-backdrop.open, .sos-modal-backdrop.open, .author-profile-modal-backdrop.open, .shurokha-modal-backdrop.open, #evidence-player-modal.open'
+        '.contact-modal-backdrop.open, .auth-modal-backdrop.open, .edit-contact-modal-backdrop.open, .sos-modal-backdrop.open, .walk-timer-modal-backdrop.open, .author-profile-modal-backdrop.open, .shurokha-modal-backdrop.open, #evidence-player-modal.open'
       );
       if (isSosActive && !hasAnyModalOpen) {
         fab.style.display = 'flex';
