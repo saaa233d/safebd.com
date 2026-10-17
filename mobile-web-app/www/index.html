@@ -2680,6 +2680,80 @@
     </div>
 
     <!-- ========================================================
+         MODAL 0B: WALK OVERDUE SAFETY CHECK MODAL
+    ======================================================== -->
+    <div id="walk-overdue-safety-modal" class="walk-timer-modal-backdrop" onclick="event.stopPropagation()" style="z-index: 100000;">
+      <div class="edit-sheet" onclick="event.stopPropagation()" style="border: 2px solid #ef4444; box-shadow: 0 10px 40px rgba(239, 68, 68, 0.45);">
+        <div class="sheet-handle" style="background: #ef4444;"></div>
+        
+        <!-- STEP 1: DID YOU REACH HOME SAFELY? -->
+        <div id="overdue-step-confirm">
+          <div style="text-align: center; margin-bottom: 16px;">
+            <div style="width: 58px; height: 58px; border-radius: 50%; background: rgba(239, 68, 68, 0.18); border: 2px solid #ef4444; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #ef4444; animation: emergencyCallPulse 1.5s infinite;">
+              <i class="fas fa-shield-heart"></i>
+            </div>
+            <h3 style="margin: 0 0 6px 0; font-size: 19px; font-weight: 800; color: #fff;">Did you reach home safely?</h3>
+            <p style="font-size: 12.5px; color: #cbd5e1; margin: 0; line-height: 1.4;">
+              Your journey safety timer has ended. Please confirm your safety status.
+            </p>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 18px;">
+            <button type="button" class="btn-submit-action" onclick="confirmOverdueArrivalSafe()" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; font-size: 14.5px; font-weight: 800; padding: 14px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); cursor: pointer;">
+              <i class="fas fa-check-circle" style="font-size: 17px;"></i> Yes, I Arrived Safely
+            </button>
+            <button type="button" class="btn-submit-action" onclick="showOverdueEmergencyOptions()" style="background: rgba(239, 68, 68, 0.15); border: 1.5px solid #ef4444; color: #f87171; font-size: 14px; font-weight: 700; padding: 13px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+              <i class="fas fa-triangle-exclamation" style="font-size: 16px;"></i> No, I Need Help
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2: EMERGENCY OPTIONS (TAKE HELP & SEND LIVE LOCATION TO GUARDIAN) -->
+        <div id="overdue-step-options" style="display: none;">
+          <div class="modal-head-row" style="margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-triangle-exclamation" style="color: #ef4444; font-size: 18px;"></i>
+              <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #fff;">Emergency Assistance</h3>
+            </div>
+            <button class="modal-close-x" onclick="backToOverdueConfirm()"><i class="fas fa-arrow-left"></i></button>
+          </div>
+
+          <p style="font-size: 12px; color: #fca5a5; margin: 0 0 14px 0; background: rgba(239, 68, 68, 0.12); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">
+            ⚠️ You did not confirm safe arrival. Choose an emergency action below:
+          </p>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- OPTION 1: TAKE HELP -->
+            <button type="button" onclick="takeEmergencyHelp()" style="background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); color: #fff; border: 1.5px solid #fca5a5; padding: 14px 12px; border-radius: 12px; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; box-shadow: 0 4px 18px rgba(239, 68, 68, 0.55); animation: emergencyCallPulse 1.8s infinite;">
+              <i class="fas fa-phone-volume" style="font-size: 17px;"></i> Take Help (Call 999 Police)
+            </button>
+
+            <!-- OPTION 2: SEND LIVE LOCATION TO GUARDIAN -->
+            <button type="button" onclick="sendLiveLocationToGuardian()" style="background: rgba(56, 189, 248, 0.15); border: 1.5px solid #38bdf8; color: #38bdf8; padding: 14px 12px; border-radius: 12px; font-weight: 800; font-size: 13.5px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; box-shadow: 0 4px 16px rgba(56, 189, 248, 0.25);">
+              <i class="fas fa-satellite-dish" style="font-size: 17px;"></i> Send Live Location to Guardian
+            </button>
+          </div>
+
+          <!-- GUARDIAN INFO DISPLAY (3RD CONTACT IN SOS PAGE) -->
+          <div id="overdue-guardian-info-box" style="margin-top: 12px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-quiet); border-radius: 10px; padding: 10px; font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <span style="color: #94a3b8; display: block; font-size: 10px;">3RD CONTACT (GUARDIAN)</span>
+              <strong style="color: #fff; font-size: 12px;" id="overdue-guardian-name-disp">Guardian</strong>: 
+              <span id="overdue-guardian-phone-disp" style="font-family: monospace; color: #38bdf8;">Loading...</span>
+            </div>
+            <button type="button" onclick="editGuardianContactFromOverdue()" style="background: none; border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px; padding: 3px 8px; font-size: 10.5px; cursor: pointer;">
+              <i class="fas fa-pen"></i> Edit
+            </button>
+          </div>
+
+          <button type="button" class="btn-close-sheet" style="margin-top: 12px;" onclick="confirmOverdueArrivalSafe()">
+            I'm Actually Safe (End Guard)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================
          MODAL 1: EDIT CONTACT NUMBER MODAL
     ======================================================== -->
     <div id="edit-contact-modal" class="edit-contact-modal-backdrop" onclick="closeEditContactModal(event)">
@@ -5955,6 +6029,8 @@
       overdueReminderPromptShown = false;
       overdueAutoEscalated = false;
       clearBackgroundWalkTimerSession();
+      const overdueModal = document.getElementById('walk-overdue-safety-modal');
+      if (overdueModal) overdueModal.classList.remove('open');
       if (typeof setTimerPreset === 'function') setTimerPreset(20);
 
       updateWalkUserBadge();
@@ -6272,6 +6348,11 @@
       overdueReminderPromptShown = false;
       overdueAutoEscalated = false;
 
+      // Pre-request device push notification permission for overdue safety check
+      if ('Notification' in window && Notification.permission === 'default') {
+        try { Notification.requestPermission().catch(() => {}); } catch (e) {}
+      }
+
       const origin = currentCoords.address;
       const userName = currentUser.name;
       const userPhone = currentUser.phone;
@@ -6419,30 +6500,206 @@
           hudMetric.innerText = `Overdue: +${overMins}m ${overSecs}s`;
         }
 
-        // Haptic feedback pulse on arrival of timer
-        if (secondsOverdueCount === 1 && navigator.vibrate) {
-          try { navigator.vibrate([300, 200, 300]); } catch (e) {}
-        }
-
-        // Prompt at 10 minutes overdue (600 seconds)
-        if (secondsOverdueCount >= 600 && !overdueReminderPromptShown) {
+        // Overdue Alarm & Safety Check when timer reaches 0
+        if (secondsOverdueCount >= 1 && !overdueReminderPromptShown) {
           overdueReminderPromptShown = true;
           triggerOverdueSafetyCheck(destination);
         }
       }
     }
 
-    function triggerOverdueSafetyCheck(destination) {
-      // Safety reminder prompt to citizen
-      const userResponded = confirm(
-        `⚠️ [SAFE BD SAFETY CHECK]\n\nDid you reach home safely?\n\n• Tap OK if you arrived safely.\n• Tap Cancel if you are still en route.`
-      );
+    function playOverdueAlertChime() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.35);
+        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.45);
+        osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.8);
+        gain.gain.setValueAtTime(0.4, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.85);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.85);
+      } catch (e) {}
+    }
 
-      if (userResponded) {
-        finishWalkWithMe();
+    function sendDeviceOverdueNotification() {
+      if (!('Notification' in window)) return;
+      if (Notification.permission === 'granted') {
+        try {
+          const notif = new Notification("⚠️ SAFE BD Safety Check", {
+            body: "Did you reach home safely?",
+            icon: "/app-icon.jpg",
+            badge: "/app-icon.jpg",
+            tag: "safebd-overdue-check",
+            requireInteraction: true,
+            vibrate: [500, 200, 500, 200, 500]
+          });
+          notif.onclick = function() {
+            window.focus();
+            notif.close();
+            openOverdueSafetyModal();
+          };
+        } catch (e) {
+          if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+            navigator.serviceWorker.ready.then(reg => {
+              reg.showNotification("⚠️ SAFE BD Safety Check", {
+                body: "Did you reach home safely?",
+                icon: "/app-icon.jpg",
+                badge: "/app-icon.jpg",
+                tag: "safebd-overdue-check",
+                requireInteraction: true,
+                vibrate: [500, 200, 500, 200, 500]
+              });
+            }).catch(() => {});
+          }
+        }
+      }
+    }
+
+    function triggerOverdueSafetyCheck(destination) {
+      if (navigator.vibrate) {
+        try { navigator.vibrate([500, 250, 500, 250, 500]); } catch (e) {}
+      }
+      playOverdueAlertChime();
+      sendDeviceOverdueNotification();
+      openOverdueSafetyModal(destination);
+    }
+
+    function openOverdueSafetyModal(destination) {
+      const modal = document.getElementById('walk-overdue-safety-modal');
+      if (!modal) return;
+
+      const confirmStep = document.getElementById('overdue-step-confirm');
+      const optionsStep = document.getElementById('overdue-step-options');
+      if (confirmStep) confirmStep.style.display = 'block';
+      if (optionsStep) optionsStep.style.display = 'none';
+
+      updateGuardianDisplayInOverdueModal();
+
+      modal.classList.add('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+    }
+
+    function closeOverdueSafetyModal() {
+      const modal = document.getElementById('walk-overdue-safety-modal');
+      if (modal) modal.classList.remove('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+    }
+
+    function updateGuardianDisplayInOverdueModal() {
+      const guardian = (contacts && contacts[2]) ? contacts[2] : (contacts && contacts.find(c => c.id === 'c3'));
+      const nameDisp = document.getElementById('overdue-guardian-name-disp');
+      const phoneDisp = document.getElementById('overdue-guardian-phone-disp');
+      
+      const isConfigured = guardian && guardian.phone && String(guardian.phone).trim() !== '' && guardian.phone !== '01XXXXXXXXX' && !isDummyPhone(guardian.phone);
+      if (nameDisp) nameDisp.innerText = (guardian && guardian.name) ? guardian.name : 'Guardian';
+      if (phoneDisp) {
+        phoneDisp.innerText = isConfigured ? `+880 ${String(guardian.phone).replace(/\D/g, '').slice(-10)}` : '01XXXXXXXXX (Not Set)';
+        phoneDisp.style.color = isConfigured ? '#38bdf8' : '#f59e0b';
+      }
+    }
+
+    function confirmOverdueArrivalSafe() {
+      closeOverdueSafetyModal();
+      finishWalkWithMe();
+    }
+
+    function showOverdueEmergencyOptions() {
+      const confirmStep = document.getElementById('overdue-step-confirm');
+      const optionsStep = document.getElementById('overdue-step-options');
+      if (confirmStep) confirmStep.style.display = 'none';
+      if (optionsStep) optionsStep.style.display = 'block';
+
+      updateGuardianDisplayInOverdueModal();
+
+      const destInput = document.getElementById('walk-destination');
+      const destination = (destInput ? destInput.value.trim() : '') || currentDestinationQuery || 'Destination';
+      escalateOverdueSessionToAdmin(destination);
+    }
+
+    function backToOverdueConfirm() {
+      const confirmStep = document.getElementById('overdue-step-confirm');
+      const optionsStep = document.getElementById('overdue-step-options');
+      if (confirmStep) confirmStep.style.display = 'block';
+      if (optionsStep) optionsStep.style.display = 'none';
+    }
+
+    function takeEmergencyHelp() {
+      if (typeof directCall999 === 'function') {
+        directCall999();
       } else {
-        // Citizen did not confirm safe arrival -> App silently observes and updates location to admin
-        escalateOverdueSessionToAdmin(destination);
+        window.location.href = 'tel:999';
+      }
+    }
+
+    function sendLiveLocationToGuardian() {
+      // 3rd contact in SOS page
+      const guardian = (contacts && contacts[2]) ? contacts[2] : (contacts && contacts.find(c => c.id === 'c3'));
+      const isConfigured = guardian && guardian.phone && String(guardian.phone).trim() !== '' && guardian.phone !== '01XXXXXXXXX' && !isDummyPhone(guardian.phone);
+
+      if (!isConfigured) {
+        alert("⚠️ No phone number configured for Guardian (3rd contact in the Emergency SOS page).\n\nPlease enter Guardian's number now so live location can be dispatched.");
+        if (typeof openEditContactModal === 'function') {
+          openEditContactModal('c3');
+        }
+        return;
+      }
+
+      const cleanPhone = String(guardian.phone).replace(/\D/g, '').slice(-10);
+      const guardianName = guardian.name || 'Guardian';
+      const lat = currentCoords.lat || 23.8103;
+      const lon = currentCoords.lon || 90.4125;
+      const address = currentCoords.address || 'Dhaka, Bangladesh';
+      const gmapsLiveUrl = `https://maps.google.com/?q=${lat},${lon}`;
+
+      const alertMessage = `🚨 [SAFE BD EMERGENCY ALERT]\nHi ${guardianName}, I did NOT arrive home safely! My journey safety timer has expired. Please check on me immediately.\n📍 Last Location: ${address}\n🗺️ Live GPS Map: ${gmapsLiveUrl}\n🔒 Verified Distress Signal via SAFE BD`;
+
+      // Open WhatsApp & compose SMS
+      const whatsappUrl = `https://wa.me/880${cleanPhone}?text=${encodeURIComponent(alertMessage)}`;
+      const smsUrl = `sms:+880${cleanPhone}?&body=${encodeURIComponent(alertMessage)}`;
+
+      // Record escalation to backend
+      const token = localStorage.getItem('safe_bd_token');
+      fetch(`${API_BASE}/api/walk/report-overdue`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          sessionId: activeJourneySessionId,
+          phone: currentUser ? currentUser.phone : "",
+          guardianPhone: cleanPhone,
+          guardianName: guardianName,
+          lat: lat,
+          lon: lon,
+          address: address,
+          alertType: 'DISPATCH_TO_GUARDIAN'
+        })
+      }).catch(() => {});
+
+      // Launch WhatsApp (with SMS fallback)
+      window.open(whatsappUrl, '_blank');
+
+      // Update Guardian status badge
+      const phoneDisp = document.getElementById('overdue-guardian-phone-disp');
+      if (phoneDisp) {
+        phoneDisp.innerHTML = `<span style="color: #10b981;">✓ Dispatched to +880 ${cleanPhone}</span>`;
+      }
+
+      alert(`🚨 Live Emergency Location Dispatched!\n\nSent to: ${guardianName} (+880 ${cleanPhone})\nLocation: ${address}\n\nWhatsApp opened with live GPS link.`);
+    }
+
+    function editGuardianContactFromOverdue() {
+      if (typeof openEditContactModal === 'function') {
+        openEditContactModal('c3');
       }
     }
 
