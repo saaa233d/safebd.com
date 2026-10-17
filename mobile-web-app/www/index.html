@@ -159,6 +159,44 @@
       border: 2px solid var(--black-pure);
     }
 
+    /* Language Switcher Capsule */
+    .lang-switch-capsule {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      padding: 2px 4px;
+      gap: 2px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+    .lang-pill-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      line-height: 1.2;
+    }
+    .lang-pill-btn:hover {
+      color: #fff;
+    }
+    .lang-pill-btn.active {
+      background: linear-gradient(135deg, var(--burgundy-vivid) 0%, var(--burgundy-core) 100%);
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(163, 8, 38, 0.4);
+    }
+    .lang-pill-sep {
+      color: rgba(255, 255, 255, 0.18);
+      font-size: 9px;
+      user-select: none;
+    }
+
     /* Screen Views */
     .screen {
       flex: 1;
@@ -2267,19 +2305,28 @@
   <div class="app-root">
     <div class="status-notch-spacer"></div>
 
-    <!-- Top Bar with SAFE Icon on Top Left -->
+    <!-- Top Bar with SAFE Icon on Top Left & Language Toggle on Top Right -->
     <div class="top-bar">
       <div class="brand-wrap">
         <img src="app-icon.svg" alt="SAFE Icon" class="brand-logo-img">
         <div>
           <div class="brand-name">SAFE <span style="font-size: 11px; font-weight: 600; color: #e57373;">BD</span></div>
-          <div class="brand-fullform">Safety • Awareness • Fast Response • Emergency Assistance</div>
+          <div class="brand-fullform" id="brand-tagline" data-i18n="brand_fullform">Safety • Awareness • Fast Response • Emergency Assistance</div>
         </div>
       </div>
       
-      <button class="profile-trigger-btn" id="top-profile-btn" onclick="openAuthModal()" title="Citizen Profile & Account">
-        <i class="far fa-user" id="profile-icon"></i>
-      </button>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <!-- Top Right Corner Language Switcher (English / Bangla) -->
+        <div class="lang-switch-capsule" title="Change Language / ভাষা পরিবর্তন">
+          <button type="button" class="lang-pill-btn active" id="btn-lang-en" onclick="setAppLanguage('en')">EN</button>
+          <span class="lang-pill-sep">|</span>
+          <button type="button" class="lang-pill-btn" id="btn-lang-bn" onclick="setAppLanguage('bn')">বাংলা</button>
+        </div>
+
+        <button class="profile-trigger-btn" id="top-profile-btn" onclick="openAuthModal()" title="Citizen Profile & Account">
+          <i class="far fa-user" id="profile-icon"></i>
+        </button>
+      </div>
     </div>
 
     <!-- SCREEN 1: EMERGENCY SOS, WALK WITH ME & CONTACTS -->
@@ -2288,11 +2335,11 @@
       <!-- 999 Direct CAD Dispatch Strip -->
       <div class="emergency-strip">
         <div>
-          <div class="strip-title"><i class="fas fa-shield-heart" style="color: #ef4444;"></i> National 999 Helpline</div>
-          <div class="strip-sub">Police • Fire Service • Ambulance CAD</div>
+          <div class="strip-title"><i class="fas fa-shield-heart" style="color: #ef4444;"></i> <span data-i18n="sos_helpline_title">National 999 Helpline</span></div>
+          <div class="strip-sub" data-i18n="sos_helpline_sub">Police • Fire Service • Ambulance CAD</div>
         </div>
         <a href="tel:999" class="strip-btn" onclick="trigger999CallDirect(event)" style="text-decoration: none;">
-          <i class="fas fa-phone"></i> Call 999
+          <i class="fas fa-phone"></i> <span data-i18n="sos_helpline_btn">Call 999</span>
         </a>
       </div>
 
@@ -2305,7 +2352,7 @@
              ontouchend="handleSosPressEnd(event)" 
              onclick="handleSosClick(event)">
           <span class="sos-text-label">SOS</span>
-          <span class="sos-text-sub">Hold 3s</span>
+          <span class="sos-text-sub" data-i18n="sos_btn_sub">Hold 3s</span>
         </div>
       </div>
 
@@ -2314,9 +2361,9 @@
         <div>
           <div class="tile-main" style="display: flex; align-items: center; gap: 8px;">
             <i class="fas fa-person-walking" style="color: #e57373;"></i>
-            <span>Walk With Me Companion</span>
+            <span data-i18n="sos_walk_card_title">Walk With Me Companion</span>
           </div>
-          <div class="tile-sub">Search any place in Bangladesh & route with Google Maps</div>
+          <div class="tile-sub" data-i18n="sos_walk_card_sub">Search any place in Bangladesh & route with Google Maps</div>
         </div>
         <i class="fas fa-chevron-right" style="color: var(--text-faint); font-size: 12px;"></i>
       </div>
@@ -2324,8 +2371,8 @@
       <!-- Trusted Family Circle with Editable Contacts (Mother, Father, Guardian) -->
       <div class="module-group">
         <div class="module-header">
-          <span>Trusted Family Contacts</span>
-          <span style="font-size: 10px; color: var(--text-muted); text-transform: none;">Tap card to contact • Pen to edit</span>
+          <span data-i18n="sos_contacts_title">Trusted Family Contacts</span>
+          <span style="font-size: 10px; color: var(--text-muted); text-transform: none;" data-i18n="sos_contacts_sub">Tap card to contact • Pen to edit</span>
         </div>
 
         <div id="contacts-container"></div>
@@ -2334,15 +2381,15 @@
       <!-- Telemetry Info with Live GPS Tracker -->
       <div class="module-group">
         <div class="module-header">
-          <span>Live Device Geolocation</span>
+          <span data-i18n="sos_geo_title">Live Device Geolocation</span>
           <button class="btn-gps-refresh" onclick="acquireRealLocation(true)" title="Force Refresh GPS">
-            <i class="fas fa-arrows-rotate"></i> Refresh GPS
+            <i class="fas fa-arrows-rotate"></i> <span data-i18n="sos_geo_refresh">Refresh GPS</span>
           </button>
         </div>
         <div class="clean-tile" onclick="acquireRealLocation(true)">
           <div>
             <div class="tile-main" id="telemetry-main-text">Acquiring Live GPS Fix...</div>
-            <div class="tile-sub" id="telemetry-sub-text">Connecting directly to device satellite sensors</div>
+            <div class="tile-sub" id="telemetry-sub-text" data-i18n="sos_geo_connecting">Connecting directly to device satellite sensors</div>
           </div>
           <div class="tile-status" id="telemetry-badge" style="color: #f59e0b;">Locating...</div>
         </div>
@@ -2384,17 +2431,17 @@
           <div class="walk-header-row">
             <div class="walk-title">
               <i class="fas fa-person-walking" style="color: #e57373;"></i>
-              <span>Walk With Me</span>
+              <span data-i18n="walk_title">Walk With Me</span>
             </div>
             <div class="walk-live-indicator" id="map-live-status-pill">
-              <span class="live-pulse-dot" style="margin-right: 2px;"></span> GPS Active
+              <span class="live-pulse-dot" style="margin-right: 2px;"></span> <span data-i18n="walk_gps_pill">GPS Active</span>
             </div>
           </div>
 
           <!-- Personal Citizen Companion Indicator -->
           <div id="walk-user-badge" style="font-size: 11px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; padding: 5px 10px; background: rgba(255, 255, 255, 0.04); border-radius: 8px; border: 1px solid var(--border-quiet);">
             <div id="walk-user-badge-text" style="color: #94a3b8; font-size: 10.5px; display: flex; align-items: center; gap: 5px;">
-              <i class="fas fa-user-shield" style="color: #38bdf8;"></i> Personal Route Guardian
+              <i class="fas fa-user-shield" style="color: #38bdf8;"></i> <span data-i18n="walk_guard_dedicated">Personal Route Guardian</span>
             </div>
             <div id="walk-user-auth-indicator" style="font-size: 10px; font-weight: 700; color: #10b981;">
               ● Profile Active
@@ -2404,7 +2451,7 @@
           <div class="route-input-group">
             <div class="route-input-box">
               <i class="fas fa-location-crosshairs" style="color: #10b981;"></i>
-              <input type="text" class="route-input" id="walk-start" value="Detecting live device GPS..." readonly>
+              <input type="text" class="route-input" id="walk-start" value="Detecting live device GPS..." readonly data-i18n-placeholder="walk_start_placeholder">
               <button class="btn-gps-refresh" onclick="acquireRealLocation(true);" title="Re-sync Google Maps GPS" style="background: rgba(120, 0, 22, 0.4); border: 1px solid var(--burgundy-vivid); color: #fff;">
                 <i class="fas fa-crosshairs"></i> GPS
               </button>
@@ -2413,20 +2460,20 @@
             <!-- Transportation Mode Selector (Walk, Car/CNG, Bike) -->
             <div style="display: flex; gap: 6px; margin: 6px 0 8px 0; background: rgba(12, 11, 14, 0.8); border: 1px solid var(--border-quiet); padding: 4px; border-radius: 12px;">
               <button type="button" class="auth-toggle-tab active" id="mode-btn-walking" style="padding: 6px 4px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="selectTravelMode('walking')">
-                <i class="fas fa-person-walking"></i> Walk
+                <i class="fas fa-person-walking"></i> <span data-i18n="walk_mode_walk">Walk</span>
               </button>
               <button type="button" class="auth-toggle-tab" id="mode-btn-driving" style="padding: 6px 4px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="selectTravelMode('driving')">
-                <i class="fas fa-car-side"></i> Car / CNG
+                <i class="fas fa-car-side"></i> <span data-i18n="walk_mode_car">Car / CNG</span>
               </button>
               <button type="button" class="auth-toggle-tab" id="mode-btn-bicycling" style="padding: 6px 4px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="selectTravelMode('bicycling')">
-                <i class="fas fa-motorcycle"></i> Bike
+                <i class="fas fa-motorcycle"></i> <span data-i18n="walk_mode_bike">Bike</span>
               </button>
             </div>
 
             <div style="position: relative;">
               <div class="route-input-box">
                 <i class="fas fa-location-dot" style="color: #f87171;"></i>
-                <input type="text" class="route-input" id="walk-destination" placeholder="Destination (e.g. Dhanmondi, Airport, Gulshan...)" oninput="handleLocationSearch(this.value)" onfocus="if (this.value.trim()) handleLocationSearch(this.value)" autocomplete="off">
+                <input type="text" class="route-input" id="walk-destination" placeholder="Destination (e.g. Dhanmondi, Airport, Gulshan...)" data-i18n-placeholder="walk_dest_placeholder" oninput="handleLocationSearch(this.value)" onfocus="if (this.value.trim()) handleLocationSearch(this.value)" autocomplete="off">
                 <button id="btn-clear-dest" onclick="clearDestinationInput()" style="display: none; background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px 6px;">
                   <i class="fas fa-xmark"></i>
                 </button>
@@ -2441,12 +2488,12 @@
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px;">
                 <div style="display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: #fff; font-weight: 700;">
                   <i class="fas fa-stopwatch" style="color: #38bdf8; font-size: 15px;"></i>
-                  <span>Set Journey Safety Timer</span>
+                  <span data-i18n="walk_timer_title">Set Journey Safety Timer</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 5px;">
                   <button type="button" onclick="adjustCustomTimerMinutes(-5)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; width: 28px; height: 28px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Minus 5 mins">-5</button>
                   <input type="number" id="user-custom-timer-mins" min="1" max="720" value="20" oninput="onCustomTimerInputChange(this.value)" style="width: 52px; text-align: center; background: rgba(56, 189, 248, 0.16); border: 1.5px solid #38bdf8; border-radius: 8px; color: #38bdf8; font-weight: 800; font-size: 14px; padding: 4px 0;">
-                  <span style="font-size: 11.5px; color: #94a3b8; font-weight: 700;">mins</span>
+                  <span style="font-size: 11.5px; color: #94a3b8; font-weight: 700;" data-i18n="walk_timer_mins_unit">mins</span>
                   <button type="button" onclick="adjustCustomTimerMinutes(+5)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; width: 28px; height: 28px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Plus 5 mins">+5</button>
                 </div>
               </div>
@@ -2462,15 +2509,15 @@
               </div>
 
               <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #94a3b8; padding: 0 2px;">
-                <span style="display: flex; align-items: center; gap: 4px;"><i class="fas fa-shield-halved" style="color: #10b981;"></i> Auto-alerts emergency circle if overdue</span>
-                <span style="color: #38bdf8;"><i class="fas fa-satellite-dish"></i> Runs automatically in background</span>
+                <span style="display: flex; align-items: center; gap: 4px;"><i class="fas fa-shield-halved" style="color: #10b981;"></i> <span data-i18n="walk_timer_alert_note">Auto-alerts emergency circle if overdue</span></span>
+                <span style="color: #38bdf8;"><i class="fas fa-satellite-dish"></i> <span data-i18n="walk_timer_bg_note">Runs automatically in background</span></span>
               </div>
             </div>
           </div>
 
           <div class="walk-action-btns">
             <button class="btn-start-walk" onclick="startWalkWithMe()">
-              <i class="fas fa-shield-heart"></i> Start Companion Guard
+              <i class="fas fa-shield-heart"></i> <span data-i18n="walk_btn_start">Start Companion Guard</span>
             </button>
             <a id="btn-external-gmaps" class="btn-open-gmaps" href="https://maps.google.com" target="_blank" title="Open full Google Maps">
               <i class="fas fa-arrow-up-right-from-square"></i>
@@ -2523,11 +2570,11 @@
         <!-- Active Walk Tracking Status Drawer -->
         <div id="walk-dock" class="walk-active-dock">
           <div class="dock-stat-row">
-            <div class="dock-stat-title"><i class="fas fa-shield-halved" style="color: #10b981;"></i> Companion Guard Active</div>
+            <div class="dock-stat-title"><i class="fas fa-shield-halved" style="color: #10b981;"></i> <span data-i18n="dock_title">Companion Guard Active</span></div>
             <div style="display: flex; align-items: center; gap: 6px;">
               <div class="dock-timer-badge" id="walk-timer-display" onclick="openEditTimerModal()" title="Tap to edit timer" style="cursor: pointer;">20:00</div>
               <button type="button" onclick="openEditTimerModal()" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; border-radius: 8px; padding: 4px 8px; font-size: 10.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Edit Timer">
-                <i class="fas fa-clock-rotate-left"></i> Edit
+                <i class="fas fa-clock-rotate-left"></i> <span data-i18n="dock_edit">Edit</span>
               </button>
             </div>
           </div>
@@ -2538,31 +2585,31 @@
           <!-- Live Telemetry Stats -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; font-size: 11px;">
             <div style="background: rgba(255,255,255,0.04); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-quiet);">
-              <span style="color: var(--text-muted); font-size: 9.5px; display: block;">LIVE SPEED</span>
+              <span style="color: var(--text-muted); font-size: 9.5px; display: block;" data-i18n="dock_speed_label">LIVE SPEED</span>
               <strong id="dock-live-speed" style="color: #10b981; font-size: 12px;">0 km/h</strong>
             </div>
             <div style="background: rgba(255,255,255,0.04); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-quiet);">
-              <span style="color: var(--text-muted); font-size: 9.5px; display: block;">GPS TRACKING</span>
-              <strong id="dock-live-accuracy" style="color: #38bdf8; font-size: 12px;">Satellite Active</strong>
+              <span style="color: var(--text-muted); font-size: 9.5px; display: block;" data-i18n="dock_gps_label">GPS TRACKING</span>
+              <strong id="dock-live-accuracy" style="color: #38bdf8; font-size: 12px;" data-i18n="dock_satellite_active">Satellite Active</strong>
             </div>
           </div>
 
           <div style="display: flex; gap: 8px; margin-bottom: 8px;">
             <button type="button" onclick="centerOnUserLiveLocation(true)" style="flex: 1; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; padding: 7px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <i class="fas fa-crosshairs"></i> Track Live Pin
+              <i class="fas fa-crosshairs"></i> <span data-i18n="dock_btn_track">Track Live Pin</span>
             </button>
             <a id="btn-dock-external-nav" href="https://maps.google.com" target="_blank" style="flex: 1; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #f59e0b; padding: 7px; border-radius: 8px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <i class="fas fa-diamond-turn-right"></i> Live Google Nav
+              <i class="fas fa-diamond-turn-right"></i> <span data-i18n="dock_btn_nav">Live Google Nav</span>
             </a>
           </div>
 
           <!-- Emergency 999 Direct Dial & Safe Arrival Action Group -->
           <div style="display: flex; gap: 8px;">
             <button type="button" class="dock-emergency-call-btn" onclick="directCall999()" style="flex: 1; background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); color: #fff; border: 1.5px solid #fca5a5; padding: 12px 10px; border-radius: 12px; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 18px rgba(239, 68, 68, 0.55); animation: emergencyCallPulse 1.8s infinite;">
-              <i class="fas fa-phone-volume" style="font-size: 14px;"></i> Call 999
+              <i class="fas fa-phone-volume" style="font-size: 14px;"></i> <span data-i18n="dock_btn_999">Call 999</span>
             </button>
             <button type="button" class="dock-finish-btn" onclick="finishWalkWithMe()" style="flex: 1.25; margin-top: 0; padding: 12px 10px; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;">
-              <i class="fas fa-check"></i> I Have Arrived Safely
+              <i class="fas fa-check"></i> <span data-i18n="dock_btn_arrived">I Have Arrived Safely</span>
             </button>
           </div>
         </div>
@@ -2575,7 +2622,7 @@
       
       <!-- Interactive Post Composer for Community Uploads -->
       <div class="create-post-card">
-        <textarea class="post-composer-input" id="composer-text" placeholder="Share safety awareness, road hazard, or community advisory..."></textarea>
+        <textarea class="post-composer-input" id="composer-text" placeholder="Share safety awareness, road hazard, or community advisory..." data-i18n-placeholder="feed_composer_placeholder"></textarea>
         
         <!-- Attached Media Preview (Photos & Videos) -->
         <div class="media-preview-container" id="media-preview-box">
@@ -2588,7 +2635,7 @@
           <div class="composer-media-icons">
             <label class="media-btn-label" title="Attach Photo or Video">
               <i class="fas fa-photo-film" style="color: #38bdf8;"></i>
-              <span style="font-size: 11px;">Photo / Video</span>
+              <span style="font-size: 11px;" data-i18n="feed_photo_video">Photo / Video</span>
               <input type="file" id="media-file-input" accept="image/*,video/*" style="display: none;" onchange="handleMediaSelected(event)">
             </label>
             <label class="media-btn-label" title="Category Tag" onclick="selectPostCategory()">
@@ -2597,7 +2644,7 @@
             </label>
           </div>
           <button class="btn-publish-post" onclick="submitCommunityPost()">
-            <i class="fas fa-paper-plane"></i> Post
+            <i class="fas fa-paper-plane"></i> <span data-i18n="feed_btn_post">Post</span>
           </button>
         </div>
       </div>
@@ -2606,14 +2653,14 @@
       <div class="feed-filter-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
         <div style="display: flex; gap: 6px; flex-wrap: wrap;">
           <button type="button" class="feed-filter-btn active" onclick="filterFeed('all', this)">
-            <i class="fas fa-layer-group"></i> All Feeds
+            <i class="fas fa-layer-group"></i> <span data-i18n="feed_tab_all">All Feeds</span>
           </button>
           <button type="button" class="feed-filter-btn" onclick="filterFeed('community', this)">
-            <i class="fas fa-users-viewfinder"></i> Citizen Reports
+            <i class="fas fa-users-viewfinder"></i> <span data-i18n="feed_tab_community">Citizen Reports</span>
           </button>
         </div>
         <button type="button" class="feed-filter-btn" onclick="fetchLiveFeedPosts(1, false)" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); margin-left: auto; white-space: nowrap;" title="Sync and refresh feed">
-          <i class="fas fa-arrows-rotate"></i> Sync
+          <i class="fas fa-arrows-rotate"></i> <span data-i18n="feed_btn_sync">Sync</span>
         </button>
       </div>
 
@@ -2627,11 +2674,11 @@
 
     <!-- Bottom Navigation -->
     <div class="bottom-bar">
-      <button class="nav-tab-btn active" onclick="switchTab('screen-sos', this)">Emergency</button>
-      <button class="nav-tab-btn" onclick="switchTab('screen-map', this)">Map</button>
-      <button class="nav-tab-btn" onclick="switchTab('screen-feed', this)">Awareness</button>
+      <button class="nav-tab-btn active" id="nav-tab-sos" data-i18n="nav_sos" onclick="switchTab('screen-sos', this)">Emergency</button>
+      <button class="nav-tab-btn" id="nav-tab-map" data-i18n="nav_map" onclick="switchTab('screen-map', this)">Map</button>
+      <button class="nav-tab-btn" id="nav-tab-feed" data-i18n="nav_feed" onclick="switchTab('screen-feed', this)">Awareness</button>
       <button class="nav-tab-btn" id="nav-btn-admin" style="display: none; color: #f59e0b;" onclick="switchTab('screen-admin', this)"></button>
-      <button class="nav-tab-btn" onclick="openAuthModal()">Profile</button>
+      <button class="nav-tab-btn" id="nav-tab-profile" data-i18n="nav_profile" onclick="openAuthModal()">Profile</button>
     </div>
 
     <!-- ========================================================
@@ -2643,18 +2690,18 @@
         <div class="modal-head-row">
           <div style="display: flex; align-items: center; gap: 8px;">
             <i class="fas fa-stopwatch" style="color: #38bdf8; font-size: 18px;"></i>
-            <h3 style="margin: 0; font-size: 16px; font-weight: 700;">Edit Companion Timer</h3>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 700;" data-i18n="modal_timer_title">Edit Companion Timer</h3>
           </div>
           <button class="modal-close-x" onclick="closeEditTimerModal()"><i class="fas fa-xmark"></i></button>
         </div>
         
-        <p style="font-size: 12px; color: var(--text-muted); margin: 6px 0 14px 0;">
+        <p style="font-size: 12px; color: var(--text-muted); margin: 6px 0 14px 0;" data-i18n="modal_timer_desc">
           Add or adjust time for your journey. The timer automatically runs in the background even if your device is locked or minimized.
         </p>
 
         <!-- Quick Delta Add / Subtract Pills -->
         <div style="margin-bottom: 14px;">
-          <label class="form-label" style="font-size: 11px; color: #cbd5e1; margin-bottom: 6px; display: block;">QUICK ADJUSTMENT</label>
+          <label class="form-label" style="font-size: 11px; color: #cbd5e1; margin-bottom: 6px; display: block;" data-i18n="modal_timer_quick_label">QUICK ADJUSTMENT</label>
           <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
             <button type="button" onclick="applyRunningTimerDelta(5)" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; padding: 9px 4px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">+5 mins</button>
             <button type="button" onclick="applyRunningTimerDelta(10)" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; padding: 9px 4px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">+10 mins</button>
@@ -2665,17 +2712,17 @@
 
         <!-- Set Exact Remaining Minutes -->
         <div style="margin-bottom: 16px;">
-          <label class="form-label" style="font-size: 11px; color: #cbd5e1; margin-bottom: 6px; display: block;">SET EXACT REMAINING TIME</label>
+          <label class="form-label" style="font-size: 11px; color: #cbd5e1; margin-bottom: 6px; display: block;" data-i18n="modal_timer_exact_label">SET EXACT REMAINING TIME</label>
           <div style="display: flex; gap: 8px; align-items: center;">
             <div class="input-field-wrap" style="flex: 1;">
               <input type="number" id="edit-running-timer-input" class="form-input" min="1" max="720" placeholder="e.g. 25" style="font-weight: 800; font-size: 15px; color: #38bdf8;">
             </div>
-            <span style="font-size: 12.5px; color: var(--text-muted); font-weight: 600;">minutes</span>
-            <button type="button" onclick="applyRunningTimerExactInput()" style="background: #38bdf8; border: none; color: #0f172a; padding: 11px 16px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer;">Apply</button>
+            <span style="font-size: 12.5px; color: var(--text-muted); font-weight: 600;" data-i18n="modal_timer_minutes">minutes</span>
+            <button type="button" onclick="applyRunningTimerExactInput()" style="background: #38bdf8; border: none; color: #0f172a; padding: 11px 16px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer;" data-i18n="modal_timer_btn_apply">Apply</button>
           </div>
         </div>
 
-        <button type="button" class="btn-close-sheet" onclick="closeEditTimerModal()">Close</button>
+        <button type="button" class="btn-close-sheet" onclick="closeEditTimerModal()" data-i18n="btn_close">Close</button>
       </div>
     </div>
 
@@ -2692,18 +2739,18 @@
             <div style="width: 58px; height: 58px; border-radius: 50%; background: rgba(239, 68, 68, 0.18); border: 2px solid #ef4444; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #ef4444; animation: emergencyCallPulse 1.5s infinite;">
               <i class="fas fa-shield-heart"></i>
             </div>
-            <h3 style="margin: 0 0 6px 0; font-size: 19px; font-weight: 800; color: #fff;">Did you reach home safely?</h3>
-            <p style="font-size: 12.5px; color: #cbd5e1; margin: 0; line-height: 1.4;">
+            <h3 style="margin: 0 0 6px 0; font-size: 19px; font-weight: 800; color: #fff;" data-i18n="overdue_title">Did you reach home safely?</h3>
+            <p style="font-size: 12.5px; color: #cbd5e1; margin: 0; line-height: 1.4;" data-i18n="overdue_sub">
               Your journey safety timer has ended. Please confirm your safety status.
             </p>
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 18px;">
             <button type="button" class="btn-submit-action" onclick="confirmOverdueArrivalSafe()" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; font-size: 14.5px; font-weight: 800; padding: 14px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); cursor: pointer;">
-              <i class="fas fa-check-circle" style="font-size: 17px;"></i> Yes, I Arrived Safely
+              <i class="fas fa-check-circle" style="font-size: 17px;"></i> <span data-i18n="overdue_btn_yes">Yes, I Arrived Safely</span>
             </button>
             <button type="button" class="btn-submit-action" onclick="showOverdueEmergencyOptions()" style="background: rgba(239, 68, 68, 0.15); border: 1.5px solid #ef4444; color: #f87171; font-size: 14px; font-weight: 700; padding: 13px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
-              <i class="fas fa-triangle-exclamation" style="font-size: 16px;"></i> No, I Need Help
+              <i class="fas fa-triangle-exclamation" style="font-size: 16px;"></i> <span data-i18n="overdue_btn_no">No, I Need Help</span>
             </button>
           </div>
         </div>
@@ -2713,40 +2760,40 @@
           <div class="modal-head-row" style="margin-bottom: 12px;">
             <div style="display: flex; align-items: center; gap: 8px;">
               <i class="fas fa-triangle-exclamation" style="color: #ef4444; font-size: 18px;"></i>
-              <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #fff;">Emergency Assistance</h3>
+              <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #fff;" data-i18n="overdue_assist_title">Emergency Assistance</h3>
             </div>
             <button class="modal-close-x" onclick="backToOverdueConfirm()"><i class="fas fa-arrow-left"></i></button>
           </div>
 
-          <p style="font-size: 12px; color: #fca5a5; margin: 0 0 14px 0; background: rgba(239, 68, 68, 0.12); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">
+          <p style="font-size: 12px; color: #fca5a5; margin: 0 0 14px 0; background: rgba(239, 68, 68, 0.12); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);" data-i18n="overdue_assist_warn">
             ⚠️ You did not confirm safe arrival. Choose an emergency action below:
           </p>
 
           <div style="display: flex; flex-direction: column; gap: 10px;">
             <!-- OPTION 1: TAKE HELP -->
             <button type="button" onclick="takeEmergencyHelp()" style="background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); color: #fff; border: 1.5px solid #fca5a5; padding: 14px 12px; border-radius: 12px; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; box-shadow: 0 4px 18px rgba(239, 68, 68, 0.55); animation: emergencyCallPulse 1.8s infinite;">
-              <i class="fas fa-phone-volume" style="font-size: 17px;"></i> Take Help (Call 999 Police)
+              <i class="fas fa-phone-volume" style="font-size: 17px;"></i> <span data-i18n="overdue_btn_help">Take Help (Call 999 Police)</span>
             </button>
 
             <!-- OPTION 2: SEND LIVE LOCATION TO GUARDIAN -->
             <button type="button" onclick="sendLiveLocationToGuardian()" style="background: rgba(56, 189, 248, 0.15); border: 1.5px solid #38bdf8; color: #38bdf8; padding: 14px 12px; border-radius: 12px; font-weight: 800; font-size: 13.5px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; box-shadow: 0 4px 16px rgba(56, 189, 248, 0.25);">
-              <i class="fas fa-satellite-dish" style="font-size: 17px;"></i> Send Live Location to Guardian
+              <i class="fas fa-satellite-dish" style="font-size: 17px;"></i> <span data-i18n="overdue_btn_guardian">Send Live Location to Guardian</span>
             </button>
           </div>
 
           <!-- GUARDIAN INFO DISPLAY (3RD CONTACT IN SOS PAGE) -->
           <div id="overdue-guardian-info-box" style="margin-top: 12px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-quiet); border-radius: 10px; padding: 10px; font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
             <div>
-              <span style="color: #94a3b8; display: block; font-size: 10px;">3RD CONTACT (GUARDIAN)</span>
+              <span style="color: #94a3b8; display: block; font-size: 10px;" data-i18n="overdue_guardian_label">3RD CONTACT (GUARDIAN)</span>
               <strong style="color: #fff; font-size: 12px;" id="overdue-guardian-name-disp">Guardian</strong>: 
               <span id="overdue-guardian-phone-disp" style="font-family: monospace; color: #38bdf8;">Loading...</span>
             </div>
             <button type="button" onclick="editGuardianContactFromOverdue()" style="background: none; border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px; padding: 3px 8px; font-size: 10.5px; cursor: pointer;">
-              <i class="fas fa-pen"></i> Edit
+              <i class="fas fa-pen"></i> <span data-i18n="btn_edit">Edit</span>
             </button>
           </div>
 
-          <button type="button" class="btn-close-sheet" style="margin-top: 12px;" onclick="confirmOverdueArrivalSafe()">
+          <button type="button" class="btn-close-sheet" style="margin-top: 12px;" onclick="confirmOverdueArrivalSafe()" data-i18n="overdue_btn_safe">
             I'm Actually Safe (End Guard)
           </button>
         </div>
@@ -2760,31 +2807,31 @@
       <div class="edit-sheet" onclick="event.stopPropagation()">
         <div class="sheet-handle"></div>
         <div class="modal-head-row">
-          <h3 id="edit-contact-title">Update Contact</h3>
+          <h3 id="edit-contact-title" data-i18n="contact_modal_title">Update Contact</h3>
           <button class="modal-close-x" onclick="closeEditContactModal()"><i class="fas fa-xmark"></i></button>
         </div>
 
         <form id="edit-contact-form" onsubmit="saveContactChanges(event)">
           <div class="form-group">
-            <label class="form-label">Contact Label / Relation</label>
+            <label class="form-label" data-i18n="contact_modal_label">Contact Label / Relation</label>
             <div class="input-field-wrap">
               <input type="text" class="form-input" id="edit-contact-name" placeholder="e.g. Guardian" required>
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Bangladeshi Mobile Number</label>
+            <label class="form-label" data-i18n="contact_modal_phone">Bangladeshi Mobile Number</label>
             <div class="input-field-wrap">
               <span class="prefix-bd">+880</span>
               <input type="tel" class="form-input" id="edit-contact-phone" placeholder="017XXXXXXXX">
             </div>
-            <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;" data-i18n="contact_modal_note">
               Supported operators: 013-019. If unconfigured, shows as 01XXXXXXXXX.
             </div>
           </div>
 
-          <button type="submit" class="btn-submit-action">Save Contact</button>
-          <button type="button" class="btn-close-sheet" style="margin-top: 8px;" onclick="closeEditContactModal()">Cancel</button>
+          <button type="submit" class="btn-submit-action" data-i18n="contact_modal_btn_save">Save Contact</button>
+          <button type="button" class="btn-close-sheet" style="margin-top: 8px;" onclick="closeEditContactModal()" data-i18n="btn_cancel">Cancel</button>
         </form>
       </div>
     </div>
@@ -2810,20 +2857,20 @@
         <a id="sheet-whatsapp-link" class="contact-action-btn btn-opt-whatsapp" href="#" target="_blank" onclick="sendWhatsAppLocation(event)">
           <i class="fab fa-whatsapp" style="font-size: 22px; color: var(--whatsapp-green);"></i>
           <div>
-            <div style="font-size: 13.5px; font-weight: 600;">Send Live Location via WhatsApp</div>
-            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Auto-composes message with live GPS link</div>
+            <div style="font-size: 13.5px; font-weight: 600;" data-i18n="sheet_wa_title">Send Live Location via WhatsApp</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;" data-i18n="sheet_wa_sub">Auto-composes message with live GPS link</div>
           </div>
         </a>
 
         <a id="sheet-sim-link" class="contact-action-btn btn-opt-sim" href="#" onclick="dialSIMCall(event)">
           <i class="fas fa-phone" style="font-size: 20px; color: #f87171;"></i>
           <div>
-            <div style="font-size: 13.5px; font-weight: 600;">Call via Direct SIM</div>
-            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Standard cellular voice call</div>
+            <div style="font-size: 13.5px; font-weight: 600;" data-i18n="sheet_sim_title">Call via Direct SIM</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;" data-i18n="sheet_sim_sub">Standard cellular voice call</div>
           </div>
         </a>
 
-        <button class="btn-close-sheet" onclick="closeContactSheet()">Cancel</button>
+        <button class="btn-close-sheet" onclick="closeContactSheet()" data-i18n="btn_cancel">Cancel</button>
       </div>
     </div>
 
@@ -2835,7 +2882,7 @@
         <div class="sheet-handle"></div>
         
         <div class="modal-head-row">
-          <h3 id="auth-title">Citizen Account</h3>
+          <h3 id="auth-title" data-i18n="auth_modal_title">Citizen Account</h3>
           <button class="modal-close-x" onclick="closeAuthModal()"><i class="fas fa-xmark"></i></button>
         </div>
 
@@ -2844,7 +2891,7 @@
           <!-- Top Citizen Status Banner (Only Name & Phone Number) -->
           <div style="background: var(--black-subtle); border: 1px solid var(--burgundy-border); border-radius: 16px; padding: 24px 16px; margin-bottom: 16px; text-align: center; position: relative;">
             <div style="position: absolute; top: 12px; right: 12px; font-size: 10px; color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 2px 8px; border-radius: 10px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-              <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span> Unlocked
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span> <span data-i18n="auth_unlocked_badge">Unlocked</span>
             </div>
             <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--burgundy-deep); border: 2px solid var(--burgundy-vivid); margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #fff;" id="profile-badge-letter">C</div>
             <h4 style="font-size: 18px; color: #fff; font-weight: 700; margin: 0 0 6px 0;" id="profile-display-name">Citizen</h4>
@@ -2856,27 +2903,27 @@
             <div style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onclick="toggleChangePasswordSection()">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <i class="fas fa-key" style="color: #60a5fa; font-size: 13px;"></i>
-                <span style="font-size: 12px; font-weight: 600; color: #fff;">Change Profile Password</span>
+                <span style="font-size: 12px; font-weight: 600; color: #fff;" data-i18n="auth_chg_pw">Change Profile Password</span>
               </div>
               <i class="fas fa-chevron-down" id="chg-pw-chevron" style="color: var(--text-muted); font-size: 11px; transition: transform 0.2s;"></i>
             </div>
             <form id="form-change-password-inline" style="display: none; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06);" onsubmit="handleChangePasswordSubmit(event)">
               <div class="form-group" style="margin-bottom: 8px;">
-                <label class="form-label" style="font-size: 10.5px;">Current Password</label>
+                <label class="form-label" style="font-size: 10.5px;" data-i18n="auth_curr_pw">Current Password</label>
                 <div class="input-field-wrap" style="padding: 7px 10px;">
                   <input type="password" class="form-input" id="inline-current-pw" placeholder="Enter current password" required style="font-size: 12px;">
                   <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('inline-current-pw', this)"><i class="fas fa-eye"></i></button>
                 </div>
               </div>
               <div class="form-group" style="margin-bottom: 8px;">
-                <label class="form-label" style="font-size: 10.5px;">New Password (min 6 chars)</label>
+                <label class="form-label" style="font-size: 10.5px;" data-i18n="auth_new_pw">New Password (min 6 chars)</label>
                 <div class="input-field-wrap" style="padding: 7px 10px;">
                   <input type="password" class="form-input" id="inline-new-pw" placeholder="New secure password" minlength="6" required style="font-size: 12px;">
                   <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('inline-new-pw', this)"><i class="fas fa-eye"></i></button>
                 </div>
               </div>
               <button type="submit" class="btn-submit-action" id="btn-change-pw-submit" style="padding: 9px; font-size: 12px;">
-                <i class="fas fa-lock"></i> Update Password
+                <i class="fas fa-lock"></i> <span data-i18n="auth_btn_update_pw">Update Password</span>
               </button>
             </form>
           </div>
@@ -2886,7 +2933,7 @@
 
           <button id="admin-portal-profile-btn" class="btn-submit-action" style="display: none; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); margin-bottom: 8px; border: none;" onclick="openAdminPortalFromProfile()"></button>
           <button class="btn-submit-action" style="background: transparent; border-color: rgba(239,68,68,0.4); color: #f87171; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="performLogout()">
-            <i class="fas fa-lock"></i> Lock Profile &amp; Sign Out
+            <i class="fas fa-lock"></i> <span data-i18n="auth_btn_logout">Lock Profile &amp; Sign Out</span>
           </button>
         </div>
 
@@ -2899,26 +2946,26 @@
                 <path d="M13.35 2.12c-.67-.78-1.92-.3-1.92.74v7.71H3.66c-.95 0-1.48 1.1-.88 1.83l7.87 9.48c.67.78 1.92.3 1.92-.74v-7.71h7.77c.95 0 1.48-1.1.88-1.83l-7.87-9.48z" fill="#10b981"/>
               </svg>
               <div>
-                <div style="font-size: 12.5px; font-weight: 700; color: #fff;">Supabase Cloud Authentication</div>
-                <div style="font-size: 10.5px; color: #a7f3d0;">Encrypted &bull; Direct Phone &amp; Password Matching</div>
+                <div style="font-size: 12.5px; font-weight: 700; color: #fff;" data-i18n="auth_cloud_title">Supabase Cloud Authentication</div>
+                <div style="font-size: 10.5px; color: #a7f3d0;" data-i18n="auth_cloud_sub">Encrypted &bull; Direct Phone &amp; Password Matching</div>
               </div>
             </div>
-            <span style="font-size: 9.5px; background: rgba(16, 185, 129, 0.2); color: #10b981; font-weight: 700; padding: 2px 7px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.35);">ACTIVE</span>
+            <span style="font-size: 9.5px; background: rgba(16, 185, 129, 0.2); color: #10b981; font-weight: 700; padding: 2px 7px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.35);" data-i18n="auth_badge_active">ACTIVE</span>
           </div>
 
           <div class="auth-toggle-bar" id="auth-main-tabs" style="margin-bottom: 16px;">
             <button class="auth-toggle-tab active" id="tab-btn-login" onclick="toggleAuthTab('login')">
-              <i class="fas fa-lock-open" style="font-size: 11px; margin-right: 4px;"></i> Log In
+              <i class="fas fa-lock-open" style="font-size: 11px; margin-right: 4px;"></i> <span data-i18n="auth_tab_login">Log In</span>
             </button>
             <button class="auth-toggle-tab" id="tab-btn-signup" onclick="toggleAuthTab('signup')">
-              <i class="fas fa-user-plus" style="font-size: 11px; margin-right: 4px;"></i> Register
+              <i class="fas fa-user-plus" style="font-size: 11px; margin-right: 4px;"></i> <span data-i18n="auth_tab_register">Register</span>
             </button>
           </div>
 
           <!-- 1. SUPABASE LOGIN FORM -->
           <form id="form-login" onsubmit="handleLoginSubmit(event)">
             <div class="form-group">
-              <label class="form-label">Bangladeshi Mobile Number</label>
+              <label class="form-label" data-i18n="contact_modal_phone">Bangladeshi Mobile Number</label>
               <div class="input-field-wrap">
                 <span class="prefix-bd">+880</span>
                 <input type="tel" class="form-input" id="login-phone" placeholder="Enter 11-digit number (e.g. 017...)" autocomplete="tel" required>
@@ -2929,7 +2976,7 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label">Password</label>
+              <label class="form-label" data-i18n="auth_label_pw">Password</label>
               <div class="input-field-wrap">
                 <input type="password" class="form-input" id="login-password" placeholder="Enter your password" autocomplete="current-password" required>
                 <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('login-password', this)" title="Show/Hide Password">
@@ -2947,21 +2994,21 @@
             </div>
 
             <button type="button" class="btn-submit-action" id="btn-login-submit" onclick="handleLoginSubmit(event)" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-              <i class="fas fa-lock-open"></i> Log In &amp; Unlock Profile
+              <i class="fas fa-lock-open"></i> <span data-i18n="auth_btn_login">Log In &amp; Unlock Profile</span>
             </button>
           </form>
 
           <!-- 2. SUPABASE REGISTER FORM -->
           <form id="form-signup" style="display: none;" onsubmit="handleSignupSubmit(event)">
             <div class="form-group">
-              <label class="form-label">Full Name</label>
+              <label class="form-label" data-i18n="auth_label_name">Full Name</label>
               <div class="input-field-wrap">
                 <input type="text" class="form-input" id="signup-name" placeholder="e.g. Tanvir Hossain" required>
               </div>
             </div>
 
             <div class="form-group">
-              <label class="form-label">Bangladeshi Mobile Number</label>
+              <label class="form-label" data-i18n="contact_modal_phone">Bangladeshi Mobile Number</label>
               <div class="input-field-wrap">
                 <span class="prefix-bd">+880</span>
                 <input type="tel" class="form-input" id="signup-phone" placeholder="017XXXXXXXX" required>
@@ -2972,7 +3019,7 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label">Create Password (min 6 characters)</label>
+              <label class="form-label" data-i18n="auth_label_create_pw">Create Password (min 6 characters)</label>
               <div class="input-field-wrap">
                 <input type="password" class="form-input" id="signup-password" placeholder="Minimum 6 characters" minlength="6" required>
                 <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('signup-password', this)" title="Show/Hide Password">
@@ -2990,7 +3037,7 @@
             </div>
 
             <button type="submit" class="btn-submit-action" id="btn-signup-submit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-              <i class="fas fa-user-plus"></i> Create Account &amp; Unlock
+              <i class="fas fa-user-plus"></i> <span data-i18n="auth_btn_register">Create Account &amp; Unlock</span>
             </button>
           </form>
         </div>
@@ -3003,16 +3050,16 @@
     ======================================================== -->
     <div id="sos-modal" class="sos-modal-backdrop">
       <div class="sos-modal-box">
-        <h2 style="font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 6px;">EMERGENCY SOS ACTIVATED</h2>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.45;">
-          Connecting with 999 Police / Medical CAD & dispatching your live GPS coordinates to your Family Circle.
+        <h2 style="font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 6px;" data-i18n="sos_modal_title">EMERGENCY SOS ACTIVATED</h2>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.45;" data-i18n="sos_modal_sub">
+          Connecting with 999 Police / Medical CAD &amp; dispatching your live GPS coordinates to your Family Circle.
         </p>
         <div style="font-size: 52px; font-weight: 800; color: #ef4444; margin-bottom: 20px; font-variant-numeric: tabular-nums;" id="sos-countdown-val">5</div>
         <div style="display: flex; flex-direction: column; gap: 9px;">
-          <button style="background: linear-gradient(135deg, var(--danger-crimson) 0%, var(--burgundy-core) 100%); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 11px; font-size: 13px; font-weight: 700; cursor: pointer;" onclick="finishEmergencySOS()">
+          <button style="background: linear-gradient(135deg, var(--danger-crimson) 0%, var(--burgundy-core) 100%); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 11px; font-size: 13px; font-weight: 700; cursor: pointer;" onclick="finishEmergencySOS()" data-i18n="sos_modal_dispatch">
             Dispatch Instantly Now
           </button>
-          <button style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-quiet); padding: 11px; border-radius: 11px; font-size: 12px; cursor: pointer;" onclick="abortEmergencySOS()">
+          <button style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-quiet); padding: 11px; border-radius: 11px; font-size: 12px; cursor: pointer;" onclick="abortEmergencySOS()" data-i18n="sos_modal_cancel">
             Cancel (False Alarm)
           </button>
         </div>
@@ -3064,7 +3111,7 @@
                 <span class="shurokha-title">shurokhaAI</span>
                 <span class="shurokha-live-tag"><i class="fas fa-globe"></i> Web Search</span>
               </div>
-              <div class="shurokha-sub">24/7 Personal Safety & Universal Companion</div>
+              <div class="shurokha-sub" data-i18n="shurokha_sub">24/7 Personal Safety & Universal Companion</div>
             </div>
           </div>
           <div class="shurokha-header-actions">
@@ -3128,7 +3175,7 @@
         <!-- Input Bar -->
         <div class="shurokha-input-bar">
           <div class="shurokha-input-wrap">
-            <textarea id="shurokha-input" rows="1" placeholder="Ask for any Thana OC, emergency hospital, helpline... (English বা বাংলা)" onkeydown="handleShurokhaInputKey(event)" oninput="autoExpandShurokhaInput(this)"></textarea>
+            <textarea id="shurokha-input" rows="1" placeholder="Ask for any Thana OC, emergency hospital, helpline... (English বা বাংলা)" data-i18n-placeholder="shurokha_placeholder" onkeydown="handleShurokhaInputKey(event)" oninput="autoExpandShurokhaInput(this)"></textarea>
           </div>
           <button type="button" id="shurokha-send-btn" class="shurokha-send-button" onclick="sendShurokhaMessage()" title="Send">
             <i class="fas fa-paper-plane"></i>
@@ -3140,6 +3187,298 @@
   </div>
 
   <script>
+    // =========================================================================
+    // I18N MULTILINGUAL LOCALIZATION ENGINE (ENGLISH & BANGLA)
+    // =========================================================================
+    const I18N_TRANSLATIONS = {
+      en: {
+        brand_fullform: "Safety • Awareness • Fast Response • Emergency Assistance",
+        sos_helpline_title: "National 999 Helpline",
+        sos_helpline_sub: "Police • Fire Service • Ambulance CAD",
+        sos_helpline_btn: "Call 999",
+        sos_btn_sub: "Hold 3s",
+        sos_walk_card_title: "Walk With Me Companion",
+        sos_walk_card_sub: "Search any place in Bangladesh & route with Google Maps",
+        sos_contacts_title: "Trusted Family Contacts",
+        sos_contacts_sub: "Tap card to contact • Pen to edit",
+        sos_geo_title: "Live Device Geolocation",
+        sos_geo_refresh: "Refresh GPS",
+        sos_geo_connecting: "Connecting directly to device satellite sensors",
+        sos_geo_locating: "Locating...",
+        sos_geo_active: "Live GPS Tracking Active",
+
+        walk_title: "Walk With Me",
+        walk_gps_pill: "GPS Active",
+        walk_guard_dedicated: "Personal Route Guardian",
+        walk_start_placeholder: "Detecting live device GPS...",
+        walk_mode_walk: "Walk",
+        walk_mode_car: "Car / CNG",
+        walk_mode_bike: "Bike",
+        walk_dest_placeholder: "Destination (e.g. Dhanmondi, Airport, Gulshan...)",
+        walk_timer_title: "Set Journey Safety Timer",
+        walk_timer_mins_unit: "mins",
+        walk_timer_alert_note: "Auto-alerts emergency circle if overdue",
+        walk_timer_bg_note: "Runs automatically in background",
+        walk_btn_start: "Start Companion Guard",
+
+        dock_title: "Companion Guard Active",
+        dock_edit: "Edit",
+        dock_speed_label: "LIVE SPEED",
+        dock_gps_label: "GPS TRACKING",
+        dock_satellite_active: "Satellite Active",
+        dock_btn_track: "Track Live Pin",
+        dock_btn_nav: "Live Google Nav",
+        dock_btn_999: "Call 999",
+        dock_btn_arrived: "I Have Arrived Safely",
+
+        feed_composer_placeholder: "Share safety awareness, road hazard, or community advisory...",
+        feed_photo_video: "Photo / Video",
+        feed_btn_post: "Post",
+        feed_tab_all: "All Feeds",
+        feed_tab_community: "Citizen Reports",
+        feed_btn_sync: "Sync",
+
+        nav_sos: "Emergency",
+        nav_map: "Map",
+        nav_feed: "Awareness",
+        nav_profile: "Profile",
+
+        modal_timer_title: "Edit Companion Timer",
+        modal_timer_desc: "Add or adjust time for your journey. The timer automatically runs in the background even if your device is locked or minimized.",
+        modal_timer_quick_label: "QUICK ADJUSTMENT",
+        modal_timer_exact_label: "SET EXACT REMAINING TIME",
+        modal_timer_minutes: "minutes",
+        modal_timer_btn_apply: "Apply",
+        btn_close: "Close",
+        btn_cancel: "Cancel",
+        btn_edit: "Edit",
+
+        overdue_title: "Did you reach home safely?",
+        overdue_sub: "Your journey safety timer has ended. Please confirm your safety status.",
+        overdue_btn_yes: "Yes, I Arrived Safely",
+        overdue_btn_no: "No, I Need Help",
+        overdue_assist_title: "Emergency Assistance",
+        overdue_assist_warn: "⚠️ You did not confirm safe arrival. Choose an emergency action below:",
+        overdue_btn_help: "Take Help (Call 999 Police)",
+        overdue_btn_guardian: "Send Live Location to Guardian",
+        overdue_guardian_label: "3RD CONTACT (GUARDIAN)",
+        overdue_btn_safe: "I'm Actually Safe (End Guard)",
+
+        contact_modal_title: "Update Contact",
+        contact_modal_label: "Contact Label / Relation",
+        contact_modal_phone: "Bangladeshi Mobile Number",
+        contact_modal_note: "Supported operators: 013-019. If unconfigured, shows as 01XXXXXXXXX.",
+        contact_modal_btn_save: "Save Contact",
+
+        sheet_wa_title: "Send Live Location via WhatsApp",
+        sheet_wa_sub: "Auto-composes message with live GPS link",
+        sheet_sim_title: "Call via Direct SIM",
+        sheet_sim_sub: "Standard cellular voice call",
+
+        auth_modal_title: "Citizen Account",
+        auth_unlocked_badge: "Unlocked",
+        auth_chg_pw: "Change Profile Password",
+        auth_curr_pw: "Current Password",
+        auth_new_pw: "New Password (min 6 chars)",
+        auth_btn_update_pw: "Update Password",
+        auth_btn_logout: "Lock Profile & Sign Out",
+        auth_cloud_title: "Supabase Cloud Authentication",
+        auth_cloud_sub: "Encrypted • Direct Phone & Password Matching",
+        auth_badge_active: "ACTIVE",
+        auth_tab_login: "Log In",
+        auth_tab_register: "Register",
+        auth_label_pw: "Password",
+        auth_label_name: "Full Name",
+        auth_label_create_pw: "Create Password (min 6 characters)",
+        auth_btn_login: "Log In & Unlock Profile",
+        auth_btn_register: "Create Account & Unlock",
+
+        sos_modal_title: "EMERGENCY SOS ACTIVATED",
+        sos_modal_sub: "Connecting with 999 Police / Medical CAD & dispatching your live GPS coordinates to your Family Circle.",
+        sos_modal_dispatch: "Dispatch Instantly Now",
+        sos_modal_cancel: "Cancel (False Alarm)",
+
+        shurokha_sub: "24/7 Personal Safety & Universal Companion",
+        shurokha_placeholder: "Ask for any Thana OC, emergency hospital, helpline... (English বা বাংলা)"
+      },
+      bn: {
+        brand_fullform: "নিরাপত্তা • সচেতনতা • দ্রুত রেসপন্স • জরুরি সহায়তা",
+        sos_helpline_title: "জাতীয় ৯৯৯ হেল্পলাইন",
+        sos_helpline_sub: "পুলিশ • ফায়ার সার্ভিস • অ্যাম্বুলেন্স সিএডি",
+        sos_helpline_btn: "৯৯৯ কল করুন",
+        sos_btn_sub: "৩ সেকেন্ড চেপে ধরুন",
+        sos_walk_card_title: "ওয়াক উইথ মি কম্প্যানিয়ন",
+        sos_walk_card_sub: "বাংলাদেশের যেকোনো স্থান খুঁজুন এবং গুগল ম্যাপস দিয়ে পথ চলুন",
+        sos_contacts_title: "বিশ্বস্ত পারিবারিক পরিচিতি",
+        sos_contacts_sub: "যোগাযোগ করতে ট্যাপ করুন • সম্পাদনা করতে কলম আইকন",
+        sos_geo_title: "ডিভাইস লাইভ ভৌগোলিক অবস্থান",
+        sos_geo_refresh: "জিপিএস রিফ্রেশ",
+        sos_geo_connecting: "ডিভাইস স্যাটেলাইট সেন্সরের সাথে সরাসরি সংযোগ করা হচ্ছে",
+        sos_geo_locating: "সন্ধান চলছে...",
+        sos_geo_active: "লাইভ জিপিএস ট্র্যাকিং সক্রিয়",
+
+        walk_title: "ওয়াক উইথ মি",
+        walk_gps_pill: "জিপিএস সক্রিয়",
+        walk_guard_dedicated: "ব্যক্তিগত রুট গার্ডিয়ান",
+        walk_start_placeholder: "লাইভ ডিভাইস জিপিএস সনাক্ত করা হচ্ছে...",
+        walk_mode_walk: "হাঁটা",
+        walk_mode_car: "গাড়ি / সিএনজি",
+        walk_mode_bike: "বাইক",
+        walk_dest_placeholder: "গন্তব্য লিখুন (যেমন: ধানমন্ডি, বিমানবন্দর, গুলশান...)",
+        walk_timer_title: "যাত্রার সেফটি টাইমার নির্ধারণ করুন",
+        walk_timer_mins_unit: "মিনিট",
+        walk_timer_alert_note: "সময় অতিক্রান্ত হলে স্বয়ংক্রিয় জরুরি অ্যালার্ট পাঠাবে",
+        walk_timer_bg_note: "ব্যাকগ্রাউন্ডে স্বয়ংক্রিয়ভাবে সক্রিয় থাকে",
+        walk_btn_start: "কম্প্যানিয়ন গার্ড শুরু করুন",
+
+        dock_title: "কম্প্যানিয়ন গার্ড সক্রিয়",
+        dock_edit: "এডিট",
+        dock_speed_label: "লাইভ গতি",
+        dock_gps_label: "জিপিএস ট্র্যাকিং",
+        dock_satellite_active: "স্যাটেলাইট সক্রিয়",
+        dock_btn_track: "লাইভ পিন ট্র্যাক",
+        dock_btn_nav: "গুগল ন্যাভ",
+        dock_btn_999: "৯৯৯ কল করুন",
+        dock_btn_arrived: "আমি নিরাপদে পৌঁছেছি",
+
+        feed_composer_placeholder: "নিরাপত্তা সচেতনতা, রাস্তার বিপদ বা সতর্কবার্তা পোস্ট করুন...",
+        feed_photo_video: "ছবি / ভিডিও",
+        feed_btn_post: "পোস্ট করুন",
+        feed_tab_all: "সকল ফিড",
+        feed_tab_community: "নাগরিক রিপোর্ট",
+        feed_btn_sync: "সিঙ্ক",
+
+        nav_sos: "জরুরি",
+        nav_map: "ম্যাপ",
+        nav_feed: "সচেতনতা",
+        nav_profile: "প্রোফাইল",
+
+        modal_timer_title: "কম্প্যানিয়ন টাইমার পরিবর্তন করুন",
+        modal_timer_desc: "যাত্রার সময় বাড়ান বা কমান। ফোন লক বা মিনিমাইজ করা থাকলেও টাইমার ব্যাকগ্রাউন্ডে চলবে।",
+        modal_timer_quick_label: "দ্রুত পরিবর্তন",
+        modal_timer_exact_label: "অবশিষ্ট সময় নির্ধারণ করুন",
+        modal_timer_minutes: "মিনিট",
+        modal_timer_btn_apply: "প্রয়োগ করুন",
+        btn_close: "বন্ধ করুন",
+        btn_cancel: "বাতিল",
+        btn_edit: "এডিট",
+
+        overdue_title: "আপনি কি নিরাপদে বাড়ি পৌঁছেছেন?",
+        overdue_sub: "আপনার যাত্রার নির্ধারিত সময় শেষ হয়েছে। আপনার নিরাপত্তা নিশ্চিত করুন।",
+        overdue_btn_yes: "হ্যাঁ, আমি নিরাপদে পৌঁছেছি",
+        overdue_btn_no: "না, আমার সাহায্য প্রয়োজন",
+        overdue_assist_title: "জরুরি সহায়তা",
+        overdue_assist_warn: "⚠️ আপনি নিরাপদ আগমন নিশ্চিত করেননি। নিচে থেকে জরুরি পদক্ষেপ বেছে নিন:",
+        overdue_btn_help: "সাহায্য নিন (৯৯৯ পুলিশ কল)",
+        overdue_btn_guardian: "অভিভাবককে লাইভ লোকেশন পাঠান",
+        overdue_guardian_label: "৩য় পরিচিতি (অভিভাবক)",
+        overdue_btn_safe: "আমি আসলে নিরাপদ (গার্ড সমাপ্ত করুন)",
+
+        contact_modal_title: "পরিচিতি আপডেট করুন",
+        contact_modal_label: "পরিচিতির পরিচয় / সম্পর্ক",
+        contact_modal_phone: "বাংলাদেশী মোবাইল নম্বর",
+        contact_modal_note: "সমর্থিত অপারেটর: ০১৩-০১৯। কনফিগার না থাকলে ০১XXXXXXXXX হিসেবে থাকবে।",
+        contact_modal_btn_save: "সংরক্ষণ করুন",
+
+        sheet_wa_title: "হোয়াটসঅ্যাপে লাইভ লোকেশন পাঠান",
+        sheet_wa_sub: "লাইভ জিপিএস লিংকসহ বার্তা স্বয়ংক্রিয়ভাবে প্রস্তুত হবে",
+        sheet_sim_title: "সরাসরি সিম কল করুন",
+        sheet_sim_sub: "সাধারণ মোবাইল সেলুলার কল",
+
+        auth_modal_title: "নাগরিক অ্যাকাউন্ট",
+        auth_unlocked_badge: "আনলকড",
+        auth_chg_pw: "প্রোফাইল পাসওয়ার্ড পরিবর্তন",
+        auth_curr_pw: "বর্তমান পাসওয়ার্ড",
+        auth_new_pw: "নতুন পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)",
+        auth_btn_update_pw: "পাসওয়ার্ড আপডেট করুন",
+        auth_btn_logout: "প্রোফাইল লক এবং সাইন আউট",
+        auth_cloud_title: "সুপাবেস ক্লাউড প্রমাণীকরণ",
+        auth_cloud_sub: "এনক্রিপ্ট করা • ফোন ও পাসওয়ার্ড মিলকরণ",
+        auth_badge_active: "সক্রিয়",
+        auth_tab_login: "লগ ইন",
+        auth_tab_register: "নিবন্ধন",
+        auth_label_pw: "পাসওয়ার্ড",
+        auth_label_name: "পুরো নাম",
+        auth_label_create_pw: "পাসওয়ার্ড তৈরি করুন (কমপক্ষে ৬ অক্ষর)",
+        auth_btn_login: "লগ ইন ও প্রোফাইল আনলক",
+        auth_btn_register: "অ্যাকাউন্ট তৈরি ও আনলক",
+
+        sos_modal_title: "জরুরি এসওএস সক্রিয় হয়েছে",
+        sos_modal_sub: "৯৯৯ পুলিশ/মেডিকেল সিএডির সাথে সংযোগ স্থাপন এবং পারিবারিক পরিচিতিদের কাছে লাইভ জিপিএস পাঠানো হচ্ছে।",
+        sos_modal_dispatch: "তাৎক্ষণিক প্রেরণ করুন",
+        sos_modal_cancel: "বাতিল (ভুল সংকেত)",
+
+        shurokha_sub: "২৪/৭ ব্যক্তিগত নিরাপত্তা ও সার্বজনীন সহযোগী",
+        shurokha_placeholder: "যেকোনো থানার ওসি, জরুরি হাসপাতাল বা হেল্পলাইনের নাম্বার জিজ্ঞাসা করুন..."
+      }
+    };
+
+    let currentAppLanguage = localStorage.getItem('safe_bd_language') || 'en';
+
+    function setAppLanguage(lang) {
+      if (lang !== 'bn' && lang !== 'en') lang = 'en';
+      currentAppLanguage = lang;
+      try {
+        localStorage.setItem('safe_bd_language', lang);
+      } catch (e) {}
+
+      document.documentElement.lang = lang === 'bn' ? 'bn' : 'en';
+
+      // Update toggle buttons in top bar
+      const btnEn = document.getElementById('btn-lang-en');
+      const btnBn = document.getElementById('btn-lang-bn');
+      if (btnEn) btnEn.classList.toggle('active', lang === 'en');
+      if (btnBn) btnBn.classList.toggle('active', lang === 'bn');
+
+      // Update all DOM elements tagged with data-i18n
+      applyI18nToDOM(lang);
+
+      // Re-render dynamic components
+      if (typeof updateWalkUserBadge === 'function') {
+        updateWalkUserBadge();
+      }
+      if (typeof renderContactsList === 'function') {
+        renderContactsList();
+      }
+      if (typeof updateGuardianDisplayInOverdueModal === 'function') {
+        updateGuardianDisplayInOverdueModal();
+      }
+    }
+
+    function toggleLanguage() {
+      setAppLanguage(currentAppLanguage === 'bn' ? 'en' : 'bn');
+    }
+
+    function applyI18nToDOM(lang) {
+      const dict = I18N_TRANSLATIONS[lang] || I18N_TRANSLATIONS.en;
+
+      // 1. Text elements
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) {
+          el.textContent = dict[key];
+        }
+      });
+
+      // 2. Placeholder inputs
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (dict[key]) {
+          el.setAttribute('placeholder', dict[key]);
+        }
+      });
+    }
+
+    function getLocalizedContactName(name) {
+      if (currentAppLanguage !== 'bn') return name;
+      if (!name) return name;
+      const lower = name.trim().toLowerCase();
+      if (lower === 'father') return 'বাবা';
+      if (lower === 'mother') return 'মা';
+      if (lower === 'guardian') return 'অভিভাবক';
+      return name;
+    }
+
     // =========================================================================
     // BANGLADESH LOCATIONS DATABASE
     // =========================================================================
@@ -4276,12 +4615,21 @@
       if (mainEl) mainEl.innerText = main;
       if (subEl) subEl.innerText = sub;
       if (badge) {
-        badge.innerText = badgeText;
+        if (currentAppLanguage === 'bn' && badgeText) {
+          if (badgeText.includes('Connecting')) badge.innerText = 'সংযোগ হচ্ছে...';
+          else if (badgeText.includes('GPS Live')) badge.innerText = badgeText.replace('GPS Live', 'জিপিএস সক্রিয়');
+          else if (badgeText.includes('Signal Lost')) badge.innerText = 'সিগন্যাল বিচ্ছিন্ন';
+          else badge.innerText = badgeText;
+        } else {
+          badge.innerText = badgeText;
+        }
         badge.style.color = badgeColor;
       }
     }
 
     window.addEventListener('load', () => {
+      // Initialize application language (English / বাংলা)
+      setAppLanguage(currentAppLanguage);
       // Connect directly to device hardware GPS
       acquireRealLocation(false);
       if (typeof updateWalkUserBadge === 'function') {
@@ -5288,12 +5636,13 @@
         const isConfigured = c.phone && String(c.phone).trim() !== '' && c.phone !== '01XXXXXXXXX' && !isDummyPhone(c.phone);
         const displayPhone = isConfigured ? `+880 ${String(c.phone).replace(/\D/g, '').slice(-10)}` : '01XXXXXXXXX';
         const phoneStyle = isConfigured ? '' : 'color: #94a3b8; font-family: monospace; letter-spacing: 0.5px;';
+        const displayName = getLocalizedContactName(c.name);
 
         card.innerHTML = `
           <div class="contact-info" onclick="openContactSheet('${c.id}')">
             <div class="contact-avatar online">${c.initial || (c.name ? c.name.charAt(0).toUpperCase() : '?')}</div>
             <div>
-              <div class="contact-name">${c.name}</div>
+              <div class="contact-name">${displayName}</div>
               <div class="contact-num" style="${phoneStyle}">${displayPhone}</div>
             </div>
           </div>
@@ -5967,12 +6316,23 @@
       const authIndicator = document.getElementById('walk-user-auth-indicator');
       if (!badgeText || !authIndicator) return;
 
+      const isBn = currentAppLanguage === 'bn';
       if (currentUser) {
-        badgeText.innerHTML = `<i class="fas fa-shield-halved" style="color: #10b981;"></i> Dedicated Guard for <strong>${escapeHtml(currentUser.name)}</strong>`;
-        authIndicator.innerHTML = `<span style="color: #10b981;">● Profile Active</span>`;
+        if (isBn) {
+          badgeText.innerHTML = `<i class="fas fa-shield-halved" style="color: #10b981;"></i> <strong>${escapeHtml(currentUser.name)}</strong>-এর জন্য ডেডিকেটেড গার্ড`;
+          authIndicator.innerHTML = `<span style="color: #10b981;">● প্রোফাইল সক্রিয়</span>`;
+        } else {
+          badgeText.innerHTML = `<i class="fas fa-shield-halved" style="color: #10b981;"></i> Dedicated Guard for <strong>${escapeHtml(currentUser.name)}</strong>`;
+          authIndicator.innerHTML = `<span style="color: #10b981;">● Profile Active</span>`;
+        }
       } else {
-        badgeText.innerHTML = `<i class="fas fa-user-lock" style="color: #f59e0b;"></i> Guest Mode • Tap to unlock Citizen Profile`;
-        authIndicator.innerHTML = `<span style="color: #f59e0b; cursor: pointer; text-decoration: underline;" onclick="openAuthModal()">Sign In</span>`;
+        if (isBn) {
+          badgeText.innerHTML = `<i class="fas fa-user-lock" style="color: #f59e0b;"></i> গেস্ট মোড • প্রোফাইল আনলক করতে ট্যাপ করুন`;
+          authIndicator.innerHTML = `<span style="color: #f59e0b; cursor: pointer; text-decoration: underline;" onclick="openAuthModal()">লগ ইন</span>`;
+        } else {
+          badgeText.innerHTML = `<i class="fas fa-user-lock" style="color: #f59e0b;"></i> Guest Mode • Tap to unlock Citizen Profile`;
+          authIndicator.innerHTML = `<span style="color: #f59e0b; cursor: pointer; text-decoration: underline;" onclick="openAuthModal()">Sign In</span>`;
+        }
       }
     }
 
@@ -6485,7 +6845,9 @@
           displayEl.style.color = "#10b981";
         }
         if (hudMetric) {
-          hudMetric.innerText = `Remaining: ~${mins}m ${secs}s`;
+          hudMetric.innerText = (currentAppLanguage === 'bn')
+            ? `অবশিষ্ট: ~${mins}মি ${secs}সে`
+            : `Remaining: ~${mins}m ${secs}s`;
         }
       } else {
         // ETA Reached -> Overdue Timer counting up
@@ -6497,7 +6859,9 @@
           displayEl.style.color = "#ef4444";
         }
         if (hudMetric) {
-          hudMetric.innerText = `Overdue: +${overMins}m ${overSecs}s`;
+          hudMetric.innerText = (currentAppLanguage === 'bn')
+            ? `সময় অতিক্রান্ত: +${overMins}মি ${overSecs}সে`
+            : `Overdue: +${overMins}m ${overSecs}s`;
         }
 
         // Overdue Alarm & Safety Check when timer reaches 0
@@ -6532,9 +6896,12 @@
     function sendDeviceOverdueNotification() {
       if (!('Notification' in window)) return;
       if (Notification.permission === 'granted') {
+        const isBn = currentAppLanguage === 'bn';
+        const notifTitle = isBn ? "⚠️ SAFE BD নিরাপত্তা সতর্কতা" : "⚠️ SAFE BD Safety Check";
+        const notifBody = isBn ? "আপনি কি নিরাপদে বাড়ি পৌঁছেছেন?" : "Did you reach home safely?";
         try {
-          const notif = new Notification("⚠️ SAFE BD Safety Check", {
-            body: "Did you reach home safely?",
+          const notif = new Notification(notifTitle, {
+            body: notifBody,
             icon: "/app-icon.jpg",
             badge: "/app-icon.jpg",
             tag: "safebd-overdue-check",
@@ -6549,8 +6916,8 @@
         } catch (e) {
           if (navigator.serviceWorker && navigator.serviceWorker.ready) {
             navigator.serviceWorker.ready.then(reg => {
-              reg.showNotification("⚠️ SAFE BD Safety Check", {
-                body: "Did you reach home safely?",
+              reg.showNotification(notifTitle, {
+                body: notifBody,
                 icon: "/app-icon.jpg",
                 badge: "/app-icon.jpg",
                 tag: "safebd-overdue-check",
@@ -6599,9 +6966,11 @@
       const phoneDisp = document.getElementById('overdue-guardian-phone-disp');
       
       const isConfigured = guardian && guardian.phone && String(guardian.phone).trim() !== '' && guardian.phone !== '01XXXXXXXXX' && !isDummyPhone(guardian.phone);
-      if (nameDisp) nameDisp.innerText = (guardian && guardian.name) ? guardian.name : 'Guardian';
+      const isBn = currentAppLanguage === 'bn';
+      if (nameDisp) nameDisp.innerText = (guardian && guardian.name) ? getLocalizedContactName(guardian.name) : (isBn ? 'অভিভাবক' : 'Guardian');
       if (phoneDisp) {
-        phoneDisp.innerText = isConfigured ? `+880 ${String(guardian.phone).replace(/\D/g, '').slice(-10)}` : '01XXXXXXXXX (Not Set)';
+        const notSetText = isBn ? '০১XXXXXXXXX (সেট করা নেই)' : '01XXXXXXXXX (Not Set)';
+        phoneDisp.innerText = isConfigured ? `+880 ${String(guardian.phone).replace(/\D/g, '').slice(-10)}` : notSetText;
         phoneDisp.style.color = isConfigured ? '#38bdf8' : '#f59e0b';
       }
     }
@@ -6659,7 +7028,11 @@
       const address = currentCoords.address || 'Dhaka, Bangladesh';
       const gmapsLiveUrl = `https://maps.google.com/?q=${lat},${lon}`;
 
-      const alertMessage = `🚨 [SAFE BD EMERGENCY ALERT]\nHi ${guardianName}, I did NOT arrive home safely! My journey safety timer has expired. Please check on me immediately.\n📍 Last Location: ${address}\n🗺️ Live GPS Map: ${gmapsLiveUrl}\n🔒 Verified Distress Signal via SAFE BD`;
+      const isBn = currentAppLanguage === 'bn';
+      const guardianDisplayName = getLocalizedContactName(guardianName);
+      const alertMessage = isBn
+        ? `🚨 [নিরাপত্তা জরুরি সতর্কতা - SAFE BD]\nপ্রিয় ${guardianDisplayName}, আমি নিরাপদে বাড়ি পৌঁছাইনি! আমার যাত্রার সেফটি টাইমারের সময় শেষ হয়ে গেছে। অনুগ্রহ করে অবিলম্বে আমার খোঁজ নিন।\n📍 সর্বশেষ অবস্থান: ${address}\n🗺️ লাইভ জিপিএস ম্যাপ: ${gmapsLiveUrl}\n🔒 SAFE BD-এর মাধ্যমে প্রেরিত জরুরি সংকেত`
+        : `🚨 [SAFE BD EMERGENCY ALERT]\nHi ${guardianName}, I did NOT arrive home safely! My journey safety timer has expired. Please check on me immediately.\n📍 Last Location: ${address}\n🗺️ Live GPS Map: ${gmapsLiveUrl}\n🔒 Verified Distress Signal via SAFE BD`;
 
       // Open WhatsApp & compose SMS
       const whatsappUrl = `https://wa.me/880${cleanPhone}?text=${encodeURIComponent(alertMessage)}`;
@@ -6694,7 +7067,11 @@
         phoneDisp.innerHTML = `<span style="color: #10b981;">✓ Dispatched to +880 ${cleanPhone}</span>`;
       }
 
-      alert(`🚨 Live Emergency Location Dispatched!\n\nSent to: ${guardianName} (+880 ${cleanPhone})\nLocation: ${address}\n\nWhatsApp opened with live GPS link.`);
+      if (isBn) {
+        alert(`🚨 লাইভ জরুরি অবস্থান পাঠানো হয়েছে!\n\nপ্রাপক: ${guardianDisplayName} (+880 ${cleanPhone})\nঅবস্থান: ${address}\n\nলাইভ জিপিএস লিংকসহ হোয়াটসঅ্যাপ খোলা হয়েছে।`);
+      } else {
+        alert(`🚨 Live Emergency Location Dispatched!\n\nSent to: ${guardianName} (+880 ${cleanPhone})\nLocation: ${address}\n\nWhatsApp opened with live GPS link.`);
+      }
     }
 
     function editGuardianContactFromOverdue() {
