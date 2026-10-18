@@ -2332,15 +2332,15 @@
     <!-- SCREEN 1: EMERGENCY SOS, WALK WITH ME & CONTACTS -->
     <div id="screen-sos" class="screen screen-padded active">
       
-      <!-- 999 Direct CAD Dispatch Strip -->
+      <!-- Emergency Help & Rapid CAD Dispatch Strip -->
       <div class="emergency-strip">
         <div>
-          <div class="strip-title"><i class="fas fa-shield-heart" style="color: #ef4444;"></i> <span data-i18n="sos_helpline_title">National 999 Helpline</span></div>
+          <div class="strip-title"><i class="fas fa-shield-heart" style="color: #ef4444;"></i> <span data-i18n="sos_helpline_title">National Emergency Services</span></div>
           <div class="strip-sub" data-i18n="sos_helpline_sub">Police • Fire Service • Ambulance CAD</div>
         </div>
-        <a href="tel:999" class="strip-btn" onclick="trigger999CallDirect(event)" style="text-decoration: none;">
-          <i class="fas fa-phone"></i> <span data-i18n="sos_helpline_btn">Call 999</span>
-        </a>
+        <button type="button" class="strip-btn" onclick="openEmergencyHelpModal()" style="border: none; text-decoration: none; cursor: pointer;">
+          <i class="fas fa-hand-holding-medical"></i> <span data-i18n="sos_helpline_btn">I Need Help</span>
+        </button>
       </div>
 
       <!-- Emergency SOS Disc -->
@@ -2801,6 +2801,76 @@
     </div>
 
     <!-- ========================================================
+         MODAL 0C: IMMEDIATE EMERGENCY ASSISTANCE (I NEED HELP)
+    ======================================================== -->
+    <div id="emergency-help-modal" class="walk-timer-modal-backdrop" onclick="closeEmergencyHelpModal(event)" style="z-index: 99999;">
+      <div class="edit-sheet" onclick="event.stopPropagation()" style="border: 1.5px solid rgba(239, 68, 68, 0.4); box-shadow: 0 10px 40px rgba(239, 68, 68, 0.35);">
+        <div class="sheet-handle" style="background: #ef4444;"></div>
+        
+        <div class="modal-head-row" style="margin-bottom: 10px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 34px; height: 34px; border-radius: 9px; background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.5); display: flex; align-items: center; justify-content: center; color: #ef4444; font-size: 16px;">
+              <i class="fas fa-hand-holding-medical"></i>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #fff;" data-i18n="help_modal_title">Immediate Emergency Help</h3>
+              <span style="font-size: 11px; color: var(--text-muted); display: block;" data-i18n="help_modal_sub">Select your critical situation for direct hotline dispatch:</span>
+            </div>
+          </div>
+          <button class="modal-close-x" onclick="closeEmergencyHelpModal()"><i class="fas fa-xmark"></i></button>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 14px;">
+          <!-- OPTION 1: STUCK WITH AN AMBULANCE? -->
+          <button type="button" onclick="selectEmergencyHelp('ambulance_traffic')" style="background: rgba(239, 68, 68, 0.12); border: 1.5px solid rgba(239, 68, 68, 0.5); padding: 13px 14px; border-radius: 12px; text-align: left; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(239, 68, 68, 0.25); border: 1px solid #ef4444; display: flex; align-items: center; justify-content: center; color: #ef4444; font-size: 18px; flex-shrink: 0;">
+                <i class="fas fa-truck-medical"></i>
+              </div>
+              <div>
+                <div style="font-weight: 800; font-size: 14px; color: #fff;" data-i18n="help_opt1_title">Stuck in Traffic with Ambulance?</div>
+                <div style="font-size: 11px; color: #fca5a5; margin-top: 2px;" data-i18n="help_opt1_desc">Urgent police traffic clearance & green corridor</div>
+              </div>
+            </div>
+            <span style="background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); color: #fff; font-size: 11.5px; font-weight: 800; padding: 7px 11px; border-radius: 8px; white-space: nowrap; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);" data-i18n="help_opt1_btn">Call 999</span>
+          </button>
+
+          <!-- OPTION 2: CRITICAL PATIENT CONDITION AT HOME -->
+          <button type="button" onclick="selectEmergencyHelp('critical_patient')" style="background: rgba(245, 158, 11, 0.12); border: 1.5px solid rgba(245, 158, 11, 0.5); padding: 13px 14px; border-radius: 12px; text-align: left; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(245, 158, 11, 0.25); border: 1px solid #f59e0b; display: flex; align-items: center; justify-content: center; color: #f59e0b; font-size: 18px; flex-shrink: 0;">
+                <i class="fas fa-heart-pulse"></i>
+              </div>
+              <div>
+                <div style="font-weight: 800; font-size: 14px; color: #fff;" data-i18n="help_opt2_title">Critical Patient Condition at Home</div>
+                <div style="font-size: 11px; color: #fde68a; margin-top: 2px;" data-i18n="help_opt2_desc">Urgent ambulance dispatch & rapid medical response</div>
+              </div>
+            </div>
+            <span style="background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); color: #fff; font-size: 11.5px; font-weight: 800; padding: 7px 11px; border-radius: 8px; white-space: nowrap; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);" data-i18n="help_opt2_btn">Call 999</span>
+          </button>
+
+          <!-- OPTION 3: FIRE SERVICE & RESCUE -->
+          <button type="button" onclick="selectEmergencyHelp('fire_service')" style="background: rgba(234, 88, 12, 0.12); border: 1.5px solid rgba(234, 88, 12, 0.5); padding: 13px 14px; border-radius: 12px; text-align: left; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(234, 88, 12, 0.15);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(234, 88, 12, 0.25); border: 1px solid #ea580c; display: flex; align-items: center; justify-content: center; color: #ff7849; font-size: 18px; flex-shrink: 0;">
+                <i class="fas fa-fire-flame-curved"></i>
+              </div>
+              <div>
+                <div style="font-weight: 800; font-size: 14px; color: #fff;" data-i18n="help_opt3_title">Fire Service & Rescue Emergency</div>
+                <div style="font-size: 11px; color: #fed7aa; margin-top: 2px;" data-i18n="help_opt3_desc">Direct hotline to Bangladesh Fire Service Control</div>
+              </div>
+            </div>
+            <span style="background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%); color: #fff; font-size: 11.5px; font-weight: 800; padding: 7px 11px; border-radius: 8px; white-space: nowrap; box-shadow: 0 2px 8px rgba(234, 88, 12, 0.4);" data-i18n="help_opt3_btn">Call 102</span>
+          </button>
+        </div>
+
+        <button type="button" class="btn-close-sheet" style="margin-top: 14px;" onclick="closeEmergencyHelpModal()" data-i18n="btn_cancel">
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <!-- ========================================================
          MODAL 1: EDIT CONTACT NUMBER MODAL
     ======================================================== -->
     <div id="edit-contact-modal" class="edit-contact-modal-backdrop" onclick="closeEditContactModal(event)">
@@ -3193,9 +3263,21 @@
     const I18N_TRANSLATIONS = {
       en: {
         brand_fullform: "Safety • Awareness • Fast Response • Emergency Assistance",
-        sos_helpline_title: "National 999 Helpline",
+        sos_helpline_title: "National Emergency Services",
         sos_helpline_sub: "Police • Fire Service • Ambulance CAD",
-        sos_helpline_btn: "Call 999",
+        sos_helpline_btn: "I Need Help",
+        help_modal_title: "Immediate Emergency Help",
+        help_modal_sub: "Select your critical situation for direct hotline dispatch:",
+        help_opt1_title: "Stuck in Traffic with Ambulance?",
+        help_opt1_desc: "Urgent police traffic clearance & green corridor",
+        help_opt1_btn: "Call 999",
+        help_opt2_title: "Critical Patient Condition at Home",
+        help_opt2_desc: "Urgent ambulance dispatch & rapid medical response",
+        help_opt2_btn: "Call 999",
+        help_opt3_title: "Fire Service & Rescue Emergency",
+        help_opt3_desc: "Direct hotline to Bangladesh Fire Service Control",
+        help_opt3_btn: "Call 102",
+        btn_cancel: "Cancel",
         sos_btn_sub: "Hold 3s",
         sos_walk_card_title: "Walk With Me Companion",
         sos_walk_card_sub: "Search any place in Bangladesh & route with Google Maps",
@@ -3303,9 +3385,21 @@
       },
       bn: {
         brand_fullform: "নিরাপত্তা • সচেতনতা • দ্রুত রেসপন্স • জরুরি সহায়তা",
-        sos_helpline_title: "জাতীয় ৯৯৯ হেল্পলাইন",
+        sos_helpline_title: "জাতীয় জরুরি সেবা ও ডিসপ্যাচ",
         sos_helpline_sub: "পুলিশ • ফায়ার সার্ভিস • অ্যাম্বুলেন্স সিএডি",
-        sos_helpline_btn: "৯৯৯ কল করুন",
+        sos_helpline_btn: "সাহায্য চাই",
+        help_modal_title: "জরুরি সহায়তা ও ডিসপ্যাচ",
+        help_modal_sub: "সরাসরি হটলাইন সংযোগের জন্য আপনার পরিস্থিতি নির্বাচন করুন:",
+        help_opt1_title: "অ্যাম্বুলেন্স জ্যামে আটকে আছে?",
+        help_opt1_desc: "জরুরি পুলিশ ট্রাফিক ক্লিয়ারেন্স ও গ্রিন করিডোর",
+        help_opt1_btn: "৯৯৯ কল করুন",
+        help_opt2_title: "বাসায় রোগীর আশঙ্কাজনক অবস্থা",
+        help_opt2_desc: "দ্রুত অ্যাম্বুলেন্স প্রেরণ ও জরুরি চিকিৎসা সহায়তা",
+        help_opt2_btn: "৯৯৯ কল করুন",
+        help_opt3_title: "ফায়ার সার্ভিস ও উদ্ধার অভিযান",
+        help_opt3_desc: "বাংলাদেশ ফায়ার সার্ভিস কেন্দ্রীয় নিয়ন্ত্রণ কক্ষ সরাসরি লাইন",
+        help_opt3_btn: "১০২ কল করুন",
+        btn_cancel: "বাতিল করুন",
         sos_btn_sub: "৩ সেকেন্ড চেপে ধরুন",
         sos_walk_card_title: "ওয়াক উইথ মি কম্প্যানিয়ন",
         sos_walk_card_sub: "বাংলাদেশের যেকোনো স্থান খুঁজুন এবং গুগল ম্যাপস দিয়ে পথ চলুন",
@@ -7266,6 +7360,65 @@
         return;
       }
       triggerSOS();
+    }
+
+    function openEmergencyHelpModal() {
+      const modal = document.getElementById('emergency-help-modal');
+      if (modal) modal.classList.add('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+    }
+
+    function closeEmergencyHelpModal(e) {
+      if (!e || e.target.id === 'emergency-help-modal' || e.target.classList.contains('modal-close-x') || e.target.closest('.modal-close-x') || e.target.classList.contains('btn-close-sheet')) {
+        const modal = document.getElementById('emergency-help-modal');
+        if (modal) modal.classList.remove('open');
+        if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+      }
+    }
+
+    function selectEmergencyHelp(type) {
+      const modal = document.getElementById('emergency-help-modal');
+      if (modal) modal.classList.remove('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+
+      let targetTel = '999';
+      let emType = 'AMBULANCE_TRAFFIC_STUCK';
+
+      if (type === 'ambulance_traffic') {
+        targetTel = '999';
+        emType = 'AMBULANCE_TRAFFIC_STUCK';
+      } else if (type === 'critical_patient') {
+        targetTel = '999';
+        emType = 'CRITICAL_PATIENT_HOME';
+      } else if (type === 'fire_service') {
+        targetTel = '102';
+        emType = 'FIRE_SERVICE_102';
+      }
+
+      // Dispatch telemetry event to CAD backend
+      try {
+        const userName = currentUser ? (currentUser.name || "Verified Citizen") : "Citizen in Distress";
+        const cleanUserPhone = currentUser && currentUser.phone ? String(currentUser.phone).replace(/\D/g, '').slice(-10) : (contacts && contacts[0] && contacts[0].phone ? String(contacts[0].phone).replace(/\D/g, '').slice(-10) : "01XXXXXXXXX");
+        fetch(`${API_BASE}/api/emergency/sos-trigger`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: cleanUserPhone,
+            userName: userName,
+            userPhone: cleanUserPhone,
+            emergencyType: emType,
+            targetDial: targetTel,
+            location: {
+              lat: currentCoords.lat,
+              lon: currentCoords.lon,
+              address: currentCoords.address || "Live GPS Location"
+            }
+          })
+        }).catch(() => {});
+      } catch(err) {}
+
+      // Native telephone dial
+      window.location.href = `tel:${targetTel}`;
     }
 
     function trigger999CallDirect(e) {
