@@ -1237,134 +1237,122 @@ function seedInitialBloodDonors() {
   dbState.bloodDonors = [
     {
       id: "donor_dhaka_01",
-      name: "Tanzimul Islam",
       phone: "01711223344",
       bloodGroup: "O+",
       district: "Dhaka",
       thana: "Dhanmondi",
       available: true,
-      lastDonationDate: "2026-07-10",
+      lastDonationDate: "Recent",
       createdAt: new Date().toISOString()
     },
     {
       id: "donor_dhaka_02",
-      name: "Sabrina Yasmin",
       phone: "01822334455",
       bloodGroup: "A+",
       district: "Dhaka",
       thana: "Mirpur",
       available: true,
-      lastDonationDate: "2026-06-20",
+      lastDonationDate: "Recent",
       createdAt: new Date().toISOString()
     },
     {
       id: "donor_dhaka_03",
-      name: "Arifur Rahman",
       phone: "01933445566",
       bloodGroup: "B+",
       district: "Dhaka",
       thana: "Uttara",
       available: true,
-      lastDonationDate: "2026-08-01",
+      lastDonationDate: "Recent",
       createdAt: new Date().toISOString()
     },
     {
       id: "donor_dhaka_04",
-      name: "Nusrat Jahan",
       phone: "01744556677",
       bloodGroup: "AB+",
       district: "Dhaka",
       thana: "Mohakhali",
       available: true,
-      lastDonationDate: "2026-05-15",
+      lastDonationDate: "Recent",
       createdAt: new Date().toISOString()
     },
     {
       id: "donor_dhaka_05",
-      name: "Mahmud Hasan (Emergency Donor)",
       phone: "01311556677",
       bloodGroup: "O-",
       district: "Dhaka",
       thana: "Mohammadpur",
       available: true,
-      lastDonationDate: "2026-08-25",
+      lastDonationDate: "Recent",
       createdAt: new Date().toISOString()
     },
     {
       id: "donor_dhaka_06",
-      name: "Fahim Ahmed",
       phone: "01655667788",
       bloodGroup: "A-",
       district: "Dhaka",
       thana: "Badda",
       available: true,
-      lastDonationDate: "2026-07-18",
+      lastDonationDate: "Recent",
       createdAt: new Date().toISOString()
     },
     {
       id: "donor_dhaka_07",
-      name: "Imtiaz Shovon",
       phone: "01877889900",
       bloodGroup: "B-",
       district: "Dhaka",
       thana: "Motijheel",
       available: true,
-      lastDonationDate: "2026-06-30",
+      lastDonationDate: "Recent",
       createdAt: new Date().toISOString()
     },
     {
       id: "donor_dhaka_08",
-      name: "Shayera Khan",
       phone: "01799001122",
       bloodGroup: "AB-",
       district: "Dhaka",
       thana: "Gulshan",
       available: true,
-      lastDonationDate: "2026-07-04",
+      lastDonationDate: "Recent",
       createdAt: new Date().toISOString()
     },
     {
       id: "donor_ctg_01",
-      name: "Kazi Farhan",
       phone: "01811998877",
       bloodGroup: "O+",
       district: "Chittagong",
       thana: "Panchlaish",
       available: true,
-      lastDonationDate: "2026-08-10",
+      lastDonationDate: "Recent",
       createdAt: new Date().toISOString()
     },
     {
       id: "donor_ctg_02",
-      name: "Rifat Chowdhury",
       phone: "01733887766",
       bloodGroup: "B+",
       district: "Chittagong",
       thana: "Agrabad",
       available: true,
-      lastDonationDate: "2026-07-22",
+      lastDonationDate: "Recent",
       createdAt: new Date().toISOString()
     },
     {
       id: "donor_syl_01",
-      name: "Syed Anisul Haque",
       phone: "01755443322",
       bloodGroup: "A+",
       district: "Sylhet",
       thana: "Zindabazar",
       available: true,
-      lastDonationDate: "2026-08-05",
+      lastDonationDate: "Recent",
       createdAt: new Date().toISOString()
     },
     {
       id: "donor_raj_01",
-      name: "Tareq Hossain",
       phone: "01911447788",
       bloodGroup: "O-",
       district: "Rajshahi",
       thana: "Boalia",
       available: true,
-      lastDonationDate: "2026-06-12",
+      lastDonationDate: "Recent",
       createdAt: new Date().toISOString()
     }
   ];
@@ -1392,7 +1380,7 @@ function getBloodDonors(bloodGroup, district) {
   return list;
 }
 
-function addOrUpdateBloodDonor({ name, phone, bloodGroup, district, thana, available }) {
+function addOrUpdateBloodDonor({ phone, bloodGroup, district, thana, available }) {
   if (!dbState.bloodDonors) dbState.bloodDonors = [];
   const cleanPhone = String(phone || '').replace(/\D/g, '').slice(-10);
   const formattedPhone = '0' + cleanPhone;
@@ -1400,7 +1388,6 @@ function addOrUpdateBloodDonor({ name, phone, bloodGroup, district, thana, avail
   const existingIdx = dbState.bloodDonors.findIndex(d => (d.phone || '').endsWith(cleanPhone));
   const donorObj = {
     id: existingIdx >= 0 ? dbState.bloodDonors[existingIdx].id : ('donor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4)),
-    name: (name || 'Anonymous Volunteer').trim(),
     phone: formattedPhone,
     bloodGroup: (bloodGroup || 'O+').toUpperCase().trim(),
     district: (district || 'Dhaka').trim(),
@@ -1429,6 +1416,52 @@ function toggleDonorAvailability(id, isAvailable) {
     return donor;
   }
   return null;
+}
+
+function updateUserBloodProfile(phone, { bloodGroup, isBloodDonor, district, thana }) {
+  const cleanPhone = normalizePhone(phone);
+  if (!cleanPhone) return null;
+  const user = dbState.users[cleanPhone];
+  if (!user) return null;
+
+  if (bloodGroup !== undefined) {
+    user.bloodGroup = bloodGroup ? bloodGroup.trim().toUpperCase() : '';
+  }
+  if (isBloodDonor !== undefined) {
+    user.isBloodDonor = Boolean(isBloodDonor);
+  }
+  if (district !== undefined) {
+    user.bloodDistrict = (district || '').trim();
+  }
+  if (thana !== undefined) {
+    user.bloodThana = (thana || '').trim();
+  }
+  user.updatedAt = new Date().toISOString();
+
+  persistToDisk();
+
+  // If user opts in to donate blood, update the Blood Donors registry (Anonymous - zero personal name)
+  if (user.isBloodDonor && user.bloodGroup) {
+    addOrUpdateBloodDonor({
+      phone: cleanPhone,
+      bloodGroup: user.bloodGroup,
+      district: user.bloodDistrict || 'Dhaka',
+      thana: user.bloodThana || '',
+      available: true
+    });
+  } else if (user.isBloodDonor === false) {
+    // If user opts out, mark donor as unavailable in registry
+    if (dbState.bloodDonors) {
+      const idx = dbState.bloodDonors.findIndex(d => (d.phone || '').endsWith(cleanPhone));
+      if (idx >= 0) {
+        dbState.bloodDonors[idx].available = false;
+        saveBloodDonorsToDisk();
+      }
+    }
+  }
+
+  const { salt: _, passwordHash: __, ...safeUser } = user;
+  return safeUser;
 }
 
 /* =========================================================================
@@ -2645,5 +2678,6 @@ module.exports = {
   getBloodDonors,
   addOrUpdateBloodDonor,
   toggleDonorAvailability,
+  updateUserBloodProfile,
   initDatabase
 };
