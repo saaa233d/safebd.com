@@ -258,7 +258,7 @@ function generateOTP() {
 
 // 1.1 Direct Citizen Registration via Supabase Cloud Auth (Phone + Name + Password)
 app.post('/api/auth/register', authLimiter, async (req, res) => {
-  const { phone, name, password } = req.body;
+  const { phone, name, password, bloodGroup, isBloodDonor, district, thana } = req.body;
   const phoneValidation = db.validateBdPhone(phone);
   if (!phoneValidation.valid) {
     return res.status(400).json({ error: phoneValidation.message });
@@ -304,6 +304,11 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
     // Upsert: create local record with verified password hash
     db.upsertUserWithPassword(cleanPhone, isFounder ? 'SAAD RIZWAN' : registeredName, password);
 
+    // Save blood group info if citizen opted in during registration
+    if (bloodGroup) {
+      db.updateUserBloodProfile(cleanPhone, { bloodGroup, isBloodDonor, district, thana });
+    }
+
     const token = db.generateSecureToken(isFounder ? 'safe_token_admin_' : 'safe_token_', cleanPhone, isFounder);
     db.markUserLogin(cleanPhone, token, { name: isFounder ? 'SAAD RIZWAN' : registeredName });
 
@@ -312,6 +317,10 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
       name: isFounder ? 'SAAD RIZWAN' : registeredName,
       isFounder: isFounder,
       isAdmin: isFounder,
+      bloodGroup: bloodGroup ? bloodGroup.toUpperCase() : '',
+      isBloodDonor: Boolean(isBloodDonor),
+      bloodDistrict: district || '',
+      bloodThana: thana || '',
       contacts: db.getUserContacts(cleanPhone)
     };
 
@@ -1167,11 +1176,8 @@ app.get('/api/blood/donors', (req, res) => {
 
 app.post('/api/blood/donors', (req, res) => {
   try {
-    const { name, phone, bloodGroup, district, thana, available } = req.body;
+    const { phone, bloodGroup, district, thana, available } = req.body;
 
-    if (!name || !name.trim()) {
-      return res.status(400).json({ error: "NAME_REQUIRED", message: "Donor name is required." });
-    }
     if (!phone || !phone.trim()) {
       return res.status(400).json({ error: "PHONE_REQUIRED", message: "Contact phone number is required." });
     }
@@ -1187,8 +1193,8 @@ app.post('/api/blood/donors', (req, res) => {
       return res.status(400).json({ error: "INVALID_BLOOD_GROUP", message: "Please select a valid blood group (A+, A-, B+, B-, O+, O-, AB+, AB-)." });
     }
 
+    // Anonymous Life Saver: Zero personal names stored or broadcast
     const donor = db.addOrUpdateBloodDonor({
-      name: name.trim(),
       phone: phoneValidation.cleanPhone || phone.trim(),
       bloodGroup: cleanGroup,
       district: (district || 'Dhaka').trim(),
@@ -1216,6 +1222,47 @@ app.post('/api/blood/donors/:id/toggle', (req, res) => {
     return res.json({ success: true, donor: updated });
   } catch (err) {
     return res.status(500).json({ error: "SERVER_ERROR", message: "Failed to update donor status." });
+  }
+});
+
+// 2.6.3 Save Blood Information on Citizen Profile (Optional Donor Opt-in)
+app.post(['/api/user/blood-profile', '/api/user/blood'], (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    let userPhone = null;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      const sess = db.getSession(token);
+      if (sess && sess.user) userPhone = sess.user.phone;
+    }
+    if (!userPhone && req.body.phone) {
+      userPhone = req.body.phone;
+    }
+
+    if (!userPhone) {
+      return res.status(401).json({ error: "UNAUTHORIZED", message: "User phone or active login session required." });
+    }
+
+    const { bloodGroup, isBloodDonor, district, thana } = req.body;
+    const updatedUser = db.updateUserBloodProfile(userPhone, {
+      bloodGroup,
+      isBloodDonor,
+      district,
+      thana
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "NOT_FOUND", message: "User profile not found." });
+    }
+
+    return res.json({
+      success: true,
+      message: "Blood profile information successfully saved to account.",
+      user: updatedUser
+    });
+  } catch (err) {
+    console.error('[USER BLOOD PROFILE SAVE ERROR]:', err);
+    return res.status(500).json({ error: "SERVER_ERROR", message: "Failed to update blood profile." });
   }
 });
 
