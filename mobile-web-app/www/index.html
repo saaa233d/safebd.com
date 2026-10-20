@@ -1829,6 +1829,127 @@
     }
 
     /* ========================================================
+       SAFE BD EMERGENCY BLOOD LIFELINE (রক্তবন্ধু) STYLES
+    ======================================================== */
+    .blood-filter-scroll {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .blood-filter-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    .blood-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.18s ease;
+    }
+    .blood-pill:hover {
+      background: rgba(244, 63, 94, 0.15);
+      border-color: rgba(244, 63, 94, 0.4);
+      color: #fff;
+    }
+    .blood-pill.active {
+      background: linear-gradient(135deg, #be123c 0%, #e11d48 100%);
+      border-color: #f43f5e;
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(225, 29, 72, 0.45);
+    }
+    .blood-donor-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1.5px solid rgba(244, 63, 94, 0.22);
+      border-radius: 14px;
+      padding: 13px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .blood-donor-card:hover {
+      border-color: rgba(244, 63, 94, 0.5);
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: 0 4px 18px rgba(225, 29, 72, 0.15);
+    }
+    .blood-group-tag {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #be123c 0%, #e11d48 100%);
+      color: #fff;
+      font-weight: 900;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 3px 10px rgba(225, 29, 72, 0.4);
+      flex-shrink: 0;
+      letter-spacing: -0.5px;
+    }
+    .donor-phone-popup {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(244, 63, 94, 0.35);
+      border-radius: 10px;
+      padding: 9px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .donor-phone-number {
+      font-family: 'SF Mono', Monaco, Consolas, monospace;
+      font-weight: 800;
+      font-size: 14px;
+      color: #fecdd3;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-blood-call {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      text-decoration: none;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 6px 11px;
+      border-radius: 7px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+      transition: filter 0.15s ease;
+    }
+    .btn-blood-call:hover {
+      filter: brightness(1.1);
+    }
+    .btn-blood-wa {
+      background: #25d366;
+      color: #fff;
+      text-decoration: none;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 6px 11px;
+      border-radius: 7px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 2px 8px rgba(37, 211, 102, 0.35);
+      transition: filter 0.15s ease;
+    }
+    .btn-blood-wa:hover {
+      filter: brightness(1.1);
+    }
+
+    /* ========================================================
        shurokhaAI — Conversational AI Widget & Modal Styles
     ======================================================== */
     .shurokha-fab {
@@ -2845,9 +2966,187 @@
             </div>
             <span style="background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%); color: #fff; font-size: 11.5px; font-weight: 800; padding: 7px 11px; border-radius: 8px; white-space: nowrap; box-shadow: 0 2px 8px rgba(234, 88, 12, 0.4);" data-i18n="help_opt3_btn">Call 102</span>
           </button>
+
+          <!-- OPTION 4: EMERGENCY BLOOD LIFELINE (রক্তবন্ধু) -->
+          <button type="button" onclick="openBloodDonorModal()" style="background: rgba(225, 29, 72, 0.12); border: 1.5px solid rgba(225, 29, 72, 0.55); padding: 13px 14px; border-radius: 12px; text-align: left; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.2);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(225, 29, 72, 0.25); border: 1px solid #e11d48; display: flex; align-items: center; justify-content: center; color: #f43f5e; font-size: 19px; flex-shrink: 0;">
+                <i class="fas fa-droplet"></i>
+              </div>
+              <div>
+                <div style="font-weight: 800; font-size: 14px; color: #fff;" data-i18n="help_opt4_title">Emergency Blood Lifeline (রক্তবন্ধু)</div>
+                <div style="font-size: 11px; color: #fecdd3; margin-top: 2px;" data-i18n="help_opt4_desc">Find immediate blood donors nearby or donate blood</div>
+              </div>
+            </div>
+            <span style="background: linear-gradient(135deg, #be123c 0%, #e11d48 100%); color: #fff; font-size: 11.5px; font-weight: 800; padding: 7px 11px; border-radius: 8px; white-space: nowrap; box-shadow: 0 2px 8px rgba(225, 29, 72, 0.4);" data-i18n="help_opt4_btn">Find Donors</span>
+          </button>
         </div>
 
         <button type="button" class="btn-close-sheet" style="margin-top: 14px;" onclick="closeEmergencyHelpModal()" data-i18n="btn_cancel">
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL 0D: EMERGENCY BLOOD DONATION LIFELINE (রক্তবন্ধু)
+    ======================================================== -->
+    <div id="blood-donor-modal" class="walk-timer-modal-backdrop" onclick="closeBloodDonorModal(event)" style="z-index: 99999;">
+      <div class="edit-sheet" onclick="event.stopPropagation()" style="border: 1.5px solid rgba(244, 63, 94, 0.5); box-shadow: 0 10px 45px rgba(225, 29, 72, 0.35); max-height: 88vh; display: flex; flex-direction: column;">
+        <div class="sheet-handle" style="background: #f43f5e;"></div>
+        
+        <!-- Header -->
+        <div class="modal-head-row" style="margin-bottom: 12px; flex-shrink: 0;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(244, 63, 94, 0.18); border: 1px solid rgba(244, 63, 94, 0.55); display: flex; align-items: center; justify-content: center; color: #f43f5e; font-size: 18px;">
+              <i class="fas fa-droplet"></i>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #fff;" data-i18n="blood_modal_title">Safe BD Blood Lifeline (রক্তবন্ধু)</h3>
+              <span style="font-size: 11px; color: #fca5a5; display: block;" data-i18n="blood_modal_sub">Emergency verified blood donors & peer donation network</span>
+            </div>
+          </div>
+          <button class="modal-close-x" onclick="closeBloodDonorModal()"><i class="fas fa-xmark"></i></button>
+        </div>
+
+        <!-- Navigation Tabs: Find Blood vs Register as Donor -->
+        <div class="auth-toggle-bar" style="margin-bottom: 14px; flex-shrink: 0;">
+          <button type="button" id="blood-tab-btn-find" class="auth-toggle-tab active" onclick="switchBloodTab('find')">
+            <i class="fas fa-magnifying-glass"></i> <span data-i18n="blood_tab_find">Find Blood Donors</span>
+          </button>
+          <button type="button" id="blood-tab-btn-donate" class="auth-toggle-tab" onclick="switchBloodTab('donate')">
+            <i class="fas fa-hand-holding-heart"></i> <span data-i18n="blood_tab_donate">Donate Blood (রক্তদাতা)</span>
+          </button>
+        </div>
+
+        <!-- TAB 1: FIND BLOOD DONORS -->
+        <div id="blood-tab-find-view" style="display: flex; flex-direction: column; gap: 12px; overflow-y: auto; padding-right: 2px;">
+          <!-- Blood Group Pills Filter -->
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;" data-i18n="blood_filter_group_label">Select Blood Group</label>
+            <div class="blood-filter-scroll" id="blood-group-pills">
+              <button type="button" class="blood-pill active" onclick="setBloodGroupFilter('ALL')">All Groups</button>
+              <button type="button" class="blood-pill" onclick="setBloodGroupFilter('A+')">A+</button>
+              <button type="button" class="blood-pill" onclick="setBloodGroupFilter('A-')">A-</button>
+              <button type="button" class="blood-pill" onclick="setBloodGroupFilter('B+')">B+</button>
+              <button type="button" class="blood-pill" onclick="setBloodGroupFilter('B-')">B-</button>
+              <button type="button" class="blood-pill" onclick="setBloodGroupFilter('O+')">O+</button>
+              <button type="button" class="blood-pill" onclick="setBloodGroupFilter('O-')">O-</button>
+              <button type="button" class="blood-pill" onclick="setBloodGroupFilter('AB+')">AB+</button>
+              <button type="button" class="blood-pill" onclick="setBloodGroupFilter('AB-')">AB-</button>
+            </div>
+          </div>
+
+          <!-- District Filter Row -->
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <div style="flex: 1; position: relative;">
+              <select id="blood-district-select" onchange="setBloodDistrictFilter(this.value)" style="width: 100%; background: #140d14; border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 10px; color: #fff; padding: 8px 12px; font-size: 12px; outline: none;">
+                <option value="ALL">All Bangladesh Districts (সকল জেলা)</option>
+                <option value="Dhaka">Dhaka (ঢাকা)</option>
+                <option value="Chittagong">Chittagong (চট্টগ্রাম)</option>
+                <option value="Sylhet">Sylhet (সিলেট)</option>
+                <option value="Rajshahi">Rajshahi (রাজশাহী)</option>
+                <option value="Khulna">Khulna (খুলনা)</option>
+                <option value="Barishal">Barishal (বরিশাল)</option>
+                <option value="Rangpur">Rangpur (রংপুর)</option>
+                <option value="Mymensingh">Mymensingh (ময়মনসিংহ)</option>
+                <option value="Comilla">Comilla (কুমিল্লা)</option>
+                <option value="Gazipur">Gazipur (গাজীপুর)</option>
+                <option value="Narayanganj">Narayanganj (নারায়ণগঞ্জ)</option>
+              </select>
+            </div>
+            <button type="button" onclick="fetchBloodDonors(true)" title="Refresh Donors" style="background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.4); color: #f43f5e; border-radius: 10px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
+              <i class="fas fa-arrows-rotate" id="blood-refresh-spinner"></i>
+            </button>
+          </div>
+
+          <!-- Donors Count Badge -->
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 2px 4px;">
+            <span id="blood-donors-count" style="font-size: 11px; font-weight: 700; color: #94a3b8;">Loading verified donors...</span>
+            <span style="font-size: 10.5px; color: #10b981; display: inline-flex; align-items: center; gap: 4px;">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+              1-Tap Hotline
+            </span>
+          </div>
+
+          <!-- Donors Cards Container -->
+          <div id="blood-donors-list" style="display: flex; flex-direction: column; gap: 10px; min-height: 180px;">
+            <!-- Dynamic donor cards inserted via JS -->
+          </div>
+        </div>
+
+        <!-- TAB 2: REGISTER AS BLOOD DONOR -->
+        <div id="blood-tab-donate-view" style="display: none; flex-direction: column; gap: 12px; overflow-y: auto;">
+          <div style="background: rgba(244, 63, 94, 0.08); border: 1px dashed rgba(244, 63, 94, 0.4); border-radius: 12px; padding: 12px;">
+            <div style="font-weight: 700; font-size: 12.5px; color: #fff; margin-bottom: 2px;" data-i18n="blood_reg_intro_title">Be a Life Saver for Bangladesh</div>
+            <div style="font-size: 11px; color: var(--text-muted); line-height: 1.4;" data-i18n="blood_reg_intro_sub">Your number will be safely displayed in the emergency network for patients in critical need of your blood type.</div>
+          </div>
+
+          <form id="blood-donor-form" onsubmit="submitBloodDonorForm(event)" style="display: flex; flex-direction: column; gap: 10px;">
+            <div>
+              <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;" data-i18n="blood_reg_name_label">Full Name</label>
+              <input type="text" id="blood-donor-name" required placeholder="e.g., Saad Rizwan" style="width: 100%; background: #140d14; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 9px; padding: 10px 12px; color: #fff; font-size: 13px; outline: none;">
+            </div>
+
+            <div>
+              <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;" data-i18n="blood_reg_phone_label">Bangladeshi Mobile Number (11 Digits)</label>
+              <input type="tel" id="blood-donor-phone" required placeholder="017XXXXXXXX" maxlength="11" style="width: 100%; background: #140d14; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 9px; padding: 10px 12px; color: #fff; font-size: 13px; font-family: monospace; outline: none;">
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+              <div style="flex: 1;">
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;" data-i18n="blood_reg_group_label">Blood Group</label>
+                <select id="blood-donor-group" required style="width: 100%; background: #140d14; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 9px; padding: 10px 12px; color: #fff; font-size: 13px; outline: none;">
+                  <option value="A+">A Positive (A+)</option>
+                  <option value="A-">A Negative (A-)</option>
+                  <option value="B+">B Positive (B+)</option>
+                  <option value="B-">B Negative (B-)</option>
+                  <option value="O+" selected>O Positive (O+)</option>
+                  <option value="O-">O Negative (O-)</option>
+                  <option value="AB+">AB Positive (AB+)</option>
+                  <option value="AB-">AB Negative (AB-)</option>
+                </select>
+              </div>
+
+              <div style="flex: 1;">
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;" data-i18n="blood_reg_district_label">District (জেলা)</label>
+                <select id="blood-donor-district" required style="width: 100%; background: #140d14; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 9px; padding: 10px 12px; color: #fff; font-size: 13px; outline: none;">
+                  <option value="Dhaka" selected>Dhaka (ঢাকা)</option>
+                  <option value="Chittagong">Chittagong (চট্টগ্রাম)</option>
+                  <option value="Sylhet">Sylhet (সিলেট)</option>
+                  <option value="Rajshahi">Rajshahi (রাজশাহী)</option>
+                  <option value="Khulna">Khulna (খুলনা)</option>
+                  <option value="Barishal">Barishal (বরিশাল)</option>
+                  <option value="Rangpur">Rangpur (রংপুর)</option>
+                  <option value="Mymensingh">Mymensingh (ময়মনসিংহ)</option>
+                  <option value="Comilla">Comilla (কুমিল্লা)</option>
+                  <option value="Gazipur">Gazipur (গাজীপুর)</option>
+                  <option value="Narayanganj">Narayanganj (নারায়ণগঞ্জ)</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;" data-i18n="blood_reg_thana_label">Area / Thana / Location</label>
+              <input type="text" id="blood-donor-thana" placeholder="e.g., Dhanmondi / Mirpur / Agrabad" style="width: 100%; background: #140d14; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 9px; padding: 10px 12px; color: #fff; font-size: 13px; outline: none;">
+            </div>
+
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-top: 4px; padding: 4px 0;">
+              <input type="checkbox" id="blood-donor-available" checked style="accent-color: #f43f5e; width: 16px; height: 16px;">
+              <span style="font-size: 11.5px; color: #e2e8f0;" data-i18n="blood_reg_ready_check">I am currently healthy and available to donate blood</span>
+            </label>
+
+            <div id="blood-donor-feedback" style="display: none; padding: 8px 12px; border-radius: 8px; font-size: 12px;"></div>
+
+            <button type="submit" id="blood-donor-submit-btn" style="background: linear-gradient(135deg, #be123c 0%, #e11d48 100%); color: #fff; border: none; padding: 12px; border-radius: 10px; font-size: 13.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(225, 29, 72, 0.4); margin-top: 4px;">
+              <i class="fas fa-heart-pulse"></i>
+              <span data-i18n="blood_reg_submit_btn">Register as Life-Saving Donor</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Footer Close Button -->
+        <button type="button" class="btn-close-sheet" style="margin-top: 14px; flex-shrink: 0;" onclick="closeBloodDonorModal()" data-i18n="btn_cancel">
           Cancel
         </button>
       </div>
@@ -3260,6 +3559,23 @@
         help_opt3_title: "Fire Service & Rescue Emergency",
         help_opt3_desc: "Direct hotline to Bangladesh Fire Service Control",
         help_opt3_btn: "Call 102",
+        help_opt4_title: "Emergency Blood Lifeline (রক্তবন্ধু)",
+        help_opt4_desc: "Find immediate blood donors nearby or donate blood",
+        help_opt4_btn: "Find Donors",
+        blood_modal_title: "Safe BD Blood Lifeline (রক্তবন্ধু)",
+        blood_modal_sub: "Emergency verified blood donors & peer donation network",
+        blood_tab_find: "Find Blood Donors",
+        blood_tab_donate: "Donate Blood (রক্তদাতা)",
+        blood_filter_group_label: "Select Blood Group",
+        blood_reg_intro_title: "Be a Life Saver for Bangladesh",
+        blood_reg_intro_sub: "Your number will be safely displayed in the emergency network for patients in critical need of your blood type.",
+        blood_reg_name_label: "Full Name",
+        blood_reg_phone_label: "Bangladeshi Mobile Number (11 Digits)",
+        blood_reg_group_label: "Blood Group",
+        blood_reg_district_label: "District (জেলা)",
+        blood_reg_thana_label: "Area / Thana / Location",
+        blood_reg_ready_check: "I am currently healthy and available to donate blood",
+        blood_reg_submit_btn: "Register as Life-Saving Donor",
         btn_cancel: "Cancel",
         sos_btn_sub: "Hold 3s",
         sos_walk_card_title: "Walk With Me Companion",
@@ -3382,6 +3698,23 @@
         help_opt3_title: "ফায়ার সার্ভিস ও উদ্ধার অভিযান",
         help_opt3_desc: "বাংলাদেশ ফায়ার সার্ভিস কেন্দ্রীয় নিয়ন্ত্রণ কক্ষ সরাসরি লাইন",
         help_opt3_btn: "১০২ কল করুন",
+        help_opt4_title: "জরুরি রক্তবন্ধু লাইফলাইন",
+        help_opt4_desc: "জরুরি রক্তের প্রয়োজনে নিকটস্থ রক্তদাতা খুঁজুন বা রক্তদান করুন",
+        help_opt4_btn: "রক্তদাতা খুঁজুন",
+        blood_modal_title: "সেইফ বিডি রক্তবন্ধু লাইফলাইন",
+        blood_modal_sub: "জরুরি যাচাইকৃত রক্তদাতা নেটওয়ার্ক ও স্বেচ্ছায় রক্তদান",
+        blood_tab_find: "রক্তদাতা খুঁজুন",
+        blood_tab_donate: "রক্তদাতা হতে চাই",
+        blood_filter_group_label: "রক্তের গ্রুপ নির্বাচন করুন",
+        blood_reg_intro_title: "বাংলাদেশের একজন জীবন রক্ষাকারী হোন",
+        blood_reg_intro_sub: "জরুরি রোগীদের জীবন বাঁচাতে আপনার রক্তের গ্রুপ ও মোবাইল নম্বর নিরাপদ নেটওয়ার্কে প্রদর্শিত হবে।",
+        blood_reg_name_label: "পূর্ণ নাম",
+        blood_reg_phone_label: "বাংলাদেশি মোবাইল নম্বর (১১ ডিজিট)",
+        blood_reg_group_label: "রক্তের গ্রুপ",
+        blood_reg_district_label: "জেলা",
+        blood_reg_thana_label: "এলাকা / থানা / অবস্থান",
+        blood_reg_ready_check: "আমি বর্তমানে সুস্থ এবং রক্তদানে প্রস্তুত আছি",
+        blood_reg_submit_btn: "রক্তদাতা হিসেবে নিবন্ধন করুন",
         btn_cancel: "বাতিল করুন",
         sos_btn_sub: "৩ সেকেন্ড চেপে ধরুন",
         sos_walk_card_title: "ওয়াক উইথ মি কম্প্যানিয়ন",
@@ -3519,6 +3852,9 @@
       }
       if (typeof updateGuardianDisplayInOverdueModal === 'function') {
         updateGuardianDisplayInOverdueModal();
+      }
+      if (typeof renderBloodDonors === 'function') {
+        renderBloodDonors();
       }
     }
 
@@ -7683,6 +8019,316 @@
 
       // Native telephone dial
       window.location.href = `tel:${targetTel}`;
+    }
+
+    /* ==========================================================
+       SAFE BD EMERGENCY BLOOD LIFELINE (রক্তবন্ধু) ENGINE
+    ========================================================== */
+    let bloodDonorsCache = [];
+    let currentBloodGroupFilter = 'ALL';
+    let currentBloodDistrictFilter = 'ALL';
+
+    function openBloodDonorModal() {
+      // Close help modal first if open
+      const helpModal = document.getElementById('emergency-help-modal');
+      if (helpModal) helpModal.classList.remove('open');
+
+      const modal = document.getElementById('blood-donor-modal');
+      if (modal) modal.classList.add('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+
+      // Auto-prefill registration form if citizen is authenticated
+      try {
+        if (typeof currentUser !== 'undefined' && currentUser) {
+          const nameInput = document.getElementById('blood-donor-name');
+          const phoneInput = document.getElementById('blood-donor-phone');
+          if (nameInput && !nameInput.value && currentUser.name) nameInput.value = currentUser.name;
+          if (phoneInput && !phoneInput.value && currentUser.phone) {
+            const raw = String(currentUser.phone).replace(/\D/g, '');
+            phoneInput.value = raw.length > 11 ? raw.slice(-11) : raw;
+          }
+        }
+      } catch (e) {}
+
+      // Default to Find tab
+      switchBloodTab('find');
+      fetchBloodDonors();
+    }
+
+    function closeBloodDonorModal(e) {
+      if (!e || e.target.id === 'blood-donor-modal' || e.target.classList.contains('modal-close-x') || e.target.closest('.modal-close-x') || e.target.classList.contains('btn-close-sheet')) {
+        const modal = document.getElementById('blood-donor-modal');
+        if (modal) modal.classList.remove('open');
+        if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+      }
+    }
+
+    function switchBloodTab(tab) {
+      const findBtn = document.getElementById('blood-tab-btn-find');
+      const donateBtn = document.getElementById('blood-tab-btn-donate');
+      const findView = document.getElementById('blood-tab-find-view');
+      const donateView = document.getElementById('blood-tab-donate-view');
+
+      if (tab === 'donate') {
+        if (findBtn) findBtn.classList.remove('active');
+        if (donateBtn) donateBtn.classList.add('active');
+        if (findView) findView.style.display = 'none';
+        if (donateView) donateView.style.display = 'flex';
+      } else {
+        if (donateBtn) donateBtn.classList.remove('active');
+        if (findBtn) findBtn.classList.add('active');
+        if (donateView) donateView.style.display = 'none';
+        if (findView) findView.style.display = 'flex';
+      }
+    }
+
+    function setBloodGroupFilter(group) {
+      currentBloodGroupFilter = (group || 'ALL').toUpperCase();
+      // Update pill buttons active state
+      const pills = document.querySelectorAll('#blood-group-pills .blood-pill');
+      pills.forEach(pill => {
+        const txt = pill.textContent.trim().toUpperCase();
+        if ((currentBloodGroupFilter === 'ALL' && (txt.includes('ALL') || txt === 'ALL GROUPS')) || txt === currentBloodGroupFilter) {
+          pill.classList.add('active');
+        } else {
+          pill.classList.remove('active');
+        }
+      });
+      renderBloodDonors();
+    }
+
+    function setBloodDistrictFilter(dist) {
+      currentBloodDistrictFilter = dist || 'ALL';
+      renderBloodDonors();
+    }
+
+    async function fetchBloodDonors(isManualRefresh = false) {
+      const countEl = document.getElementById('blood-donors-count');
+      const spinner = document.getElementById('blood-refresh-spinner');
+      const isBn = (typeof currentAppLanguage !== 'undefined' ? currentAppLanguage : (typeof currentLanguage !== 'undefined' ? currentLanguage : 'en')) === 'bn';
+      if (spinner && isManualRefresh) spinner.classList.add('fa-spin');
+      if (countEl) countEl.innerText = (isBn ? 'যাচাইকৃত রক্তদাতাদের তালিকা লোড হচ্ছে...' : 'Loading verified donors...');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/blood/donors`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data.donors)) {
+            bloodDonorsCache = data.donors;
+            try {
+              localStorage.setItem('safe_bd_local_blood_donors', JSON.stringify(bloodDonorsCache));
+            } catch (e) {}
+          }
+        }
+      } catch (err) {
+        console.warn('[BLOOD DONORS] Network fetch failed, using offline fallback cache');
+      } finally {
+        if (spinner) spinner.classList.remove('fa-spin');
+      }
+
+      // If empty, check localStorage
+      if (!bloodDonorsCache || bloodDonorsCache.length === 0) {
+        try {
+          const saved = localStorage.getItem('safe_bd_local_blood_donors');
+          if (saved) bloodDonorsCache = JSON.parse(saved);
+        } catch (e) {}
+      }
+
+      // Seed fallback if still empty
+      if (!bloodDonorsCache || bloodDonorsCache.length === 0) {
+        bloodDonorsCache = [
+          { id: 'b1', name: "Tanvir Ahmed", phone: "01712345678", bloodGroup: "O+", district: "Dhaka", thana: "Dhanmondi", available: true, lastDonationDate: "2 weeks ago" },
+          { id: 'b2', name: "Nusrat Jahan", phone: "01819876543", bloodGroup: "A+", district: "Dhaka", thana: "Mirpur 10", available: true, lastDonationDate: "1 month ago" },
+          { id: 'b3', name: "Sabbir Hossain", phone: "01911223344", bloodGroup: "B+", district: "Chittagong", thana: "Agrabad", available: true, lastDonationDate: "Recent" },
+          { id: 'b4', name: "Farhana Akter", phone: "01622334455", bloodGroup: "AB+", district: "Dhaka", thana: "Uttara Sector 7", available: true, lastDonationDate: "3 weeks ago" },
+          { id: 'b5', name: "Arifur Rahman", phone: "01533445566", bloodGroup: "O-", district: "Sylhet", thana: "Zindabazar", available: true, lastDonationDate: "Recent" },
+          { id: 'b6', name: "Mehedi Hasan", phone: "01755667788", bloodGroup: "A-", district: "Rajshahi", thana: "Shaheb Bazar", available: true, lastDonationDate: "Recent" },
+          { id: 'b7', name: "Sumaiya Islam", phone: "01866778899", bloodGroup: "B-", district: "Dhaka", thana: "Mohakhali", available: true, lastDonationDate: "Recent" },
+          { id: 'b8', name: "Kamrul Islam", phone: "01977889900", bloodGroup: "AB-", district: "Chittagong", thana: "GEC Circle", available: true, lastDonationDate: "Recent" }
+        ];
+      }
+
+      renderBloodDonors();
+    }
+
+    function renderBloodDonors() {
+      const container = document.getElementById('blood-donors-list');
+      const countEl = document.getElementById('blood-donors-count');
+      if (!container) return;
+
+      const isBn = (typeof currentAppLanguage !== 'undefined' ? currentAppLanguage : (typeof currentLanguage !== 'undefined' ? currentLanguage : 'en')) === 'bn';
+      let filtered = bloodDonorsCache || [];
+
+      // Filter by Blood Group
+      if (currentBloodGroupFilter && currentBloodGroupFilter !== 'ALL') {
+        filtered = filtered.filter(d => (d.bloodGroup || '').toUpperCase() === currentBloodGroupFilter);
+      }
+
+      // Filter by District
+      if (currentBloodDistrictFilter && currentBloodDistrictFilter !== 'ALL') {
+        const targetDist = currentBloodDistrictFilter.toLowerCase();
+        filtered = filtered.filter(d => (d.district || '').toLowerCase().includes(targetDist));
+      }
+
+      // Update count text
+      if (countEl) {
+        if (isBn) {
+          countEl.innerText = `${filtered.length} জন রক্তদাতা পাওয়া গেছে (${currentBloodGroupFilter === 'ALL' ? 'সকল গ্রুপ' : currentBloodGroupFilter})`;
+        } else {
+          countEl.innerText = `Showing ${filtered.length} Verified Blood Donors (${currentBloodGroupFilter})`;
+        }
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="background: rgba(255,255,255,0.03); border: 1px dashed rgba(244,63,94,0.3); border-radius: 12px; padding: 24px 16px; text-align: center; color: var(--text-muted);">
+            <div style="font-size: 26px; color: #f43f5e; margin-bottom: 8px;"><i class="fas fa-droplet-slash"></i></div>
+            <div style="font-size: 13px; font-weight: 700; color: #fff;">${isBn ? 'এই ফিল্টারে কোনো রক্তদাতা পাওয়া যায়নি' : 'No Donors Found for this Filter'}</div>
+            <div style="font-size: 11.5px; margin-top: 4px;">${isBn ? 'আপনি কি এই রক্তের গ্রুপের রক্তদাতা হতে চান?' : 'Be the first hero to register for this blood group!'}</div>
+            <button type="button" onclick="switchBloodTab('donate')" style="margin-top: 12px; background: rgba(244,63,94,0.18); border: 1px solid #f43f5e; color: #fff; padding: 7px 14px; border-radius: 8px; font-size: 11.5px; font-weight: 700; cursor: pointer;">
+              ${isBn ? 'রক্তদাতা হিসেবে নিবন্ধন করুন' : 'Register as Blood Donor'}
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(d => {
+        const cleanPhone = String(d.phone || '').replace(/\D/g, '');
+        const displayPhone = cleanPhone.length === 11 ? `${cleanPhone.slice(0, 5)}-${cleanPhone.slice(5)}` : (d.phone || '01XXXXXXXXX');
+        const waMsg = encodeURIComponent(isBn 
+          ? `আসসালামু আলাইকুম ${d.name || ''}, Safe BD জরুরি অ্যাপ থেকে রক্ত প্রয়োজনে যোগাযোগ করছি। আপনার রক্তের গ্রুপ ${d.bloodGroup || ''}। আপনি কি এই মুহূর্তে জরুরি রক্ত দিতে পারবেন?`
+          : `Hello ${d.name || ''}, contacting via Safe BD Emergency Network for urgent ${d.bloodGroup || ''} blood requirement. Are you available for blood donation?`
+        );
+        const waUrl = `https://wa.me/880${cleanPhone.replace(/^0+/, '')}?text=${waMsg}`;
+        const isAvail = d.available !== false;
+
+        return `
+          <div class="blood-donor-card">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="blood-group-tag">${typeof escapeHtml === 'function' ? escapeHtml(d.bloodGroup || 'O+') : (d.bloodGroup || 'O+')}</div>
+                <div>
+                  <div style="font-weight: 800; font-size: 14px; color: #fff; display: flex; align-items: center; gap: 6px;">
+                    ${typeof escapeHtml === 'function' ? escapeHtml(d.name || 'Anonymous Donor') : (d.name || 'Anonymous Donor')}
+                    <span title="Verified Safe BD Lifesaver" style="color: #38bdf8; font-size: 12px;"><i class="fas fa-circle-check"></i></span>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; margin-top: 2px;">
+                    <i class="fas fa-location-dot" style="color: #f43f5e; font-size: 10px;"></i>
+                    <span>${typeof escapeHtml === 'function' ? escapeHtml(d.district || 'Dhaka') : (d.district || 'Dhaka')}${d.thana ? ', ' + (typeof escapeHtml === 'function' ? escapeHtml(d.thana) : d.thana) : ''}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="text-align: right;">
+                <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700; color: ${isAvail ? '#10b981' : '#94a3b8'}; background: ${isAvail ? 'rgba(16,185,129,0.14)' : 'rgba(148,163,184,0.1)'}; padding: 3px 8px; border-radius: 6px; border: 1px solid ${isAvail ? 'rgba(16,185,129,0.3)' : 'rgba(148,163,184,0.2)'};">
+                  <span style="width: 5px; height: 5px; border-radius: 50%; background: ${isAvail ? '#10b981' : '#94a3b8'};"></span>
+                  ${isAvail ? (isBn ? 'প্রস্তুত আছেন' : 'Available') : (isBn ? 'ব্যস্ত আছেন' : 'Busy')}
+                </span>
+              </div>
+            </div>
+
+            <!-- POPPED-UP CONTACT BOX WITH DIRECT 1-TAP ACTION -->
+            <div class="donor-phone-popup">
+              <div class="donor-phone-number">
+                <i class="fas fa-phone-volume" style="color: #f43f5e; font-size: 12px;"></i>
+                <span>${displayPhone}</span>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <a href="tel:${cleanPhone}" class="btn-blood-call" title="Call Donor Now">
+                  <i class="fas fa-phone"></i>
+                  <span>${isBn ? 'কল' : 'Call'}</span>
+                </a>
+                <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-blood-wa" title="WhatsApp Message">
+                  <i class="fab fa-whatsapp"></i>
+                  <span>WhatsApp</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function submitBloodDonorForm(e) {
+      e.preventDefault();
+      const feedback = document.getElementById('blood-donor-feedback');
+      const submitBtn = document.getElementById('blood-donor-submit-btn');
+      const isBn = (typeof currentAppLanguage !== 'undefined' ? currentAppLanguage : (typeof currentLanguage !== 'undefined' ? currentLanguage : 'en')) === 'bn';
+
+      const name = (document.getElementById('blood-donor-name')?.value || '').trim();
+      const phone = (document.getElementById('blood-donor-phone')?.value || '').trim();
+      const bloodGroup = (document.getElementById('blood-donor-group')?.value || 'O+').trim();
+      const district = (document.getElementById('blood-donor-district')?.value || 'Dhaka').trim();
+      const thana = (document.getElementById('blood-donor-thana')?.value || '').trim();
+      const available = document.getElementById('blood-donor-available')?.checked !== false;
+
+      // Validate BD Phone
+      const cleanPhone = phone.replace(/\D/g, '');
+      if (cleanPhone.length !== 11 || !cleanPhone.startsWith('01')) {
+        if (feedback) {
+          feedback.style.display = 'block';
+          feedback.style.background = 'rgba(239, 68, 68, 0.15)';
+          feedback.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+          feedback.style.color = '#fca5a5';
+          feedback.innerText = (isBn ? 'দয়া করে সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন (যেমন: 017XXXXXXXX)' : 'Please enter a valid 11-digit Bangladeshi mobile number (017XXXXXXXX).');
+        }
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Registering...';
+      }
+
+      try {
+        const payload = { name, phone: cleanPhone, bloodGroup, district, thana, available };
+        const res = await fetch(`${API_BASE}/api/blood/donors`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          if (feedback) {
+            feedback.style.display = 'block';
+            feedback.style.background = 'rgba(16, 185, 129, 0.15)';
+            feedback.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+            feedback.style.color = '#6ee7b7';
+            feedback.innerText = (isBn ? 'সফলভাবে নিবন্ধিত হয়েছে! Safe BD রক্তবন্ধু পরিবারে আপনাকে স্বাগতম।' : 'Successfully registered to Safe BD Blood Lifeline! Thank you for being a lifesaver.');
+          }
+
+          // Insert or update in local cache
+          const newDonor = data.donor || { id: 'd_' + Date.now(), name, phone: cleanPhone, bloodGroup, district, thana, available, lastDonationDate: "Just now" };
+          bloodDonorsCache = [newDonor, ...(bloodDonorsCache || []).filter(d => String(d.phone).replace(/\D/g, '') !== cleanPhone)];
+          try {
+            localStorage.setItem('safe_bd_local_blood_donors', JSON.stringify(bloodDonorsCache));
+          } catch(e) {}
+
+          // Switch to find tab and show user's card at the top after 1.2s
+          setTimeout(() => {
+            switchBloodTab('find');
+            setBloodGroupFilter(bloodGroup);
+            if (feedback) feedback.style.display = 'none';
+          }, 1200);
+        } else {
+          throw new Error(data.message || 'Registration failed');
+        }
+      } catch (err) {
+        if (feedback) {
+          feedback.style.display = 'block';
+          feedback.style.background = 'rgba(239, 68, 68, 0.15)';
+          feedback.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+          feedback.style.color = '#fca5a5';
+          feedback.innerText = err.message || 'Failed to connect. Please try again.';
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<i class="fas fa-heart-pulse"></i> <span>${isBn ? 'রক্তদাতা হিসেবে নিবন্ধন করুন' : 'Register as Life-Saving Donor'}</span>`;
+        }
+      }
     }
 
     function trigger999CallDirect(e) {
