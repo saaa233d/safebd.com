@@ -461,22 +461,22 @@
 
     .walk-overlay-panel {
       position: absolute;
-      top: 14px;
-      left: 14px;
-      right: 14px;
-      background: rgba(12, 11, 14, 0.94);
+      top: 8px;
+      left: 10px;
+      right: 10px;
+      background: rgba(12, 11, 14, 0.92);
       border: 1px solid var(--burgundy-border);
-      border-radius: 18px;
-      padding: 14px;
+      border-radius: 14px;
+      padding: 8px 10px;
       backdrop-filter: blur(14px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85);
       z-index: 100;
     }
     .walk-header-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 6px;
     }
     .walk-title {
       font-size: 13px;
@@ -2439,11 +2439,11 @@
           </div>
 
           <!-- Personal Citizen Companion Indicator -->
-          <div id="walk-user-badge" style="font-size: 11px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; padding: 5px 10px; background: rgba(255, 255, 255, 0.04); border-radius: 8px; border: 1px solid var(--border-quiet);">
-            <div id="walk-user-badge-text" style="color: #94a3b8; font-size: 10.5px; display: flex; align-items: center; gap: 5px;">
+          <div id="walk-user-badge" style="font-size: 10px; margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; padding: 3px 8px; background: rgba(255, 255, 255, 0.04); border-radius: 8px; border: 1px solid var(--border-quiet);">
+            <div id="walk-user-badge-text" style="color: #94a3b8; font-size: 10px; display: flex; align-items: center; gap: 5px;">
               <i class="fas fa-user-shield" style="color: #38bdf8;"></i> <span data-i18n="walk_guard_dedicated">Personal Route Guardian</span>
             </div>
-            <div id="walk-user-auth-indicator" style="font-size: 10px; font-weight: 700; color: #10b981;">
+            <div id="walk-user-auth-indicator" style="font-size: 9.5px; font-weight: 700; color: #10b981;">
               ● Profile Active
             </div>
           </div>
@@ -2458,14 +2458,14 @@
             </div>
             
             <!-- Transportation Mode Selector (Walk, Car/CNG, Bike) -->
-            <div style="display: flex; gap: 6px; margin: 6px 0 8px 0; background: rgba(12, 11, 14, 0.8); border: 1px solid var(--border-quiet); padding: 4px; border-radius: 12px;">
-              <button type="button" class="auth-toggle-tab active" id="mode-btn-walking" style="padding: 6px 4px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="selectTravelMode('walking')">
+            <div style="display: flex; gap: 5px; margin: 4px 0 5px 0; background: rgba(12, 11, 14, 0.8); border: 1px solid var(--border-quiet); padding: 3px; border-radius: 10px;">
+              <button type="button" class="auth-toggle-tab active" id="mode-btn-walking" style="padding: 5px 3px; font-size: 10.5px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="selectTravelMode('walking')">
                 <i class="fas fa-person-walking"></i> <span data-i18n="walk_mode_walk">Walk</span>
               </button>
-              <button type="button" class="auth-toggle-tab" id="mode-btn-driving" style="padding: 6px 4px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="selectTravelMode('driving')">
+              <button type="button" class="auth-toggle-tab" id="mode-btn-driving" style="padding: 5px 3px; font-size: 10.5px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="selectTravelMode('driving')">
                 <i class="fas fa-car-side"></i> <span data-i18n="walk_mode_car">Car / CNG</span>
               </button>
-              <button type="button" class="auth-toggle-tab" id="mode-btn-bicycling" style="padding: 6px 4px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="selectTravelMode('bicycling')">
+              <button type="button" class="auth-toggle-tab" id="mode-btn-bicycling" style="padding: 5px 3px; font-size: 10.5px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="selectTravelMode('bicycling')">
                 <i class="fas fa-motorcycle"></i> <span data-i18n="walk_mode_bike">Bike</span>
               </button>
             </div>
@@ -2483,39 +2483,22 @@
               <div class="location-dropdown-popup" id="bd-location-dropdown"></div>
             </div>
 
-            <!-- User Safety Timer Control (Set Before Starting) -->
-            <div id="walk-timer-setting-box" style="margin-top: 10px; background: rgba(12, 11, 14, 0.85); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 14px; padding: 11px 12px; box-shadow: 0 4px 18px rgba(0,0,0,0.4);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px;">
-                <div style="display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: #fff; font-weight: 700;">
-                  <i class="fas fa-stopwatch" style="color: #38bdf8; font-size: 15px;"></i>
-                  <span data-i18n="walk_timer_title">Set Journey Safety Timer</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 5px;">
-                  <button type="button" onclick="adjustCustomTimerMinutes(-5)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; width: 28px; height: 28px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Minus 5 mins">-5</button>
-                  <input type="number" id="user-custom-timer-mins" min="1" max="720" value="20" oninput="onCustomTimerInputChange(this.value)" style="width: 52px; text-align: center; background: rgba(56, 189, 248, 0.16); border: 1.5px solid #38bdf8; border-radius: 8px; color: #38bdf8; font-weight: 800; font-size: 14px; padding: 4px 0;">
-                  <span style="font-size: 11.5px; color: #94a3b8; font-weight: 700;" data-i18n="walk_timer_mins_unit">mins</span>
-                  <button type="button" onclick="adjustCustomTimerMinutes(+5)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; width: 28px; height: 28px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Plus 5 mins">+5</button>
-                </div>
+            <!-- Compact Single-Line Journey Safety Timer (Clean, No Bulky Preset Chips) -->
+            <div id="walk-timer-setting-box" style="margin-top: 5px; background: rgba(12, 11, 14, 0.78); border: 1px solid rgba(56, 189, 248, 0.28); border-radius: 9px; padding: 4px 8px; display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 5px; font-size: 11px; color: #e2e8f0; font-weight: 700;">
+                <i class="fas fa-stopwatch" style="color: #38bdf8; font-size: 12px;"></i>
+                <span data-i18n="walk_timer_title">Safety Timer</span>
               </div>
-
-              <!-- Quick Preset Minute Chips -->
-              <div style="display: flex; gap: 5px; margin-bottom: 7px;">
-                <button type="button" class="walk-timer-chip" id="chip-timer-10" onclick="setTimerPreset(10)" style="flex: 1; padding: 6px 2px; font-size: 11px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-weight: 700; cursor: pointer;">10m</button>
-                <button type="button" class="walk-timer-chip" id="chip-timer-15" onclick="setTimerPreset(15)" style="flex: 1; padding: 6px 2px; font-size: 11px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-weight: 700; cursor: pointer;">15m</button>
-                <button type="button" class="walk-timer-chip active" id="chip-timer-20" onclick="setTimerPreset(20)" style="flex: 1; padding: 6px 2px; font-size: 11px; border-radius: 8px; background: rgba(56, 189, 248, 0.22); border: 1.5px solid #38bdf8; color: #38bdf8; font-weight: 800; cursor: pointer;">20m</button>
-                <button type="button" class="walk-timer-chip" id="chip-timer-30" onclick="setTimerPreset(30)" style="flex: 1; padding: 6px 2px; font-size: 11px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-weight: 700; cursor: pointer;">30m</button>
-                <button type="button" class="walk-timer-chip" id="chip-timer-45" onclick="setTimerPreset(45)" style="flex: 1; padding: 6px 2px; font-size: 11px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-weight: 700; cursor: pointer;">45m</button>
-                <button type="button" class="walk-timer-chip" id="chip-timer-60" onclick="setTimerPreset(60)" style="flex: 1; padding: 6px 2px; font-size: 11px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-weight: 700; cursor: pointer;">60m</button>
-              </div>
-
-              <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #94a3b8; padding: 0 2px;">
-                <span style="display: flex; align-items: center; gap: 4px;"><i class="fas fa-shield-halved" style="color: #10b981;"></i> <span data-i18n="walk_timer_alert_note">Auto-alerts emergency circle if overdue</span></span>
-                <span style="color: #38bdf8;"><i class="fas fa-satellite-dish"></i> <span data-i18n="walk_timer_bg_note">Runs automatically in background</span></span>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <button type="button" onclick="adjustCustomTimerMinutes(-5)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; width: 24px; height: 24px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Minus 5 mins">-5</button>
+                <input type="number" id="user-custom-timer-mins" min="1" max="720" value="20" oninput="onCustomTimerInputChange(this.value)" style="width: 42px; text-align: center; background: rgba(56, 189, 248, 0.16); border: 1px solid #38bdf8; border-radius: 6px; color: #38bdf8; font-weight: 800; font-size: 12.5px; padding: 2px 0;">
+                <span style="font-size: 10.5px; color: #94a3b8; font-weight: 700;" data-i18n="walk_timer_mins_unit">mins</span>
+                <button type="button" onclick="adjustCustomTimerMinutes(+5)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; width: 24px; height: 24px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Plus 5 mins">+5</button>
               </div>
             </div>
           </div>
 
-          <div class="walk-action-btns">
+          <div class="walk-action-btns" style="margin-top: 5px;">
             <button class="btn-start-walk" onclick="startWalkWithMe()">
               <i class="fas fa-shield-heart"></i> <span data-i18n="walk_btn_start">Start Companion Guard</span>
             </button>
