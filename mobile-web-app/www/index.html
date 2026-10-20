@@ -8582,20 +8582,6 @@
       if (distEl && currentUser.bloodDistrict) distEl.value = currentUser.bloodDistrict;
       if (thanaEl && currentUser.bloodThana) thanaEl.value = currentUser.bloodThana;
     }
-        if (feedback) {
-          feedback.style.display = 'block';
-          feedback.style.background = 'rgba(239, 68, 68, 0.15)';
-          feedback.style.border = '1px solid rgba(239, 68, 68, 0.4)';
-          feedback.style.color = '#fca5a5';
-          feedback.innerText = err.message || 'Failed to connect. Please try again.';
-        }
-      } finally {
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = `<i class="fas fa-heart-pulse"></i> <span>${isBn ? 'রক্তদাতা হিসেবে নিবন্ধন করুন' : 'Register as Life-Saving Donor'}</span>`;
-        }
-      }
-    }
 
     function trigger999CallDirect(e) {
       // Direct instant dial: zero pop-up, zero alert
