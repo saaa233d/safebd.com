@@ -40,6 +40,7 @@ const DATA_DIR = path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'safe_bd_database.json');
 const EVIDENCE_FILE = path.join(DATA_DIR, 'safe_bd_evidence.json');
 const POSTS_FILE = path.join(DATA_DIR, 'safe_bd_posts.json');
+const BLOOD_DONORS_FILE = path.join(DATA_DIR, 'safe_bd_blood_donors.json');
 
 // Global Cloud Infrastructure Fallbacks (Google Drive 5TB Vault & Supabase Cloud)
 const DEFAULT_GDRIVE_URL = process.env.GDRIVE_VAULT_URL || 'https://script.google.com/macros/s/AKfycby3O-1dfJeGE5DJ8dDrhBHtkdgnk-IKSXFRtUswiTblka1M3GoC8uxGHfOM2kvyOVmq/exec';
@@ -59,6 +60,7 @@ let dbState = {
   approvedPostIds: [],  // Array of approved post IDs sorted newest first (O(limit) pagination for live feed)
   pendingPostIds: [],   // Array of pending post IDs awaiting admin moderation
   otpCodes: {},         // cleanPhone -> { code, purpose, expiresAt, attempts }
+  bloodDonors: [],      // Emergency volunteer blood donors list (রক্তবন্ধু)
   cloudVault: {
     scriptUrl: DEFAULT_GDRIVE_URL,
     secretKey: DEFAULT_GDRIVE_KEY,
@@ -208,6 +210,20 @@ function initDatabase() {
 
   // Ensure Official Founder Announcement Post by SAAD RIZWAN is seeded & verified live
   seedFounderPost();
+
+  // Load or seed Blood Donors directory (রক্তবন্ধু)
+  if (fs.existsSync(BLOOD_DONORS_FILE)) {
+    try {
+      const bRaw = fs.readFileSync(BLOOD_DONORS_FILE, 'utf8');
+      const bParsed = JSON.parse(bRaw);
+      if (Array.isArray(bParsed) && bParsed.length > 0) {
+        dbState.bloodDonors = bParsed;
+      }
+    } catch(bErr) {}
+  }
+  if (!dbState.bloodDonors || dbState.bloodDonors.length === 0) {
+    seedInitialBloodDonors();
+  }
 
   // Commit initial state
   persistToDisk();
@@ -1206,6 +1222,211 @@ function resolveSosAlert(id, adminName = "Chief Administrator") {
     persistToDisk();
     scheduleCloudStateBackup();
     return alert;
+  }
+  return null;
+}
+
+/* =========================================================================
+   EMERGENCY BLOOD LIFELINE DIRECTORY & DONATION ENGINE (রক্তবন্ধু)
+   Enables peer-to-peer life-saving blood donation and matching by blood group.
+========================================================================= */
+
+function seedInitialBloodDonors() {
+  if (dbState.bloodDonors && dbState.bloodDonors.length > 0) return;
+  
+  dbState.bloodDonors = [
+    {
+      id: "donor_dhaka_01",
+      name: "Tanzimul Islam",
+      phone: "01711223344",
+      bloodGroup: "O+",
+      district: "Dhaka",
+      thana: "Dhanmondi",
+      available: true,
+      lastDonationDate: "2026-07-10",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "donor_dhaka_02",
+      name: "Sabrina Yasmin",
+      phone: "01822334455",
+      bloodGroup: "A+",
+      district: "Dhaka",
+      thana: "Mirpur",
+      available: true,
+      lastDonationDate: "2026-06-20",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "donor_dhaka_03",
+      name: "Arifur Rahman",
+      phone: "01933445566",
+      bloodGroup: "B+",
+      district: "Dhaka",
+      thana: "Uttara",
+      available: true,
+      lastDonationDate: "2026-08-01",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "donor_dhaka_04",
+      name: "Nusrat Jahan",
+      phone: "01744556677",
+      bloodGroup: "AB+",
+      district: "Dhaka",
+      thana: "Mohakhali",
+      available: true,
+      lastDonationDate: "2026-05-15",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "donor_dhaka_05",
+      name: "Mahmud Hasan (Emergency Donor)",
+      phone: "01311556677",
+      bloodGroup: "O-",
+      district: "Dhaka",
+      thana: "Mohammadpur",
+      available: true,
+      lastDonationDate: "2026-08-25",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "donor_dhaka_06",
+      name: "Fahim Ahmed",
+      phone: "01655667788",
+      bloodGroup: "A-",
+      district: "Dhaka",
+      thana: "Badda",
+      available: true,
+      lastDonationDate: "2026-07-18",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "donor_dhaka_07",
+      name: "Imtiaz Shovon",
+      phone: "01877889900",
+      bloodGroup: "B-",
+      district: "Dhaka",
+      thana: "Motijheel",
+      available: true,
+      lastDonationDate: "2026-06-30",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "donor_dhaka_08",
+      name: "Shayera Khan",
+      phone: "01799001122",
+      bloodGroup: "AB-",
+      district: "Dhaka",
+      thana: "Gulshan",
+      available: true,
+      lastDonationDate: "2026-07-04",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "donor_ctg_01",
+      name: "Kazi Farhan",
+      phone: "01811998877",
+      bloodGroup: "O+",
+      district: "Chittagong",
+      thana: "Panchlaish",
+      available: true,
+      lastDonationDate: "2026-08-10",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "donor_ctg_02",
+      name: "Rifat Chowdhury",
+      phone: "01733887766",
+      bloodGroup: "B+",
+      district: "Chittagong",
+      thana: "Agrabad",
+      available: true,
+      lastDonationDate: "2026-07-22",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "donor_syl_01",
+      name: "Syed Anisul Haque",
+      phone: "01755443322",
+      bloodGroup: "A+",
+      district: "Sylhet",
+      thana: "Zindabazar",
+      available: true,
+      lastDonationDate: "2026-08-05",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "donor_raj_01",
+      name: "Tareq Hossain",
+      phone: "01911447788",
+      bloodGroup: "O-",
+      district: "Rajshahi",
+      thana: "Boalia",
+      available: true,
+      lastDonationDate: "2026-06-12",
+      createdAt: new Date().toISOString()
+    }
+  ];
+  saveBloodDonorsToDisk();
+}
+
+function saveBloodDonorsToDisk() {
+  try {
+    fs.writeFileSync(BLOOD_DONORS_FILE, JSON.stringify(dbState.bloodDonors || [], null, 2), 'utf8');
+  } catch (e) {
+    console.warn('[⚠️ ERROR SAVING BLOOD DONORS]:', e.message);
+  }
+}
+
+function getBloodDonors(bloodGroup, district) {
+  let list = dbState.bloodDonors || [];
+  if (bloodGroup && bloodGroup !== 'all' && bloodGroup !== 'ALL') {
+    const cleanGroup = bloodGroup.trim().toUpperCase();
+    list = list.filter(d => (d.bloodGroup || '').toUpperCase() === cleanGroup);
+  }
+  if (district && district !== 'all' && district !== 'ALL' && district !== 'All Districts') {
+    const cleanDist = district.trim().toLowerCase();
+    list = list.filter(d => (d.district || '').toLowerCase().includes(cleanDist));
+  }
+  return list;
+}
+
+function addOrUpdateBloodDonor({ name, phone, bloodGroup, district, thana, available }) {
+  if (!dbState.bloodDonors) dbState.bloodDonors = [];
+  const cleanPhone = String(phone || '').replace(/\D/g, '').slice(-10);
+  const formattedPhone = '0' + cleanPhone;
+  
+  const existingIdx = dbState.bloodDonors.findIndex(d => (d.phone || '').endsWith(cleanPhone));
+  const donorObj = {
+    id: existingIdx >= 0 ? dbState.bloodDonors[existingIdx].id : ('donor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4)),
+    name: (name || 'Anonymous Volunteer').trim(),
+    phone: formattedPhone,
+    bloodGroup: (bloodGroup || 'O+').toUpperCase().trim(),
+    district: (district || 'Dhaka').trim(),
+    thana: (thana || 'Local Area').trim(),
+    available: available !== false,
+    lastDonationDate: (existingIdx >= 0 && dbState.bloodDonors[existingIdx].lastDonationDate) || 'Recent',
+    updatedAt: new Date().toISOString()
+  };
+
+  if (existingIdx >= 0) {
+    dbState.bloodDonors[existingIdx] = { ...dbState.bloodDonors[existingIdx], ...donorObj };
+  } else {
+    dbState.bloodDonors.unshift(donorObj); // Newly added donor appears at top
+  }
+  saveBloodDonorsToDisk();
+  return donorObj;
+}
+
+function toggleDonorAvailability(id, isAvailable) {
+  if (!dbState.bloodDonors) return null;
+  const donor = dbState.bloodDonors.find(d => d.id === id);
+  if (donor) {
+    donor.available = Boolean(isAvailable);
+    donor.updatedAt = new Date().toISOString();
+    saveBloodDonorsToDisk();
+    return donor;
   }
   return null;
 }
@@ -2421,5 +2642,8 @@ module.exports = {
   addSosAlert,
   getAllSosAlerts,
   resolveSosAlert,
+  getBloodDonors,
+  addOrUpdateBloodDonor,
+  toggleDonorAvailability,
   initDatabase
 };
