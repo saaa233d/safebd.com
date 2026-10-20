@@ -1147,6 +1147,79 @@ app.post('/api/admin/sos-alerts/:id/resolve', (req, res) => {
 });
 
 /* ==========================================================
+   2.6 EMERGENCY BLOOD DONATION LIFELINE (রক্তবন্ধু)
+   Peer-to-peer life-saving blood donor search and opt-in registry
+========================================================== */
+app.get('/api/blood/donors', (req, res) => {
+  try {
+    const { group, district } = req.query;
+    const donors = db.getBloodDonors(group, district);
+    return res.json({
+      success: true,
+      donors: donors || [],
+      total: donors ? donors.length : 0
+    });
+  } catch (err) {
+    console.error('[BLOOD DONORS GET ERROR]:', err);
+    return res.status(500).json({ error: "SERVER_ERROR", message: "Failed to fetch blood donors list." });
+  }
+});
+
+app.post('/api/blood/donors', (req, res) => {
+  try {
+    const { name, phone, bloodGroup, district, thana, available } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: "NAME_REQUIRED", message: "Donor name is required." });
+    }
+    if (!phone || !phone.trim()) {
+      return res.status(400).json({ error: "PHONE_REQUIRED", message: "Contact phone number is required." });
+    }
+
+    const phoneValidation = db.validateBdPhone ? db.validateBdPhone(phone) : { valid: phone.replace(/\D/g, '').length >= 10, cleanPhone: phone.trim() };
+    if (!phoneValidation.valid) {
+      return res.status(400).json({ error: "INVALID_PHONE", message: "Please provide a valid 11-digit Bangladeshi mobile number (e.g., 017XXXXXXXX)." });
+    }
+
+    const validGroups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+    const cleanGroup = (bloodGroup || 'O+').trim().toUpperCase();
+    if (!validGroups.includes(cleanGroup)) {
+      return res.status(400).json({ error: "INVALID_BLOOD_GROUP", message: "Please select a valid blood group (A+, A-, B+, B-, O+, O-, AB+, AB-)." });
+    }
+
+    const donor = db.addOrUpdateBloodDonor({
+      name: name.trim(),
+      phone: phoneValidation.cleanPhone || phone.trim(),
+      bloodGroup: cleanGroup,
+      district: (district || 'Dhaka').trim(),
+      thana: (thana || '').trim(),
+      available: available !== false
+    });
+
+    return res.json({
+      success: true,
+      message: "Successfully registered to the Safe BD Emergency Blood Lifeline! Thank you for being a lifesaver.",
+      donor
+    });
+  } catch (err) {
+    console.error('[BLOOD DONORS POST ERROR]:', err);
+    return res.status(500).json({ error: "SERVER_ERROR", message: "Failed to register blood donor." });
+  }
+});
+
+app.post('/api/blood/donors/:id/toggle', (req, res) => {
+  try {
+    const updated = db.toggleDonorAvailability(req.params.id, req.body.available);
+    if (!updated) {
+      return res.status(404).json({ error: "NOT_FOUND", message: "Donor profile not found." });
+    }
+    return res.json({ success: true, donor: updated });
+  } catch (err) {
+    return res.status(500).json({ error: "SERVER_ERROR", message: "Failed to update donor status." });
+  }
+});
+
+/* ==========================================================
    3. "WALK WITH ME" / JOURNEY COMPANION SESSIONS & LIVE TRACKING
 ========================================================== */
 
