@@ -4490,6 +4490,11 @@
     } catch(e) {
       loadUserContacts(null);
     }
+    try {
+      if (typeof initBackgroundWalkSessionOnLoad === 'function') {
+        initBackgroundWalkSessionOnLoad();
+      }
+    } catch(e) {}
     loadFeedFromLocalStorage();
     fetchLiveFeedPosts(1, false);
     if (currentUser && currentUser.isAdmin) {
@@ -4556,6 +4561,20 @@
       // Realistic real-time speed calculation from sensor Doppler or jitter-gated delta
       currentSpeedKmh = computeRealisticSpeed(position, acc);
       lastGpsTimestamp = Date.now();
+
+      // Check destination proximity & auto-stop/disclose when nearby (10-15 meters)
+      if ((activeJourneySessionId || walkTargetEndTime > 0) && selectedDestCoords && selectedDestCoords.lat && selectedDestCoords.lon) {
+        const distToDestMeters = computeGeoDistanceMeters(lat, lon, selectedDestCoords.lat, selectedDestCoords.lon);
+        if (distToDestMeters !== null) {
+          if (typeof updateLiveDestinationProximityUI === 'function') {
+            updateLiveDestinationProximityUI(distToDestMeters);
+          }
+          if (distToDestMeters <= 15) {
+            handleAutoArrivalAtDestination(distToDestMeters);
+            return;
+          }
+        }
+      }
 
       // Format live speed indicator
       let speedText = "";
@@ -6524,6 +6543,13 @@
         clearInterval(walkTimerInterval);
         walkTimerInterval = null;
       }
+      if (typeof stopBackgroundTimerWorker === 'function') {
+        stopBackgroundTimerWorker();
+      }
+      if (typeof releaseScreenWakeLock === 'function') {
+        releaseScreenWakeLock();
+      }
+      isAutoArrivalTriggered = false;
 
       const dock = document.getElementById('walk-dock');
       if (dock) dock.style.display = 'none';
@@ -6765,16 +6791,221 @@
       handleJourneyTimerTick(destination);
     }
 
+    /* ----------------------------------------------------
+       PROXIMITY DETECTION & 10-15M AUTO-STOP DISCLOSE ENGINE
+    ---------------------------------------------------- */
+    let isAutoArrivalTriggered = false;
+
+    function updateLiveDestinationProximityUI(meters) {
+      if (meters === null || meters === undefined) return;
+      const rounded = Math.round(meters);
+      const isBn = currentAppLanguage === 'bn';
+
+      // Update destination display with live distance
+      const destTargetEl = document.getElementById('transit-target-dest');
+      if (destTargetEl && currentDestinationQuery) {
+        const formattedDist = rounded >= 1000 ? `${(rounded/1000).toFixed(1)} km` : `${rounded}m`;
+        destTargetEl.innerHTML = `${escapeHtml(currentDestinationQuery)} <span style="color:#10b981; font-weight:700; margin-left:4px;">(${formattedDist})</span>`;
+      }
+
+      const dockAcc = document.getElementById('dock-live-accuracy');
+      if (dockAcc) {
+        if (rounded <= 25) {
+          dockAcc.innerHTML = `<span style="color:#10b981; font-weight:800;">🎯 ${rounded}m to destination</span>`;
+        } else {
+          const distLabel = rounded >= 1000 ? `${(rounded/1000).toFixed(1)}km` : `${rounded}m`;
+          dockAcc.innerText = `GPS ±${currentCoords.accuracy || 5}m • 🎯 ${distLabel}`;
+        }
+      }
+    }
+
+    function playArrivalSuccessChime() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        const now = ctx.currentTime;
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.15); // E5
+        osc.frequency.setValueAtTime(783.99, now + 0.3); // G5
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.75);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.75);
+      } catch(e) {}
+    }
+
+    function sendDeviceArrivalNotification(approxMeters, destName) {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      const isBn = currentAppLanguage === 'bn';
+      const title = isBn ? "🎯 SAFE BD: গন্তব্যে আগমন সম্পন্ন!" : "🎯 SAFE BD: Destination Reached!";
+      const body = isBn 
+        ? `আপনি ${destName}-এর কাছাকাছি (${approxMeters} মি.) পৌঁছে গেছেন। ট্রানজিট টাইমার বন্ধ করা হয়েছে।`
+        : `You reached nearby ${destName} (~${approxMeters}m). Safety companion timer stopped automatically.`;
+      try {
+        new Notification(title, {
+          body,
+          icon: "/app-icon.jpg",
+          badge: "/app-icon.jpg",
+          tag: "safebd-arrival-notice",
+          requireInteraction: false
+        });
+      } catch(e) {}
+    }
+
+    function handleAutoArrivalAtDestination(distanceMeters) {
+      if (isAutoArrivalTriggered) return;
+      isAutoArrivalTriggered = true;
+
+      const approxMeters = Math.max(1, Math.round(distanceMeters || 12));
+      const isBn = currentAppLanguage === 'bn';
+      const destInput = document.getElementById('walk-destination');
+      const destName = (destInput ? destInput.value.trim() : '') || currentDestinationQuery || (isBn ? 'গন্তব্য' : 'Destination');
+
+      // 1. Stop timer interval and background worker immediately
+      if (walkTimerInterval) {
+        clearInterval(walkTimerInterval);
+        walkTimerInterval = null;
+      }
+      stopBackgroundTimerWorker();
+      releaseScreenWakeLock();
+
+      // 2. Play pleasant arrival audio chime & vibrate
+      playArrivalSuccessChime();
+      if (navigator.vibrate) {
+        try { navigator.vibrate([200, 100, 200, 100, 400]); } catch (e) {}
+      }
+
+      // 3. Send notification for background/system visibility
+      sendDeviceArrivalNotification(approxMeters, destName);
+
+      // 4. Notify backend
+      const sessId = activeJourneySessionId;
+      const phone = currentUser ? currentUser.phone : "";
+      const token = localStorage.getItem('safe_bd_token');
+      if (sessId || phone) {
+        fetch(`${API_BASE}/api/walk/finish`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify({
+            sessionId: sessId,
+            phone: phone,
+            arrivalReason: 'GEOFENCE_PROXIMITY_AUTO_STOP',
+            distanceMeters: approxMeters
+          })
+        }).catch(() => {});
+      }
+
+      // 5. Clear saved background walk timer and local session
+      const userKey = getUserWalkKey(currentUser);
+      localStorage.removeItem('safe_bd_walk_' + userKey);
+      clearBackgroundWalkTimerSession();
+
+      // 6. Automatically disclose / dismiss the timer and active transit dock/HUD
+      resetWalkUI();
+
+      // 7. Show friendly arrival alert to user
+      const alertMsg = isBn
+        ? `🎯 আপনি গন্তব্যের কাছাকাছি (${approxMeters} মিটারের মধ্যে) পৌঁছে গেছেন!\n\nগন্তব্য: ${destName}\n\nআপনার ট্রানজিট সেফটি টাইমারটি স্বয়ংক্রিয়ভাবে সমাপ্ত (disclose) হয়েছে এবং নিরাপদ আগমন নিশ্চিত করা হয়েছে।`
+        : `🎯 Destination Reached!\n\nYou have arrived nearby your destination (within ~${approxMeters} meters)!\n\nDestination: ${destName}\n\nYour companion safety timer has automatically stopped and closed. Glad you arrived safely!`;
+
+      setTimeout(() => {
+        alert(alertMsg);
+        isAutoArrivalTriggered = false;
+      }, 150);
+    }
+
+    /* ----------------------------------------------------
+       BACKGROUND EXECUTION ENGINE (WEB WORKER & WAKE-LOCK)
+    ---------------------------------------------------- */
+    let bgTimerWorker = null;
+    let screenWakeLock = null;
+
+    function startBackgroundTimerWorker() {
+      try {
+        if (bgTimerWorker) {
+          bgTimerWorker.terminate();
+          bgTimerWorker = null;
+        }
+        const workerScript = `
+          let timer = null;
+          self.onmessage = function(e) {
+            if (e.data === 'start') {
+              if (timer) clearInterval(timer);
+              timer = setInterval(function() {
+                self.postMessage('tick');
+              }, 1000);
+            } else if (e.data === 'stop') {
+              if (timer) clearInterval(timer);
+              timer = null;
+            }
+          };
+        `;
+        const blob = new Blob([workerScript], { type: 'application/javascript' });
+        bgTimerWorker = new Worker(URL.createObjectURL(blob));
+        bgTimerWorker.onmessage = function(e) {
+          if (e.data === 'tick' && (activeJourneySessionId || walkTargetEndTime > 0)) {
+            const destInput = document.getElementById('walk-destination');
+            const dest = (destInput ? destInput.value.trim() : '') || currentDestinationQuery || 'Destination';
+            handleJourneyTimerTick(dest);
+          }
+        };
+        bgTimerWorker.postMessage('start');
+      } catch (err) {
+        console.log("Background Web Worker initialized fallback:", err);
+      }
+    }
+
+    function stopBackgroundTimerWorker() {
+      if (bgTimerWorker) {
+        try {
+          bgTimerWorker.postMessage('stop');
+          bgTimerWorker.terminate();
+        } catch(e) {}
+        bgTimerWorker = null;
+      }
+    }
+
+    async function requestScreenWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          screenWakeLock = await navigator.wakeLock.request('screen');
+          screenWakeLock.addEventListener('release', () => {
+            screenWakeLock = null;
+          });
+        }
+      } catch(e) {}
+    }
+
+    function releaseScreenWakeLock() {
+      if (screenWakeLock) {
+        try { screenWakeLock.release(); } catch(e) {}
+        screenWakeLock = null;
+      }
+    }
+
     function syncBackgroundWalkTimer() {
       const destInput = document.getElementById('walk-destination');
       const destination = (destInput ? destInput.value.trim() : '') || currentDestinationQuery || 'Destination';
       handleJourneyTimerTick(destination);
     }
 
-    // Background lifecycle listeners: auto-sync timer on wake, focus, or tab switch
+    // Background lifecycle listeners: auto-sync timer on wake, focus, tab switch, or app minimize
     document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && walkTargetEndTime > 0) {
-        syncBackgroundWalkTimer();
+      if (walkTargetEndTime > 0) {
+        if (!document.hidden) {
+          syncBackgroundWalkTimer();
+        } else {
+          saveBackgroundWalkTimerSession({ targetEndTime: walkTargetEndTime, totalAllocatedSeconds: totalJourneyAllocatedSeconds });
+        }
       }
     });
     window.addEventListener('focus', () => {
@@ -6787,6 +7018,32 @@
         syncBackgroundWalkTimer();
       }
     });
+    window.addEventListener('blur', () => {
+      if (walkTargetEndTime > 0) {
+        saveBackgroundWalkTimerSession({ targetEndTime: walkTargetEndTime, totalAllocatedSeconds: totalJourneyAllocatedSeconds });
+      }
+    });
+    window.addEventListener('pagehide', () => {
+      if (walkTargetEndTime > 0) {
+        saveBackgroundWalkTimerSession({ targetEndTime: walkTargetEndTime, totalAllocatedSeconds: totalJourneyAllocatedSeconds });
+      }
+    });
+    window.addEventListener('beforeunload', () => {
+      if (walkTargetEndTime > 0) {
+        saveBackgroundWalkTimerSession({ targetEndTime: walkTargetEndTime, totalAllocatedSeconds: totalJourneyAllocatedSeconds });
+      }
+    });
+
+    function initBackgroundWalkSessionOnLoad() {
+      try {
+        const bgSaved = getBackgroundWalkTimerSession();
+        if (bgSaved && bgSaved.destination && bgSaved.targetEndTime && bgSaved.targetEndTime > 0) {
+          if (!activeJourneySessionId) {
+            restoreActiveWalkSession(bgSaved);
+          }
+        }
+      } catch(e) {}
+    }
 
     function restoreActiveWalkSession(session) {
       if (!session) return;
@@ -6851,6 +7108,9 @@
       walkTimerInterval = setInterval(() => {
         handleJourneyTimerTick(session.destination);
       }, 1000);
+      isAutoArrivalTriggered = false;
+      if (typeof startBackgroundTimerWorker === 'function') startBackgroundTimerWorker();
+      if (typeof requestScreenWakeLock === 'function') requestScreenWakeLock();
 
       // Restore map route
       if (currentCoords.lat && selectedDestCoords) {
@@ -7003,6 +7263,9 @@
       walkTimerInterval = setInterval(() => {
         handleJourneyTimerTick(destination);
       }, 1000);
+      isAutoArrivalTriggered = false;
+      if (typeof startBackgroundTimerWorker === 'function') startBackgroundTimerWorker();
+      if (typeof requestScreenWakeLock === 'function') requestScreenWakeLock();
 
       alert(`🛡️ Personal Walk Companion Activated!\n\nGuarding: ${userName}\nMode: ${selectedTravelMode.toUpperCase()}\nCompanion Timer: ${etaDurationFormatted}\nDestination: ${destination}\n\nYour companion timer runs automatically in the background even if your device is locked.`);
     }
@@ -7023,6 +7286,24 @@
         else secondsOverdueCount++;
       }
 
+      // Check live proximity to destination during each timer tick (10-15 Meters Auto-Stop)
+      let proxSuffix = "";
+      if (selectedDestCoords && selectedDestCoords.lat && selectedDestCoords.lon && currentCoords.lat && currentCoords.lon) {
+        const distMeters = computeGeoDistanceMeters(currentCoords.lat, currentCoords.lon, selectedDestCoords.lat, selectedDestCoords.lon);
+        if (distMeters !== null) {
+          if (distMeters <= 15) {
+            handleAutoArrivalAtDestination(distMeters);
+            return;
+          }
+          const isBn = currentAppLanguage === 'bn';
+          if (distMeters >= 1000) {
+            proxSuffix = isBn ? ` • 🎯 ${(distMeters/1000).toFixed(1)} কিমি বাকি` : ` • 🎯 ${(distMeters/1000).toFixed(1)}km to dest`;
+          } else {
+            proxSuffix = isBn ? ` • 🎯 ${Math.round(distMeters)}মি বাকি` : ` • 🎯 ${Math.round(distMeters)}m to dest`;
+          }
+        }
+      }
+
       const displayEl = document.getElementById('walk-timer-display');
       const hudMetric = document.getElementById('transit-eta-metric');
 
@@ -7036,8 +7317,8 @@
         }
         if (hudMetric) {
           hudMetric.innerText = (currentAppLanguage === 'bn')
-            ? `অবশিষ্ট: ~${mins}মি ${secs}সে`
-            : `Remaining: ~${mins}m ${secs}s`;
+            ? `অবশিষ্ট: ~${mins}মি ${secs}সে${proxSuffix}`
+            : `Remaining: ~${mins}m ${secs}s${proxSuffix}`;
         }
       } else {
         // ETA Reached -> Overdue Timer counting up
@@ -7050,8 +7331,8 @@
         }
         if (hudMetric) {
           hudMetric.innerText = (currentAppLanguage === 'bn')
-            ? `সময় অতিক্রান্ত: +${overMins}মি ${overSecs}সে`
-            : `Overdue: +${overMins}m ${overSecs}s`;
+            ? `সময় অতিক্রান্ত: +${overMins}মি ${overSecs}সে${proxSuffix}`
+            : `Overdue: +${overMins}m ${overSecs}s${proxSuffix}`;
         }
 
         // Overdue Alarm & Safety Check when timer reaches 0
