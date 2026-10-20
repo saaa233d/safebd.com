@@ -3957,10 +3957,6 @@
       if (typeof updateWalkUserBadge === 'function') {
         updateWalkUserBadge();
       }
-
-      if (typeof updateProfileBloodDisplay === 'function') {
-        updateProfileBloodDisplay();
-      }
       if (typeof renderContactsList === 'function') {
         renderContactsList();
       }
@@ -8278,9 +8274,11 @@
     }
 
     function renderBloodDonors() {
+      const modal = document.getElementById('blood-donor-modal');
       const container = document.getElementById('blood-donors-list');
       const countEl = document.getElementById('blood-donors-count');
       if (!container) return;
+      if (modal && !modal.classList.contains('open')) return;
 
       const isBn = (typeof currentAppLanguage !== 'undefined' ? currentAppLanguage : (typeof currentLanguage !== 'undefined' ? currentLanguage : 'en')) === 'bn';
       let filtered = bloodDonorsCache || [];
@@ -11620,37 +11618,27 @@
       const fab = document.getElementById('shurokha-ai-trigger');
       if (!fab) return;
       const sosScreen = document.getElementById('screen-sos');
-      const isSosActive = sosScreen && (sosScreen.classList.contains('active') || (sosScreen.style.display !== 'none' && getComputedStyle(sosScreen).display !== 'none'));
+      const isSosActive = sosScreen && (sosScreen.classList.contains('active') || sosScreen.style.display !== 'none');
       const hasAnyModalOpen = !!document.querySelector(
         '.contact-modal-backdrop.open, .auth-modal-backdrop.open, .edit-contact-modal-backdrop.open, .sos-modal-backdrop.open, .walk-timer-modal-backdrop.open, .author-profile-modal-backdrop.open, .shurokha-modal-backdrop.open, #evidence-player-modal.open'
       );
-      if (isSosActive && !hasAnyModalOpen) {
-        fab.style.display = 'flex';
-        fab.style.visibility = 'visible';
-        fab.style.opacity = '1';
-        fab.style.pointerEvents = 'auto';
+      const shouldShow = Boolean(isSosActive && !hasAnyModalOpen);
+      if (shouldShow) {
+        if (fab.style.display !== 'flex') {
+          fab.style.display = 'flex';
+          fab.style.visibility = 'visible';
+          fab.style.opacity = '1';
+          fab.style.pointerEvents = 'auto';
+        }
       } else {
-        fab.style.display = 'none';
-        fab.style.visibility = 'hidden';
-        fab.style.opacity = '0';
-        fab.style.pointerEvents = 'none';
-      }
-    }
-
-    try {
-      if (typeof MutationObserver !== 'undefined') {
-        const shurokhaObserver = new MutationObserver(() => {
-          updateShurokhaFabVisibility();
-        });
-        if (document.body) {
-          shurokhaObserver.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class', 'style'] });
-        } else {
-          document.addEventListener('DOMContentLoaded', () => {
-            shurokhaObserver.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class', 'style'] });
-          });
+        if (fab.style.display !== 'none') {
+          fab.style.display = 'none';
+          fab.style.visibility = 'hidden';
+          fab.style.opacity = '0';
+          fab.style.pointerEvents = 'none';
         }
       }
-    } catch (e) {}
+    }
 
     function openShurokhaChat() {
       const modal = document.getElementById('shurokha-ai-modal');
