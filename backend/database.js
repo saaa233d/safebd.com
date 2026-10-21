@@ -211,19 +211,28 @@ function initDatabase() {
   // Ensure Official Founder Announcement Post by SAAD RIZWAN is seeded & verified live
   seedFounderPost();
 
-  // Load or seed Blood Donors directory (রক্তবন্ধু)
+  // Load Blood Donors directory (রক্তবন্ধু) - Pure real citizen entries only (Purge all fakes)
   if (fs.existsSync(BLOOD_DONORS_FILE)) {
     try {
       const bRaw = fs.readFileSync(BLOOD_DONORS_FILE, 'utf8');
       const bParsed = JSON.parse(bRaw);
       if (Array.isArray(bParsed) && bParsed.length > 0) {
-        dbState.bloodDonors = bParsed;
+        const DUMMY_PREFIXES = ['donor_dhaka', 'donor_ctg', 'donor_syl', 'donor_raj', 'b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8'];
+        const DUMMY_PHONES = ['01711223344', '01822334455', '01933445566', '01744556677', '01311556677', '01655667788', '01877889900', '01799001122', '01811998877', '01733887766', '01755443322', '01911447788', '01712345678', '01819876543', '01911223344', '01622334455', '01533445566'];
+        dbState.bloodDonors = bParsed.filter(d => {
+          const id = String(d.id || '');
+          const cleanP = String(d.phone || '').replace(/\D/g, '');
+          const isDummyId = DUMMY_PREFIXES.some(prefix => id.startsWith(prefix));
+          const isDummyPhone = DUMMY_PHONES.some(p => cleanP.endsWith(p.slice(-10)));
+          return !isDummyId && !isDummyPhone;
+        });
       }
     } catch(bErr) {}
   }
-  if (!dbState.bloodDonors || dbState.bloodDonors.length === 0) {
-    seedInitialBloodDonors();
+  if (!dbState.bloodDonors) {
+    dbState.bloodDonors = [];
   }
+  saveBloodDonorsToDisk();
 
   // Commit initial state
   persistToDisk();
@@ -281,10 +290,22 @@ function initDatabase() {
             isAdmin: phone === '1316750712' || Boolean(meta.isAdmin),
             nidVerified: true,
             createdAt: su.created_at || new Date().toISOString(),
+            bloodGroup: meta.bloodGroup || '',
+            isBloodDonor: Boolean(meta.isBloodDonor),
+            bloodDistrict: meta.bloodDistrict || '',
+            bloodThana: meta.bloodThana || '',
             contacts: Array.isArray(meta.contacts) && meta.contacts.length ? meta.contacts : getDefaultUserContacts()
           };
           restoredCount++;
         } else {
+          // Restore blood group and donor opt-in if present in Supabase PostgreSQL
+          if (meta.bloodGroup && !dbState.users[phone].bloodGroup) {
+            dbState.users[phone].bloodGroup = meta.bloodGroup;
+            dbState.users[phone].isBloodDonor = Boolean(meta.isBloodDonor);
+            dbState.users[phone].bloodDistrict = meta.bloodDistrict || '';
+            dbState.users[phone].bloodThana = meta.bloodThana || '';
+            restoredCount++;
+          }
           // If local user has no contacts but Supabase has configured contacts, restore them!
           if (Array.isArray(meta.contacts) && meta.contacts.length > 0) {
             const sanitized = sanitizeContacts(meta.contacts);
@@ -293,6 +314,26 @@ function initDatabase() {
               dbState.users[phone].contacts = sanitized;
               restoredCount++;
             }
+          }
+        }
+
+        // Auto-restore real donor to blood lifeline registry
+        if (meta.isBloodDonor && meta.bloodGroup) {
+          const donorPhone = '0' + phone;
+          const exists = (dbState.bloodDonors || []).some(d => (d.phone || '').endsWith(phone));
+          if (!exists) {
+            if (!dbState.bloodDonors) dbState.bloodDonors = [];
+            dbState.bloodDonors.push({
+              id: 'donor_supa_' + phone,
+              phone: donorPhone,
+              bloodGroup: meta.bloodGroup,
+              district: meta.bloodDistrict || 'Dhaka',
+              thana: meta.bloodThana || '',
+              available: true,
+              lastDonationDate: 'Recent',
+              updatedAt: new Date().toISOString()
+            });
+            saveBloodDonorsToDisk();
           }
         }
       }
@@ -1229,135 +1270,8 @@ function resolveSosAlert(id, adminName = "Chief Administrator") {
 /* =========================================================================
    EMERGENCY BLOOD LIFELINE DIRECTORY & DONATION ENGINE (রক্তবন্ধু)
    Enables peer-to-peer life-saving blood donation and matching by blood group.
+   Zero mock/fake profiles - 100% Real Citizen Inputs Persisted to PostgreSQL.
 ========================================================================= */
-
-function seedInitialBloodDonors() {
-  if (dbState.bloodDonors && dbState.bloodDonors.length > 0) return;
-  
-  dbState.bloodDonors = [
-    {
-      id: "donor_dhaka_01",
-      phone: "01711223344",
-      bloodGroup: "O+",
-      district: "Dhaka",
-      thana: "Dhanmondi",
-      available: true,
-      lastDonationDate: "Recent",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: "donor_dhaka_02",
-      phone: "01822334455",
-      bloodGroup: "A+",
-      district: "Dhaka",
-      thana: "Mirpur",
-      available: true,
-      lastDonationDate: "Recent",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: "donor_dhaka_03",
-      phone: "01933445566",
-      bloodGroup: "B+",
-      district: "Dhaka",
-      thana: "Uttara",
-      available: true,
-      lastDonationDate: "Recent",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: "donor_dhaka_04",
-      phone: "01744556677",
-      bloodGroup: "AB+",
-      district: "Dhaka",
-      thana: "Mohakhali",
-      available: true,
-      lastDonationDate: "Recent",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: "donor_dhaka_05",
-      phone: "01311556677",
-      bloodGroup: "O-",
-      district: "Dhaka",
-      thana: "Mohammadpur",
-      available: true,
-      lastDonationDate: "Recent",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: "donor_dhaka_06",
-      phone: "01655667788",
-      bloodGroup: "A-",
-      district: "Dhaka",
-      thana: "Badda",
-      available: true,
-      lastDonationDate: "Recent",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: "donor_dhaka_07",
-      phone: "01877889900",
-      bloodGroup: "B-",
-      district: "Dhaka",
-      thana: "Motijheel",
-      available: true,
-      lastDonationDate: "Recent",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: "donor_dhaka_08",
-      phone: "01799001122",
-      bloodGroup: "AB-",
-      district: "Dhaka",
-      thana: "Gulshan",
-      available: true,
-      lastDonationDate: "Recent",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: "donor_ctg_01",
-      phone: "01811998877",
-      bloodGroup: "O+",
-      district: "Chittagong",
-      thana: "Panchlaish",
-      available: true,
-      lastDonationDate: "Recent",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: "donor_ctg_02",
-      phone: "01733887766",
-      bloodGroup: "B+",
-      district: "Chittagong",
-      thana: "Agrabad",
-      available: true,
-      lastDonationDate: "Recent",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: "donor_syl_01",
-      phone: "01755443322",
-      bloodGroup: "A+",
-      district: "Sylhet",
-      thana: "Zindabazar",
-      available: true,
-      lastDonationDate: "Recent",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: "donor_raj_01",
-      phone: "01911447788",
-      bloodGroup: "O-",
-      district: "Rajshahi",
-      thana: "Boalia",
-      available: true,
-      lastDonationDate: "Recent",
-      createdAt: new Date().toISOString()
-    }
-  ];
-  saveBloodDonorsToDisk();
-}
 
 function saveBloodDonorsToDisk() {
   try {
@@ -1400,9 +1314,39 @@ function addOrUpdateBloodDonor({ phone, bloodGroup, district, thana, available }
   if (existingIdx >= 0) {
     dbState.bloodDonors[existingIdx] = { ...dbState.bloodDonors[existingIdx], ...donorObj };
   } else {
-    dbState.bloodDonors.unshift(donorObj); // Newly added donor appears at top
+    dbState.bloodDonors.unshift(donorObj); // Real newly added donor appears at top
   }
   saveBloodDonorsToDisk();
+
+  // Permanent SQL Persistence in Supabase PostgreSQL
+  try {
+    let user = dbState.users[cleanPhone];
+    if (!user) {
+      user = {
+        id: 'usr_' + cleanPhone,
+        phone: cleanPhone,
+        displayPhone: '+880 ' + cleanPhone,
+        name: 'Verified Donor',
+        role: 'Citizen Member',
+        isFounder: cleanPhone === '1316750712',
+        isAdmin: cleanPhone === '1316750712',
+        nidVerified: false,
+        createdAt: new Date().toISOString(),
+        contacts: getDefaultUserContacts()
+      };
+      dbState.users[cleanPhone] = user;
+      persistToDisk();
+    }
+    user.bloodGroup = donorObj.bloodGroup;
+    user.isBloodDonor = Boolean(donorObj.available);
+    user.bloodDistrict = donorObj.district;
+    user.bloodThana = donorObj.thana;
+    user.updatedAt = new Date().toISOString();
+    syncUserToSupabase(user).catch(() => {});
+  } catch (err) {
+    console.warn('[SQL BLOOD SYNC WARNING]:', err.message);
+  }
+
   return donorObj;
 }
 
@@ -1413,6 +1357,13 @@ function toggleDonorAvailability(id, isAvailable) {
     donor.available = Boolean(isAvailable);
     donor.updatedAt = new Date().toISOString();
     saveBloodDonorsToDisk();
+    
+    // Sync to PostgreSQL user profile
+    const cleanPhone = String(donor.phone || '').replace(/\D/g, '').slice(-10);
+    if (dbState.users[cleanPhone]) {
+      dbState.users[cleanPhone].isBloodDonor = Boolean(isAvailable);
+      syncUserToSupabase(dbState.users[cleanPhone]).catch(() => {});
+    }
     return donor;
   }
   return null;
@@ -1459,6 +1410,11 @@ function updateUserBloodProfile(phone, { bloodGroup, isBloodDonor, district, tha
       }
     }
   }
+
+  // Permanent SQL Persistence: Sync directly to Supabase PostgreSQL database
+  syncUserToSupabase(user).catch(err => {
+    console.warn('[SQL USER BLOOD PROFILE SYNC WARNING]:', err.message);
+  });
 
   const { salt: _, passwordHash: __, ...safeUser } = user;
   return safeUser;
@@ -1894,11 +1850,15 @@ async function syncUserToSupabase(user) {
         body: JSON.stringify({
           user_metadata: {
             ...existing.user_metadata,
-            name: user.name || 'Citizen',
+            name: user.name || (existing.user_metadata && existing.user_metadata.name) || 'Citizen',
             phone: cleanPhone,
             isFounder: cleanPhone === '1316750712',
             isAdmin: Boolean(user.isAdmin),
-            contacts: user.contacts || []
+            contacts: user.contacts || (existing.user_metadata && existing.user_metadata.contacts) || [],
+            bloodGroup: user.bloodGroup !== undefined ? user.bloodGroup : ((existing.user_metadata && existing.user_metadata.bloodGroup) || ''),
+            isBloodDonor: user.isBloodDonor !== undefined ? Boolean(user.isBloodDonor) : Boolean(existing.user_metadata && existing.user_metadata.isBloodDonor),
+            bloodDistrict: user.bloodDistrict !== undefined ? user.bloodDistrict : ((existing.user_metadata && existing.user_metadata.bloodDistrict) || ''),
+            bloodThana: user.bloodThana !== undefined ? user.bloodThana : ((existing.user_metadata && existing.user_metadata.bloodThana) || '')
           }
         })
       });
@@ -1920,7 +1880,11 @@ async function syncUserToSupabase(user) {
             phone: cleanPhone,
             isFounder: cleanPhone === '1316750712',
             isAdmin: Boolean(user.isAdmin),
-            contacts: user.contacts || []
+            contacts: user.contacts || [],
+            bloodGroup: user.bloodGroup || '',
+            isBloodDonor: Boolean(user.isBloodDonor),
+            bloodDistrict: user.bloodDistrict || '',
+            bloodThana: user.bloodThana || ''
           }
         })
       });
