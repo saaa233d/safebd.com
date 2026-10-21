@@ -8442,26 +8442,19 @@
         if (spinner) spinner.classList.remove('fa-spin');
       }
 
-      // If empty, check localStorage
+      // If empty, check localStorage (Strictly filter out all legacy fake/dummy entries)
       if (!bloodDonorsCache || bloodDonorsCache.length === 0) {
         try {
           const saved = localStorage.getItem('safe_bd_local_blood_donors');
-          if (saved) bloodDonorsCache = JSON.parse(saved);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            const DUMMY_IDS = ['b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8', 'donor_dhaka', 'donor_ctg', 'donor_syl', 'donor_raj'];
+            bloodDonorsCache = (parsed || []).filter(d => !DUMMY_IDS.some(k => String(d.id || '').includes(k)));
+            if (bloodDonorsCache.length === 0) {
+              localStorage.removeItem('safe_bd_local_blood_donors');
+            }
+          }
         } catch (e) {}
-      }
-
-      // Seed fallback if still empty (Zero personal names - 100% anonymous & private)
-      if (!bloodDonorsCache || bloodDonorsCache.length === 0) {
-        bloodDonorsCache = [
-          { id: 'b1', phone: "01712345678", bloodGroup: "O+", district: "Dhaka", thana: "Dhanmondi", available: true, lastDonationDate: "Recent" },
-          { id: 'b2', phone: "01819876543", bloodGroup: "A+", district: "Dhaka", thana: "Mirpur 10", available: true, lastDonationDate: "Recent" },
-          { id: 'b3', phone: "01911223344", bloodGroup: "B+", district: "Chittagong", thana: "Agrabad", available: true, lastDonationDate: "Recent" },
-          { id: 'b4', phone: "01622334455", bloodGroup: "AB+", district: "Dhaka", thana: "Uttara Sector 7", available: true, lastDonationDate: "Recent" },
-          { id: 'b5', phone: "01533445566", bloodGroup: "O-", district: "Sylhet", thana: "Zindabazar", available: true, lastDonationDate: "Recent" },
-          { id: 'b6', phone: "01755667788", bloodGroup: "A-", district: "Rajshahi", thana: "Shaheb Bazar", available: true, lastDonationDate: "Recent" },
-          { id: 'b7', phone: "01866778899", bloodGroup: "B-", district: "Dhaka", thana: "Mohakhali", available: true, lastDonationDate: "Recent" },
-          { id: 'b8', phone: "01977889900", bloodGroup: "AB-", district: "Chittagong", thana: "GEC Circle", available: true, lastDonationDate: "Recent" }
-        ];
       }
 
       renderBloodDonors();
