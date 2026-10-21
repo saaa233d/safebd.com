@@ -1649,6 +1649,207 @@
       font-size: 16px;
       cursor: pointer;
     }
+
+    /* ========================================================
+       IMMEDIATE EMERGENCY HELP MODAL (COOL TACTICAL 2x2 GRID)
+    ======================================================== */
+    .help-tactical-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+    @media (max-width: 320px) {
+      .help-tactical-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .help-card-tile {
+      background: linear-gradient(145deg, rgba(28, 20, 26, 0.9) 0%, rgba(14, 10, 14, 0.95) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 12px 11px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 114px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .help-card-tile::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2.5px;
+      opacity: 0.85;
+      transition: opacity 0.2s ease;
+    }
+    .help-card-tile:hover {
+      transform: translateY(-2px);
+    }
+    .help-card-tile:active {
+      transform: scale(0.96);
+    }
+
+    /* Card Themes */
+    .help-card-tile.theme-ambulance {
+      border-color: rgba(239, 68, 68, 0.35);
+      background: linear-gradient(145deg, rgba(239, 68, 68, 0.12) 0%, rgba(20, 10, 14, 0.95) 100%);
+    }
+    .help-card-tile.theme-ambulance::before {
+      background: linear-gradient(90deg, #ef4444, #f87171);
+    }
+    .help-card-tile.theme-ambulance:hover {
+      border-color: #ef4444;
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+    }
+
+    .help-card-tile.theme-patient {
+      border-color: rgba(245, 158, 11, 0.35);
+      background: linear-gradient(145deg, rgba(245, 158, 11, 0.12) 0%, rgba(20, 14, 10, 0.95) 100%);
+    }
+    .help-card-tile.theme-patient::before {
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+    .help-card-tile.theme-patient:hover {
+      border-color: #f59e0b;
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.25);
+    }
+
+    .help-card-tile.theme-fire {
+      border-color: rgba(234, 88, 12, 0.35);
+      background: linear-gradient(145deg, rgba(234, 88, 12, 0.12) 0%, rgba(20, 12, 10, 0.95) 100%);
+    }
+    .help-card-tile.theme-fire::before {
+      background: linear-gradient(90deg, #ea580c, #fb923c);
+    }
+    .help-card-tile.theme-fire:hover {
+      border-color: #ea580c;
+      box-shadow: 0 6px 20px rgba(234, 88, 12, 0.25);
+    }
+
+    .help-card-tile.theme-blood {
+      border-color: rgba(244, 63, 94, 0.4);
+      background: linear-gradient(145deg, rgba(244, 63, 94, 0.14) 0%, rgba(22, 10, 15, 0.95) 100%);
+    }
+    .help-card-tile.theme-blood::before {
+      background: linear-gradient(90deg, #f43f5e, #fda4af);
+    }
+    .help-card-tile.theme-blood:hover {
+      border-color: #f43f5e;
+      box-shadow: 0 6px 20px rgba(244, 63, 94, 0.3);
+    }
+
+    .help-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .help-icon-bubble {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .theme-ambulance .help-icon-bubble {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #ef4444;
+    }
+    .theme-patient .help-icon-bubble {
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      color: #f59e0b;
+    }
+    .theme-fire .help-icon-bubble {
+      background: rgba(234, 88, 12, 0.2);
+      border: 1px solid rgba(234, 88, 12, 0.5);
+      color: #ea580c;
+    }
+    .theme-blood .help-icon-bubble {
+      background: rgba(244, 63, 94, 0.2);
+      border: 1px solid rgba(244, 63, 94, 0.55);
+      color: #f43f5e;
+    }
+
+    .help-pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+    .theme-ambulance .help-pill-badge {
+      background: rgba(239, 68, 68, 0.25);
+      border: 1px solid rgba(239, 68, 68, 0.6);
+      color: #fee2e2;
+    }
+    .theme-patient .help-pill-badge {
+      background: rgba(245, 158, 11, 0.25);
+      border: 1px solid rgba(245, 158, 11, 0.6);
+      color: #fef3c7;
+    }
+    .theme-fire .help-pill-badge {
+      background: rgba(234, 88, 12, 0.25);
+      border: 1px solid rgba(234, 88, 12, 0.6);
+      color: #ffedd5;
+    }
+    .theme-blood .help-pill-badge {
+      background: rgba(244, 63, 94, 0.25);
+      border: 1px solid rgba(244, 63, 94, 0.65);
+      color: #ffe4e6;
+    }
+
+    .live-beacon-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #fff;
+      display: inline-block;
+      box-shadow: 0 0 6px #fff;
+      animation: beaconPulse 1.4s infinite ease-in-out;
+    }
+    @keyframes beaconPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.75); }
+    }
+
+    .help-card-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.3;
+      margin-bottom: 3px;
+    }
+    .help-card-desc {
+      font-size: 9.5px;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .theme-ambulance .help-card-desc { color: #fca5a5; }
+    .theme-patient .help-card-desc { color: #fde68a; }
+    .theme-fire .help-card-desc { color: #fed7aa; }
+    .theme-blood .help-card-desc { color: #fecdd3; }
     .form-group {
       margin-bottom: 14px;
       text-align: left;
@@ -2924,61 +3125,54 @@
           <button class="modal-close-x" onclick="closeEmergencyHelpModal()"><i class="fas fa-xmark"></i></button>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 14px;">
+        <!-- TACTICAL 2x2 ACTION MATRIX -->
+        <div class="help-tactical-grid">
           <!-- OPTION 1: STUCK WITH AN AMBULANCE? -->
-          <button type="button" onclick="selectEmergencyHelp('ambulance_traffic')" style="background: rgba(239, 68, 68, 0.12); border: 1.5px solid rgba(239, 68, 68, 0.5); padding: 13px 14px; border-radius: 12px; text-align: left; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(239, 68, 68, 0.25); border: 1px solid #ef4444; display: flex; align-items: center; justify-content: center; color: #ef4444; font-size: 18px; flex-shrink: 0;">
-                <i class="fas fa-truck-medical"></i>
-              </div>
-              <div>
-                <div style="font-weight: 800; font-size: 14px; color: #fff;" data-i18n="help_opt1_title">Stuck in Traffic with Ambulance?</div>
-                <div style="font-size: 11px; color: #fca5a5; margin-top: 2px;" data-i18n="help_opt1_desc">Urgent police traffic clearance & green corridor</div>
-              </div>
+          <button type="button" onclick="selectEmergencyHelp('ambulance_traffic')" class="help-card-tile theme-ambulance">
+            <div class="help-card-top">
+              <div class="help-icon-bubble"><i class="fas fa-truck-medical"></i></div>
+              <span class="help-pill-badge"><span class="live-beacon-dot"></span> <span data-i18n="help_opt1_btn">Call 999</span></span>
             </div>
-            <span style="background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); color: #fff; font-size: 11.5px; font-weight: 800; padding: 7px 11px; border-radius: 8px; white-space: nowrap; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);" data-i18n="help_opt1_btn">Call 999</span>
+            <div>
+              <div class="help-card-title" data-i18n="help_opt1_title">Stuck in Traffic with Ambulance?</div>
+              <div class="help-card-desc" data-i18n="help_opt1_desc">Urgent police traffic clearance & green corridor</div>
+            </div>
           </button>
 
           <!-- OPTION 2: CRITICAL PATIENT CONDITION AT HOME -->
-          <button type="button" onclick="selectEmergencyHelp('critical_patient')" style="background: rgba(245, 158, 11, 0.12); border: 1.5px solid rgba(245, 158, 11, 0.5); padding: 13px 14px; border-radius: 12px; text-align: left; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(245, 158, 11, 0.25); border: 1px solid #f59e0b; display: flex; align-items: center; justify-content: center; color: #f59e0b; font-size: 18px; flex-shrink: 0;">
-                <i class="fas fa-heart-pulse"></i>
-              </div>
-              <div>
-                <div style="font-weight: 800; font-size: 14px; color: #fff;" data-i18n="help_opt2_title">Critical Patient Condition at Home</div>
-                <div style="font-size: 11px; color: #fde68a; margin-top: 2px;" data-i18n="help_opt2_desc">Urgent ambulance dispatch & rapid medical response</div>
-              </div>
+          <button type="button" onclick="selectEmergencyHelp('critical_patient')" class="help-card-tile theme-patient">
+            <div class="help-card-top">
+              <div class="help-icon-bubble"><i class="fas fa-heart-pulse"></i></div>
+              <span class="help-pill-badge"><span class="live-beacon-dot"></span> <span data-i18n="help_opt2_btn">Call 999</span></span>
             </div>
-            <span style="background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); color: #fff; font-size: 11.5px; font-weight: 800; padding: 7px 11px; border-radius: 8px; white-space: nowrap; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);" data-i18n="help_opt2_btn">Call 999</span>
+            <div>
+              <div class="help-card-title" data-i18n="help_opt2_title">Critical Patient Condition at Home</div>
+              <div class="help-card-desc" data-i18n="help_opt2_desc">Urgent ambulance dispatch & rapid medical response</div>
+            </div>
           </button>
 
           <!-- OPTION 3: FIRE SERVICE & RESCUE -->
-          <button type="button" onclick="selectEmergencyHelp('fire_service')" style="background: rgba(234, 88, 12, 0.12); border: 1.5px solid rgba(234, 88, 12, 0.5); padding: 13px 14px; border-radius: 12px; text-align: left; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(234, 88, 12, 0.15);">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(234, 88, 12, 0.25); border: 1px solid #ea580c; display: flex; align-items: center; justify-content: center; color: #ff7849; font-size: 18px; flex-shrink: 0;">
-                <i class="fas fa-fire-flame-curved"></i>
-              </div>
-              <div>
-                <div style="font-weight: 800; font-size: 14px; color: #fff;" data-i18n="help_opt3_title">Fire Service & Rescue Emergency</div>
-                <div style="font-size: 11px; color: #fed7aa; margin-top: 2px;" data-i18n="help_opt3_desc">Direct hotline to Bangladesh Fire Service Control</div>
-              </div>
+          <button type="button" onclick="selectEmergencyHelp('fire_service')" class="help-card-tile theme-fire">
+            <div class="help-card-top">
+              <div class="help-icon-bubble"><i class="fas fa-fire-flame-curved"></i></div>
+              <span class="help-pill-badge"><span class="live-beacon-dot"></span> <span data-i18n="help_opt3_btn">Call 102</span></span>
             </div>
-            <span style="background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%); color: #fff; font-size: 11.5px; font-weight: 800; padding: 7px 11px; border-radius: 8px; white-space: nowrap; box-shadow: 0 2px 8px rgba(234, 88, 12, 0.4);" data-i18n="help_opt3_btn">Call 102</span>
+            <div>
+              <div class="help-card-title" data-i18n="help_opt3_title">Fire Service & Rescue Emergency</div>
+              <div class="help-card-desc" data-i18n="help_opt3_desc">Direct hotline to Bangladesh Fire Service Control</div>
+            </div>
           </button>
 
           <!-- OPTION 4: EMERGENCY BLOOD LIFELINE (রক্তবন্ধু) -->
-          <button type="button" onclick="openBloodDonorModal()" style="background: rgba(225, 29, 72, 0.12); border: 1.5px solid rgba(225, 29, 72, 0.55); padding: 13px 14px; border-radius: 12px; text-align: left; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.2);">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(225, 29, 72, 0.25); border: 1px solid #e11d48; display: flex; align-items: center; justify-content: center; color: #f43f5e; font-size: 19px; flex-shrink: 0;">
-                <i class="fas fa-droplet"></i>
-              </div>
-              <div>
-                <div style="font-weight: 800; font-size: 14px; color: #fff;" data-i18n="help_opt4_title">Emergency Blood Lifeline (রক্তবন্ধু)</div>
-                <div style="font-size: 11px; color: #fecdd3; margin-top: 2px;" data-i18n="help_opt4_desc">Find immediate blood donors nearby or donate blood</div>
-              </div>
+          <button type="button" onclick="openBloodDonorModal()" class="help-card-tile theme-blood">
+            <div class="help-card-top">
+              <div class="help-icon-bubble"><i class="fas fa-droplet"></i></div>
+              <span class="help-pill-badge"><i class="fas fa-hand-holding-heart" style="font-size: 8.5px;"></i> <span data-i18n="help_opt4_btn">Find Donors</span></span>
             </div>
-            <span style="background: linear-gradient(135deg, #be123c 0%, #e11d48 100%); color: #fff; font-size: 11.5px; font-weight: 800; padding: 7px 11px; border-radius: 8px; white-space: nowrap; box-shadow: 0 2px 8px rgba(225, 29, 72, 0.4);" data-i18n="help_opt4_btn">Find Donors</span>
+            <div>
+              <div class="help-card-title" data-i18n="help_opt4_title">Emergency Blood Lifeline (রক্তবন্ধু)</div>
+              <div class="help-card-desc" data-i18n="help_opt4_desc">Find immediate blood donors nearby or donate blood</div>
+            </div>
           </button>
         </div>
 
