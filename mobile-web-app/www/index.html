@@ -215,64 +215,125 @@
       display: none;
     }
 
-    /* 999 DIRECT CAD EMERGENCY STRIP */
+    /* ========================================================
+       APPLE / IOS DESIGN SYSTEM FOR EMERGENCY SCREEN (SCREEN 1)
+    ======================================================== */
+
+    /* 1. APPLE DYNAMIC ISLAND CAD DISPATCH CAPSULE */
     .emergency-strip {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 16px;
-      background: var(--black-subtle);
-      border: 1px solid var(--burgundy-border);
-      border-radius: 14px;
+      padding: 10px 16px;
+      background: rgba(18, 22, 34, 0.7);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 9999px;
       margin-bottom: 24px;
-      box-shadow: 0 4px 15px rgba(120, 0, 22, 0.25);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      gap: 12px;
+    }
+    .strip-content-wrap {
+      min-width: 0;
+      flex: 1;
     }
     .strip-title {
       font-size: 13px;
       font-weight: 700;
-      color: var(--text-main);
+      color: #f8fafc;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
+      letter-spacing: -0.2px;
+    }
+    .cad-live-beacon {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      display: inline-block;
+      animation: cadBeaconPulse 2s infinite ease-in-out;
+      flex-shrink: 0;
+    }
+    @keyframes cadBeaconPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
     }
     .strip-sub {
-      font-size: 11px;
-      color: var(--text-muted);
+      font-size: 10.5px;
+      color: #94a3b8;
       margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: 0.1px;
     }
     .strip-btn {
-      background: linear-gradient(135deg, var(--danger-crimson) 0%, var(--burgundy-core) 100%);
+      background: linear-gradient(135deg, #ff3b30 0%, #e11d48 100%);
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: #fff;
       font-size: 12px;
       font-weight: 700;
-      padding: 8px 16px;
-      border-radius: 9px;
+      padding: 7px 16px;
+      border-radius: 9999px;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 6px;
-      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
-      transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(255, 59, 48, 0.4);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .strip-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(255, 59, 48, 0.55);
     }
     .strip-btn:active {
       transform: scale(0.96);
     }
 
-    /* EMERGENCY SOS DISC */
+    /* 2. APPLE WATCH ULTRA LIVING RADAR SOS DISC */
     .sos-stage {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 26px;
+      justify-content: center;
+      margin: 28px 0 34px 0;
+      position: relative;
+    }
+    .sos-radar-ring {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      border: 1.5px solid rgba(255, 59, 48, 0.35);
+    }
+    .sos-radar-ring.ring-1 {
+      width: 195px;
+      height: 195px;
+      animation: appleRadar 3s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+    }
+    .sos-radar-ring.ring-2 {
+      width: 228px;
+      height: 228px;
+      animation: appleRadar 3s infinite 1.2s cubic-bezier(0.215, 0.61, 0.355, 1);
+    }
+    @keyframes appleRadar {
+      0% { transform: scale(0.75); opacity: 0.8; }
+      50% { opacity: 0.3; }
+      100% { transform: scale(1.18); opacity: 0; }
     }
     .sos-button-disc {
-      width: 164px;
-      height: 164px;
+      width: 172px;
+      height: 172px;
       border-radius: 50%;
-      background: radial-gradient(circle at 40% 35%, var(--burgundy-core) 0%, var(--burgundy-deep) 65%, #250209 100%);
-      border: 1.5px solid var(--burgundy-border);
-      box-shadow: 0 16px 40px rgba(120, 0, 22, 0.4), inset 0 2px 8px rgba(255, 255, 255, 0.15);
+      background: radial-gradient(circle at 35% 28%, #ff4d4d 0%, #ff1744 40%, #b71c1c 80%, #7f0000 100%);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 20px 55px rgba(255, 23, 68, 0.45), 
+                  inset 0 3px 8px rgba(255, 255, 255, 0.45), 
+                  inset 0 -8px 16px rgba(0, 0, 0, 0.5);
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -281,98 +342,176 @@
       position: relative;
       user-select: none;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 2;
     }
-    .sos-button-disc::before {
-      content: '';
+    .sos-glass-reflection {
       position: absolute;
-      inset: -10px;
-      border-radius: 50%;
-      border: 1px solid rgba(163, 8, 38, 0.25);
-      transition: all 0.25s ease;
+      top: 6px;
+      left: 18px;
+      right: 18px;
+      height: 60px;
+      border-radius: 50% 50% 40% 40%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 100%);
+      pointer-events: none;
     }
     .sos-button-disc:hover {
-      transform: scale(1.02);
-      border-color: var(--burgundy-vivid);
-      box-shadow: 0 20px 50px rgba(163, 8, 38, 0.6);
-    }
-    .sos-button-disc:hover::before {
-      inset: -14px;
-      border-color: rgba(163, 8, 38, 0.4);
+      transform: scale(1.03);
+      box-shadow: 0 25px 65px rgba(255, 23, 68, 0.65), 
+                  inset 0 3px 10px rgba(255, 255, 255, 0.55), 
+                  inset 0 -8px 16px rgba(0, 0, 0, 0.5);
     }
     .sos-button-disc:active {
-      transform: scale(0.96);
+      transform: scale(0.95);
+      box-shadow: 0 10px 30px rgba(255, 23, 68, 0.7);
     }
     .sos-text-label {
-      font-size: 26px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
       color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+      line-height: 1;
     }
     .sos-text-sub {
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 1.4px;
-      color: rgba(255, 255, 255, 0.75);
-      margin-top: 2px;
-      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      margin-top: 6px;
+      font-weight: 700;
+      background: rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(8px);
+      padding: 2px 10px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
     }
 
-    /* Section & Cards */
+    /* 3. APPLE INSET GROUPED TILES */
     .module-group {
-      margin-bottom: 20px;
+      margin-bottom: 22px;
     }
     .module-header {
-      font-size: 11px;
+      font-size: 11.5px;
       text-transform: uppercase;
-      letter-spacing: 0.9px;
-      color: var(--text-faint);
+      letter-spacing: 0.8px;
+      color: #94a3b8;
       margin-bottom: 10px;
-      font-weight: 600;
+      font-weight: 700;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 0 4px;
+    }
+    .btn-gps-refresh {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #38bdf8;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+    .btn-gps-refresh:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: #38bdf8;
+      color: #fff;
+      transform: translateY(-1px);
     }
     .clean-tile {
-      background: var(--black-subtle);
-      border: 1px solid var(--border-quiet);
-      border-radius: 12px;
-      padding: 12px 14px;
+      background: rgba(18, 22, 34, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 18px;
+      padding: 14px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .clean-tile:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.14);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
     }
     .tile-main {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-main);
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: -0.15px;
     }
     .tile-sub {
       font-size: 11px;
-      color: var(--text-muted);
+      color: #94a3b8;
       margin-top: 2px;
+      line-height: 1.4;
     }
     .tile-status {
       font-size: 11.5px;
-      font-weight: 500;
-      color: var(--text-muted);
+      font-weight: 600;
+      color: #94a3b8;
+      white-space: nowrap;
+      margin-left: 10px;
+    }
+    .apple-chevron {
+      color: #64748b;
+      font-size: 13px;
+      transition: transform 0.2s ease;
+      margin-left: 8px;
+    }
+    .clean-tile:hover .apple-chevron {
+      color: #fff;
+      transform: translateX(2px);
     }
 
-    /* Contacts List & Dynamic Cards */
+    /* 4. APPLE SQUIRCLE ICON SYSTEM */
+    .apple-squircle {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 15px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    .squircle-walk {
+      background: linear-gradient(135deg, #ff453a 0%, #ff9f0a 100%);
+      box-shadow: 0 4px 14px rgba(255, 69, 58, 0.35);
+    }
+    .squircle-gps {
+      background: linear-gradient(135deg, #0a84ff 0%, #64d2ff 100%);
+      box-shadow: 0 4px 14px rgba(10, 132, 255, 0.35);
+    }
+
+    /* 5. CONTACTS LIST APPLE STYLING */
     .contact-item-card {
-      background: var(--black-subtle);
-      border: 1px solid var(--border-quiet);
-      border-radius: 14px;
-      padding: 12px 14px;
+      background: rgba(18, 22, 34, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 18px;
+      padding: 13px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
-      transition: all 0.2s ease;
+      margin-bottom: 9px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .contact-item-card:hover {
-      border-color: var(--burgundy-border);
-      background: #110e13;
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.14);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
     }
     .contact-info {
       display: flex;
@@ -380,66 +519,89 @@
       gap: 12px;
       flex: 1;
       cursor: pointer;
+      min-width: 0;
     }
     .contact-avatar {
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
-      background: #19141e;
-      border: 1px solid var(--border-quiet);
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-main);
+      font-size: 14px;
+      font-weight: 700;
+      color: #f8fafc;
       position: relative;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
     .contact-avatar.online::after {
       content: '';
       position: absolute;
-      bottom: 0px;
-      right: 0px;
-      width: 8px;
-      height: 8px;
+      bottom: 1px;
+      right: 1px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      background: var(--burgundy-vivid);
-      border: 2px solid var(--black-pure);
+      background: #10b981;
+      border: 2px solid #0f172a;
+      box-shadow: 0 0 6px #10b981;
     }
     .contact-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-main);
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: -0.15px;
     }
     .contact-num {
       font-size: 11px;
-      color: var(--text-muted);
+      color: #94a3b8;
       margin-top: 2px;
+      letter-spacing: 0.2px;
     }
-    
     .contact-action-group {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      margin-left: 10px;
+    }
+    .contact-action-icon-pill {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .contact-action-icon-pill:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: scale(1.08);
     }
     .btn-edit-contact {
-      background: transparent;
-      border: 1px solid var(--border-quiet);
-      color: var(--text-muted);
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #94a3b8;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 11px;
       cursor: pointer;
-      transition: all 0.15s;
+      transition: all 0.2s ease;
     }
     .btn-edit-contact:hover {
       color: #fff;
-      border-color: var(--burgundy-border);
-      background: var(--burgundy-tint);
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: scale(1.08);
     }
 
     /* GOOGLE MAPS + AUTOCOMPLETE */
@@ -2823,10 +2985,13 @@
     <!-- SCREEN 1: EMERGENCY SOS, WALK WITH ME & CONTACTS -->
     <div id="screen-sos" class="screen screen-padded active">
       
-      <!-- Emergency Help & Rapid CAD Dispatch Strip -->
+      <!-- Apple Dynamic Island CAD Dispatch Strip -->
       <div class="emergency-strip">
-        <div>
-          <div class="strip-title"><i class="fas fa-shield-heart" style="color: #ef4444;"></i> <span data-i18n="sos_helpline_title">National Emergency Services</span></div>
+        <div class="strip-content-wrap">
+          <div class="strip-title">
+            <span class="cad-live-beacon"></span>
+            <span data-i18n="sos_helpline_title">National Emergency Services</span>
+          </div>
           <div class="strip-sub" data-i18n="sos_helpline_sub">Police • Fire Service • Ambulance CAD</div>
         </div>
         <button type="button" class="strip-btn" onclick="openEmergencyHelpModal()" style="border: none; text-decoration: none; cursor: pointer;">
@@ -2834,29 +2999,34 @@
         </button>
       </div>
 
-      <!-- Emergency SOS Disc -->
+      <!-- Apple Watch Ultra Living Radar SOS Disc -->
       <div class="sos-stage">
+        <div class="sos-radar-ring ring-1"></div>
+        <div class="sos-radar-ring ring-2"></div>
         <div class="sos-button-disc" 
              onmousedown="handleSosPressStart(event)" 
              onmouseup="handleSosPressEnd(event)" 
              ontouchstart="handleSosPressStart(event)" 
              ontouchend="handleSosPressEnd(event)" 
              onclick="handleSosClick(event)">
+          <div class="sos-glass-reflection"></div>
           <span class="sos-text-label">SOS</span>
           <span class="sos-text-sub" data-i18n="sos_btn_sub">Hold 3s</span>
         </div>
       </div>
 
-      <!-- Quick Walk With Me Shortcut Card -->
+      <!-- Quick Walk With Me Shortcut Card (Apple Inset Grouped) -->
       <div class="clean-tile" style="padding: 14px 16px; margin-bottom: 20px; cursor: pointer;" onclick="switchTab('screen-map', document.querySelectorAll('.nav-tab-btn')[1])">
-        <div>
-          <div class="tile-main" style="display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-person-walking" style="color: #e57373;"></i>
-            <span data-i18n="sos_walk_card_title">Walk With Me Companion</span>
+        <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
+          <div class="apple-squircle squircle-walk">
+            <i class="fas fa-person-walking"></i>
           </div>
-          <div class="tile-sub" data-i18n="sos_walk_card_sub">Search any place in Bangladesh & route with Google Maps</div>
+          <div>
+            <div class="tile-main" data-i18n="sos_walk_card_title">Walk With Me Companion</div>
+            <div class="tile-sub" data-i18n="sos_walk_card_sub">Search any place in Bangladesh & route with Google Maps</div>
+          </div>
         </div>
-        <i class="fas fa-chevron-right" style="color: var(--text-faint); font-size: 12px;"></i>
+        <i class="fas fa-chevron-right apple-chevron"></i>
       </div>
 
       <!-- Trusted Family Circle with Editable Contacts (Mother, Father, Guardian) -->
@@ -2878,9 +3048,14 @@
           </button>
         </div>
         <div class="clean-tile" onclick="acquireRealLocation(true)">
-          <div>
-            <div class="tile-main" id="telemetry-main-text">Acquiring Live GPS Fix...</div>
-            <div class="tile-sub" id="telemetry-sub-text" data-i18n="sos_geo_connecting">Connecting directly to device satellite sensors</div>
+          <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
+            <div class="apple-squircle squircle-gps">
+              <i class="fas fa-satellite"></i>
+            </div>
+            <div>
+              <div class="tile-main" id="telemetry-main-text">Acquiring Live GPS Fix...</div>
+              <div class="tile-sub" id="telemetry-sub-text" data-i18n="sos_geo_connecting">Connecting directly to device satellite sensors</div>
+            </div>
           </div>
           <div class="tile-status" id="telemetry-badge" style="color: #f59e0b;">Locating...</div>
         </div>
@@ -6592,8 +6767,12 @@
             </div>
           </div>
           <div class="contact-action-group">
-            <i class="fab fa-whatsapp" style="color: var(--whatsapp-green); font-size: 14px; cursor: pointer;" onclick="openContactSheet('${c.id}')"></i>
-            <i class="fas fa-phone" style="color: #f87171; font-size: 11px; cursor: pointer;" onclick="openContactSheet('${c.id}')"></i>
+            <div class="contact-action-icon-pill" onclick="openContactSheet('${c.id}')" title="WhatsApp">
+              <i class="fab fa-whatsapp" style="color: #22c55e; font-size: 14px;"></i>
+            </div>
+            <div class="contact-action-icon-pill" onclick="openContactSheet('${c.id}')" title="Call">
+              <i class="fas fa-phone" style="color: #f87171; font-size: 11px;"></i>
+            </div>
             <button class="btn-edit-contact" onclick="openEditContactModal('${c.id}')" title="Edit Contact">
               <i class="fas fa-pen"></i>
             </button>
