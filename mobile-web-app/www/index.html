@@ -952,173 +952,267 @@
        SCREEN 3: INTERACTIVE SOCIAL MEDIA & CIVIC FEED
     ======================================================== */
     .create-post-card {
-      background: var(--black-subtle);
-      border: 1px solid var(--burgundy-border);
-      border-radius: 16px;
-      padding: 14px;
+      background: rgba(18, 22, 34, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 16px 18px;
       margin-bottom: 18px;
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.35);
+      transition: all 0.25s ease;
+    }
+    .create-post-card:focus-within {
+      border-color: rgba(225, 29, 72, 0.4);
+      box-shadow: 0 12px 36px rgba(225, 29, 72, 0.12), 0 0 0 1px rgba(225, 29, 72, 0.2);
+    }
+    .composer-input-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .composer-user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(225, 29, 72, 0.2) 0%, rgba(190, 18, 60, 0.3) 100%);
+      border: 1.5px solid rgba(225, 29, 72, 0.4);
+      color: #f43f5e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
     }
     .post-composer-input {
       width: 100%;
       background: transparent;
       border: none;
-      color: #fff;
+      color: #f8fafc;
       font-family: inherit;
-      font-size: 13px;
+      font-size: 13.5px;
+      line-height: 1.55;
       resize: none;
-      height: 60px;
+      min-height: 52px;
       outline: none;
     }
     .post-composer-input::placeholder {
-      color: var(--text-muted);
+      color: #64748b;
+      font-weight: 400;
     }
     .composer-toolbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      padding-top: 10px;
-      margin-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 12px;
+      margin-top: 12px;
     }
     .composer-media-icons {
       display: flex;
-      gap: 12px;
+      gap: 8px;
       align-items: center;
     }
     .media-btn-label {
-      color: var(--text-muted);
+      color: #94a3b8;
       cursor: pointer;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      transition: color 0.15s;
-    }
-    .media-btn-label:hover {
-      color: #e57373;
-    }
-    .btn-publish-post {
-      background: var(--burgundy-core);
-      border: 1px solid var(--burgundy-vivid);
-      color: #fff;
       font-size: 12px;
       font-weight: 600;
-      padding: 6px 14px;
-      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .media-btn-label:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-1px);
+    }
+    .btn-publish-post {
+      background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+      border: none;
+      color: #fff;
+      font-size: 12.5px;
+      font-weight: 700;
+      padding: 7px 18px;
+      border-radius: 9999px;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35);
+      transition: all 0.2s ease;
+      letter-spacing: 0.3px;
+    }
+    .btn-publish-post:hover {
+      background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(225, 29, 72, 0.45);
     }
     .media-preview-container {
-      margin-top: 10px;
+      margin-top: 12px;
       display: none;
       position: relative;
     }
     .media-preview-img {
       width: 100%;
-      max-height: 180px;
+      max-height: 220px;
       object-fit: cover;
-      border-radius: 10px;
-      border: 1px solid var(--border-quiet);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     }
     .btn-remove-media {
       position: absolute;
-      top: 6px;
-      right: 6px;
-      background: rgba(0,0,0,0.7);
+      top: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.75);
       color: #fff;
-      border: none;
+      border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 50%;
-      width: 22px;
-      height: 22px;
+      width: 26px;
+      height: 26px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 11px;
+      font-size: 12px;
+      transition: background 0.15s;
+    }
+    .btn-remove-media:hover {
+      background: #ef4444;
     }
 
-    /* Awareness Feed Category Filter Bar */
+    /* Awareness Feed Minimalist Pill Segmented Filter Bar */
     .feed-filter-bar {
       display: flex;
-      background: var(--black-subtle);
-      border: 1px solid var(--border-quiet);
-      border-radius: 14px;
+      background: rgba(15, 20, 30, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 9999px;
       padding: 4px;
       margin-bottom: 18px;
-      gap: 6px;
+      gap: 4px;
       width: 100%;
       box-sizing: border-box;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
     }
     .feed-filter-btn {
       flex: 1;
-      height: 38px;
+      height: 36px;
       padding: 0 14px;
       border: 1px solid transparent;
       background: transparent;
-      color: var(--text-muted);
+      color: #94a3b8;
       font-size: 12px;
       font-weight: 600;
-      border-radius: 10px;
+      border-radius: 9999px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       transition: all 0.2s ease;
       white-space: nowrap;
       user-select: none;
       box-sizing: border-box;
     }
     .feed-filter-btn:hover {
-      color: #fff;
+      color: #f8fafc;
       background: rgba(255, 255, 255, 0.04);
     }
     .feed-filter-btn.active {
-      background: var(--burgundy-deep);
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    }
+    .feed-filter-btn.sync-btn {
+      flex: 0 0 auto;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+    .feed-filter-btn.sync-btn:hover {
+      background: rgba(56, 189, 248, 0.18);
+      border-color: #38bdf8;
       color: #fff;
-      border: 1px solid var(--burgundy-border);
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
     }
 
-    /* Feed Post Card */
+    /* Feed Post Card - Ultra-Clean Glassmorphism */
     .feed-card {
-      background: var(--black-subtle);
-      border: 1px solid var(--border-quiet);
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 14px;
+      background: rgba(16, 20, 30, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .feed-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.14);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
     }
     .feed-card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      gap: 10px;
     }
     .author-info {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      min-width: 0;
+      flex: 1;
     }
     .author-avatar {
-      width: 32px;
-      height: 32px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
-      background: var(--burgundy-deep);
-      border: 1px solid var(--burgundy-border);
+      background: rgba(30, 41, 59, 0.8);
+      border: 2px solid rgba(255, 255, 255, 0.12);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
-      font-weight: 700;
-      color: #fff;
-    }
-    .author-name {
       font-size: 13px;
       font-weight: 700;
-      color: #fff;
+      color: #f8fafc;
+      flex-shrink: 0;
+      transition: transform 0.2s ease;
+    }
+    .author-avatar:hover {
+      transform: scale(1.05);
+    }
+    .author-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f8fafc;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       flex-wrap: wrap;
+      line-height: 1.3;
+    }
+    .author-meta-sub {
+      font-size: 11px;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 3px;
     }
     .verified-icon {
       color: #38bdf8;
@@ -1126,9 +1220,9 @@
       margin-left: 2px;
     }
     .founder-avatar {
-      background: linear-gradient(135deg, #4a0414 0%, #1c181f 100%) !important;
-      border: 1.5px solid #d4af37 !important;
-      box-shadow: 0 0 10px rgba(212, 175, 55, 0.4) !important;
+      background: linear-gradient(135deg, #1c181f 0%, #0a090d 100%) !important;
+      border: 2px solid #d4af37 !important;
+      box-shadow: 0 0 14px rgba(212, 175, 55, 0.35) !important;
       color: #d4af37 !important;
       font-weight: 800 !important;
       cursor: pointer;
@@ -1139,37 +1233,82 @@
       color: #d4af37;
       background: rgba(212, 175, 55, 0.12);
       border: 1px solid rgba(212, 175, 55, 0.35);
-      padding: 1px 7px;
-      border-radius: 10px;
-      margin-left: 4px;
+      padding: 1.5px 8px;
+      border-radius: 9999px;
       letter-spacing: 0.3px;
       display: inline-flex;
       align-items: center;
       gap: 3px;
     }
+    .feed-category-pill {
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .feed-category-pill.cat-crime {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.32);
+      color: #f87171;
+    }
+    .feed-category-pill.cat-hazard {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.32);
+      color: #fbbf24;
+    }
+    .feed-category-pill.cat-women {
+      background: rgba(236, 72, 153, 0.12);
+      border: 1px solid rgba(236, 72, 153, 0.32);
+      color: #f472b6;
+    }
+    .feed-category-pill.cat-medical {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.32);
+      color: #34d399;
+    }
+    .feed-category-pill.cat-official {
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      color: #fbbf24;
+    }
+    .feed-category-pill.cat-general {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      color: #38bdf8;
+    }
     .mod-pending-badge {
-      font-size: 10px;
-      background: rgba(245, 158, 11, 0.15);
+      font-size: 10.5px;
+      background: rgba(245, 158, 11, 0.12);
       color: #f59e0b;
       border: 1px solid rgba(245, 158, 11, 0.3);
-      padding: 2px 7px;
-      border-radius: 10px;
+      padding: 3px 9px;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
     .post-text {
-      font-size: 13px;
+      font-size: 13.5px;
       color: #e2e8f0;
-      line-height: 1.6;
-      margin-bottom: 12px;
+      line-height: 1.65;
+      margin-bottom: 14px;
       white-space: pre-line;
       word-break: break-word;
+      letter-spacing: 0.15px;
     }
     .post-media-attachment {
       width: 100%;
       max-height: 380px;
       object-fit: contain;
-      border-radius: 10px;
+      border-radius: 14px;
       background: #000;
-      border: 1px solid var(--border-quiet);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
     .post-media-container {
       width: 100%;
@@ -1406,25 +1545,55 @@
     }
     .post-actions-row {
       display: flex;
-      gap: 16px;
-      border-top: 1px solid rgba(255, 255, 255, 0.04);
-      padding-top: 10px;
-      color: var(--text-muted);
-      font-size: 12px;
+      align-items: center;
+      gap: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 12px;
+      margin-top: 12px;
+      flex-wrap: wrap;
     }
     .post-action-btn {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 600;
       cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
     }
     .post-action-btn:hover {
-      color: #e57373;
+      background: rgba(255, 255, 255, 0.09);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+    .post-action-btn.liked {
+      background: rgba(244, 63, 94, 0.12);
+      border-color: rgba(244, 63, 94, 0.35);
+      color: #f43f5e;
+    }
+    .post-action-btn.liked i {
+      color: #f43f5e;
+      animation: heartBeat 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes heartBeat {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.35); }
+      100% { transform: scale(1); }
     }
     .post-action-btn.comment-btn:hover {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: rgba(56, 189, 248, 0.3);
       color: #38bdf8;
     }
     .post-action-btn.share-btn:hover {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.3);
       color: #10b981;
     }
     .btn-approve-post {
@@ -2925,14 +3094,17 @@
     <!-- SCREEN 3: INTERACTIVE SOCIAL MEDIA & CIVIC AWARENESS FEED -->
     <div id="screen-feed" class="screen screen-padded">
       
-      <!-- Interactive Post Composer for Community Uploads -->
+      <!-- Interactive Post Composer for Community Uploads (Minimalist Glass) -->
       <div class="create-post-card">
-        <textarea class="post-composer-input" id="composer-text" placeholder="Share safety awareness, road hazard, or community advisory..." data-i18n-placeholder="feed_composer_placeholder"></textarea>
+        <div class="composer-input-row">
+          <div class="composer-user-avatar"><i class="fas fa-shield-cat"></i></div>
+          <textarea class="post-composer-input" id="composer-text" placeholder="Share safety awareness, road hazard, or community advisory..." data-i18n-placeholder="feed_composer_placeholder"></textarea>
+        </div>
         
         <!-- Attached Media Preview (Photos & Videos) -->
         <div class="media-preview-container" id="media-preview-box">
           <img id="media-preview-img" class="media-preview-img" src="" alt="Media Preview" style="display: none;">
-          <video id="media-preview-video" class="media-preview-img" controls playsinline style="display: none; width: 100%; max-height: 220px; object-fit: contain; background: #000; border-radius: 10px;"></video>
+          <video id="media-preview-video" class="media-preview-img" controls playsinline style="display: none; width: 100%; max-height: 220px; object-fit: contain; background: #000; border-radius: 12px;"></video>
           <button class="btn-remove-media" onclick="removeAttachedMedia()" title="Remove Attachment"><i class="fas fa-xmark"></i></button>
         </div>
 
@@ -2940,12 +3112,12 @@
           <div class="composer-media-icons">
             <label class="media-btn-label" title="Attach Photo or Video">
               <i class="fas fa-photo-film" style="color: #38bdf8;"></i>
-              <span style="font-size: 11px;" data-i18n="feed_photo_video">Photo / Video</span>
+              <span data-i18n="feed_photo_video">Photo / Video</span>
               <input type="file" id="media-file-input" accept="image/*,video/*" style="display: none;" onchange="handleMediaSelected(event)">
             </label>
             <label class="media-btn-label" title="Category Tag" onclick="selectPostCategory()">
               <i class="fas fa-tag" style="color: #f59e0b;"></i>
-              <span style="font-size: 11px;" id="composer-category-tag">General</span>
+              <span id="composer-category-tag">General</span>
             </label>
           </div>
           <button class="btn-publish-post" onclick="submitCommunityPost()">
@@ -2954,17 +3126,15 @@
         </div>
       </div>
 
-      <!-- Feed Category Filter Bar -->
-      <div class="feed-filter-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-          <button type="button" class="feed-filter-btn active" onclick="filterFeed('all', this)">
-            <i class="fas fa-layer-group"></i> <span data-i18n="feed_tab_all">All Feeds</span>
-          </button>
-          <button type="button" class="feed-filter-btn" onclick="filterFeed('community', this)">
-            <i class="fas fa-users-viewfinder"></i> <span data-i18n="feed_tab_community">Citizen Reports</span>
-          </button>
-        </div>
-        <button type="button" class="feed-filter-btn" onclick="fetchLiveFeedPosts(1, false)" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); margin-left: auto; white-space: nowrap;" title="Sync and refresh feed">
+      <!-- Feed Category Filter Bar (Pill Segmented) -->
+      <div class="feed-filter-bar">
+        <button type="button" class="feed-filter-btn active" onclick="filterFeed('all', this)">
+          <i class="fas fa-layer-group"></i> <span data-i18n="feed_tab_all">All Feeds</span>
+        </button>
+        <button type="button" class="feed-filter-btn" onclick="filterFeed('community', this)">
+          <i class="fas fa-users-viewfinder"></i> <span data-i18n="feed_tab_community">Citizen Reports</span>
+        </button>
+        <button type="button" class="feed-filter-btn sync-btn" onclick="fetchLiveFeedPosts(1, false)" title="Sync and refresh feed">
           <i class="fas fa-arrows-rotate"></i> <span data-i18n="feed_btn_sync">Sync</span>
         </button>
       </div>
@@ -5888,6 +6058,23 @@
       return false;
     }
 
+    function getFeedCategoryBadgeHtml(cat, isSaad) {
+      if (isSaad) {
+        return `<span class="feed-category-pill cat-official"><i class="fas fa-bullhorn"></i> Official</span>`;
+      }
+      const c = String(cat || 'General Safety').toLowerCase();
+      if (c.includes('snatch') || c.includes('rob') || c.includes('crime') || c.includes('theft')) {
+        return `<span class="feed-category-pill cat-crime"><i class="fas fa-triangle-exclamation"></i> Crime Alert</span>`;
+      } else if (c.includes('hazard') || c.includes('road') || c.includes('traffic') || c.includes('fire')) {
+        return `<span class="feed-category-pill cat-hazard"><i class="fas fa-car-burst"></i> Road Hazard</span>`;
+      } else if (c.includes('harass') || c.includes('eve') || c.includes('women') || c.includes('stalk')) {
+        return `<span class="feed-category-pill cat-women"><i class="fas fa-person-shelter"></i> Safety Alert</span>`;
+      } else if (c.includes('medical') || c.includes('health') || c.includes('blood') || c.includes('hospital')) {
+        return `<span class="feed-category-pill cat-medical"><i class="fas fa-heart-pulse"></i> Medical</span>`;
+      }
+      return `<span class="feed-category-pill cat-general"><i class="fas fa-shield-halved"></i> Citizen Report</span>`;
+    }
+
     function renderCommunityPosts() {
       const container = document.getElementById('posts-container');
       if (!container) return;
@@ -5902,10 +6089,12 @@
 
       if (postsToRender.length === 0) {
         container.innerHTML = `
-          <div style="text-align: center; padding: 40px 20px; background: var(--black-subtle); border-radius: 16px; border: 1px solid var(--border-quiet); margin: 10px 0;">
-            <i class="fas fa-shield-halved" style="font-size: 32px; color: var(--text-muted); margin-bottom: 12px; display: block;"></i>
-            <h4 style="font-size: 14px; color: #fff; margin-bottom: 4px;">Civic Safety Feed Active</h4>
-            <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">All community reports are moderated for high trust and safety. Approved citizen reports will appear here.</p>
+          <div style="text-align: center; padding: 48px 24px; background: rgba(16, 20, 30, 0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.07); margin: 10px 0; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(225, 29, 72, 0.12); border: 1px solid rgba(225, 29, 72, 0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+              <i class="fas fa-shield-halved" style="font-size: 24px; color: #f43f5e;"></i>
+            </div>
+            <h4 style="font-size: 15px; font-weight: 700; color: #f8fafc; margin-bottom: 6px;">Civic Safety Feed Active</h4>
+            <p style="font-size: 12.5px; color: #94a3b8; line-height: 1.6; max-width: 320px; margin: 0 auto;">All community reports are moderated in real-time for high trust and safety. Verified citizen alerts will appear here.</p>
           </div>
         `;
         return;
@@ -5924,6 +6113,9 @@
         const isLikedByMe = Array.isArray(p.likedBy) ? p.likedBy.includes(myUserId) : false;
         const currentLikesCount = (typeof p.likes === 'number' && !isNaN(p.likes)) ? p.likes : 0;
 
+        // Dynamic category pill helper
+        const categoryBadgeHtml = getFeedCategoryBadgeHtml(p.category, isSaadRizwan);
+
         card.innerHTML = `
           <div class="feed-card-header">
             <div class="author-info" onclick="openAuthorProfileModal('${safeAuthorAttr}', ${isSaadRizwan ? 'true' : 'false'}, '${safeRoleAttr}')" style="cursor: pointer;" title="Tap to view official profile">
@@ -5936,19 +6128,20 @@
                   ${(p.verified || isSaadRizwan) ? BLUE_TICK_SVG : ''}
                   ${isSaadRizwan ? `
                     <span class="founder-title-pill">
-                      <i class="fas fa-crown"></i> Founder &amp; CEO
+                      <i class="fas fa-crown"></i> Founder
                     </span>
                   ` : ''}
                 </div>
-                <div style="font-size: 10px; color: var(--text-muted);">${formatExactPostTime(p.createdAt || p.approvedAt || p.time)} • <span style="color: ${isSaadRizwan ? '#d4af37' : '#e57373'}; font-weight: ${isSaadRizwan ? '700' : 'normal'};">${escapeHtml(p.category || 'General Safety')}</span></div>
+                <div class="author-meta-sub">
+                  <span>${formatExactPostTime(p.createdAt || p.approvedAt || p.time)}</span>
+                  <span>•</span>
+                  <span><i class="fas fa-location-dot" style="font-size: 9px; color: #f43f5e;"></i> ${escapeHtml(p.location || 'Dhaka')}</span>
+                </div>
               </div>
             </div>
-            ${!isSaadRizwan ? `
             <div>
-              <span class="mod-pending-badge" style="color: #10b981; border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.15);">
-                <i class="fas fa-shield-check"></i> Verified Live
-              </span>
-            </div>` : ''}
+              ${categoryBadgeHtml}
+            </div>
           </div>
           <div class="post-text">${escapeHtml(p.content || '')}</div>
           ${renderPostMediaHtml(p)}
@@ -5964,7 +6157,7 @@
             </div>
             ${p.media ? `
             <div class="post-action-btn" onclick="downloadPostMedia('${p.id}', event)" title="Download ${isVideoMedia(p.media) ? 'Video' : 'Photo'}">
-              <i class="fas fa-download"></i>
+              <i class="fas fa-arrow-down-to-line"></i>
             </div>` : ''}
             ${canDeletePost(p) ? `
             <div class="post-action-btn" onclick="deletePostAdmin('${p.id}', event)" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4); margin-left: auto;" title="Permanently Delete Post">
