@@ -3390,17 +3390,30 @@
               <div class="location-dropdown-popup" id="bd-location-dropdown"></div>
             </div>
 
-            <!-- Compact Single-Line Journey Safety Timer (Clean, No Bulky Preset Chips) -->
-            <div id="walk-timer-setting-box" style="margin-top: 5px; background: rgba(12, 11, 14, 0.78); border: 1px solid rgba(56, 189, 248, 0.28); border-radius: 9px; padding: 4px 8px; display: flex; justify-content: space-between; align-items: center;">
-              <div style="display: flex; align-items: center; gap: 5px; font-size: 11px; color: #e2e8f0; font-weight: 700;">
-                <i class="fas fa-stopwatch" style="color: #38bdf8; font-size: 12px;"></i>
-                <span data-i18n="walk_timer_title">Safety Timer</span>
+            <!-- Compact Single-Line Journey Safety Timer with Google Maps ETA Auto-Prediction -->
+            <div id="walk-timer-setting-box" style="margin-top: 6px; background: rgba(20, 24, 34, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 16px rgba(0,0,0,0.35);">
+              <div style="display: flex; align-items: center; gap: 7px; min-width: 0;">
+                <div style="width: 26px; height: 26px; border-radius: 8px; background: rgba(56, 189, 248, 0.16); border: 1px solid rgba(56, 189, 248, 0.4); display: flex; align-items: center; justify-content: center; color: #38bdf8; font-size: 12px; flex-shrink: 0;">
+                  <i class="fas fa-stopwatch"></i>
+                </div>
+                <div style="display: flex; flex-direction: column; line-height: 1.2;">
+                  <div style="display: flex; align-items: center; gap: 5px;">
+                    <span style="font-size: 11px; color: #fff; font-weight: 800;" data-i18n="walk_timer_title">Safety Timer</span>
+                    <span id="timer-source-badge" style="font-size: 9px; font-weight: 700; padding: 1.5px 6px; border-radius: 9999px; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); display: inline-flex; align-items: center; gap: 3px;">
+                      <i class="fas fa-sparkles" style="font-size: 8px;"></i> <span id="timer-source-badge-text">Google Maps ETA</span>
+                    </span>
+                  </div>
+                  <span id="timer-source-sub" style="font-size: 9px; color: #94a3b8;">Predicted from live route & traffic</span>
+                </div>
               </div>
-              <div style="display: flex; align-items: center; gap: 4px;">
-                <button type="button" onclick="adjustCustomTimerMinutes(-5)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; width: 24px; height: 24px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Minus 5 mins">-5</button>
-                <input type="number" id="user-custom-timer-mins" min="1" max="720" value="20" oninput="onCustomTimerInputChange(this.value)" style="width: 42px; text-align: center; background: rgba(56, 189, 248, 0.16); border: 1px solid #38bdf8; border-radius: 6px; color: #38bdf8; font-weight: 800; font-size: 12.5px; padding: 2px 0;">
-                <span style="font-size: 10.5px; color: #94a3b8; font-weight: 700;" data-i18n="walk_timer_mins_unit">mins</span>
-                <button type="button" onclick="adjustCustomTimerMinutes(+5)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; width: 24px; height: 24px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Plus 5 mins">+5</button>
+              <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
+                <button type="button" onclick="adjustCustomTimerMinutes(-5)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; width: 24px; height: 24px; border-radius: 6px; font-size: 11px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Minus 5 mins">-5</button>
+                <input type="number" id="user-custom-timer-mins" min="1" max="720" value="20" oninput="onCustomTimerInputChange(this.value)" style="width: 44px; text-align: center; background: rgba(56, 189, 248, 0.16); border: 1.5px solid #38bdf8; border-radius: 7px; color: #38bdf8; font-weight: 800; font-size: 13px; padding: 2px 0; outline: none; transition: all 0.25s ease;">
+                <span style="font-size: 10px; color: #94a3b8; font-weight: 700;" data-i18n="walk_timer_mins_unit">mins</span>
+                <button type="button" onclick="adjustCustomTimerMinutes(+5)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; width: 24px; height: 24px; border-radius: 6px; font-size: 11px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Plus 5 mins">+5</button>
+                <button type="button" id="btn-reset-maps-eta" onclick="resetTimerToGoogleMapsEta()" style="display: none; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; width: 24px; height: 24px; border-radius: 6px; font-size: 10px; cursor: pointer; align-items: center; justify-content: center;" title="Reset to Google Maps ETA">
+                  <i class="fas fa-rotate-left"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -4496,6 +4509,9 @@
         walk_dest_placeholder: "Destination (e.g. Dhanmondi, Airport, Gulshan...)",
         walk_timer_title: "Set Journey Safety Timer",
         walk_timer_mins_unit: "mins",
+        timer_auto_gmaps: "Google Maps ETA",
+        timer_user_custom: "User Edited",
+        timer_reset_eta: "Use Maps ETA",
         walk_timer_alert_note: "Auto-alerts emergency circle if overdue",
         walk_timer_bg_note: "Runs automatically in background",
         walk_btn_start: "Start Companion Guard",
@@ -4643,6 +4659,9 @@
         walk_dest_placeholder: "গন্তব্য লিখুন (যেমন: ধানমন্ডি, বিমানবন্দর, গুলশান...)",
         walk_timer_title: "যাত্রার সেফটি টাইমার নির্ধারণ করুন",
         walk_timer_mins_unit: "মিনিট",
+        timer_auto_gmaps: "ম্যাপস পূর্বাভাস",
+        timer_user_custom: "কাস্টম সময়",
+        timer_reset_eta: "ম্যাপস সময় দিন",
         walk_timer_alert_note: "সময় অতিক্রান্ত হলে স্বয়ংক্রিয় জরুরি অ্যালার্ট পাঠাবে",
         walk_timer_bg_note: "ব্যাকগ্রাউন্ডে স্বয়ংক্রিয়ভাবে সক্রিয় থাকে",
         walk_btn_start: "কম্প্যানিয়ন গার্ড শুরু করুন",
@@ -4764,6 +4783,9 @@
       }
       if (typeof updateProfileBloodDisplay === 'function') {
         updateProfileBloodDisplay();
+      }
+      if (typeof updateTimerSourceBadge === 'function') {
+        updateTimerSourceBadge(isTimerAutoPredicted);
       }
     }
 
@@ -5994,6 +6016,9 @@
 
       if (typeof updateProfileBloodDisplay === 'function') {
         updateProfileBloodDisplay();
+      }
+      if (typeof updateTimerSourceBadge === 'function') {
+        updateTimerSourceBadge(isTimerAutoPredicted);
       }
     });
 
@@ -7419,6 +7444,7 @@
 
     function selectTravelMode(mode) {
       selectedTravelMode = mode;
+      isTimerAutoPredicted = true;
       document.querySelectorAll('#mode-btn-walking, #mode-btn-driving, #mode-btn-bicycling').forEach(b => b.classList.remove('active'));
       const activeBtn = document.getElementById(`mode-btn-${mode}`);
       if (activeBtn) activeBtn.classList.add('active');
@@ -7437,6 +7463,7 @@
     }
 
     function selectLocation(displayName, query, lat, lon) {
+      isTimerAutoPredicted = true;
       const destInput = document.getElementById('walk-destination');
       if (destInput) destInput.value = displayName;
 
@@ -7564,6 +7591,11 @@
       lastRouteCalculatedCoords = { lat: 0, lon: 0 };
       lastRouteCalculatedTime = 0;
       isRouteCalculating = false;
+      isTimerAutoPredicted = true;
+      latestGoogleMapsPredictedMinutes = null;
+      const timerInput = document.getElementById('user-custom-timer-mins');
+      if (timerInput) timerInput.value = 20;
+      if (typeof updateTimerSourceBadge === 'function') updateTimerSourceBadge(true);
 
       if (typeof clearNavRoutePolylines === 'function') {
         clearNavRoutePolylines();
@@ -7660,6 +7692,9 @@
           if (data && data.success) {
             calculatedRouteDistanceKm = data.distanceKm;
             calculatedDurationMinutes = data.durationMinutes;
+            if (typeof applyPredictedGoogleMapsTimer === 'function') {
+              applyPredictedGoogleMapsTimer(data.durationMinutes, data.distanceKm);
+            }
             if (data.destination && data.destination.lat && !isNaN(data.destination.lat)) {
               selectedDestCoords = data.destination;
             }
@@ -7746,6 +7781,9 @@
       }
 
       calculatedDurationMinutes = durationMins;
+      if (typeof applyPredictedGoogleMapsTimer === 'function') {
+        applyPredictedGoogleMapsTimer(durationMins, km);
+      }
 
       const originStr = (currentCoords.lat && currentCoords.lon) ? `${currentCoords.lat},${currentCoords.lon}` : 'Dhaka, Bangladesh';
       const destStr = (dLat && dLon) ? `${dLat},${dLon}` : encodeURIComponent(destQuery || 'Dhaka');
@@ -7913,8 +7951,84 @@
     }
 
     /* ----------------------------------------------------
-       COMPANION SAFETY TIMER ENGINE (USER-EDITABLE & BACKGROUND RUNNING)
+       COMPANION SAFETY TIMER ENGINE (AUTO-PREDICTED VIA GOOGLE MAPS + USER-EDITABLE)
     ---------------------------------------------------- */
+    let latestGoogleMapsPredictedMinutes = null;
+    let isTimerAutoPredicted = true;
+
+    function applyPredictedGoogleMapsTimer(mins, distanceKm, isSilent = false) {
+      if (!mins || isNaN(mins) || mins <= 0) return;
+      latestGoogleMapsPredictedMinutes = mins;
+
+      // When in auto-predicted mode (default or newly chosen route):
+      if (isTimerAutoPredicted) {
+        userConfiguredTimerMinutes = mins;
+        const input = document.getElementById('user-custom-timer-mins');
+        if (input) {
+          input.value = mins;
+          input.style.borderColor = '#10b981';
+          input.style.color = '#34d399';
+          setTimeout(() => {
+            if (input) {
+              input.style.borderColor = '#38bdf8';
+              input.style.color = '#38bdf8';
+            }
+          }, 800);
+        }
+        updateTimerSourceBadge(true);
+      }
+
+      // Pop Apple Dynamic Island with route ETA prediction
+      if (!isSilent && typeof showDynamicIsland === 'function') {
+        const isBn = currentAppLanguage === 'bn';
+        const modeLabel = selectedTravelMode === 'driving' 
+          ? (isBn ? 'গাড়ি / সিএনজি' : 'Driving') 
+          : (selectedTravelMode === 'bicycling' ? (isBn ? 'বাইক' : 'Bike') : (isBn ? 'হাঁটা' : 'Walking'));
+        showDynamicIsland({
+          title: isBn ? `গুগল ম্যাপস পূর্বাভাস: ${mins} মিনিট` : `Google Maps Route: ${mins} mins`,
+          sub: isBn ? `${modeLabel} • দূরত্ব প্রায় ${distanceKm || ''} কিমি` : `${modeLabel} • ~${distanceKm || ''} km expected`,
+          icon: "fa-route",
+          type: "info",
+          duration: 3500
+        });
+      }
+    }
+
+    function updateTimerSourceBadge(isAuto) {
+      const badge = document.getElementById('timer-source-badge');
+      const subText = document.getElementById('timer-source-sub');
+      const resetBtn = document.getElementById('btn-reset-maps-eta');
+      const isBn = currentAppLanguage === 'bn';
+
+      if (!badge) return;
+
+      if (isAuto) {
+        badge.style.background = 'rgba(16, 185, 129, 0.15)';
+        badge.style.borderColor = 'rgba(16, 185, 129, 0.35)';
+        badge.style.color = '#34d399';
+        badge.innerHTML = `<i class="fas fa-sparkles" style="font-size: 8px;"></i> <span id="timer-source-badge-text">${isBn ? 'ম্যাপস পূর্বাভাস' : 'Google Maps ETA'}</span>`;
+        if (subText) subText.textContent = isBn ? 'লাইভ গুগল ম্যাপস থেকে অনুমিত' : 'Auto-predicted from live maps & traffic';
+        if (resetBtn) resetBtn.style.display = 'none';
+      } else {
+        badge.style.background = 'rgba(245, 158, 11, 0.15)';
+        badge.style.borderColor = 'rgba(245, 158, 11, 0.35)';
+        badge.style.color = '#fbbf24';
+        badge.innerHTML = `<i class="fas fa-pen" style="font-size: 8px;"></i> <span id="timer-source-badge-text">${isBn ? 'কাস্টম সময়' : 'User Edited'}</span>`;
+        if (subText) subText.textContent = isBn ? 'ব্যবহারকারীর নির্ধারিত সময়' : 'Manually edited by citizen';
+        if (resetBtn && latestGoogleMapsPredictedMinutes) {
+          resetBtn.style.display = 'flex';
+          resetBtn.title = isBn ? `গুগল ম্যাপসের সময় ফিরিয়ে নিন (${latestGoogleMapsPredictedMinutes} মিনিট)` : `Reset to Google Maps ETA (${latestGoogleMapsPredictedMinutes} mins)`;
+        }
+      }
+    }
+
+    function resetTimerToGoogleMapsEta() {
+      if (latestGoogleMapsPredictedMinutes) {
+        isTimerAutoPredicted = true;
+        applyPredictedGoogleMapsTimer(latestGoogleMapsPredictedMinutes, calculatedRouteDistanceKm, false);
+      }
+    }
+
     function setTimerPreset(val) {
       document.querySelectorAll('.walk-timer-chip').forEach(c => {
         c.style.background = 'rgba(255,255,255,0.05)';
@@ -7922,11 +8036,13 @@
         c.style.color = '#cbd5e1';
       });
 
+      isTimerAutoPredicted = false;
       userTimerMode = 'custom';
       const mins = parseInt(val, 10);
       userConfiguredTimerMinutes = (isNaN(mins) || mins < 1) ? 20 : mins;
       const input = document.getElementById('user-custom-timer-mins');
       if (input) input.value = userConfiguredTimerMinutes;
+      updateTimerSourceBadge(false);
       const chip = document.getElementById(`chip-timer-${userConfiguredTimerMinutes}`);
       if (chip) {
         chip.style.background = 'rgba(56, 189, 248, 0.22)';
@@ -7936,22 +8052,26 @@
     }
 
     function adjustCustomTimerMinutes(delta) {
+      isTimerAutoPredicted = false;
       userTimerMode = 'custom';
-      let current = parseInt(userConfiguredTimerMinutes || 20, 10);
+      let current = parseInt(userConfiguredTimerMinutes || (latestGoogleMapsPredictedMinutes || 20), 10);
       if (isNaN(current)) current = 20;
       let next = Math.max(1, Math.min(720, current + delta));
       userConfiguredTimerMinutes = next;
       const input = document.getElementById('user-custom-timer-mins');
       if (input) input.value = next;
+      updateTimerSourceBadge(false);
       highlightMatchingTimerChip(next);
     }
 
     function onCustomTimerInputChange(val) {
+      isTimerAutoPredicted = false;
       userTimerMode = 'custom';
       let mins = parseInt(val, 10);
       if (isNaN(mins) || mins < 1) mins = 1;
       if (mins > 720) mins = 720;
       userConfiguredTimerMinutes = mins;
+      updateTimerSourceBadge(false);
       highlightMatchingTimerChip(mins);
     }
 
@@ -12414,6 +12534,9 @@
 
       if (typeof updateProfileBloodDisplay === 'function') {
         updateProfileBloodDisplay();
+      }
+      if (typeof updateTimerSourceBadge === 'function') {
+        updateTimerSourceBadge(isTimerAutoPredicted);
       }
 
       // Toggle Admin UI elements
