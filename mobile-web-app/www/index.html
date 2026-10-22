@@ -312,28 +312,30 @@
     }
     .sos-radar-ring.ring-1 {
       width: 195px;
-      height: 195px;
-      animation: appleRadar 3s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+      height: 200px;
+      background: radial-gradient(circle, rgba(255, 69, 58, 0.28) 0%, rgba(255, 69, 58, 0.08) 60%, transparent 80%);
+      animation: appleRadarPulse 2.8s infinite cubic-bezier(0.2, 0.8, 0.2, 1);
     }
     .sos-radar-ring.ring-2 {
-      width: 228px;
-      height: 228px;
-      animation: appleRadar 3s infinite 1.2s cubic-bezier(0.215, 0.61, 0.355, 1);
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, rgba(255, 69, 58, 0.18) 0%, rgba(255, 69, 58, 0.04) 70%, transparent 90%);
+      animation: appleRadarPulse 2.8s infinite 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
-    @keyframes appleRadar {
-      0% { transform: scale(0.75); opacity: 0.8; }
-      50% { opacity: 0.3; }
-      100% { transform: scale(1.18); opacity: 0; }
+    @keyframes appleRadarPulse {
+      0% { transform: scale(0.72); opacity: 0.9; }
+      50% { opacity: 0.35; }
+      100% { transform: scale(1.22); opacity: 0; }
     }
     .sos-button-disc {
       width: 172px;
       height: 172px;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 28%, #ff4d4d 0%, #ff1744 40%, #b71c1c 80%, #7f0000 100%);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 20px 55px rgba(255, 23, 68, 0.45), 
-                  inset 0 3px 8px rgba(255, 255, 255, 0.45), 
-                  inset 0 -8px 16px rgba(0, 0, 0, 0.5);
+      background: radial-gradient(circle at 35% 25%, #ff453a 0%, #e01435 40%, #9e001c 80%, #59000e 100%);
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      box-shadow: 0 18px 50px rgba(225, 29, 72, 0.55), 
+                  inset 0 3px 6px rgba(255, 255, 255, 0.6), 
+                  inset 0 -10px 22px rgba(0, 0, 0, 0.65);
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -341,8 +343,9 @@
       cursor: pointer;
       position: relative;
       user-select: none;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.22s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.22s ease;
       z-index: 2;
+      -webkit-tap-highlight-color: transparent;
     }
     .sos-glass-reflection {
       position: absolute;
@@ -351,18 +354,37 @@
       right: 18px;
       height: 60px;
       border-radius: 50% 50% 40% 40%;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 100%);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0) 100%);
       pointer-events: none;
+    }
+    .sos-progress-svg {
+      position: absolute;
+      top: -6px;
+      left: -6px;
+      width: 184px;
+      height: 184px;
+      transform: rotate(-90deg);
+      pointer-events: none;
+    }
+    .sos-progress-meter {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.95);
+      stroke-width: 4px;
+      stroke-linecap: round;
+      stroke-dasharray: 540;
+      stroke-dashoffset: 540;
+      transition: stroke-dashoffset 0.15s ease-out;
+      filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8));
     }
     .sos-button-disc:hover {
       transform: scale(1.03);
-      box-shadow: 0 25px 65px rgba(255, 23, 68, 0.65), 
-                  inset 0 3px 10px rgba(255, 255, 255, 0.55), 
-                  inset 0 -8px 16px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 24px 60px rgba(225, 29, 72, 0.68), 
+                  inset 0 3px 8px rgba(255, 255, 255, 0.7), 
+                  inset 0 -10px 22px rgba(0, 0, 0, 0.65);
     }
     .sos-button-disc:active {
-      transform: scale(0.95);
-      box-shadow: 0 10px 30px rgba(255, 23, 68, 0.7);
+      transform: scale(0.94);
+      box-shadow: 0 10px 28px rgba(225, 29, 72, 0.7);
     }
     .sos-text-label {
       font-size: 32px;
@@ -1884,36 +1906,172 @@
       transform: scale(0.92);
     }
 
-    /* Bottom Navigation Bar */
+    /* ========================================================
+       APPLE DYNAMIC ISLAND NOTIFICATION HUD
+    ======================================================== */
+    .dynamic-island-container {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-70px) scale(0.9);
+      z-index: 100000;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.25), opacity 0.3s ease;
+      display: flex;
+      justify-content: center;
+      max-width: 92%;
+      width: max-content;
+    }
+    .dynamic-island-container.island-visible {
+      transform: translateX(-50%) translateY(0) scale(1);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .dynamic-island-capsule {
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(28px) saturate(200%);
+      -webkit-backdrop-filter: blur(28px) saturate(200%);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 9999px;
+      padding: 7px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .dynamic-island-capsule:active {
+      transform: scale(0.96);
+    }
+    .island-icon-box {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255, 69, 58, 0.2);
+      border: 1px solid rgba(255, 69, 58, 0.45);
+      color: #ff453a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+    .island-icon-box.success {
+      background: rgba(48, 209, 88, 0.2);
+      border-color: rgba(48, 209, 88, 0.5);
+      color: #30d158;
+    }
+    .island-icon-box.info {
+      background: rgba(10, 132, 255, 0.2);
+      border-color: rgba(10, 132, 255, 0.5);
+      color: #0a84ff;
+    }
+    .island-icon-box.warning {
+      background: rgba(255, 159, 10, 0.2);
+      border-color: rgba(255, 159, 10, 0.5);
+      color: #ff9f0a;
+    }
+    .island-content {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+    .island-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.15px;
+      white-space: nowrap;
+    }
+    .island-sub {
+      font-size: 9.5px;
+      color: rgba(255, 255, 255, 0.65);
+      white-space: nowrap;
+      letter-spacing: -0.05px;
+    }
+    .island-trailing {
+      display: flex;
+      align-items: center;
+      padding-left: 2px;
+    }
+    .island-beacon-pulse {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #30d158;
+      box-shadow: 0 0 8px #30d158;
+      animation: islandBeaconGlow 1.5s infinite ease-in-out;
+    }
+    @keyframes islandBeaconGlow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.7); }
+    }
+
+    /* ========================================================
+       APPLE FLOATING LIQUID GLASS BOTTOM NAVIGATION BAR
+    ======================================================== */
     .bottom-bar {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 64px;
-      background: rgba(5, 5, 7, 0.96);
-      border-top: 1px solid var(--border-quiet);
+      bottom: 12px;
+      left: 14px;
+      right: 14px;
+      height: 60px;
+      background: rgba(18, 20, 30, 0.78);
+      backdrop-filter: blur(30px) saturate(190%);
+      -webkit-backdrop-filter: blur(30px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 26px;
       display: flex;
       justify-content: space-around;
       align-items: center;
-      backdrop-filter: blur(16px);
-      z-index: 50;
-      padding-bottom: env(safe-area-inset-bottom, 0px);
+      padding: 0 6px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+      z-index: 1000;
+      user-select: none;
+      transition: all 0.25s ease;
     }
     .nav-tab-btn {
       background: none;
       border: none;
-      color: var(--text-muted);
-      font-size: 12px;
-      font-weight: 500;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 10px;
+      font-weight: 600;
       cursor: pointer;
-      padding: 8px 14px;
-      border-radius: 8px;
-      transition: all 0.15s;
+      padding: 5px 10px;
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+      -webkit-tap-highlight-color: transparent;
+      min-width: 54px;
+    }
+    .nav-tab-icon {
+      font-size: 16px;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
+    }
+    .nav-tab-btn:hover {
+      color: rgba(255, 255, 255, 0.85);
     }
     .nav-tab-btn.active {
-      color: var(--text-main);
-      background: var(--burgundy-tint);
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .nav-tab-btn.active .nav-tab-icon {
+      transform: scale(1.12);
+      color: #ff453a;
+    }
+    #nav-tab-map.nav-tab-btn.active .nav-tab-icon { color: #0a84ff; }
+    #nav-tab-feed.nav-tab-btn.active .nav-tab-icon { color: #ff9f0a; }
+    #nav-tab-profile.nav-tab-btn.active .nav-tab-icon { color: #30d158; }
+    .nav-tab-btn:active {
+      transform: scale(0.92);
     }
 
     /* Modals & Sheets */
@@ -2377,62 +2535,65 @@
       display: none;
     }
     .blood-pill {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.12);
       color: #cbd5e1;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
+      padding: 6px 13px;
+      border-radius: 9999px;
+      font-size: 11.5px;
+      font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
-      transition: all 0.18s ease;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
     }
     .blood-pill:hover {
-      background: rgba(244, 63, 94, 0.15);
-      border-color: rgba(244, 63, 94, 0.4);
+      background: rgba(255, 255, 255, 0.12);
       color: #fff;
     }
     .blood-pill.active {
-      background: linear-gradient(135deg, #be123c 0%, #e11d48 100%);
-      border-color: #f43f5e;
+      background: linear-gradient(135deg, #ff375f 0%, #e11d48 100%);
+      border-color: rgba(255, 55, 95, 0.8);
       color: #fff;
-      box-shadow: 0 2px 10px rgba(225, 29, 72, 0.45);
+      box-shadow: 0 4px 14px rgba(255, 55, 95, 0.45);
     }
     .blood-donor-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1.5px solid rgba(244, 63, 94, 0.22);
-      border-radius: 14px;
-      padding: 13px 14px;
+      background: rgba(24, 26, 36, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      padding: 14px 15px;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .blood-donor-card:hover {
-      border-color: rgba(244, 63, 94, 0.5);
-      background: rgba(255, 255, 255, 0.05);
-      box-shadow: 0 4px 18px rgba(225, 29, 72, 0.15);
+      border-color: rgba(255, 55, 95, 0.45);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(255, 55, 95, 0.25);
     }
     .blood-group-tag {
       width: 44px;
       height: 44px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #be123c 0%, #e11d48 100%);
+      border-radius: 14px;
+      background: linear-gradient(135deg, #ff375f 0%, #d61845 100%);
       color: #fff;
-      font-weight: 900;
+      font-weight: 800;
       font-size: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 3px 10px rgba(225, 29, 72, 0.4);
+      box-shadow: 0 4px 14px rgba(255, 55, 95, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
       flex-shrink: 0;
-      letter-spacing: -0.5px;
+      letter-spacing: -0.3px;
     }
     .donor-phone-popup {
-      background: rgba(0, 0, 0, 0.45);
-      border: 1px solid rgba(244, 63, 94, 0.35);
-      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
       padding: 9px 12px;
       display: flex;
       align-items: center;
@@ -2450,38 +2611,81 @@
       gap: 6px;
     }
     .btn-blood-call {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      background: linear-gradient(135deg, #30d158 0%, #24a148 100%);
       color: #fff;
       text-decoration: none;
       font-size: 11.5px;
       font-weight: 700;
-      padding: 6px 11px;
-      border-radius: 7px;
+      padding: 6px 12px;
+      border-radius: 9999px;
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
-      transition: filter 0.15s ease;
+      box-shadow: 0 3px 10px rgba(48, 209, 88, 0.35);
+      transition: transform 0.15s ease, filter 0.15s ease;
     }
-    .btn-blood-call:hover {
-      filter: brightness(1.1);
-    }
+    .btn-blood-call:hover { filter: brightness(1.1); transform: scale(1.02); }
+    .btn-blood-call:active { transform: scale(0.96); }
     .btn-blood-wa {
-      background: #25d366;
+      background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
       color: #fff;
       text-decoration: none;
       font-size: 11.5px;
       font-weight: 700;
-      padding: 6px 11px;
-      border-radius: 7px;
+      padding: 6px 12px;
+      border-radius: 9999px;
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      box-shadow: 0 2px 8px rgba(37, 211, 102, 0.35);
-      transition: filter 0.15s ease;
+      box-shadow: 0 3px 10px rgba(37, 211, 102, 0.35);
+      transition: transform 0.15s ease, filter 0.15s ease;
     }
-    .btn-blood-wa:hover {
-      filter: brightness(1.1);
+    .btn-blood-wa:hover { filter: brightness(1.1); transform: scale(1.02); }
+    .btn-blood-wa:active { transform: scale(0.96); }
+
+    /* Apple Health Medical ID Profile System */
+    .apple-medical-id-card {
+      background: rgba(26, 28, 38, 0.78);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 22px;
+      padding: 22px 18px;
+      margin-bottom: 16px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    }
+    .apple-medical-avatar {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff453a 0%, #b71c1c 100%);
+      border: 2.5px solid rgba(255, 255, 255, 0.35);
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(255, 69, 58, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+    }
+    .apple-medical-badge {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      font-size: 10px;
+      color: #30d158;
+      background: rgba(48, 209, 88, 0.15);
+      border: 1px solid rgba(48, 209, 88, 0.35);
+      padding: 3px 9px;
+      border-radius: 9999px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      letter-spacing: 0.3px;
     }
 
     /* ========================================================
@@ -2615,18 +2819,20 @@
     .shurokha-chat-window {
       width: 100%;
       max-width: 480px;
-      height: 84vh;
-      max-height: 720px;
-      background: #0f0b14;
-      border: 1px solid rgba(56, 189, 248, 0.35);
+      height: 86vh;
+      max-height: 740px;
+      background: rgba(18, 20, 30, 0.94);
+      backdrop-filter: blur(35px) saturate(190%);
+      -webkit-backdrop-filter: blur(35px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
       border-bottom: none;
-      border-radius: 24px 24px 0 0;
+      border-radius: 28px 28px 0 0;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.15);
+      box-shadow: 0 -12px 45px rgba(0, 0, 0, 0.8), 0 0 35px rgba(10, 132, 255, 0.2);
       transform: translateY(100%);
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .shurokha-modal-backdrop.open .shurokha-chat-window {
       transform: translateY(0);
@@ -2634,8 +2840,8 @@
 
     /* Header */
     .shurokha-chat-header {
-      padding: 14px 16px;
-      background: rgba(20, 12, 28, 0.95);
+      padding: 14px 18px;
+      background: rgba(24, 26, 36, 0.92);
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       align-items: center;
@@ -2644,29 +2850,31 @@
     .shurokha-header-info {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
     .shurokha-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
       display: flex;
       align-items: center;
       justify-content: center;
       color: #fff;
       font-size: 16px;
       position: relative;
+      box-shadow: 0 4px 14px rgba(10, 132, 255, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.4);
     }
     .shurokha-avatar-status {
       position: absolute;
-      bottom: 0;
-      right: 0;
-      width: 9px;
-      height: 9px;
-      background: #10b981;
-      border: 1.5px solid #0f0b14;
+      bottom: -1px;
+      right: -1px;
+      width: 10px;
+      height: 10px;
+      background: #30d158;
+      border: 2px solid #12141e;
       border-radius: 50%;
+      box-shadow: 0 0 6px #30d158;
     }
     .shurokha-title-row {
       display: flex;
@@ -2677,19 +2885,21 @@
       font-size: 14px;
       font-weight: 800;
       color: #fff;
+      letter-spacing: -0.2px;
     }
     .shurokha-live-tag {
-      font-size: 9.5px;
-      color: #38bdf8;
-      background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      padding: 1px 6px;
-      border-radius: 6px;
+      font-size: 9px;
+      color: #64d2ff;
+      background: rgba(10, 132, 255, 0.16);
+      border: 1px solid rgba(10, 132, 255, 0.35);
+      padding: 2px 7px;
+      border-radius: 9999px;
       font-weight: 700;
+      letter-spacing: 0.2px;
     }
     .shurokha-sub {
       font-size: 10.5px;
-      color: var(--text-muted);
+      color: rgba(255, 255, 255, 0.6);
     }
     .shurokha-header-actions {
       display: flex;
@@ -2698,7 +2908,7 @@
     }
     .shurokha-icon-btn {
       background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       color: #cbd5e1;
       width: 32px;
       height: 32px;
@@ -2711,53 +2921,56 @@
       transition: all 0.2s;
     }
     .shurokha-icon-btn:hover {
-      background: rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.16);
       color: #fff;
     }
 
     /* Quick Pills */
     .shurokha-quick-pills {
       display: flex;
-      gap: 6px;
-      padding: 8px 14px;
+      gap: 7px;
+      padding: 10px 16px;
       overflow-x: auto;
       white-space: nowrap;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      background: rgba(10, 6, 14, 0.4);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(14, 16, 24, 0.65);
       scrollbar-width: none;
     }
     .shurokha-quick-pills::-webkit-scrollbar {
       display: none;
     }
     .shurokha-pill {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.12);
-      color: #cbd5e1;
-      padding: 5px 10px;
-      border-radius: 999px;
-      font-size: 11px;
+      color: #e2e8f0;
+      padding: 6px 13px;
+      border-radius: 9999px;
+      font-size: 11.5px;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
     }
     .shurokha-pill:hover {
-      background: rgba(56, 189, 248, 0.15);
-      border-color: #38bdf8;
-      color: #38bdf8;
+      background: rgba(10, 132, 255, 0.18);
+      border-color: #0a84ff;
+      color: #64d2ff;
+      transform: translateY(-1px);
     }
 
     /* Messages Stream */
     .shurokha-messages {
       flex: 1;
       overflow-y: auto;
-      padding: 14px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
       scroll-behavior: smooth;
     }
     .shurokha-msg-row {
       display: flex;
-      gap: 8px;
+      gap: 9px;
       max-width: 88%;
       align-items: flex-start;
     }
@@ -2772,7 +2985,7 @@
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      background: #0284c7;
+      background: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -2780,28 +2993,32 @@
       font-size: 12px;
       flex-shrink: 0;
       margin-top: 2px;
+      box-shadow: 0 2px 8px rgba(10, 132, 255, 0.35);
     }
     .shurokha-msg-avatar.user {
       background: #475569;
+      box-shadow: none;
     }
     .shurokha-msg-bubble {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 14px;
-      padding: 10px 13px;
-      color: #f1f5f9;
-      font-size: 13px;
+      background: rgba(30, 34, 48, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      border-radius: 18px 18px 18px 4px;
+      padding: 11px 15px;
+      color: #f8fafc;
+      font-size: 13.5px;
       line-height: 1.5;
       word-break: break-word;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
     }
     .shurokha-msg-row.user .shurokha-msg-bubble {
-      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
-      border-color: rgba(59, 130, 246, 0.4);
-      color: #fff;
-      border-bottom-right-radius: 3px;
+      background: linear-gradient(135deg, #0a84ff 0%, #0066cc 100%);
+      border-color: rgba(10, 132, 255, 0.4);
+      color: #ffffff;
+      border-radius: 18px 18px 4px 18px;
+      box-shadow: 0 4px 16px rgba(10, 132, 255, 0.35);
     }
     .shurokha-msg-row.ai .shurokha-msg-bubble {
-      border-bottom-left-radius: 3px;
+      border-bottom-left-radius: 4px;
     }
     .shurokha-bubble-footer {
       display: flex;
@@ -2809,7 +3026,7 @@
       justify-content: space-between;
       margin-top: 6px;
       font-size: 10px;
-      color: var(--text-muted);
+      color: rgba(255, 255, 255, 0.5);
     }
     .shurokha-speak-btn {
       background: none;
@@ -2821,7 +3038,7 @@
       transition: color 0.2s;
     }
     .shurokha-speak-btn:hover {
-      color: #38bdf8;
+      color: #64d2ff;
     }
     .shurokha-sources-wrap {
       margin-top: 8px;
@@ -2833,7 +3050,7 @@
       gap: 3px;
     }
     .shurokha-source-head {
-      color: #38bdf8;
+      color: #64d2ff;
       font-weight: 700;
     }
     .shurokha-source-link {
@@ -2845,7 +3062,7 @@
     }
     .shurokha-powered-tag {
       font-size: 9.5px;
-      color: #10b981;
+      color: #30d158;
       margin-top: 4px;
       display: flex;
       align-items: center;
@@ -2857,7 +3074,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 14px;
+      padding: 8px 16px;
     }
     .shurokha-typing-dots {
       display: flex;
@@ -2871,7 +3088,7 @@
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: #38bdf8;
+      background: #64d2ff;
       animation: shurokhaDot 1.4s infinite ease-in-out;
     }
     .shurokha-typing-dots span:nth-child(2) { animation-delay: 0.2s; }
@@ -2884,7 +3101,7 @@
     /* Input Bar */
     .shurokha-input-bar {
       padding: 10px 14px;
-      background: rgba(15, 10, 20, 0.98);
+      background: rgba(16, 18, 26, 0.96);
       border-top: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       align-items: flex-end;
@@ -2892,17 +3109,18 @@
     }
     .shurokha-input-wrap {
       flex: 1;
-      background: var(--black-subtle);
+      background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 16px;
-      padding: 8px 12px;
+      border-radius: 20px;
+      padding: 8px 14px;
       display: flex;
       align-items: center;
       gap: 8px;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
     .shurokha-input-wrap:focus-within {
-      border-color: #38bdf8;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+      border-color: #0a84ff;
+      box-shadow: 0 0 14px rgba(10, 132, 255, 0.3);
     }
     .shurokha-input-wrap textarea {
       flex: 1;
@@ -2926,17 +3144,17 @@
       transition: color 0.2s;
     }
     .shurokha-action-btn:hover {
-      color: #38bdf8;
+      color: #64d2ff;
     }
     .shurokha-action-btn.listening {
-      color: #ef4444;
+      color: #ff453a;
       animation: shurokhaPulse 1s infinite;
     }
     .shurokha-send-button {
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+      background: linear-gradient(135deg, #0a84ff 0%, #0066cc 100%);
       border: none;
       color: #fff;
       display: flex;
@@ -2946,10 +3164,11 @@
       font-size: 15px;
       flex-shrink: 0;
       transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 14px rgba(10, 132, 255, 0.4);
     }
     .shurokha-send-button:hover {
       transform: scale(1.05);
-      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+      box-shadow: 0 6px 18px rgba(10, 132, 255, 0.55);
     }
     .shurokha-send-button:active {
       transform: scale(0.95);
@@ -2960,6 +3179,22 @@
 
   <div class="app-root">
     <div class="status-notch-spacer"></div>
+
+    <!-- APPLE DYNAMIC ISLAND NOTIFICATION HUD -->
+    <div id="apple-dynamic-island" class="dynamic-island-container">
+      <div class="dynamic-island-capsule" onclick="handleDynamicIslandTap()">
+        <div class="island-icon-box" id="island-icon">
+          <i class="fas fa-shield-halved"></i>
+        </div>
+        <div class="island-content">
+          <span class="island-title" id="island-title">SAFE BD Active</span>
+          <span class="island-sub" id="island-sub">GPS Satellite Guarded</span>
+        </div>
+        <div class="island-trailing" id="island-trailing">
+          <span class="island-beacon-pulse"></span>
+        </div>
+      </div>
+    </div>
 
     <!-- Top Bar with SAFE Icon on Top Left & Language Toggle on Top Right -->
     <div class="top-bar">
@@ -3013,6 +3248,9 @@
              ontouchend="handleSosPressEnd(event)" 
              onclick="handleSosClick(event)">
           <div class="sos-glass-reflection"></div>
+          <svg class="sos-progress-svg" viewBox="0 0 184 184">
+            <circle class="sos-progress-meter" id="sos-progress-arc" cx="92" cy="92" r="86"></circle>
+          </svg>
           <span class="sos-text-label">SOS</span>
           <span class="sos-text-sub" data-i18n="sos_btn_sub">Hold 3s</span>
         </div>
@@ -3325,13 +3563,25 @@
 
     <div id="screen-admin" class="screen screen-padded" style="display: none;"></div>
 
-    <!-- Bottom Navigation -->
+    <!-- Apple Floating Liquid Glass Bottom Navigation -->
     <div class="bottom-bar">
-      <button class="nav-tab-btn active" id="nav-tab-sos" data-i18n="nav_sos" onclick="switchTab('screen-sos', this)">Emergency</button>
-      <button class="nav-tab-btn" id="nav-tab-map" data-i18n="nav_map" onclick="switchTab('screen-map', this)">Map</button>
-      <button class="nav-tab-btn" id="nav-tab-feed" data-i18n="nav_feed" onclick="switchTab('screen-feed', this)">Awareness</button>
+      <button class="nav-tab-btn active" id="nav-tab-sos" onclick="switchTab('screen-sos', this)">
+        <i class="fas fa-shield-halved nav-tab-icon"></i>
+        <span data-i18n="nav_sos">Emergency</span>
+      </button>
+      <button class="nav-tab-btn" id="nav-tab-map" onclick="switchTab('screen-map', this)">
+        <i class="fas fa-map-location-dot nav-tab-icon"></i>
+        <span data-i18n="nav_map">Map</span>
+      </button>
+      <button class="nav-tab-btn" id="nav-tab-feed" onclick="switchTab('screen-feed', this)">
+        <i class="fas fa-bullhorn nav-tab-icon"></i>
+        <span data-i18n="nav_feed">Awareness</span>
+      </button>
       <button class="nav-tab-btn" id="nav-btn-admin" style="display: none; color: #f59e0b;" onclick="switchTab('screen-admin', this)"></button>
-      <button class="nav-tab-btn" id="nav-tab-profile" data-i18n="nav_profile" onclick="openAuthModal()">Profile</button>
+      <button class="nav-tab-btn" id="nav-tab-profile" onclick="openAuthModal()">
+        <i class="fas fa-user nav-tab-icon"></i>
+        <span data-i18n="nav_profile">Profile</span>
+      </button>
     </div>
 
     <!-- ========================================================
@@ -3777,24 +4027,24 @@
 
         <!-- Logged In Profile View (UNLOCKED PROFILE) -->
         <div id="view-profile-active" style="display: none;">
-          <!-- Top Citizen Status Banner (Only Name & Phone Number) -->
-          <div style="background: var(--black-subtle); border: 1px solid var(--burgundy-border); border-radius: 16px; padding: 24px 16px; margin-bottom: 16px; text-align: center; position: relative;">
-            <div style="position: absolute; top: 12px; right: 12px; font-size: 10px; color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 2px 8px; border-radius: 10px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-              <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span> <span data-i18n="auth_unlocked_badge">Unlocked</span>
+          <!-- Top Citizen Status Banner (Apple Health Medical ID Style) -->
+          <div class="apple-medical-id-card">
+            <div class="apple-medical-badge">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: #30d158; box-shadow: 0 0 6px #30d158;"></span> <span data-i18n="auth_unlocked_badge">Unlocked</span>
             </div>
-            <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--burgundy-deep); border: 2px solid var(--burgundy-vivid); margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #fff;" id="profile-badge-letter">C</div>
-            <h4 style="font-size: 18px; color: #fff; font-weight: 700; margin: 0 0 6px 0;" id="profile-display-name">Citizen</h4>
-            <p style="font-size: 13.5px; color: #cbd5e1; font-weight: 600; margin: 0; font-family: monospace; letter-spacing: 0.5px;" id="profile-display-phone">+880 17XXXXXXXX</p>
+            <div class="apple-medical-avatar" id="profile-badge-letter">C</div>
+            <h4 style="font-size: 19px; color: #fff; font-weight: 800; letter-spacing: -0.3px; margin: 0 0 4px 0;" id="profile-display-name">Citizen</h4>
+            <p style="font-size: 13px; color: #cbd5e1; font-weight: 600; margin: 0; font-family: monospace; letter-spacing: 0.5px;" id="profile-display-phone">+880 17XXXXXXXX</p>
 
-            <!-- Citizen Blood Group Pill Display -->
-            <div id="profile-blood-pill-wrap" style="margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.35); border-radius: 20px; padding: 4px 12px;">
-              <i class="fas fa-droplet" style="color: #f43f5e; font-size: 11px;"></i>
+            <!-- Citizen Blood Group Pill Display (Apple Medical ID Metric) -->
+            <div id="profile-blood-pill-wrap" style="margin-top: 12px; display: inline-flex; align-items: center; gap: 7px; background: rgba(255, 55, 95, 0.15); border: 1px solid rgba(255, 55, 95, 0.35); border-radius: 9999px; padding: 5px 14px; backdrop-filter: blur(8px);">
+              <i class="fas fa-droplet" style="color: #ff375f; font-size: 12px;"></i>
               <span style="font-size: 11.5px; font-weight: 800; color: #fecdd3;" id="profile-blood-pill-text">Blood: Not Set</span>
             </div>
           </div>
 
-          <!-- CITIZEN EMERGENCY BLOOD LIFELINE PROFILE CARD -->
-          <div style="background: rgba(244, 63, 94, 0.05); border: 1.5px solid rgba(244, 63, 94, 0.28); border-radius: 16px; padding: 14px 16px; margin-bottom: 14px;">
+          <!-- CITIZEN EMERGENCY BLOOD LIFELINE PROFILE CARD (Apple Inset Grouped) -->
+          <div style="background: rgba(26, 28, 38, 0.72); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 18px; padding: 15px 16px; margin-bottom: 14px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(244, 63, 94, 0.2); border: 1px solid #f43f5e; display: flex; align-items: center; justify-content: center; color: #f43f5e; font-size: 13px;">
@@ -5700,7 +5950,17 @@
       }
 
       if (showAlert) {
-        alert(`📍 Accurate GPS Location Updated!\n\nDevice Location: ${locName}\nCoordinates: ${lat.toFixed(5)}, ${lon.toFixed(5)}\nAccuracy: ±${currentCoords.accuracy} meters`);
+        if (typeof showDynamicIsland === 'function') {
+          showDynamicIsland({
+            title: "GPS Location Locked",
+            sub: `${locName || 'Live Position'} (±${Math.round(currentCoords.accuracy || 10)}m)`,
+            icon: "fa-satellite-dish",
+            type: "success",
+            duration: 3500
+          });
+        } else {
+          alert(`📍 Accurate GPS Location Updated!\n\nDevice Location: ${locName}\nCoordinates: ${lat.toFixed(5)}, ${lon.toFixed(5)}\nAccuracy: ±${currentCoords.accuracy} meters`);
+        }
       }
     }
 
@@ -8620,14 +8880,58 @@
     let covertMediaStream = null;
     let covertRecordedChunks = [];
 
+    /* ========================================================
+       APPLE DYNAMIC ISLAND CONTROLLER
+    ======================================================== */
+    let dynamicIslandTimer = null;
+    function showDynamicIsland({ title, sub, icon = 'fa-shield-halved', type = 'info', duration = 3500 } = {}) {
+      const container = document.getElementById('apple-dynamic-island');
+      if (!container) return;
+      const titleEl = document.getElementById('island-title');
+      const subEl = document.getElementById('island-sub');
+      const iconEl = document.getElementById('island-icon');
+
+      if (titleEl && title) titleEl.textContent = title;
+      if (subEl && sub) subEl.textContent = sub;
+      if (iconEl) {
+        iconEl.className = `island-icon-box ${type}`;
+        iconEl.innerHTML = `<i class="fas ${icon}"></i>`;
+      }
+
+      container.classList.add('island-visible');
+      if (navigator.vibrate) {
+        try { navigator.vibrate(35); } catch(e) {}
+      }
+
+      if (dynamicIslandTimer) clearTimeout(dynamicIslandTimer);
+      dynamicIslandTimer = setTimeout(() => {
+        container.classList.remove('island-visible');
+      }, duration);
+    }
+
+    function handleDynamicIslandTap() {
+      const container = document.getElementById('apple-dynamic-island');
+      if (container) container.classList.remove('island-visible');
+    }
+
+    /* Apple Watch Ultra Living Radar SOS with Radial Countdown Ring */
     function handleSosPressStart(e) {
       sosHoldStartTime = Date.now();
       sosTriggeredByHold = false;
       const disc = document.querySelector('.sos-button-disc');
-      if (disc) disc.style.transform = 'scale(1.06)';
+      if (disc) disc.style.transform = 'scale(0.94)';
+      const arc = document.getElementById('sos-progress-arc');
+      if (arc) {
+        arc.style.transition = 'stroke-dashoffset 1.2s linear';
+        arc.style.strokeDashoffset = '0';
+      }
+
+      if (navigator.vibrate) {
+        try { navigator.vibrate(30); } catch(err) {}
+      }
 
       if (sosHoldTimer) clearTimeout(sosHoldTimer);
-      // Press & Hold for 1.2s triggers SOS
+      // Press & Hold for 1.2s triggers SOS with progress ring completion
       sosHoldTimer = setTimeout(() => {
         sosTriggeredByHold = true;
         if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
@@ -8638,6 +8942,11 @@
     function handleSosPressEnd(e) {
       const disc = document.querySelector('.sos-button-disc');
       if (disc) disc.style.transform = '';
+      const arc = document.getElementById('sos-progress-arc');
+      if (arc) {
+        arc.style.transition = 'stroke-dashoffset 0.15s ease-out';
+        arc.style.strokeDashoffset = '540';
+      }
       if (sosHoldTimer) {
         clearTimeout(sosHoldTimer);
         sosHoldTimer = null;
@@ -9179,6 +9488,19 @@
     }
 
     function triggerSOS() {
+      const arc = document.getElementById('sos-progress-arc');
+      if (arc) {
+        arc.style.transition = 'none';
+        arc.style.strokeDashoffset = '540';
+      }
+      showDynamicIsland({
+        title: "EMERGENCY SOS INITIATED",
+        sub: "5-second CAD dispatcher countdown active",
+        icon: "fa-triangle-exclamation",
+        type: "warning",
+        duration: 4500
+      });
+
       sosCount = 5;
       document.getElementById('sos-countdown-val').innerText = sosCount;
       document.getElementById('sos-modal').classList.add('open');
@@ -9199,12 +9521,26 @@
       clearInterval(sosTimer);
       document.getElementById('sos-modal').classList.remove('open');
       if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+      showDynamicIsland({
+        title: "SOS Countdown Cancelled",
+        sub: "Safe status maintained",
+        icon: "fa-circle-check",
+        type: "info",
+        duration: 3000
+      });
     }
 
     function finishEmergencySOS() {
       clearInterval(sosTimer);
       document.getElementById('sos-modal').classList.remove('open');
       if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+      showDynamicIsland({
+        title: "SOS DISPATCHED TO 999",
+        sub: "Live GPS coordinates broadcast to CAD",
+        icon: "fa-shield-halved",
+        type: "success",
+        duration: 5000
+      });
 
       // 1. Dispatch Emergency Signal & Live GPS to 999 CAD Dispatcher
       const userName = currentUser ? (currentUser.name || "Verified Citizen") : "Citizen in Distress";
@@ -12085,8 +12421,8 @@
       const adminProfileBtn = document.getElementById('admin-portal-profile-btn');
       if (currentUser.isAdmin || isChiefAdmin) {
         if (adminNavBtn) {
-          adminNavBtn.innerHTML = '<i class="fas fa-gavel"></i> Admin';
-          adminNavBtn.style.display = 'block';
+          adminNavBtn.innerHTML = '<i class="fas fa-gavel nav-tab-icon"></i> <span>Admin</span>';
+          adminNavBtn.style.display = 'flex';
         }
         if (adminProfileBtn) {
           adminProfileBtn.innerHTML = '<i class="fas fa-shield-halved"></i> Open Admin Command Portal';
