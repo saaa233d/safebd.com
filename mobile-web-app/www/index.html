@@ -1982,13 +1982,13 @@
     }
 
     /* ========================================================
-       IMMEDIATE EMERGENCY HELP MODAL (COOL TACTICAL 2x2 GRID)
+       IMMEDIATE EMERGENCY HELP MODAL (APPLE-INSPIRED 2x2 ACTION MATRIX)
     ======================================================== */
     .help-tactical-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 14px;
+      gap: 12px;
+      margin-top: 16px;
     }
     @media (max-width: 320px) {
       .help-tactical-grid {
@@ -1996,21 +1996,24 @@
       }
     }
     .help-card-tile {
-      background: linear-gradient(145deg, rgba(28, 20, 26, 0.9) 0%, rgba(14, 10, 14, 0.95) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      padding: 12px 11px;
+      background: rgba(30, 32, 42, 0.72);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 14px 13px;
       text-align: left;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 114px;
+      min-height: 124px;
       cursor: pointer;
       position: relative;
       overflow: hidden;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.45), inset 0 1px 1px 0 rgba(255, 255, 255, 0.15);
       -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
     .help-card-tile::before {
       content: '';
@@ -2018,169 +2021,169 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 2.5px;
-      opacity: 0.85;
-      transition: opacity 0.2s ease;
+      height: 48px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
+      pointer-events: none;
+      border-radius: 20px 20px 0 0;
     }
     .help-card-tile:hover {
       transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.22);
+      box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.55), inset 0 1px 1px 0 rgba(255, 255, 255, 0.25);
     }
     .help-card-tile:active {
-      transform: scale(0.96);
+      transform: scale(0.965);
+      filter: brightness(1.08);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
     }
 
-    /* Card Themes */
+    /* Apple-Themed Accents for Cards */
     .help-card-tile.theme-ambulance {
-      border-color: rgba(239, 68, 68, 0.35);
-      background: linear-gradient(145deg, rgba(239, 68, 68, 0.12) 0%, rgba(20, 10, 14, 0.95) 100%);
-    }
-    .help-card-tile.theme-ambulance::before {
-      background: linear-gradient(90deg, #ef4444, #f87171);
+      background: radial-gradient(circle at top left, rgba(255, 69, 58, 0.16), transparent 70%), rgba(28, 22, 26, 0.78);
+      border-color: rgba(255, 69, 58, 0.28);
     }
     .help-card-tile.theme-ambulance:hover {
-      border-color: #ef4444;
-      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+      border-color: rgba(255, 69, 58, 0.5);
+      box-shadow: 0 12px 30px -4px rgba(255, 69, 58, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
     }
 
     .help-card-tile.theme-patient {
-      border-color: rgba(245, 158, 11, 0.35);
-      background: linear-gradient(145deg, rgba(245, 158, 11, 0.12) 0%, rgba(20, 14, 10, 0.95) 100%);
-    }
-    .help-card-tile.theme-patient::before {
-      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      background: radial-gradient(circle at top left, rgba(255, 159, 10, 0.16), transparent 70%), rgba(28, 24, 20, 0.78);
+      border-color: rgba(255, 159, 10, 0.28);
     }
     .help-card-tile.theme-patient:hover {
-      border-color: #f59e0b;
-      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.25);
+      border-color: rgba(255, 159, 10, 0.5);
+      box-shadow: 0 12px 30px -4px rgba(255, 159, 10, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
     }
 
     .help-card-tile.theme-fire {
-      border-color: rgba(234, 88, 12, 0.35);
-      background: linear-gradient(145deg, rgba(234, 88, 12, 0.12) 0%, rgba(20, 12, 10, 0.95) 100%);
-    }
-    .help-card-tile.theme-fire::before {
-      background: linear-gradient(90deg, #ea580c, #fb923c);
+      background: radial-gradient(circle at top left, rgba(255, 107, 53, 0.16), transparent 70%), rgba(28, 22, 18, 0.78);
+      border-color: rgba(255, 107, 53, 0.28);
     }
     .help-card-tile.theme-fire:hover {
-      border-color: #ea580c;
-      box-shadow: 0 6px 20px rgba(234, 88, 12, 0.25);
+      border-color: rgba(255, 107, 53, 0.5);
+      box-shadow: 0 12px 30px -4px rgba(255, 107, 53, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
     }
 
     .help-card-tile.theme-blood {
-      border-color: rgba(244, 63, 94, 0.4);
-      background: linear-gradient(145deg, rgba(244, 63, 94, 0.14) 0%, rgba(22, 10, 15, 0.95) 100%);
-    }
-    .help-card-tile.theme-blood::before {
-      background: linear-gradient(90deg, #f43f5e, #fda4af);
+      background: radial-gradient(circle at top left, rgba(255, 55, 95, 0.16), transparent 70%), rgba(28, 20, 24, 0.78);
+      border-color: rgba(255, 55, 95, 0.28);
     }
     .help-card-tile.theme-blood:hover {
-      border-color: #f43f5e;
-      box-shadow: 0 6px 20px rgba(244, 63, 94, 0.3);
+      border-color: rgba(255, 55, 95, 0.5);
+      box-shadow: 0 12px 30px -4px rgba(255, 55, 95, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
     }
 
     .help-card-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
+
+    /* Apple iOS Vibrant Squircle Icons */
     .help-icon-bubble {
-      width: 32px;
-      height: 32px;
-      border-radius: 9px;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 16px;
+      color: #ffffff;
       flex-shrink: 0;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.35);
     }
     .theme-ambulance .help-icon-bubble {
-      background: rgba(239, 68, 68, 0.2);
-      border: 1px solid rgba(239, 68, 68, 0.5);
-      color: #ef4444;
+      background: linear-gradient(140deg, #ff453a 0%, #d70015 100%);
+      box-shadow: 0 4px 14px rgba(255, 69, 58, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
     }
     .theme-patient .help-icon-bubble {
-      background: rgba(245, 158, 11, 0.2);
-      border: 1px solid rgba(245, 158, 11, 0.5);
-      color: #f59e0b;
+      background: linear-gradient(140deg, #ff9f0a 0%, #d97706 100%);
+      box-shadow: 0 4px 14px rgba(255, 159, 10, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
     }
     .theme-fire .help-icon-bubble {
-      background: rgba(234, 88, 12, 0.2);
-      border: 1px solid rgba(234, 88, 12, 0.5);
-      color: #ea580c;
+      background: linear-gradient(140deg, #ff6b35 0%, #ea580c 100%);
+      box-shadow: 0 4px 14px rgba(255, 107, 53, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
     }
     .theme-blood .help-icon-bubble {
-      background: rgba(244, 63, 94, 0.2);
-      border: 1px solid rgba(244, 63, 94, 0.55);
-      color: #f43f5e;
+      background: linear-gradient(140deg, #ff375f 0%, #d61845 100%);
+      box-shadow: 0 4px 14px rgba(255, 55, 95, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
     }
 
+    /* Apple Frosted Capsule Pill Badge */
     .help-pill-badge {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
       font-size: 10px;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 6px;
-      letter-spacing: 0.3px;
-      text-transform: uppercase;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      padding: 4px 9px;
+      border-radius: 9999px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
     }
     .theme-ambulance .help-pill-badge {
-      background: rgba(239, 68, 68, 0.25);
-      border: 1px solid rgba(239, 68, 68, 0.6);
-      color: #fee2e2;
+      background: rgba(255, 69, 58, 0.15);
+      border: 1px solid rgba(255, 69, 58, 0.35);
+      color: #ff9d97;
     }
     .theme-patient .help-pill-badge {
-      background: rgba(245, 158, 11, 0.25);
-      border: 1px solid rgba(245, 158, 11, 0.6);
-      color: #fef3c7;
+      background: rgba(255, 159, 10, 0.15);
+      border: 1px solid rgba(255, 159, 10, 0.35);
+      color: #ffca80;
     }
     .theme-fire .help-pill-badge {
-      background: rgba(234, 88, 12, 0.25);
-      border: 1px solid rgba(234, 88, 12, 0.6);
-      color: #ffedd5;
+      background: rgba(255, 107, 53, 0.15);
+      border: 1px solid rgba(255, 107, 53, 0.35);
+      color: #ffb794;
     }
     .theme-blood .help-pill-badge {
-      background: rgba(244, 63, 94, 0.25);
-      border: 1px solid rgba(244, 63, 94, 0.65);
-      color: #ffe4e6;
+      background: rgba(255, 55, 95, 0.15);
+      border: 1px solid rgba(255, 55, 95, 0.35);
+      color: #ff9bb0;
     }
 
     .live-beacon-dot {
       width: 5px;
       height: 5px;
       border-radius: 50%;
-      background: #fff;
+      background: currentColor;
       display: inline-block;
-      box-shadow: 0 0 6px #fff;
-      animation: beaconPulse 1.4s infinite ease-in-out;
+      box-shadow: 0 0 6px currentColor;
+      animation: appleBeaconPulse 1.6s infinite ease-in-out;
     }
-    @keyframes beaconPulse {
+    @keyframes appleBeaconPulse {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.75); }
+      50% { opacity: 0.35; transform: scale(0.8); }
     }
 
+    /* Apple-style Card Typography */
     .help-card-title {
-      font-size: 12px;
-      font-weight: 800;
-      color: #fff;
-      line-height: 1.3;
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.25;
+      letter-spacing: -0.15px;
       margin-bottom: 3px;
     }
     .help-card-desc {
-      font-size: 9.5px;
+      font-size: 10px;
       line-height: 1.35;
+      color: rgba(255, 255, 255, 0.68);
+      font-weight: 400;
+      letter-spacing: -0.05px;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .theme-ambulance .help-card-desc { color: #fca5a5; }
-    .theme-patient .help-card-desc { color: #fde68a; }
-    .theme-fire .help-card-desc { color: #fed7aa; }
-    .theme-blood .help-card-desc { color: #fecdd3; }
+    .theme-ambulance .help-card-desc { color: rgba(255, 225, 225, 0.75); }
+    .theme-patient .help-card-desc { color: rgba(255, 243, 215, 0.75); }
+    .theme-fire .help-card-desc { color: rgba(255, 235, 220, 0.75); }
+    .theme-blood .help-card-desc { color: rgba(255, 225, 235, 0.75); }
     .form-group {
       margin-bottom: 14px;
       text-align: left;
