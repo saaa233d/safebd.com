@@ -65,8 +65,8 @@ function normalizeQuery(q) {
   return q
     .toLowerCase()
     .replace(/[^\w\s\u0980-\u09FF]/gi, ' ')
-    .replace(/\b(give|me|the|number|phone|mobile|contact|of|what|is|thana|police|station|ps|model|oc|officer|in|charge|duty|investigation|ops|operations|please|bhai|vai|koto|ki|details|all)\b/gi, ' ')
-    .replace(/\b(নাম্বার|ফোন|ওসি|থানার|থানা|পুলিশ|দাও|কত|যোগাযোগ|বলুন|দিন|সব|নাম্বারগুলো)\b/gi, ' ')
+    .replace(/\b(give|me|the|number|phone|mobile|contact|of|what|is|thana|police|station|ps|model|oc|officer|in|charge|duty|investigation|ops|operations|please|bhai|vai|koto|ki|details|all|im|i|am|my|we|he|she|they|it|are|was|were|so|very|just|now|here|there|feeling|feel|and|or|crying|cry|sad|hurt|scared|upset|tears)\b/gi, ' ')
+    .replace(/\b(নাম্বার|ফোন|ওসি|থানার|থানা|পুলিশ|দাও|কত|যোগাযোগ|বলুন|দিন|সব|নাম্বারগুলো|আমি|আমার|আমরা|তুমি|তোমার|খুব|একটু|মন|খারাপ|কাঁদছি|কান্না)\b/gi, ' ')
     .trim()
     .replace(/\s+/g, ' ');
 }
@@ -82,7 +82,10 @@ function resolvePoliceQuery(rawQuery) {
   const isBangla = /[\u0980-\u09FF]/.test(originalQ);
   const cleanQ = normalizeQuery(originalQ);
 
-  const tokens = cleanQ.split(' ').filter(t => t.length >= 2);
+  if (!cleanQ || cleanQ.length < 3) return null;
+
+  const tokens = cleanQ.split(' ').filter(t => t.length >= 3);
+  if (tokens.length === 0 && cleanQ.length < 3) return null;
 
   let bestMatch = null;
   let bestScore = 0;
@@ -111,10 +114,11 @@ function resolvePoliceQuery(rawQuery) {
     } else {
       let matchedTokens = 0;
       for (const tok of tokens) {
-        if (tok.length < 2) continue;
-        if (thanaNameLower.split(/\s+/).includes(tok) || (thana.keywords && thana.keywords.includes(tok))) {
+        if (tok.length < 3) continue;
+        const nameTokens = thanaNameLower.split(/\s+/);
+        if (nameTokens.includes(tok) || (thana.keywords && thana.keywords.includes(tok))) {
           matchedTokens += 2;
-        } else if (thanaNameLower.includes(tok)) {
+        } else if (tok.length >= 4 && thanaNameLower.startsWith(tok)) {
           matchedTokens += 1;
         }
       }
@@ -136,12 +140,12 @@ function resolvePoliceQuery(rawQuery) {
     }
   }
 
-  // 3. Typo / Fuzzy Match (Levenshtein & Trigram Similarity)
+  // 3. Typo / Fuzzy Match (Levenshtein & Trigram Similarity) - requires high confidence
   if (bestScore < 85 && tokens.length > 0) {
     for (const thana of database.thanas) {
       const thanaNameLower = thana.name.toLowerCase();
       for (const tok of tokens) {
-        if (tok.length < 3) continue;
+        if (tok.length < 4) continue;
 
         // Similarity against thana name
         const sim = stringSimilarity(tok, thanaNameLower);
@@ -151,7 +155,7 @@ function resolvePoliceQuery(rawQuery) {
         }
 
         const totalSim = sim + distBonus;
-        if (totalSim >= 0.72 && totalSim * 85 > bestScore) {
+        if (totalSim >= 0.82 && totalSim * 85 > bestScore) {
           bestScore = totalSim * 85;
           bestMatch = thana;
           isTypoCorrection = (sim < 0.99);
@@ -160,9 +164,9 @@ function resolvePoliceQuery(rawQuery) {
         // Similarity against thana keywords
         if (thana.keywords) {
           for (const kw of thana.keywords) {
-            if (kw.length < 3) continue;
+            if (kw.length < 4) continue;
             const kwSim = stringSimilarity(tok, kw.toLowerCase());
-            if (kwSim >= 0.75 && kwSim * 85 > bestScore) {
+            if (kwSim >= 0.85 && kwSim * 85 > bestScore) {
               bestScore = kwSim * 85;
               bestMatch = thana;
               isTypoCorrection = (kwSim < 0.99);
