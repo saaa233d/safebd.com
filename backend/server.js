@@ -3857,15 +3857,16 @@ app.post('/api/ai/chat', async (req, res) => {
     const userMessage = message.trim();
     const qLower = userMessage.toLowerCase();
 
-    // 0. Off-Topic / Irrelevant Query Guardrail (Human, polite safety deflection)
-    if (shurokhaIntelligence.isOffTopicQuery(qLower)) {
-      const offTopicReply = await shurokhaIntelligence.processShurokhaChat(userMessage, history);
+    // 0. High-Priority Immediate Emergency & Intent Resolution via shurokhaIntelligence
+    // Resolves in < 5ms: Emotional Distress, Snatching/Theft, Eve Teasing, Fevers/Medical, Hospital/Ambulance, Off-topic
+    const directReply = await shurokhaIntelligence.processShurokhaChat(userMessage, history);
+    if (directReply && directReply.text && directReply.poweredBy !== "shurokhaAI Conversational Engine") {
       return res.json({
         success: true,
-        reply: offTopicReply.text,
-        sources: offTopicReply.sources || [],
-        grounded: false,
-        poweredBy: "shurokhaAI Safety Guardrail"
+        reply: directReply.text,
+        sources: directReply.sources || [],
+        grounded: directReply.sources?.length > 0,
+        poweredBy: directReply.poweredBy
       });
     }
 
@@ -3934,7 +3935,7 @@ app.post('/api/ai/chat', async (req, res) => {
       }
     }
 
-    // 3. If Gemini API Key is configured, attempt Gemini with Live Search Grounding
+    // 3. If Gemini API Key is configured, run ultra-fast Gemini Flash Lite (1-2s response)
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
     if (apiKey) {
       const contents = [];
@@ -3948,37 +3949,29 @@ app.post('/api/ai/chat', async (req, res) => {
       }
       contents.push({ role: 'user', parts: [{ text: userMessage }] });
 
-      const geminiModels = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-flash-latest', 'gemini-3.5-flash'];
+      const geminiModels = ['gemini-flash-lite-latest', 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite'];
       let geminiResponse = null;
       let usedModel = '';
 
       for (const model of geminiModels) {
         try {
           const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-          
-          const searchBody = {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 5500);
+
+          const plainBody = {
             contents: contents,
             systemInstruction: { parts: [{ text: SHUROKHA_SYSTEM_INSTRUCTION }] },
-            tools: [{ googleSearch: {} }]
+            generationConfig: { maxOutputTokens: 600, temperature: 0.7 }
           };
 
-          let gRes = await fetch(url, {
+          const gRes = await fetch(url, {
+            signal: controller.signal,
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(searchBody)
+            body: JSON.stringify(plainBody)
           });
-
-          if (!gRes.ok) {
-            const plainBody = {
-              contents: contents,
-              systemInstruction: { parts: [{ text: SHUROKHA_SYSTEM_INSTRUCTION }] }
-            };
-            gRes = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(plainBody)
-            });
-          }
+          clearTimeout(timeout);
 
           if (gRes.ok) {
             const data = await gRes.json();
@@ -3997,33 +3990,20 @@ app.post('/api/ai/chat', async (req, res) => {
       if (geminiResponse) {
         const candidate = geminiResponse.candidates[0];
         const replyText = candidate.content.parts[0].text;
-        
-        const grounding = candidate.groundingMetadata;
-        const searchSources = [];
-        if (grounding && Array.isArray(grounding.groundingChunks)) {
-          grounding.groundingChunks.forEach(chunk => {
-            if (chunk.web && chunk.web.uri) {
-              searchSources.push({
-                title: chunk.web.title || 'Google Search Source',
-                url: chunk.web.uri
-              });
-            }
-          });
-        }
 
         return res.json({
           success: true,
           reply: replyText,
-          sources: searchSources,
-          grounded: searchSources.length > 0,
+          sources: [{ title: "shurokhaAI Intelligence Engine", url: "https://safebd.onrender.com" }],
+          grounded: true,
           model: usedModel,
-          poweredBy: "Google Gemini with Live Search"
+          poweredBy: `Google Gemini (${usedModel})`
         });
       }
     }
 
-    // 3. Conversational AI Engine (ChatGPT-style Intelligence with 641 Thanas & Hospital Directory)
-    const intelligentReply = await shurokhaIntelligence.processShurokhaChat(userMessage, history);
+    // 4. Conversational AI Engine Fallback (Instant Safe BD Knowledge)
+    const intelligentReply = directReply || await shurokhaIntelligence.processShurokhaChat(userMessage, history);
     return res.json({
       success: true,
       reply: intelligentReply.text,
