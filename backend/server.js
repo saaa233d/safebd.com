@@ -3884,7 +3884,57 @@ app.post('/api/ai/chat', async (req, res) => {
       }
     }
 
-    // 2. If Gemini API Key is configured, attempt Gemini with ChatGPT-like Persona & Live Search Grounding
+    // 2. If OpenAI (ChatGPT) API Key is configured, run actual ChatGPT (gpt-4o-mini / gpt-4o)
+    const openaiApiKey = process.env.OPENAI_API_KEY || '';
+    if (openaiApiKey) {
+      try {
+        const messages = [{ role: 'system', content: SHUROKHA_SYSTEM_INSTRUCTION }];
+        if (Array.isArray(history)) {
+          history.slice(-8).forEach(h => {
+            if (h && h.text) {
+              const role = h.role === 'model' ? 'assistant' : (h.role === 'assistant' ? 'assistant' : 'user');
+              messages.push({ role, content: String(h.text) });
+            }
+          });
+        }
+        messages.push({ role: 'user', content: userMessage });
+
+        const oRes = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${openaiApiKey}`
+          },
+          body: JSON.stringify({
+            model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+            messages,
+            temperature: 0.7,
+            max_tokens: 800
+          })
+        });
+
+        if (oRes.ok) {
+          const oData = await oRes.json();
+          const replyText = oData.choices?.[0]?.message?.content;
+          if (replyText) {
+            return res.json({
+              success: true,
+              reply: replyText,
+              sources: [{ title: "ChatGPT Intelligence Engine", url: "https://openai.com" }],
+              grounded: true,
+              model: oData.model || 'gpt-4o-mini',
+              poweredBy: "ChatGPT (OpenAI GPT-4o)"
+            });
+          }
+        } else {
+          console.warn('[shurokhaAI] OpenAI error:', oRes.status, await oRes.text());
+        }
+      } catch (oErr) {
+        console.warn('[shurokhaAI] OpenAI connection error:', oErr.message);
+      }
+    }
+
+    // 3. If Gemini API Key is configured, attempt Gemini with Live Search Grounding
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
     if (apiKey) {
       const contents = [];
