@@ -192,34 +192,99 @@ async function processShurokhaChat(userMessage, history = []) {
     }
   }
 
-  // If user previously expressed emotional distress and is now continuing the reason (e.g. "my friend betrayed me", "i lost my job", "family issues")
-  if (lastTopic === 'EMOTIONAL_DISTRESS' && !detectedLocation) {
-    if (isBangla) {
-      return {
-        text: `💙 **আপনার কথাটি আমি মন দিয়ে শুনেছি এবং বুঝতে পেরেছি।** এমন পরিস্থিতির মধ্য দিয়ে যাওয়া সত্যিই প্রচণ্ড বেদনাদায়ক ও মানসিক ক্লান্তির।\n\n` +
-          `নিজের প্রতি একটু সদয় হোন। জীবনের কঠিন সময়গুলোতে অনেক সময় সবকিছু অন্ধকার মনে হয়, তবে মনে রাখবেন আপনার এই কষ্ট চিরস্থায়ী নয়। নিজেকে সময় দিন এবং নিজের যত্ন নিন।\n\n` +
-          `আপনি কি কোনো আপনজন বা বন্ধুর সাথে এই কথাটি শেয়ার করতে পারেন? আর যদি কোনো কাউন্সেলরের সাথে মনের ভাব খোলামেলা আলোচনা করতে চান:\n` +
-          `• 📞 **কান পেতে রই (Kaan Pete Roi):** [01779-554391](tel:01779554391) / [01779-554392](tel:01779554392)\n` +
-          `• 📞 **স্বাস্থ্য বাতায়ন (২৪ ঘণ্টা পরামর্শ):** [১৬২৬৩](tel:16263)\n\n` +
-          `আমি আপনার পাশেই আছি। আরও কিছু বলতে চাইলে বলুন, আমি শুনছি।`,
-        sources: [
-          { title: "কান পেতে রই হেল্পলাইন", url: "tel:01779554391" }
-        ],
-        poweredBy: "shurokhaAI Human Empathy Companion"
-      };
+  // ─── 0. CRIME / THEFT / SNATCHING PRIORITY ────────────────────────────────
+  const isSnatching = /\b(snatch|snatched|mugging|mugged|robbery|robbed|stole|stolen|theft|thief|pickpocket|bag|wallet|phone)\b|ছিনতাই|ডাকাতি|ব্যাগ|চুরি|মোবাইল চুরি|ছিনতাইকারী/i.test(qLower) ||
+    (lastTopic === 'SNATCHING' && detectedLocation);
+
+  if (isSnatching) {
+    const isClarifyingTheft = /counsellor|counselor|why should i need|কাউন্সেলর/i.test(qLower) || lastTopic === 'EMOTIONAL_DISTRESS';
+    const apologizeIntroEn = isClarifyingTheft ? `**You are completely right — I apologize!** Having your bag or property stolen is a crime and an emergency, NOT an emotional counseling situation. Let's take immediate tactical action right now:\n\n` : '';
+    const apologizeIntroBn = isClarifyingTheft ? `**আপনি একদম ঠিক বলেছেন — আমি আন্তরিকভাবে দুঃখিত!** ব্যাগ চুরি বা ছিনতাই হওয়া একটি অপরাধমূলক ঘটনা, এখানে কোনো কাউন্সেলরের প্রয়োজন নেই। আসুন অবিলম্বে পুলিশি ও আইনি ব্যবস্থা নিই:\n\n` : '';
+
+    if (detectedLocation) {
+      const thanaMatch = policeDirectory.resolvePoliceQuery(detectedLocation.name);
+      if (isBangla) {
+        let text = `${apologizeIntroBn}🛡️ **সবার আগে নিশ্চিত করুন আপনি শারীরিকভাবে নিরাপদ আছেন কিনা।**\n\n` +
+          `📍 **ঘটনাস্থল / এলাকা:** ${locationBn || detectedLocation.name}\n\n` +
+          `🚨 **তাৎক্ষণিক প্রয়োজনীয় পদক্ষেপ:**\n` +
+          `১. **অবিলম্বে নিকটস্থ থানায় জিডি (GD) বা মামলা করুন:** ছিনতাই বা চুরির ঘটনায় দ্রুত থানায় অভিযোগ দায়ের করা অত্যন্ত গুরুত্বপূর্ণ যাতে পুলিশ সিসিটিভি ফুটেজ দেখতে পারে।\n`;
+
+        if (thanaMatch && thanaMatch.text) {
+          text += `\n${thanaMatch.text}\n\n`;
+        }
+
+        text += `২. **সিম ও মোবাইল ব্যাংকিং বন্ধ করুন (যদি ফোন বা কার্ড ব্যাগে থাকে):**\n` +
+          `   • **বিকাশ (bKash):** [16247](tel:16247) (অ্যাকাউন্ট সাময়িক ফ্রিজ করতে)\n` +
+          `   • **নগদ (Nagad):** [16167](tel:16167)\n` +
+          `   • **রকেট (Rocket):** [16216](tel:16216)\n` +
+          `   • **সিম ব্লক করতে:** গ্রামীনফোন [121](tel:121), বাংলালিংক [121](tel:121), রবি [121](tel:121)\n` +
+          `৩. **জিডিতে যা উল্লেখ করবেন:** মোবাইল ফোনের IMEI নম্বর, খোয়া যাওয়া টাকার পরিমাণ, সঠিক সময় ও স্থান।\n` +
+          `৪. **জরুরি পুলিশ পেট্রোল:** সরাসরি [৯৯৯](tel:999) এ কল করুন।`;
+
+        return {
+          text,
+          sources: thanaMatch?.sources || [{ title: "National 999 Police Dispatch", url: "tel:999" }],
+          poweredBy: "shurokhaAI Incident Response Engine"
+        };
+      } else {
+        let text = `${apologizeIntroEn}🛡️ **First and foremost, please ensure you are in a safe place and physically unhurt.**\n\n` +
+          `📍 **Incident Area:** ${detectedLocation.name}\n\n` +
+          `🚨 **Crucial Immediate Steps to Take:**\n` +
+          `1. **Report to Nearest Police Station (Thana):** File a General Diary (GD) or FIR immediately so police can pull area CCTV cameras.\n`;
+
+        if (thanaMatch && thanaMatch.text) {
+          text += `\n${thanaMatch.text}\n\n`;
+        }
+
+        text += `2. **Freeze Financial Accounts & SIMs (If Phone or Cards were in the Bag):**\n` +
+          `   • **bKash:** [16247](tel:16247) (Freeze your mobile wallet)\n` +
+          `   • **Nagad:** [16167](tel:16167)\n` +
+          `   • **Rocket:** [16216](tel:16216)\n` +
+          `   • **Telecom SIM Lock:** Grameenphone [121](tel:121), Banglalink [121](tel:121), Robi [121](tel:121)\n` +
+          `3. **Key Details for the GD/FIR:** Note the exact time, street location, description of contents, and any vehicle or suspect details.\n` +
+          `4. **Immediate Police Alert:** Call [999](tel:999) toll-free.`;
+
+        return {
+          text,
+          sources: thanaMatch?.sources || [{ title: "National 999 Police Dispatch", url: "tel:999" }],
+          poweredBy: "shurokhaAI Incident Response Engine"
+        };
+      }
     } else {
-      return {
-        text: `💙 **Thank you for sharing that with me. I hear you, and I truly feel your pain.** Going through something like this is incredibly exhausting, heavy, and emotionally draining.\n\n` +
-          `Please be gentle with yourself. It is completely valid to feel heartbroken, disappointed, or overwhelmed right now. But remember: this difficult chapter does not define your entire story, and you have the strength inside you to get through this step by step.\n\n` +
-          `Take a quiet moment for yourself, drink some water, and if you'd like to speak with a caring counselor who will listen confidentially:\n` +
-          `• 📞 **Kaan Pete Roi (Bangladesh Emotional Support Hotline):** [01779-554391](tel:01779554391) / [01779-554392](tel:01779554392)\n` +
-          `• 📞 **DGHS Shastho Batayan:** [16263](tel:16263)\n\n` +
-          `I am right here with you. If you want to talk more or get anything else off your chest, I am listening.`,
-        sources: [
-          { title: "Kaan Pete Roi Helpline", url: "tel:01779554391" }
-        ],
-        poweredBy: "shurokhaAI Human Empathy Companion"
-      };
+      if (isBangla) {
+        return {
+          text: `${apologizeIntroBn}🛡️ **ব্যাগ চুরি বা ছিনতাইয়ের ঘটনায় এখনই যা করণীয়:**\n\n` +
+            `১. **আপনার এলাকা জানান:** ঘটনাটি **কোন এলাকায় বা কোন রোডে ঘটেছে?** (যেমন: *ধানমন্ডি, মিরপুর, গুলশান, উত্তরা, বাড্ডা* ইত্যাদি) জানালে আমি আপনাকে ওই এলাকার থানার ওসির সরাসরি মোবাইল নাম্বার ও সঠিক ঠিকানা দিচ্ছি যাতে এখনই যেতে পারেন।\n` +
+            `২. **ব্যাগে ফোন বা এটিএম কার্ড থাকলে দ্রুত ব্লক করুন:**\n` +
+            `   • বিকাশ ([16247](tel:16247)), নগদ ([16167](tel:16167)), রকেট ([16216](tel:16216))\n` +
+            `   • আপনার সিম অপারেটর হেল্পলাইন ([121](tel:121))\n` +
+            `৩. **থানায় জিডি বা মামলা:** থানায় গিয়ে জিডি করুন যাতে পুলিশ সিসিটিভি ফুটেজ ট্র্যাকিং করতে পারে।\n` +
+            `৪. **তাৎক্ষণিক পুলিশ সহায়তা:** সরাসরি [৯৯৯](tel:999) এ কল করুন।\n\n` +
+            `ব্যাগটি কোন এলাকায় চুরি হয়েছে অনুগ্রহ করে লিখুন, আমি নিকটস্থ থানার ঠিকানা ও ওসির নাম্বার দিচ্ছি।`,
+          sources: [
+            { title: "National Emergency 999", url: "tel:999" },
+            { title: "bKash Emergency Lock 16247", url: "tel:16247" }
+          ],
+          poweredBy: "shurokhaAI Incident Response Engine"
+        };
+      } else {
+        return {
+          text: `${apologizeIntroEn}🛡️ **Immediate Action Plan for Stolen Bag / Property:**\n\n` +
+            `1. **Tell me the area:** Which neighborhood or street did this happen in? (e.g., *Dhanmondi, Uttara, Mirpur, Gulshan, Old Dhaka*) — Tell me, and I will give you the **exact nearest Police Thana, address, and OC direct phone number** to report it.\n` +
+            `2. **If your phone or cards were in the bag, freeze them immediately:**\n` +
+            `   • Call bKash ([16247](tel:16247)), Nagad ([16167](tel:16167)), or Rocket ([16216](tel:16216)) to freeze wallets.\n` +
+            `   • Call your SIM operator ([121](tel:121)) to suspend the SIM card.\n` +
+            `   • Contact your bank to block ATM/Debit cards.\n` +
+            `3. **File a Police GD/FIR:** Lodge a report at the Thana so officers can inspect local CCTV cameras.\n` +
+            `4. **Urgent Police Dispatch:** Dial [999](tel:999) directly.\n\n` +
+            `Which area was your bag stolen in?`,
+          sources: [
+            { title: "National Emergency Helpline 999", url: "tel:999" },
+            { title: "bKash Emergency Helpline 16247", url: "tel:16247" }
+          ],
+          poweredBy: "shurokhaAI Incident Response Engine"
+        };
+      }
     }
   }
 
@@ -332,97 +397,6 @@ async function processShurokhaChat(userMessage, history = []) {
             { title: "National Women Helpline 109", url: "tel:109" }
           ],
           poweredBy: "shurokhaAI Women Safety Protocol"
-        };
-      }
-    }
-  }
-
-  // ─── 2. SNATCHING / MUGGING / ROBBERY ─────────────────────────────────────
-  const isSnatching = /snatch|mug(?:ging|ged)?|rob(?:bery|bed)?|stole|churi|ছিনতাই|ডাকাতি|ব্যাগ টান|মোবাইল নিল|টাকা ছিনতাই|চুরি হয়েছে|ছিনতাইকারী/.test(qLower) ||
-    (lastTopic === 'SNATCHING' && detectedLocation);
-
-  if (isSnatching) {
-    if (detectedLocation) {
-      const thanaMatch = policeDirectory.resolvePoliceQuery(detectedLocation.name);
-      if (isBangla) {
-        let text = `🛡️ **আমি অত্যন্ত দুঃখিত এই অনাকাঙ্ক্ষিত ঘটনার জন্য। সবার আগে নিশ্চিত করুন আপনি শারীরিকভাবে নিরাপদ আছেন কিনা।**\n\n` +
-          `📍 **ঘটনাস্থল / এলাকা:** ${locationBn || detectedLocation.name}\n\n` +
-          `🚨 **তাৎক্ষণিক প্রয়োজনীয় পদক্ষেপ:**\n` +
-          `১. **অবিলম্বে নিকটস্থ থানায় জিডি (GD) বা মামলা করুন:** ছিনতাইয়ের ঘটনায় দ্রুত থানায় অভিযোগ দায়ের করা অত্যন্ত গুরুত্বপূর্ণ।\n`;
-
-        if (thanaMatch && thanaMatch.text) {
-          text += `\n${thanaMatch.text}\n\n`;
-        }
-
-        text += `২. **সিম ও মোবাইল ব্যাংকিং বন্ধ করুন (যদি ফোন ছিনতাই হয়ে থাকে):**\n` +
-          `   • **বিকাশ (bKash):** [16247](tel:16247) (অ্যাকাউন্ট সাময়িক ফ্রিজ করতে)\n` +
-          `   • **নগদ (Nagad):** [16167](tel:16167)\n` +
-          `   • **রকেট (Rocket):** [16216](tel:16216)\n` +
-          `   • **সিম ব্লক করতে:** গ্রামীনফোন [121](tel:121), বাংলালিংক [121](tel:121), রবি [121](tel:121)\n` +
-          `৩. **জিডিতে যা উল্লেখ করবেন:** মোবাইল ফোনের IMEI নাম্বার, ছিনতাইয়ের সঠিক সময় ও স্থান, এবং ছিনতাইকারীর কোনো শারীরিক বিবরণ বা বাইকের নাম্বার মনে থাকলে তা উল্লেখ করুন।\n` +
-          `৪. **জরুরি পুলিশ পেট্রোল:** সরাসরি [৯৯৯](tel:999) এ কল করুন।`;
-
-        return {
-          text,
-          sources: thanaMatch?.sources || [{ title: "National 999 Police Dispatch", url: "tel:999" }],
-          poweredBy: "shurokhaAI Incident Response Engine"
-        };
-      } else {
-        let text = `🛡️ **I am so sorry this happened to you! First, please take a deep breath — your physical safety is what matters most.**\n\n` +
-          `📍 **Incident Area:** ${detectedLocation.name}\n\n` +
-          `🚨 **Crucial Immediate Steps to Take:**\n` +
-          `1. **Report to Nearest Police Station (Thana):** File a General Diary (GD) or FIR immediately so police can track the perpetrators.\n`;
-
-        if (thanaMatch && thanaMatch.text) {
-          text += `\n${thanaMatch.text}\n\n`;
-        }
-
-        text += `2. **Freeze Financial Accounts & SIMs (If Phone was Snatched):**\n` +
-          `   • **bKash:** [16247](tel:16247) (Freeze your mobile wallet)\n` +
-          `   • **Nagad:** [16167](tel:16167)\n` +
-          `   • **Rocket:** [16216](tel:16216)\n` +
-          `   • **Telecom SIM Lock:** Grameenphone [121](tel:121), Banglalink [121](tel:121), Robi [121](tel:121)\n` +
-          `3. **Key Details for the GD/FIR:** Note the IMEI number (from device box), exact time, direction the snatchers fled, and vehicle/bike license plate if noticed.\n` +
-          `4. **Immediate Police Alert:** Call [999](tel:999) toll-free.`;
-
-        return {
-          text,
-          sources: thanaMatch?.sources || [{ title: "National 999 Police Dispatch", url: "tel:999" }],
-          poweredBy: "shurokhaAI Incident Response Engine"
-        };
-      }
-    } else {
-      if (isBangla) {
-        return {
-          text: `🛡️ **আমি অত্যন্ত দুঃখিত এই ছিনতাইয়ের ঘটনার জন্য!** অনুগ্রহ করে শান্ত থাকুন — সবার আগে দেখুন আপনার শরীরে কোনো আঘাত বা রক্তপাত হয়েছে কিনা।\n\n` +
-            `🚨 **এখনই যা করণীয়:**\n` +
-            `১. **নিকটস্থ থানায় গিয়ে জিডি করুন:** পুলিশকে অবিলম্বে অবহিত করা জরুরি যাতে সিসিটিভি ফুটেজ সংগ্রহ করা যায়।\n` +
-            `২. **আপনার এলাকা জানান:** ছিনতাইয়ের ঘটনাটি **কোন এলাকায় বা কোন রোডে ঘটেছে?** (যেমন: *ধানমন্ডি, মিরপুর, গুলশান, বাড্ডা* ইত্যাদি) জানালে আমি আপনাকে ওই এলাকার থানার ওসির ফোন নাম্বার ও সঠিক ঠিকানা দিচ্ছি।\n` +
-            `৩. **ফোন ছিনতাই হলে দ্রুত মোবাইল ব্যাংকিং ব্লক করুন:** বিকাশ ([16247](tel:16247)), নগদ ([16167](tel:16167)), রকেট ([16216](tel:16216)) ও আপনার সিম অপারেটরের হেল্পলাইনে ([121](tel:121)) কল করে অ্যাকাউন্ট বন্ধ করুন।\n` +
-            `৪. **জরুরি পুলিশ টহল:** সরাসরি [৯৯৯](tel:999) এ কল করুন।\n\n` +
-            `ঘটনাটি কোন এলাকায় ঘটেছে অনুগ্রহ করে লিখুন।`,
-          sources: [
-            { title: "National Emergency 999", url: "tel:999" },
-            { title: "bKash Emergency Lock 16247", url: "tel:16247" }
-          ],
-          poweredBy: "shurokhaAI Incident Response Engine"
-        };
-      } else {
-        return {
-          text: `🛡️ **I am so sorry to hear this! First, please ensure you are in a safe place and check if you sustained any injuries.**\n\n` +
-            `🚨 **Immediate Actions to Take Right Now:**\n` +
-            `1. **Visit the Nearest Police Station (Thana):** A General Diary (GD) or FIR must be lodged quickly so officers can review CCTV footage and track stolen property.\n` +
-            `2. **Where did this happen?** Tell me the area or street name (e.g., *Dhanmondi, Uttara, Mirpur, Old Dhaka*), and I will provide the exact **nearest Police Thana, address, and OC direct phone number**.\n` +
-            `3. **If your phone was taken, secure your accounts immediately:**\n` +
-            `   • Call bKash ([16247](tel:16247)), Nagad ([16167](tel:16167)), or Rocket ([16216](tel:16216)) to freeze wallets.\n` +
-            `   • Call your SIM operator ([121](tel:121)) to suspend the SIM card.\n` +
-            `4. **Urgent Police Assistance:** Dial [999](tel:999) directly.\n\n` +
-            `Which area or neighborhood did this happen in?`,
-          sources: [
-            { title: "National Emergency Helpline 999", url: "tel:999" },
-            { title: "bKash Emergency Helpline 16247", url: "tel:16247" }
-          ],
-          poweredBy: "shurokhaAI Incident Response Engine"
         };
       }
     }
