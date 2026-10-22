@@ -2069,7 +2069,13 @@
     }
     #nav-tab-map.nav-tab-btn.active .nav-tab-icon { color: #0a84ff; }
     #nav-tab-feed.nav-tab-btn.active .nav-tab-icon { color: #ff9f0a; }
-    #nav-tab-profile.nav-tab-btn.active .nav-tab-icon { color: #30d158; }
+    #nav-tab-help.nav-tab-btn.active .nav-tab-icon { color: #ff375f; }
+    .profile-trigger-btn.active {
+      border-color: #30d158 !important;
+      color: #fff !important;
+      background: rgba(48, 209, 88, 0.22) !important;
+      box-shadow: 0 0 14px rgba(48, 209, 88, 0.45);
+    }
     .nav-tab-btn:active {
       transform: scale(0.92);
     }
@@ -3214,7 +3220,7 @@
           <button type="button" class="lang-pill-btn" id="btn-lang-bn" onclick="setAppLanguage('bn')">বাংলা</button>
         </div>
 
-        <button class="profile-trigger-btn" id="top-profile-btn" onclick="openAuthModal()" title="Citizen Profile & Account">
+        <button class="profile-trigger-btn" id="top-profile-btn" onclick="openProfilePage()" title="Citizen Profile & Security">
           <i class="far fa-user" id="profile-icon"></i>
         </button>
       </div>
@@ -3224,7 +3230,7 @@
     <div id="screen-sos" class="screen screen-padded active">
       
       <!-- Apple Dynamic Island CAD Dispatch Strip -->
-      <div class="emergency-strip">
+      <div class="emergency-strip" style="justify-content: space-between; align-items: center;">
         <div class="strip-content-wrap">
           <div class="strip-title">
             <span class="cad-live-beacon"></span>
@@ -3232,9 +3238,10 @@
           </div>
           <div class="strip-sub" data-i18n="sos_helpline_sub">Police • Fire Service • Ambulance CAD</div>
         </div>
-        <button type="button" class="strip-btn" onclick="openEmergencyHelpModal()" style="border: none; text-decoration: none; cursor: pointer;">
-          <i class="fas fa-hand-holding-medical"></i> <span data-i18n="sos_helpline_btn">I Need Help</span>
-        </button>
+        <div style="font-size: 10.5px; font-weight: 800; color: #34d399; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); padding: 4px 10px; border-radius: 9999px; display: flex; align-items: center; gap: 5px;">
+          <span style="width: 5px; height: 5px; border-radius: 50%; background: #34d399; box-shadow: 0 0 6px #34d399;"></span>
+          <span>999 CAD Live</span>
+        </div>
       </div>
 
       <!-- Apple Watch Ultra Living Radar SOS Disc -->
@@ -3574,6 +3581,394 @@
       </div>
     </div>
 
+    <!-- SCREEN 4: EMERGENCY TACTICAL HELP & HOTLINES -->
+    <div id="screen-help" class="screen screen-padded" style="display: none;">
+      <!-- Apple Clean Header -->
+      <div style="margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <h2 style="font-size: 22px; font-weight: 800; color: #fff; margin: 0; letter-spacing: -0.4px;" data-i18n="help_screen_title">Emergency Tactical Help</h2>
+            <p style="font-size: 12px; color: var(--text-muted); margin: 3px 0 0 0;" data-i18n="help_screen_sub">Direct hotlines, immediate dispatches &amp; life-saving lifelines</p>
+          </div>
+          <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); display: flex; align-items: center; justify-content: center; color: #ef4444; font-size: 16px; box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);">
+            <i class="fas fa-hand-holding-medical"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- TACTICAL 2x2 ACTION MATRIX -->
+      <div class="help-tactical-grid" style="margin-bottom: 20px;">
+        <!-- OPTION 1: STUCK WITH AN AMBULANCE? -->
+        <button type="button" onclick="selectEmergencyHelp('ambulance_traffic')" class="help-card-tile theme-ambulance">
+          <div class="help-card-top">
+            <div class="help-icon-bubble"><i class="fas fa-truck-medical"></i></div>
+            <span class="help-pill-badge"><span class="live-beacon-dot"></span> <span data-i18n="help_opt1_btn">Call 999</span></span>
+          </div>
+          <div>
+            <div class="help-card-title" data-i18n="help_opt1_title">Stuck in Traffic with Ambulance?</div>
+            <div class="help-card-desc" data-i18n="help_opt1_desc">Urgent police traffic clearance &amp; green corridor</div>
+          </div>
+        </button>
+
+        <!-- OPTION 2: CRITICAL PATIENT CONDITION AT HOME -->
+        <button type="button" onclick="selectEmergencyHelp('critical_patient')" class="help-card-tile theme-patient">
+          <div class="help-card-top">
+            <div class="help-icon-bubble"><i class="fas fa-heart-pulse"></i></div>
+            <span class="help-pill-badge"><span class="live-beacon-dot"></span> <span data-i18n="help_opt2_btn">Call 999</span></span>
+          </div>
+          <div>
+            <div class="help-card-title" data-i18n="help_opt2_title">Critical Patient Condition at Home</div>
+            <div class="help-card-desc" data-i18n="help_opt2_desc">Urgent ambulance dispatch &amp; rapid medical response</div>
+          </div>
+        </button>
+
+        <!-- OPTION 3: FIRE SERVICE & RESCUE -->
+        <button type="button" onclick="selectEmergencyHelp('fire_service')" class="help-card-tile theme-fire">
+          <div class="help-card-top">
+            <div class="help-icon-bubble"><i class="fas fa-fire-flame-curved"></i></div>
+            <span class="help-pill-badge"><span class="live-beacon-dot"></span> <span data-i18n="help_opt3_btn">Call 102</span></span>
+          </div>
+          <div>
+            <div class="help-card-title" data-i18n="help_opt3_title">Fire Service &amp; Rescue Emergency</div>
+            <div class="help-card-desc" data-i18n="help_opt3_desc">Direct hotline to Bangladesh Fire Service Control</div>
+          </div>
+        </button>
+
+        <!-- OPTION 4: EMERGENCY BLOOD LIFELINE (রক্তবন্ধু) -->
+        <button type="button" onclick="openBloodDonorModal()" class="help-card-tile theme-blood">
+          <div class="help-card-top">
+            <div class="help-icon-bubble"><i class="fas fa-droplet"></i></div>
+            <span class="help-pill-badge"><i class="fas fa-hand-holding-heart" style="font-size: 8.5px;"></i> <span data-i18n="help_opt4_btn">Find Donors</span></span>
+          </div>
+          <div>
+            <div class="help-card-title" data-i18n="help_opt4_title">Emergency Blood Lifeline (রক্তবন্ধু)</div>
+            <div class="help-card-desc" data-i18n="help_opt4_desc">Find immediate blood donors nearby or donate blood</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Quick National Speed-Dial Section -->
+      <div style="background: rgba(26, 28, 38, 0.72); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 18px; padding: 16px; margin-bottom: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.25);">
+        <div style="font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-phone-volume" style="color: #30d158;"></i>
+          <span>National Emergency Speed Dials</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <a href="tel:999" style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 12px; text-decoration: none; color: inherit;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 14px; font-weight: 800; color: #ff453a; background: rgba(255,69,58,0.15); padding: 3px 8px; border-radius: 6px;">999</span>
+              <div>
+                <div style="font-size: 12.5px; font-weight: 700; color: #fff;">National Emergency Dispatch</div>
+                <div style="font-size: 10.5px; color: var(--text-muted);">Police, Fire &amp; Ambulance Services</div>
+              </div>
+            </div>
+            <i class="fas fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
+          </a>
+          <a href="tel:109" style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 12px; text-decoration: none; color: inherit;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 14px; font-weight: 800; color: #bf5af2; background: rgba(191,90,242,0.15); padding: 3px 8px; border-radius: 6px;">109</span>
+              <div>
+                <div style="font-size: 12.5px; font-weight: 700; color: #fff;">Women &amp; Child Safety Helpline</div>
+                <div style="font-size: 10.5px; color: var(--text-muted);">Toll-free 24/7 legal aid &amp; distress response</div>
+              </div>
+            </div>
+            <i class="fas fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
+          </a>
+          <a href="tel:1090" style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 12px; text-decoration: none; color: inherit;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 14px; font-weight: 800; color: #ff9f0a; background: rgba(255,159,10,0.15); padding: 3px 8px; border-radius: 6px;">1090</span>
+              <div>
+                <div style="font-size: 12.5px; font-weight: 700; color: #fff;">Disaster Early Warning System</div>
+                <div style="font-size: 10.5px; color: var(--text-muted);">Flood, cyclone &amp; weather emergencies</div>
+              </div>
+            </div>
+            <i class="fas fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 5: DEDICATED CITIZEN PROFILE & SECURITY -->
+    <div id="screen-profile" class="screen screen-padded" style="display: none; padding-bottom: 90px;">
+      <!-- Apple Clean Header with Back Button -->
+      <div style="margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <button type="button" onclick="switchTab('screen-sos', document.getElementById('nav-tab-sos'))" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; transition: background 0.2s;" title="Return to Emergency Home">
+              <i class="fas fa-arrow-left"></i>
+            </button>
+            <div>
+              <h2 style="font-size: 20px; font-weight: 800; color: #fff; margin: 0; letter-spacing: -0.4px;" data-i18n="profile_page_title">Citizen Profile</h2>
+              <p style="font-size: 11.5px; color: var(--text-muted); margin: 2px 0 0 0;" data-i18n="profile_page_sub">Personal identity, emergency blood &amp; password security</p>
+            </div>
+          </div>
+          <div id="profile-page-status-pill" style="font-size: 10.5px; font-weight: 700; padding: 4px 10px; border-radius: 9999px; background: rgba(48, 209, 88, 0.15); color: #30d158; border: 1px solid rgba(48, 209, 88, 0.35);">
+            Active
+          </div>
+        </div>
+      </div>
+
+      <!-- Logged In Profile View (UNLOCKED PROFILE) -->
+      <div id="view-profile-active" style="display: none;">
+        <!-- Top Citizen Status Banner (Apple Health Medical ID Style) -->
+        <div class="apple-medical-id-card">
+          <div class="apple-medical-badge">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: #30d158; box-shadow: 0 0 6px #30d158;"></span> <span data-i18n="auth_unlocked_badge">Unlocked</span>
+          </div>
+          <div class="apple-medical-avatar" id="profile-badge-letter">C</div>
+          <h4 style="font-size: 19px; color: #fff; font-weight: 800; letter-spacing: -0.3px; margin: 0 0 4px 0;" id="profile-display-name">Citizen</h4>
+          <p style="font-size: 13px; color: #cbd5e1; font-weight: 600; margin: 0; font-family: monospace; letter-spacing: 0.5px;" id="profile-display-phone">+880 17XXXXXXXX</p>
+
+          <!-- Citizen Blood Group Pill Display (Apple Medical ID Metric) -->
+          <div id="profile-blood-pill-wrap" style="margin-top: 12px; display: inline-flex; align-items: center; gap: 7px; background: rgba(255, 55, 95, 0.15); border: 1px solid rgba(255, 55, 95, 0.35); border-radius: 9999px; padding: 5px 14px; backdrop-filter: blur(8px);">
+            <i class="fas fa-droplet" style="color: #ff375f; font-size: 12px;"></i>
+            <span style="font-size: 11.5px; font-weight: 800; color: #fecdd3;" id="profile-blood-pill-text">Blood: Not Set</span>
+          </div>
+        </div>
+
+        <!-- CITIZEN EMERGENCY BLOOD LIFELINE PROFILE CARD (Apple Inset Grouped) -->
+        <div style="background: rgba(26, 28, 38, 0.72); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 18px; padding: 15px 16px; margin-bottom: 14px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(244, 63, 94, 0.2); border: 1px solid #f43f5e; display: flex; align-items: center; justify-content: center; color: #f43f5e; font-size: 13px;">
+                <i class="fas fa-hand-holding-droplet"></i>
+              </div>
+              <div>
+                <span style="font-size: 12.5px; font-weight: 800; color: #fff;" data-i18n="profile_blood_section_title">Emergency Blood Profile</span>
+                <span style="font-size: 10.5px; color: #fca5a5; display: block;" data-i18n="profile_blood_section_sub">Saved on your account for emergency medical safety</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Blood Group Selection -->
+          <div style="margin-bottom: 10px;">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;" data-i18n="profile_blood_group_label">Your Blood Group</label>
+            <select id="profile-blood-group-select" style="width: 100%; background: #140d14; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 9px; padding: 9px 12px; color: #fff; font-size: 12.5px; outline: none;">
+              <option value="">-- Not Set / রক্তের গ্রুপ নির্বাচন করুন --</option>
+              <option value="A+">A Positive (A+)</option>
+              <option value="A-">A Negative (A-)</option>
+              <option value="B+">B Positive (B+)</option>
+              <option value="B-">B Negative (B-)</option>
+              <option value="O+">O Positive (O+)</option>
+              <option value="O-">O Negative (O-)</option>
+              <option value="AB+">AB Positive (AB+)</option>
+              <option value="AB-">AB Negative (AB-)</option>
+            </select>
+          </div>
+
+          <!-- Volunteer as Donor Option -->
+          <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer; background: rgba(0,0,0,0.3); border: 1px solid rgba(244,63,94,0.2); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px;">
+            <input type="checkbox" id="profile-blood-donor-toggle" style="accent-color: #f43f5e; width: 16px; height: 16px; margin-top: 2px;">
+            <div>
+              <span style="font-size: 12px; font-weight: 700; color: #fff; display: block;" data-i18n="profile_blood_donor_check">List me in Emergency Blood Lifeline (রক্তবন্ধু)</span>
+              <span style="font-size: 10.5px; color: var(--text-muted); line-height: 1.35; display: block;" data-i18n="profile_blood_donor_sub">Allow citizens in critical medical emergency to contact me (No personal name is ever displayed).</span>
+            </div>
+          </label>
+
+          <!-- District & Area when volunteering -->
+          <div id="profile-blood-location-row" style="display: flex; gap: 8px; margin-bottom: 10px;">
+            <div style="flex: 1;">
+              <label style="font-size: 10.5px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;" data-i18n="blood_reg_district_label">District</label>
+              <select id="profile-blood-district-select" style="width: 100%; background: #140d14; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 7px 10px; color: #fff; font-size: 11.5px; outline: none;">
+                <option value="Dhaka">Dhaka (ঢাকা)</option>
+                <option value="Chittagong">Chittagong (চট্টগ্রাম)</option>
+                <option value="Sylhet">Sylhet (সিলেট)</option>
+                <option value="Rajshahi">Rajshahi (রাজশাহী)</option>
+                <option value="Khulna">Khulna (খুলনা)</option>
+                <option value="Barishal">Barishal (বরিশাল)</option>
+                <option value="Rangpur">Rangpur (রংপুর)</option>
+                <option value="Mymensingh">Mymensingh (ময়মনসিংহ)</option>
+                <option value="Comilla">Comilla (কুমিল্লা)</option>
+                <option value="Gazipur">Gazipur (গাজীপুর)</option>
+                <option value="Narayanganj">Narayanganj (নারায়ণগঞ্জ)</option>
+              </select>
+            </div>
+            <div style="flex: 1;">
+              <label style="font-size: 10.5px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;" data-i18n="blood_reg_thana_label">Area / Thana</label>
+              <input type="text" id="profile-blood-thana-input" placeholder="e.g. Mirpur, Dhanmondi" style="width: 100%; background: #140d14; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 7px 10px; color: #fff; font-size: 11.5px; outline: none;">
+            </div>
+          </div>
+
+          <!-- Feedback toast banner -->
+          <div id="profile-blood-feedback" style="display: none; padding: 7px 10px; border-radius: 8px; font-size: 11px; margin-bottom: 8px;"></div>
+
+          <!-- Save Action Button -->
+          <button type="button" onclick="saveUserBloodProfile()" id="btn-save-blood-profile" style="width: 100%; background: linear-gradient(135deg, #be123c 0%, #e11d48 100%); color: #fff; border: none; padding: 9px; border-radius: 9px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 3px 12px rgba(225, 29, 72, 0.35);">
+            <i class="fas fa-check"></i> <span data-i18n="profile_btn_save_blood">Save Blood Info to Profile</span>
+          </button>
+        </div>
+
+        <!-- Account Security / Change Password (Directly Accessible & Prominent) -->
+        <div style="background: rgba(26, 28, 38, 0.72); backdrop-filter: blur(20px); border: 1.5px solid rgba(96, 165, 250, 0.35); border-radius: 18px; padding: 16px; margin-bottom: 14px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 30px; height: 30px; border-radius: 9px; background: rgba(96, 165, 250, 0.2); border: 1px solid #60a5fa; display: flex; align-items: center; justify-content: center; color: #60a5fa; font-size: 13px;">
+                <i class="fas fa-key"></i>
+              </div>
+              <div>
+                <span style="font-size: 13.5px; font-weight: 800; color: #fff;" data-i18n="auth_chg_pw">Change Profile Password</span>
+                <span style="font-size: 11px; color: #93c5fd; display: block;">Enter your previous password to set a new password</span>
+              </div>
+            </div>
+          </div>
+          
+          <form id="form-change-password-inline" onsubmit="handleChangePasswordSubmit(event)">
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label class="form-label" style="font-size: 11px; font-weight: 700; color: #e2e8f0;" data-i18n="auth_curr_pw">Previous / Current Password</label>
+              <div class="input-field-wrap" style="padding: 9px 12px; background: #140d14; border: 1px solid rgba(255,255,255,0.15); border-radius: 9px;">
+                <input type="password" class="form-input" id="inline-current-pw" placeholder="Enter previous password" required style="font-size: 12.5px; color: #fff;">
+                <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('inline-current-pw', this)"><i class="fas fa-eye"></i></button>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label class="form-label" style="font-size: 11px; font-weight: 700; color: #e2e8f0;" data-i18n="auth_new_pw">New Password (min 6 characters)</label>
+              <div class="input-field-wrap" style="padding: 9px 12px; background: #140d14; border: 1px solid rgba(255,255,255,0.15); border-radius: 9px;">
+                <input type="password" class="form-input" id="inline-new-pw" placeholder="New secure password" minlength="6" required style="font-size: 12.5px; color: #fff;">
+                <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('inline-new-pw', this)"><i class="fas fa-eye"></i></button>
+              </div>
+            </div>
+            <button type="submit" class="btn-submit-action" id="btn-change-pw-submit" style="padding: 10px; font-size: 12.5px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);">
+              <i class="fas fa-lock"></i> <span data-i18n="auth_btn_update_pw">Update Password</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Admin Live SOS Location Widget (Visible on Admin Profile when distress signals are active) -->
+        <div id="admin-profile-sos-widget" style="display: none; margin-bottom: 12px; background: rgba(239, 68, 68, 0.12); border: 1.5px solid rgba(239, 68, 68, 0.55); border-radius: 14px; padding: 12px; box-shadow: 0 4px 18px rgba(239, 68, 68, 0.25);"></div>
+
+        <button id="admin-portal-profile-btn" class="btn-submit-action" style="display: none; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); margin-bottom: 8px; border: none;" onclick="openAdminPortalFromProfile()"></button>
+        <button class="btn-submit-action" style="background: transparent; border-color: rgba(239,68,68,0.4); color: #f87171; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px;" onclick="performLogout()">
+          <i class="fas fa-lock"></i> <span data-i18n="auth_btn_logout">Lock Profile &amp; Sign Out</span>
+        </button>
+      </div>
+
+      <!-- Auth Form Container (Profile Locked / Sign In / Register) -->
+      <div id="view-auth-forms">
+        <!-- Supabase Cloud Badge -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 10px 14px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M13.35 2.12c-.67-.78-1.92-.3-1.92.74v7.71H3.66c-.95 0-1.48 1.1-.88 1.83l7.87 9.48c.67.78 1.92.3 1.92-.74v-7.71h7.77c.95 0 1.48-1.1.88-1.83l-7.87-9.48z" fill="#10b981"/>
+            </svg>
+            <div>
+              <div style="font-size: 12.5px; font-weight: 700; color: #fff;" data-i18n="auth_cloud_title">Supabase Cloud Authentication</div>
+              <div style="font-size: 10.5px; color: #a7f3d0;" data-i18n="auth_cloud_sub">Encrypted &bull; Direct Phone &amp; Password Matching</div>
+            </div>
+          </div>
+          <span style="font-size: 9.5px; background: rgba(16, 185, 129, 0.2); color: #10b981; font-weight: 700; padding: 2px 7px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.35);" data-i18n="auth_badge_active">ACTIVE</span>
+        </div>
+
+        <div class="auth-toggle-bar" id="auth-main-tabs" style="margin-bottom: 16px;">
+          <button class="auth-toggle-tab active" id="tab-btn-login" onclick="toggleAuthTab('login')">
+            <i class="fas fa-lock-open" style="font-size: 11px; margin-right: 4px;"></i> <span data-i18n="auth_tab_login">Log In</span>
+          </button>
+          <button class="auth-toggle-tab" id="tab-btn-signup" onclick="toggleAuthTab('signup')">
+            <i class="fas fa-user-plus" style="font-size: 11px; margin-right: 4px;"></i> <span data-i18n="auth_tab_register">Register</span>
+          </button>
+        </div>
+
+        <!-- 1. SUPABASE LOGIN FORM -->
+        <form id="form-login" onsubmit="handleLoginSubmit(event)">
+          <div class="form-group">
+            <label class="form-label" data-i18n="contact_modal_phone">Bangladeshi Mobile Number</label>
+            <div class="input-field-wrap">
+              <span class="prefix-bd">+880</span>
+              <input type="tel" class="form-input" id="login-phone" placeholder="Enter 11-digit number (e.g. 017...)" autocomplete="tel" required>
+            </div>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
+              Operators: 013, 014, 015, 016, 017, 018, 019
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" data-i18n="auth_label_pw">Password</label>
+            <div class="input-field-wrap">
+              <input type="password" class="form-input" id="login-password" placeholder="Enter your password" autocomplete="current-password" required>
+              <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('login-password', this)" title="Show/Hide Password">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Inline Error Feedback Banner -->
+          <div id="login-error-banner" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; font-size: 11.5px; color: #fca5a5; line-height: 1.45;">
+            <div style="display: flex; align-items: flex-start; gap: 8px;">
+              <i class="fas fa-circle-exclamation" style="margin-top: 2px; color: #ef4444; font-size: 13px;"></i>
+              <span id="login-error-msg">Incorrect credentials</span>
+            </div>
+          </div>
+
+          <button type="button" class="btn-submit-action" id="btn-login-submit" onclick="handleLoginSubmit(event)" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+            <i class="fas fa-lock-open"></i> <span data-i18n="auth_btn_login">Log In &amp; Unlock Profile</span>
+          </button>
+        </form>
+
+        <!-- 2. SUPABASE REGISTER FORM -->
+        <form id="form-signup" style="display: none;" onsubmit="handleSignupSubmit(event)">
+          <div class="form-group">
+            <label class="form-label" data-i18n="auth_label_name">Full Name</label>
+            <div class="input-field-wrap">
+              <input type="text" class="form-input" id="signup-name" placeholder="e.g. Tanvir Hossain" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" data-i18n="contact_modal_phone">Bangladeshi Mobile Number</label>
+            <div class="input-field-wrap">
+              <span class="prefix-bd">+880</span>
+              <input type="tel" class="form-input" id="signup-phone" placeholder="017XXXXXXXX" required>
+            </div>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
+              Operators: 013, 014, 015, 016, 017, 018, 019
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" data-i18n="auth_label_pw">Create Password (min 6 characters)</label>
+            <div class="input-field-wrap">
+              <input type="password" class="form-input" id="signup-password" placeholder="Minimum 6 characters" minlength="6" required>
+              <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('signup-password', this)" title="Show/Hide Password">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Optional Blood Group Selection on Registration -->
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label class="form-label" style="display: flex; align-items: center; justify-content: space-between;">
+              <span data-i18n="auth_label_blood">Blood Group (Optional)</span>
+              <span style="font-size: 10px; color: #f43f5e; font-weight: 600;" data-i18n="auth_blood_lifeline_opt">Safe BD Lifeline</span>
+            </label>
+            <div class="input-field-wrap" style="padding: 4px 8px;">
+              <select id="signup-blood-group" class="form-input" style="background: transparent; border: none; color: #fff; padding: 4px 0; outline: none; width: 100%;">
+                <option value="" style="background: #1a101a; color: #94a3b8;">Select your blood group (optional)</option>
+                <option value="A+" style="background: #1a101a; color: #fff;">A Positive (A+)</option>
+                <option value="A-" style="background: #1a101a; color: #fff;">A Negative (A-)</option>
+                <option value="B+" style="background: #1a101a; color: #fff;">B Positive (B+)</option>
+                <option value="B-" style="background: #1a101a; color: #fff;">B Negative (B-)</option>
+                <option value="O+" style="background: #1a101a; color: #fff;">O Positive (O+)</option>
+                <option value="O-" style="background: #1a101a; color: #fff;">O Negative (O-)</option>
+                <option value="AB+" style="background: #1a101a; color: #fff;">AB Positive (AB+)</option>
+                <option value="AB-" style="background: #1a101a; color: #fff;">AB Negative (AB-)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Signup Error Feedback Banner -->
+          <div id="signup-error-banner" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; font-size: 11.5px; color: #fca5a5; line-height: 1.45;">
+            <div style="display: flex; align-items: flex-start; gap: 8px;">
+              <i class="fas fa-circle-exclamation" style="margin-top: 2px; color: #ef4444; font-size: 13px;"></i>
+              <span id="signup-error-msg">Registration error</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit-action" id="btn-signup-submit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+            <i class="fas fa-user-plus"></i> <span data-i18n="auth_btn_register">Create Account &amp; Unlock</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
     <div id="screen-admin" class="screen screen-padded" style="display: none;"></div>
 
     <!-- Apple Floating Liquid Glass Bottom Navigation -->
@@ -3591,9 +3986,9 @@
         <span data-i18n="nav_feed">Awareness</span>
       </button>
       <button class="nav-tab-btn" id="nav-btn-admin" style="display: none; color: #f59e0b;" onclick="switchTab('screen-admin', this)"></button>
-      <button class="nav-tab-btn" id="nav-tab-profile" onclick="openAuthModal()">
-        <i class="fas fa-user nav-tab-icon"></i>
-        <span data-i18n="nav_profile">Profile</span>
+      <button class="nav-tab-btn" id="nav-tab-help" onclick="switchTab('screen-help', this)">
+        <i class="fas fa-hand-holding-medical nav-tab-icon"></i>
+        <span data-i18n="nav_help">Help</span>
       </button>
     </div>
 
@@ -4026,275 +4421,8 @@
       </div>
     </div>
 
-    <!-- ========================================================
-         MODAL 3: CITIZEN AUTHENTICATION (Login & BD OTP)
-    ======================================================== -->
-    <div id="auth-modal" class="auth-modal-backdrop" onclick="closeAuthModal(event)">
-      <div class="auth-sheet" onclick="event.stopPropagation()">
-        <div class="sheet-handle"></div>
-        
-        <div class="modal-head-row">
-          <h3 id="auth-title" data-i18n="auth_modal_title">Citizen Account</h3>
-          <button class="modal-close-x" onclick="closeAuthModal()"><i class="fas fa-xmark"></i></button>
-        </div>
-
-        <!-- Logged In Profile View (UNLOCKED PROFILE) -->
-        <div id="view-profile-active" style="display: none;">
-          <!-- Top Citizen Status Banner (Apple Health Medical ID Style) -->
-          <div class="apple-medical-id-card">
-            <div class="apple-medical-badge">
-              <span style="width: 6px; height: 6px; border-radius: 50%; background: #30d158; box-shadow: 0 0 6px #30d158;"></span> <span data-i18n="auth_unlocked_badge">Unlocked</span>
-            </div>
-            <div class="apple-medical-avatar" id="profile-badge-letter">C</div>
-            <h4 style="font-size: 19px; color: #fff; font-weight: 800; letter-spacing: -0.3px; margin: 0 0 4px 0;" id="profile-display-name">Citizen</h4>
-            <p style="font-size: 13px; color: #cbd5e1; font-weight: 600; margin: 0; font-family: monospace; letter-spacing: 0.5px;" id="profile-display-phone">+880 17XXXXXXXX</p>
-
-            <!-- Citizen Blood Group Pill Display (Apple Medical ID Metric) -->
-            <div id="profile-blood-pill-wrap" style="margin-top: 12px; display: inline-flex; align-items: center; gap: 7px; background: rgba(255, 55, 95, 0.15); border: 1px solid rgba(255, 55, 95, 0.35); border-radius: 9999px; padding: 5px 14px; backdrop-filter: blur(8px);">
-              <i class="fas fa-droplet" style="color: #ff375f; font-size: 12px;"></i>
-              <span style="font-size: 11.5px; font-weight: 800; color: #fecdd3;" id="profile-blood-pill-text">Blood: Not Set</span>
-            </div>
-          </div>
-
-          <!-- CITIZEN EMERGENCY BLOOD LIFELINE PROFILE CARD (Apple Inset Grouped) -->
-          <div style="background: rgba(26, 28, 38, 0.72); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 18px; padding: 15px 16px; margin-bottom: 14px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(244, 63, 94, 0.2); border: 1px solid #f43f5e; display: flex; align-items: center; justify-content: center; color: #f43f5e; font-size: 13px;">
-                  <i class="fas fa-hand-holding-droplet"></i>
-                </div>
-                <div>
-                  <span style="font-size: 12.5px; font-weight: 800; color: #fff;" data-i18n="profile_blood_section_title">Emergency Blood Profile</span>
-                  <span style="font-size: 10.5px; color: #fca5a5; display: block;" data-i18n="profile_blood_section_sub">Saved on your account for emergency medical safety</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Blood Group Selection -->
-            <div style="margin-bottom: 10px;">
-              <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;" data-i18n="profile_blood_group_label">Your Blood Group</label>
-              <select id="profile-blood-group-select" style="width: 100%; background: #140d14; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 9px; padding: 9px 12px; color: #fff; font-size: 12.5px; outline: none;">
-                <option value="">-- Not Set / রক্তের গ্রুপ নির্বাচন করুন --</option>
-                <option value="A+">A Positive (A+)</option>
-                <option value="A-">A Negative (A-)</option>
-                <option value="B+">B Positive (B+)</option>
-                <option value="B-">B Negative (B-)</option>
-                <option value="O+">O Positive (O+)</option>
-                <option value="O-">O Negative (O-)</option>
-                <option value="AB+">AB Positive (AB+)</option>
-                <option value="AB-">AB Negative (AB-)</option>
-              </select>
-            </div>
-
-            <!-- Volunteer as Donor Option ("if they wants to it will be saved") -->
-            <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer; background: rgba(0,0,0,0.3); border: 1px solid rgba(244,63,94,0.2); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px;">
-              <input type="checkbox" id="profile-blood-donor-toggle" style="accent-color: #f43f5e; width: 16px; height: 16px; margin-top: 2px;">
-              <div>
-                <span style="font-size: 12px; font-weight: 700; color: #fff; display: block;" data-i18n="profile_blood_donor_check">List me in Emergency Blood Lifeline (রক্তবন্ধু)</span>
-                <span style="font-size: 10.5px; color: var(--text-muted); line-height: 1.35; display: block;" data-i18n="profile_blood_donor_sub">Allow citizens in critical medical emergency to contact me (No personal name is ever displayed).</span>
-              </div>
-            </label>
-
-            <!-- District & Area when volunteering -->
-            <div id="profile-blood-location-row" style="display: flex; gap: 8px; margin-bottom: 10px;">
-              <div style="flex: 1;">
-                <label style="font-size: 10.5px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;" data-i18n="blood_reg_district_label">District</label>
-                <select id="profile-blood-district-select" style="width: 100%; background: #140d14; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 7px 10px; color: #fff; font-size: 11.5px; outline: none;">
-                  <option value="Dhaka">Dhaka (ঢাকা)</option>
-                  <option value="Chittagong">Chittagong (চট্টগ্রাম)</option>
-                  <option value="Sylhet">Sylhet (সিলেট)</option>
-                  <option value="Rajshahi">Rajshahi (রাজশাহী)</option>
-                  <option value="Khulna">Khulna (খুলনা)</option>
-                  <option value="Barishal">Barishal (বরিশাল)</option>
-                  <option value="Rangpur">Rangpur (রংপুর)</option>
-                  <option value="Mymensingh">Mymensingh (ময়মনসিংহ)</option>
-                  <option value="Comilla">Comilla (কুমিল্লা)</option>
-                  <option value="Gazipur">Gazipur (গাজীপুর)</option>
-                  <option value="Narayanganj">Narayanganj (নারায়ণগঞ্জ)</option>
-                </select>
-              </div>
-              <div style="flex: 1;">
-                <label style="font-size: 10.5px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;" data-i18n="blood_reg_thana_label">Area / Thana</label>
-                <input type="text" id="profile-blood-thana-input" placeholder="e.g. Mirpur, Dhanmondi" style="width: 100%; background: #140d14; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 7px 10px; color: #fff; font-size: 11.5px; outline: none;">
-              </div>
-            </div>
-
-            <!-- Feedback toast banner -->
-            <div id="profile-blood-feedback" style="display: none; padding: 7px 10px; border-radius: 8px; font-size: 11px; margin-bottom: 8px;"></div>
-
-            <!-- Save Action Button -->
-            <button type="button" onclick="saveUserBloodProfile()" id="btn-save-blood-profile" style="width: 100%; background: linear-gradient(135deg, #be123c 0%, #e11d48 100%); color: #fff; border: none; padding: 9px; border-radius: 9px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 3px 12px rgba(225, 29, 72, 0.35);">
-              <i class="fas fa-check"></i> <span data-i18n="profile_btn_save_blood">Save Blood Info to Profile</span>
-            </button>
-          </div>
-
-          <!-- Account Security / Change Password (Collapsible) -->
-          <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-quiet); border-radius: 14px; padding: 12px 14px; margin-bottom: 14px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onclick="toggleChangePasswordSection()">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <i class="fas fa-key" style="color: #60a5fa; font-size: 13px;"></i>
-                <span style="font-size: 12px; font-weight: 600; color: #fff;" data-i18n="auth_chg_pw">Change Profile Password</span>
-              </div>
-              <i class="fas fa-chevron-down" id="chg-pw-chevron" style="color: var(--text-muted); font-size: 11px; transition: transform 0.2s;"></i>
-            </div>
-            <form id="form-change-password-inline" style="display: none; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06);" onsubmit="handleChangePasswordSubmit(event)">
-              <div class="form-group" style="margin-bottom: 8px;">
-                <label class="form-label" style="font-size: 10.5px;" data-i18n="auth_curr_pw">Current Password</label>
-                <div class="input-field-wrap" style="padding: 7px 10px;">
-                  <input type="password" class="form-input" id="inline-current-pw" placeholder="Enter current password" required style="font-size: 12px;">
-                  <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('inline-current-pw', this)"><i class="fas fa-eye"></i></button>
-                </div>
-              </div>
-              <div class="form-group" style="margin-bottom: 8px;">
-                <label class="form-label" style="font-size: 10.5px;" data-i18n="auth_new_pw">New Password (min 6 chars)</label>
-                <div class="input-field-wrap" style="padding: 7px 10px;">
-                  <input type="password" class="form-input" id="inline-new-pw" placeholder="New secure password" minlength="6" required style="font-size: 12px;">
-                  <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('inline-new-pw', this)"><i class="fas fa-eye"></i></button>
-                </div>
-              </div>
-              <button type="submit" class="btn-submit-action" id="btn-change-pw-submit" style="padding: 9px; font-size: 12px;">
-                <i class="fas fa-lock"></i> <span data-i18n="auth_btn_update_pw">Update Password</span>
-              </button>
-            </form>
-          </div>
-
-          <!-- Admin Live SOS Location Widget (Visible on Admin Profile when distress signals are active) -->
-          <div id="admin-profile-sos-widget" style="display: none; margin-bottom: 12px; background: rgba(239, 68, 68, 0.12); border: 1.5px solid rgba(239, 68, 68, 0.55); border-radius: 14px; padding: 12px; box-shadow: 0 4px 18px rgba(239, 68, 68, 0.25);"></div>
-
-          <button id="admin-portal-profile-btn" class="btn-submit-action" style="display: none; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); margin-bottom: 8px; border: none;" onclick="openAdminPortalFromProfile()"></button>
-          <button class="btn-submit-action" style="background: transparent; border-color: rgba(239,68,68,0.4); color: #f87171; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="performLogout()">
-            <i class="fas fa-lock"></i> <span data-i18n="auth_btn_logout">Lock Profile &amp; Sign Out</span>
-          </button>
-        </div>
-
-        <!-- Auth Form Container (Profile Locked) -->
-        <div id="view-auth-forms">
-          <!-- Supabase Cloud Badge -->
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 10px 14px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M13.35 2.12c-.67-.78-1.92-.3-1.92.74v7.71H3.66c-.95 0-1.48 1.1-.88 1.83l7.87 9.48c.67.78 1.92.3 1.92-.74v-7.71h7.77c.95 0 1.48-1.1.88-1.83l-7.87-9.48z" fill="#10b981"/>
-              </svg>
-              <div>
-                <div style="font-size: 12.5px; font-weight: 700; color: #fff;" data-i18n="auth_cloud_title">Supabase Cloud Authentication</div>
-                <div style="font-size: 10.5px; color: #a7f3d0;" data-i18n="auth_cloud_sub">Encrypted &bull; Direct Phone &amp; Password Matching</div>
-              </div>
-            </div>
-            <span style="font-size: 9.5px; background: rgba(16, 185, 129, 0.2); color: #10b981; font-weight: 700; padding: 2px 7px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.35);" data-i18n="auth_badge_active">ACTIVE</span>
-          </div>
-
-          <div class="auth-toggle-bar" id="auth-main-tabs" style="margin-bottom: 16px;">
-            <button class="auth-toggle-tab active" id="tab-btn-login" onclick="toggleAuthTab('login')">
-              <i class="fas fa-lock-open" style="font-size: 11px; margin-right: 4px;"></i> <span data-i18n="auth_tab_login">Log In</span>
-            </button>
-            <button class="auth-toggle-tab" id="tab-btn-signup" onclick="toggleAuthTab('signup')">
-              <i class="fas fa-user-plus" style="font-size: 11px; margin-right: 4px;"></i> <span data-i18n="auth_tab_register">Register</span>
-            </button>
-          </div>
-
-          <!-- 1. SUPABASE LOGIN FORM -->
-          <form id="form-login" onsubmit="handleLoginSubmit(event)">
-            <div class="form-group">
-              <label class="form-label" data-i18n="contact_modal_phone">Bangladeshi Mobile Number</label>
-              <div class="input-field-wrap">
-                <span class="prefix-bd">+880</span>
-                <input type="tel" class="form-input" id="login-phone" placeholder="Enter 11-digit number (e.g. 017...)" autocomplete="tel" required>
-              </div>
-              <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
-                Operators: 013, 014, 015, 016, 017, 018, 019
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" data-i18n="auth_label_pw">Password</label>
-              <div class="input-field-wrap">
-                <input type="password" class="form-input" id="login-password" placeholder="Enter your password" autocomplete="current-password" required>
-                <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('login-password', this)" title="Show/Hide Password">
-                  <i class="fas fa-eye"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Inline Error Feedback Banner -->
-            <div id="login-error-banner" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; font-size: 11.5px; color: #fca5a5; line-height: 1.45;">
-              <div style="display: flex; align-items: flex-start; gap: 8px;">
-                <i class="fas fa-circle-exclamation" style="margin-top: 2px; color: #ef4444; font-size: 13px;"></i>
-                <span id="login-error-msg">Incorrect credentials</span>
-              </div>
-            </div>
-
-            <button type="button" class="btn-submit-action" id="btn-login-submit" onclick="handleLoginSubmit(event)" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-              <i class="fas fa-lock-open"></i> <span data-i18n="auth_btn_login">Log In &amp; Unlock Profile</span>
-            </button>
-          </form>
-
-          <!-- 2. SUPABASE REGISTER FORM -->
-          <form id="form-signup" style="display: none;" onsubmit="handleSignupSubmit(event)">
-            <div class="form-group">
-              <label class="form-label" data-i18n="auth_label_name">Full Name</label>
-              <div class="input-field-wrap">
-                <input type="text" class="form-input" id="signup-name" placeholder="e.g. Tanvir Hossain" required>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" data-i18n="contact_modal_phone">Bangladeshi Mobile Number</label>
-              <div class="input-field-wrap">
-                <span class="prefix-bd">+880</span>
-                <input type="tel" class="form-input" id="signup-phone" placeholder="017XXXXXXXX" required>
-              </div>
-              <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
-                Operators: 013, 014, 015, 016, 017, 018, 019
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" data-i18n="auth_label_create_pw">Create Password (min 6 characters)</label>
-              <div class="input-field-wrap">
-                <input type="password" class="form-input" id="signup-password" placeholder="Minimum 6 characters" minlength="6" required>
-                <button type="button" class="btn-pw-eye" onclick="togglePasswordVisibility('signup-password', this)" title="Show/Hide Password">
-                  <i class="fas fa-eye"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Optional Blood Group Selection on Registration -->
-            <div class="form-group" style="margin-bottom: 12px;">
-              <label class="form-label" style="display: flex; align-items: center; justify-content: space-between;">
-                <span data-i18n="auth_label_blood">Blood Group (Optional)</span>
-                <span style="font-size: 10px; color: #f43f5e; font-weight: 600;" data-i18n="auth_blood_lifeline_opt">Safe BD Lifeline</span>
-              </label>
-              <div class="input-field-wrap" style="padding: 4px 8px;">
-                <select id="signup-blood-group" class="form-input" style="background: transparent; border: none; color: #fff; padding: 4px 0; outline: none; width: 100%;">
-                  <option value="" style="background: #1a101a; color: #94a3b8;">Select your blood group (optional)</option>
-                  <option value="A+" style="background: #1a101a; color: #fff;">A Positive (A+)</option>
-                  <option value="A-" style="background: #1a101a; color: #fff;">A Negative (A-)</option>
-                  <option value="B+" style="background: #1a101a; color: #fff;">B Positive (B+)</option>
-                  <option value="B-" style="background: #1a101a; color: #fff;">B Negative (B-)</option>
-                  <option value="O+" style="background: #1a101a; color: #fff;">O Positive (O+)</option>
-                  <option value="O-" style="background: #1a101a; color: #fff;">O Negative (O-)</option>
-                  <option value="AB+" style="background: #1a101a; color: #fff;">AB Positive (AB+)</option>
-                  <option value="AB-" style="background: #1a101a; color: #fff;">AB Negative (AB-)</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Signup Error Feedback Banner -->
-            <div id="signup-error-banner" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; font-size: 11.5px; color: #fca5a5; line-height: 1.45;">
-              <div style="display: flex; align-items: flex-start; gap: 8px;">
-                <i class="fas fa-circle-exclamation" style="margin-top: 2px; color: #ef4444; font-size: 13px;"></i>
-                <span id="signup-error-msg">Registration error</span>
-              </div>
-            </div>
-
-            <button type="submit" class="btn-submit-action" id="btn-signup-submit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-              <i class="fas fa-user-plus"></i> <span data-i18n="auth_btn_register">Create Account &amp; Unlock</span>
-            </button>
-          </form>
-        </div>
-
-      </div>
-    </div>
+    <!-- Legacy auth modal anchor retained for backwards-safe query selection -->
+    <div id="auth-modal" style="display: none;"></div>
 
     <!-- ========================================================
          MODAL 4: EMERGENCY SOS COUNTDOWN MODAL
@@ -4536,7 +4664,13 @@
         nav_sos: "Emergency",
         nav_map: "Map",
         nav_feed: "Awareness",
+        nav_help: "Help",
         nav_profile: "Profile",
+
+        help_screen_title: "Emergency Tactical Help",
+        help_screen_sub: "Direct hotlines, immediate dispatches & life-saving lifelines",
+        profile_page_title: "Citizen Profile",
+        profile_page_sub: "Personal identity, emergency blood & password security",
 
         modal_timer_title: "Edit Companion Timer",
         modal_timer_desc: "Add or adjust time for your journey. The timer automatically runs in the background even if your device is locked or minimized.",
@@ -4686,7 +4820,13 @@
         nav_sos: "জরুরি",
         nav_map: "ম্যাপ",
         nav_feed: "সচেতনতা",
+        nav_help: "সহায়তা",
         nav_profile: "প্রোফাইল",
+
+        help_screen_title: "জরুরি ট্যাকটিক্যাল সহায়তা",
+        help_screen_sub: "সরাসরি হটলাইন, তাৎক্ষণিক ডিসপ্যাচ ও জীবনরক্ষাকারী নেটওয়ার্ক",
+        profile_page_title: "নাগরিক প্রোফাইল",
+        profile_page_sub: "ব্যক্তিগত পরিচয়, জরুরি রক্তের গ্রুপ ও পাসওয়ার্ড পরিবর্তন",
 
         modal_timer_title: "কম্প্যানিয়ন টাইমার পরিবর্তন করুন",
         modal_timer_desc: "যাত্রার সময় বাড়ান বা কমান। ফোন লক বা মিনিমাইজ করা থাকলেও টাইমার ব্যাকগ্রাউন্ডে চলবে।",
@@ -9082,9 +9222,7 @@
     }
 
     function openEmergencyHelpModal() {
-      const modal = document.getElementById('emergency-help-modal');
-      if (modal) modal.classList.add('open');
-      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+      switchTab('screen-help', document.getElementById('nav-tab-help'));
     }
 
     function closeEmergencyHelpModal(e) {
@@ -9994,29 +10132,60 @@
           }
         }, 150);
       }
+
+      // Manage top-right profile button active state
+      const topProfBtn = document.getElementById('top-profile-btn');
+      if (topProfBtn) {
+        if (id === 'screen-profile') {
+          topProfBtn.classList.add('active');
+        } else {
+          topProfBtn.classList.remove('active');
+        }
+      }
+
+      if (id === 'screen-profile') {
+        renderProfileScreenState();
+      }
+
       if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
     }
 
     /* ----------------------------------------------------
-       AUTHENTICATION
+       AUTHENTICATION & PROFILE PAGE
     ---------------------------------------------------- */
-    function openAuthModal() {
-      const modal = document.getElementById('auth-modal');
-      if (!modal) return;
-      modal.classList.add('open');
-      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
-      if (currentUser) {
-        document.getElementById('view-auth-forms').style.display = 'none';
-        document.getElementById('view-profile-active').style.display = 'block';
-        const titleEl = document.getElementById('auth-title');
-        if (titleEl) titleEl.innerText = "Citizen Profile (Unlocked)";
-        setLoggedInState();
+    function openProfilePage() {
+      const profileScreen = document.getElementById('screen-profile');
+      if (profileScreen && profileScreen.classList.contains('active')) {
+        switchTab('screen-sos', document.getElementById('nav-tab-sos'));
       } else {
-        if (typeof hideAuthError === 'function') hideAuthError();
-        document.getElementById('view-auth-forms').style.display = 'block';
-        document.getElementById('view-profile-active').style.display = 'none';
-        const titleEl = document.getElementById('auth-title');
-        if (titleEl) titleEl.innerText = "Unlock Citizen Profile";
+        switchTab('screen-profile', null);
+      }
+    }
+
+    function renderProfileScreenState() {
+      const activeView = document.getElementById('view-profile-active');
+      const authForms = document.getElementById('view-auth-forms');
+      const statusPill = document.getElementById('profile-page-status-pill');
+
+      if (currentUser) {
+        if (activeView) activeView.style.display = 'block';
+        if (authForms) authForms.style.display = 'none';
+        if (statusPill) {
+          statusPill.innerHTML = '<i class="fas fa-circle-check"></i> ' + (currentAppLanguage === 'bn' ? 'সক্রিয়' : 'Active');
+          statusPill.style.color = '#30d158';
+          statusPill.style.background = 'rgba(48, 209, 88, 0.15)';
+          statusPill.style.borderColor = 'rgba(48, 209, 88, 0.35)';
+        }
+        if (typeof setLoggedInState === 'function') setLoggedInState();
+      } else {
+        if (activeView) activeView.style.display = 'none';
+        if (authForms) authForms.style.display = 'block';
+        if (statusPill) {
+          statusPill.innerHTML = '<i class="fas fa-lock"></i> ' + (currentAppLanguage === 'bn' ? 'লকড' : 'Locked');
+          statusPill.style.color = '#f59e0b';
+          statusPill.style.background = 'rgba(245, 158, 11, 0.15)';
+          statusPill.style.borderColor = 'rgba(245, 158, 11, 0.35)';
+        }
         try {
           const lastPhone = localStorage.getItem('safe_bd_last_phone');
           const phoneInp = document.getElementById('login-phone');
@@ -10024,6 +10193,18 @@
             phoneInp.value = lastPhone;
           }
         } catch(e) {}
+      }
+      if (typeof applyLanguage === 'function') applyLanguage();
+    }
+
+    function openAuthModal() {
+      openProfilePage();
+    }
+
+    function closeAuthModal() {
+      const profileScreen = document.getElementById('screen-profile');
+      if (profileScreen && profileScreen.classList.contains('active')) {
+        switchTab('screen-sos', document.getElementById('nav-tab-sos'));
       }
     }
 
@@ -12612,8 +12793,7 @@
 
       toggleAuthTab('login');
       if (document.getElementById('login-password')) document.getElementById('login-password').value = '';
-      switchTab('screen-sos', document.querySelectorAll('.nav-tab-btn')[0]);
-      openAuthModal();
+      switchTab('screen-sos', document.getElementById('nav-tab-sos'));
       alert("🔒 Citizen Profile Locked.\n\nYou have signed out. All emergency contacts and personal records are securely locked.");
     }
 
