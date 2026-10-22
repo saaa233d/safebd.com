@@ -12019,15 +12019,22 @@
       if (typing) typing.style.display = 'flex';
       if (messagesContainer) messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
+      const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timeoutId = controller ? setTimeout(() => controller.abort(), 12000) : null;
+
       try {
-        const res = await fetch(`${API_BASE}/api/ai/chat`, {
+        const fetchOptions = {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             message: text,
             history: shurokhaChatHistory
           })
-        });
+        };
+        if (controller) fetchOptions.signal = controller.signal;
+
+        const res = await fetch(`${API_BASE}/api/ai/chat`, fetchOptions);
+        if (timeoutId) clearTimeout(timeoutId);
 
         const data = await res.json();
         if (typing) typing.style.display = 'none';
@@ -12040,8 +12047,9 @@
           appendShurokhaBubble('model', fallbackMsg);
         }
       } catch (err) {
+        if (timeoutId) clearTimeout(timeoutId);
         if (typing) typing.style.display = 'none';
-        appendShurokhaBubble('model', "I had a momentary network hiccup, but I am still with you! In an emergency, please press the Red SOS Button or dial 999 immediately.");
+        appendShurokhaBubble('model', "I am right here with you! If you are facing an emergency or need urgent police/ambulance assistance, please use our Red SOS Button or dial 999 directly.");
       }
     }
   </script>
