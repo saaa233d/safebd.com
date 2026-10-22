@@ -20,6 +20,8 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const policeDirectory = require('./policeDirectoryService');
+const hospitalDirectory = require('./hospitalDirectoryService');
+const shurokhaIntelligence = require('./shurokhaIntelligenceEngine');
 
 // Process Crash Resilience: Prevent uncaught network/socket exceptions from killing the server
 process.on('uncaughtException', (err) => {
@@ -3728,20 +3730,36 @@ function formatEntityCard(e, isBangla) {
   };
 }
 
-const SHUROKHA_SYSTEM_INSTRUCTION = `You are shurokhaAI, the official Emergency Services & Police Station Contact Directory AI for Bangladesh (developed for SAFE BD).
+const SHUROKHA_SYSTEM_INSTRUCTION = `You are shurokhaAI, the 24/7 dedicated Citizen Safety & Emergency Health AI Companion developed for SAFE BD in Bangladesh. You behave like a compassionate, highly capable, and intelligent assistant (similar to ChatGPT) tailored for emergency situations, health triage, and citizen security in Bangladesh.
 
-CRITICAL OPERATIONAL RULES & STRICT SCOPE:
-1. STRICT EMERGENCY SCOPE: You are SOLELY and EXCLUSIVELY an Emergency AI Chatbot. You ONLY provide official contact numbers, addresses, and emergency advice for:
-   - Bangladesh Police Stations (all Thanas, Officer-in-Charge OC numbers, 24/7 Duty Officers, SP Offices, Police Control Rooms).
-   - Fire Service & Civil Defence stations and control rooms (16163).
-   - Climate Control, Weather, Flood, Cyclone & Disaster Management helplines (1090, BMD, FFWC, CPP).
-   - National Emergency Services: 999 CAD Dispatch, National Burn & Plastic Surgery Institute, Emergency Hospitals, Police Cyber Support for Women (PCSW 01320-000888), Child Helpline (1098), Women Helpline (109).
-2. The specialized burn trauma hospital is referred to strictly as "National Institute of Burn & Plastic Surgery" or "জাতীয় বার্ন ও প্লাস্টিক সার্জারি ইনস্টিটিউট".
-3. IF THE CITIZEN ASKS OFF-TOPIC QUESTIONS (unrelated to emergency services, thanas, police, fire, disaster/climate, or safety):
-   - Politely inform them that you are strictly an Emergency Service & Thana Directory AI.
-   - Present them with emergency options (Thana numbers, Fire Service, Climate/Disaster control, 999).
-4. FORMATTING: Every telephone and mobile number MUST be formatted with clickable markdown links (e.g., [01713-373126](tel:01713373126) or [16163](tel:16163)).
-5. LANGUAGE: Respond in fluent, direct, caring English or Bengali (বাংলা) matching the user. Always give direct contact numbers without fluff.`;
+YOUR CORE DOMAINS & RESPONSIBILITIES:
+1. HUMANLY CONVERSATION & MEDICAL FIRST AID:
+   - If a citizen is suffering from fever, sudden illness, cold, headache, or body ache:
+     * Respond with warmth, empathy, and practical first-aid advice (hydration with ORS/saline, rest, tepid water sponging).
+     * Recommend taking standard Paracetamol if suitable, but WARN against taking Aspirin, Brufen, or NSAIDs during Dengue fever season.
+     * Tell them to consult a registered doctor or call DGHS Shastho Batayan free 24/7 helpline [16263](tel:16263).
+     * Provide red-flag warning signs (temperature > 103°F, severe vomiting, bleeding, breathing distress) where they must call 999 or rush to an emergency room.
+     * Ask for their location or provide nearby hospitals if location is already known.
+2. EVE TEASING, STALKING & HARASSMENT:
+   - Provide immediate calming reassurance. Advise them to move to a well-lit, crowded place (shop, pharmacy, bank, metro station) and avoid confronting alone.
+   - Ask for their location (neighborhood or street in Bangladesh). Once known, provide the nearest Police Thana, direct Officer-in-Charge (OC) official number, and 24/7 Duty Officer.
+   - Provide Police Cyber Support for Women (PCSW [01320-000888](tel:01320000888)), National Women Helpline [109](tel:109), and 999 emergency CAD dispatch.
+3. SNATCHING, MUGGING & ROBBERY:
+   - Express empathy and verify physical safety.
+   - Instruct them to go to the nearest Police Station (Thana) immediately to file a General Diary (GD) or FIR.
+   - If phone was snatched, provide urgent instructions to freeze mobile wallets (bKash 16247, Nagad 16167, Rocket 16216) and suspend SIM cards (GP/BL/Robi 121).
+   - Ask for their location to provide the nearest Thana with OC contact and GD writing guidance (mention IMEI, exact time, description).
+4. NEARBY HOSPITALS & 24/7 AMBULANCES:
+   - When asked for nearby hospitals ("what's the nearest hospital", "hospital in Uttara", etc.), provide top verified emergency hospitals in that area with 24/7 emergency numbers, direct ambulance dispatch lines, and addresses. If location is unknown, ask for their area.
+5. BANGLADESH POLICE THANAS & OFFICIAL 01320- SERIES:
+   - Provide verified Thana, OC, 24/7 Duty Officer, and Landline contacts. Always format telephone numbers as clickable markdown links (e.g. [01320-XXXXXX](tel:01320XXXXXX) or [999](tel:999)).
+6. EMERGENCY BLOOD LIFELINE (রক্তবন্ধু):
+   - Guide citizens to Safe BD's "I Need Help" -> "Emergency Blood Lifeline" to filter and call verified blood donors directly. Provide Red Crescent (02-9330188) and Quantum Blood Lab (01714-010869).
+7. STRICT OFF-TOPIC / IRRELEVANT SCOPE:
+   - If a citizen asks about sports (cricket, football, IPL, Messi), movies/celebrities, video games, programming/coding, school homework, recipes/cooking, or general random trivia:
+   - Politely, warmly decline by explaining: "I am shurokhaAI, dedicated to keeping you safe and healthy in Bangladesh. I am exclusively focused on medical guidance, emergency response, nearby hospitals, and police thana services."
+8. LANGUAGE:
+   - Respond in fluent, empathetic Bengali (বাংলা) or English matching the user's language. Keep formatting clean, structured, and easy to read during distress.`;
 
 async function generateShurokhaFallbackResponse(query) {
   const q = (query || '').toLowerCase().trim();
@@ -3837,50 +3855,49 @@ app.post('/api/ai/chat', async (req, res) => {
     }
 
     const userMessage = message.trim();
+    const qLower = userMessage.toLowerCase();
 
-    // Priority 1: Official Bangladesh Thana, District Police & Emergency Directory (Instant 100% Verified Match)
-    const directContact = findBangladeshSafetyContact(userMessage);
-    if (directContact) {
+    // 0. Off-Topic / Irrelevant Query Guardrail (Human, polite safety deflection)
+    if (shurokhaIntelligence.isOffTopicQuery(qLower)) {
+      const offTopicReply = await shurokhaIntelligence.processShurokhaChat(userMessage, history);
       return res.json({
         success: true,
-        reply: directContact.text,
-        sources: directContact.sources || [],
-        grounded: directContact.sources?.length > 0,
-        poweredBy: "Official Bangladesh Police Master Directory (01320 Series)"
+        reply: offTopicReply.text,
+        sources: offTopicReply.sources || [],
+        grounded: false,
+        poweredBy: "shurokhaAI Safety Guardrail"
       });
     }
 
-    // Priority 2: Live Search for any specific Thana / Emergency service requested
-    const isThanaOrEmergencyQuery = /thana|থানা|oc|ওসি|police|পুলিশ|fire|ফায়ার|hospital|হাসপাতাল|number|নাম্বার|ফোন/i.test(userMessage);
-    if (isThanaOrEmergencyQuery) {
-      const googleMatch = await searchGoogleThanaContact(userMessage);
-      if (googleMatch) {
+    // 1. Direct Thana / OC query with single-turn directory lookup intent (e.g. "Dhanmondi thana oc number")
+    const isDirectThanaLookup = /^(?:give\s*me\s*|what\s*is\s*|tell\s*me\s*)?(?:the\s*)?(?:[a-z\u0980-\u09FF\s]+)\s*(?:thana|থানা|ps)\s*(?:oc|officer|duty|number|ফোন|নাম্বার)?$/i.test(userMessage.trim());
+    if (isDirectThanaLookup) {
+      const directContact = findBangladeshSafetyContact(userMessage);
+      if (directContact) {
         return res.json({
           success: true,
-          reply: googleMatch.text,
-          sources: googleMatch.sources || [],
-          grounded: true,
-          poweredBy: "Google Search Emergency Directory"
+          reply: directContact.text,
+          sources: directContact.sources || [],
+          grounded: directContact.sources?.length > 0,
+          poweredBy: "Official Bangladesh Police Master Directory (01320 Series)"
         });
       }
     }
 
+    // 2. If Gemini API Key is configured, attempt Gemini with ChatGPT-like Persona & Live Search Grounding
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
-
-    // Prepare conversation contents for Gemini
-    const contents = [];
-    if (Array.isArray(history)) {
-      history.slice(-8).forEach(h => {
-        if (h && h.text) {
-          const role = (h.role === 'user' || h.role === 'model') ? h.role : 'user';
-          contents.push({ role, parts: [{ text: String(h.text) }] });
-        }
-      });
-    }
-    contents.push({ role: 'user', parts: [{ text: userMessage }] });
-
-    // Method 1: Google Gemini with Live Google Search Grounding
     if (apiKey) {
+      const contents = [];
+      if (Array.isArray(history)) {
+        history.slice(-8).forEach(h => {
+          if (h && h.text) {
+            const role = (h.role === 'user' || h.role === 'model') ? h.role : 'user';
+            contents.push({ role, parts: [{ text: String(h.text) }] });
+          }
+        });
+      }
+      contents.push({ role: 'user', parts: [{ text: userMessage }] });
+
       const geminiModels = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
       let geminiResponse = null;
       let usedModel = '';
@@ -3889,7 +3906,6 @@ app.post('/api/ai/chat', async (req, res) => {
         try {
           const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
           
-          // First attempt with Google Search grounding tool
           const searchBody = {
             contents: contents,
             systemInstruction: { parts: [{ text: SHUROKHA_SYSTEM_INSTRUCTION }] },
@@ -3902,7 +3918,6 @@ app.post('/api/ai/chat', async (req, res) => {
             body: JSON.stringify(searchBody)
           });
 
-          // If googleSearch tool errors with 400 or is unsupported, retry with clean prompt
           if (!gRes.ok) {
             const plainBody = {
               contents: contents,
@@ -3933,7 +3948,6 @@ app.post('/api/ai/chat', async (req, res) => {
         const candidate = geminiResponse.candidates[0];
         const replyText = candidate.content.parts[0].text;
         
-        // Extract web search grounding sources if present
         const grounding = candidate.groundingMetadata;
         const searchSources = [];
         if (grounding && Array.isArray(grounding.groundingChunks)) {
@@ -3958,14 +3972,14 @@ app.post('/api/ai/chat', async (req, res) => {
       }
     }
 
-    // Method 2: High-Intelligence Conversational & Wikipedia Live Search Fallback Engine
-    const fallbackReply = await generateShurokhaFallbackResponse(userMessage);
+    // 3. Conversational AI Engine (ChatGPT-style Intelligence with 641 Thanas & Hospital Directory)
+    const intelligentReply = await shurokhaIntelligence.processShurokhaChat(userMessage, history);
     return res.json({
       success: true,
-      reply: fallbackReply.text,
-      sources: fallbackReply.sources || [],
-      grounded: fallbackReply.sources?.length > 0,
-      poweredBy: "shurokhaAI Conversational Engine"
+      reply: intelligentReply.text,
+      sources: intelligentReply.sources || [],
+      grounded: intelligentReply.sources?.length > 0,
+      poweredBy: intelligentReply.poweredBy || "shurokhaAI Conversational Engine"
     });
 
   } catch (err) {
