@@ -122,7 +122,7 @@ async function processShurokhaChat(userMessage, history = []) {
   const locationName = detectedLocation ? detectedLocation.name : null;
   const locationBn = detectedLocation ? detectedLocation.bn : null;
 
-  // Retrieve previous bot topic if user is continuing a topic (e.g. user previously asked about eve teasing or fever)
+  // Retrieve previous bot topic if user is continuing a topic (e.g. user previously asked about eve teasing, fever, or emotional distress)
   let lastTopic = null;
   if (Array.isArray(history) && history.length > 0) {
     const lastExchange = history.slice(-3);
@@ -132,6 +132,94 @@ async function processShurokhaChat(userMessage, history = []) {
       else if (/snatch|mug|rob|ছিনতাই|ডাকাতি|ব্যাগ|মোবাইল চুরি/.test(text)) lastTopic = 'SNATCHING';
       else if (/fever|জ্বর|headache|stomach|অসুস্থ|sick|doctor|চিকিৎসা/.test(text)) lastTopic = 'MEDICAL';
       else if (/hospital|হাসপাতাল|clinic|অ্যাম্বুলেন্স/.test(text)) lastTopic = 'HOSPITAL';
+      else if (/cry|crying|tears|sad|heartbroken|depress|hopeless|lonely|alone|কাঁদছি|কান্না|মন\s*খারাপ|কষ্ট|একা/.test(text)) lastTopic = 'EMOTIONAL_DISTRESS';
+    }
+  }
+
+  // ─── 0. EMOTIONAL DISTRESS, CRYING, SADNESS & HUMAN EMPATHY ───────────────
+  const isEmotionalDistress = /\b(crying|cry|cried|tears|sob|sobbing|heartbroken|broken|sad|upset|depressed|depression|hopeless|lonely|alone|hurt\s*inside|feel\s*like\s*crying|breaking\s*down|can\'?t\s*take\s*this|hate\s*my\s*life|suicid|kill\s*myself|end\s*my\s*life)\b/i.test(qLower) ||
+    /কাঁদছি|কান্না|মন\s*খারাপ|কষ্ট\s*হচ্ছে|বুক\s*ভেঙে|একা\s*লাগছে|ডিপ্রেশন|হতাশ|মরতে\s*ইচ্ছা|জীবন\s*শেষ|আত্মহত্যা|সহ্য\s*করতে\s*পারছি\s*না/i.test(originalQ);
+
+  if (isEmotionalDistress) {
+    const isSevereCrisis = /suicid|kill\s*myself|end\s*my\s*life|মরতে\s*ইচ্ছা|জীবন\s*শেষ|আত্মহত্যা/.test(qLower) || /মরতে\s*ইচ্ছা|জীবন\s*শেষ|আত্মহত্যা/.test(originalQ);
+
+    if (isBangla) {
+      let text = `💙 **ওহ না... আমি সত্যিই খুব দুঃখিত যে আপনি কাঁদছেন এবং এত কষ্ট পাচ্ছেন।**\n\n` +
+        `দয়া করে জানবেন, **আপনি একা নন — আমি আপনার পাশেই আছি।**\n\n` +
+        `💭 **কী হয়েছে আমাকে একটু খুলে বলবেন?** কেন আপনি কাঁদছেন বা আপনার মন এত খারাপ?\n` +
+        `কেউ কি আপনাকে কষ্ট দিয়েছে, কোনো প্রিয়জনকে হারিয়েছেন, কোনো পারিবারিক বা মানসিক চাপ যাচ্ছে, নাকি সবকিছু খুব কঠিন মনে হচ্ছে? একটু সময় নিন, এক ঢোক পানি পান করুন এবং আমাকে বলুন — **আমি কোনো বিচার না করে মন দিয়ে আপনার সব কথা শুনছি।**\n\n`;
+
+      if (isSevereCrisis) {
+        text += `🛑 **দয়া করে নিজের কোনো ক্ষতি করবেন না। আপনার জীবন অত্যন্ত মূল্যবান।**\n` +
+          `এই কঠিন মুহূর্তটি কেটে যাবে। এখনই একজন বিশ্বস্ত মানুষের সাথে অথবা আমাদের দেশের বিনা মূল্যের মানসিক স্বাস্থ্য হেল্পলাইনে কথা বলুন:\n` +
+          `• 📞 **কান পেতে রই (Kaan Pete Roi - মানসিক সহায়তা হেল্পলাইন):** [01779-554391](tel:01779554391) / [01779-554392](tel:01779554392)\n` +
+          `• 📞 **জাতীয় জরুরি মানসিক স্বাস্থ্য সেবা:** [৯৯৯](tel:999)\n\n`;
+      } else {
+        text += `✨ *চোখের পানি আটকে রাখবেন না — কষ্ট লাগলে কেঁদে মন হালকা করাও স্বাভাবিক। আপনি শারীরিকভাবে নিরাপদ তো? কী হয়েছে আমাকে নির্দ্বিধায় বলুন, আমি শুনছি।*`;
+      }
+
+      return {
+        text,
+        sources: [
+          { title: "কান পেতে রই (মানসিক স্বাস্থ্য হেল্পলাইন)", url: "tel:01779554391" },
+          { title: "স্বাস্থ্য বাতায়ন ১৬২৬৩", url: "tel:16263" }
+        ],
+        poweredBy: "shurokhaAI Human Empathy Companion"
+      };
+    } else {
+      let text = `💙 **Oh no... I am so deeply sorry that you are crying right now.**\n\n` +
+        `Please take a slow, deep breath. Know that **you are not alone, and I am right here with you.**\n\n` +
+        `💭 **Can you tell me what happened? Why are you crying?**\n` +
+        `Did someone hurt you, are you going through a painful situation, dealing with overwhelming stress, or feeling broken and lonely? Please talk to me — take all the time you need. **I am here to listen to you with all my care and without any judgment.**\n\n`;
+
+      if (isSevereCrisis) {
+        text += `🛑 **Please do not hurt yourself. Your life is immensely precious and you matter so much.**\n` +
+          `This dark moment will pass, and there are people who care deeply. Please reach out to Bangladesh's confidential mental health and crisis counseling helpline right now:\n` +
+          `• 📞 **Kaan Pete Roi (Emotional Support & Suicide Helpline):** [01779-554391](tel:01779554391) / [01779-554392](tel:01779554392)\n` +
+          `• 📞 **National Emergency Helpline:** [999](tel:999)\n\n`;
+      } else {
+        text += `✨ *Sit somewhere comfortable, take a sip of water, and let your tears flow if you need to — it is okay to not be okay. Are you physically safe right now? What is on your mind? Talk to me.*`;
+      }
+
+      return {
+        text,
+        sources: [
+          { title: "Kaan Pete Roi (Emotional Support Line)", url: "tel:01779554391" },
+          { title: "DGHS Shastho Batayan 16263", url: "tel:16263" }
+        ],
+        poweredBy: "shurokhaAI Human Empathy Companion"
+      };
+    }
+  }
+
+  // If user previously expressed emotional distress and is now continuing the reason (e.g. "my friend betrayed me", "i lost my job", "family issues")
+  if (lastTopic === 'EMOTIONAL_DISTRESS' && !detectedLocation) {
+    if (isBangla) {
+      return {
+        text: `💙 **আপনার কথাটি আমি মন দিয়ে শুনেছি এবং বুঝতে পেরেছি।** এমন পরিস্থিতির মধ্য দিয়ে যাওয়া সত্যিই প্রচণ্ড বেদনাদায়ক ও মানসিক ক্লান্তির।\n\n` +
+          `নিজের প্রতি একটু সদয় হোন। জীবনের কঠিন সময়গুলোতে অনেক সময় সবকিছু অন্ধকার মনে হয়, তবে মনে রাখবেন আপনার এই কষ্ট চিরস্থায়ী নয়। নিজেকে সময় দিন এবং নিজের যত্ন নিন।\n\n` +
+          `আপনি কি কোনো আপনজন বা বন্ধুর সাথে এই কথাটি শেয়ার করতে পারেন? আর যদি কোনো কাউন্সেলরের সাথে মনের ভাব খোলামেলা আলোচনা করতে চান:\n` +
+          `• 📞 **কান পেতে রই (Kaan Pete Roi):** [01779-554391](tel:01779554391) / [01779-554392](tel:01779554392)\n` +
+          `• 📞 **স্বাস্থ্য বাতায়ন (২৪ ঘণ্টা পরামর্শ):** [১৬২৬৩](tel:16263)\n\n` +
+          `আমি আপনার পাশেই আছি। আরও কিছু বলতে চাইলে বলুন, আমি শুনছি।`,
+        sources: [
+          { title: "কান পেতে রই হেল্পলাইন", url: "tel:01779554391" }
+        ],
+        poweredBy: "shurokhaAI Human Empathy Companion"
+      };
+    } else {
+      return {
+        text: `💙 **Thank you for sharing that with me. I hear you, and I truly feel your pain.** Going through something like this is incredibly exhausting, heavy, and emotionally draining.\n\n` +
+          `Please be gentle with yourself. It is completely valid to feel heartbroken, disappointed, or overwhelmed right now. But remember: this difficult chapter does not define your entire story, and you have the strength inside you to get through this step by step.\n\n` +
+          `Take a quiet moment for yourself, drink some water, and if you'd like to speak with a caring counselor who will listen confidentially:\n` +
+          `• 📞 **Kaan Pete Roi (Bangladesh Emotional Support Hotline):** [01779-554391](tel:01779554391) / [01779-554392](tel:01779554392)\n` +
+          `• 📞 **DGHS Shastho Batayan:** [16263](tel:16263)\n\n` +
+          `I am right here with you. If you want to talk more or get anything else off your chest, I am listening.`,
+        sources: [
+          { title: "Kaan Pete Roi Helpline", url: "tel:01779554391" }
+        ],
+        poweredBy: "shurokhaAI Human Empathy Companion"
+      };
     }
   }
 
