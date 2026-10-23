@@ -308,6 +308,40 @@ app.get(['/api/health', '/ping'], (req, res) => {
   });
 });
 
+// Accurate Bangladesh & Global Reverse Geocoding Proxy (High Availability, Server-Side User Agent)
+app.get('/api/geo/reverse', async (req, res) => {
+  const lat = parseFloat(req.query.lat);
+  const lon = parseFloat(req.query.lon);
+  if (isNaN(lat) || isNaN(lon)) {
+    return res.status(400).json({ error: "INVALID_COORDINATES", message: "Latitude and longitude required." });
+  }
+
+  try {
+    const fetchFn = globalThis.fetch;
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
+    const geoRes = await fetchFn(url, {
+      headers: {
+        'User-Agent': 'SAFE_BD_Emergency_Platform/2.0 (bangladesh_citizen_safety@safebd.com)'
+      }
+    });
+
+    if (geoRes.ok) {
+      const data = await geoRes.json();
+      if (data && data.address) {
+        const addr = data.address;
+        const road = addr.road || addr.suburb || addr.neighbourhood || addr.residential || addr.quarter || "";
+        const city = addr.city || addr.town || addr.county || addr.state_district || addr.state || "Bangladesh";
+        const readable = road ? `${road}, ${city}` : (data.display_name ? data.display_name.split(',').slice(0, 3).join(', ') : `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`);
+        return res.json({ success: true, address: readable, fullAddress: data.display_name || readable });
+      }
+    }
+  } catch (err) {
+    console.warn('[ReverseGeocode] Server lookup warning:', err.message);
+  }
+
+  return res.json({ success: true, address: `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}` });
+});
+
 // In-Memory Secure State (for production: backed by Redis + PostgreSQL PostGIS)
 const users = new Map();             // phone -> userProfile
 const activeSessions = new Map();    // token -> user
