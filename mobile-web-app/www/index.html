@@ -5706,9 +5706,49 @@
     let selectedCategory = "General Safety";
     let activeFeedFilter = 'all';
 
-    const API_BASE = (window.location.protocol.startsWith('http') && !window.location.origin.includes('file:'))
-      ? window.location.origin
-      : 'http://localhost:5000';
+    let API_BASE = (() => {
+      try {
+        if (typeof window !== 'undefined' && window.location) {
+          const host = window.location.hostname || '';
+          const port = window.location.port || '';
+          // 1. Live Render production
+          if (host.includes('onrender.com') || host.includes('safebd.com')) {
+            return window.location.origin;
+          }
+          // 2. Direct Node.js local server on port 5000
+          if (port === '5000') {
+            return window.location.origin;
+          }
+          // 3. Dev environments (localhost / 127.0.0.1 on other ports like 3000, 5500, 8080)
+          if (host === 'localhost' || host === '127.0.0.1') {
+            return 'http://localhost:5000';
+          }
+        }
+      } catch (e) {}
+      // 4. Standalone file:/// or Capacitor mobile app:
+      return 'https://safebd.onrender.com';
+    })();
+
+    async function apiFetch(endpoint, options = {}) {
+      const primaryUrl = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
+      try {
+        const res = await fetch(primaryUrl, options);
+        return res;
+      } catch (err) {
+        // High-availability auto-failover: if localhost:5000 fails, retry on live Render; if Render fails, retry localhost
+        const isLocal = primaryUrl.includes('localhost') || primaryUrl.includes('127.0.0.1');
+        const fallbackHost = isLocal ? 'https://safebd.onrender.com' : 'http://localhost:5000';
+        const failoverUrl = endpoint.startsWith('http') ? endpoint.replace(/https?:\/\/[^\/]+/, fallbackHost) : `${fallbackHost}${endpoint}`;
+        console.warn(`[API FAILOVER] ${primaryUrl} failed (${err.message}). Retrying against ${failoverUrl}...`);
+        try {
+          const fallbackRes = await fetch(failoverUrl, options);
+          API_BASE = fallbackHost;
+          return fallbackRes;
+        } catch (fallbackErr) {
+          throw err;
+        }
+      }
+    }
 
     // High-Throughput Scalable Posts State (Backed by Database Engine for Millions of Citizens)
     let liveApprovedPosts = [];
@@ -10553,7 +10593,7 @@
 
       for (let attempt = 1; attempt <= 2; attempt++) {
         try {
-          const res = await fetch(`${API_BASE}/api/admin/portal-template`, {
+          const res = await apiFetch('/api/admin/portal-template', {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await res.json();
@@ -10954,7 +10994,7 @@
       const token = localStorage.getItem('safe_bd_token');
       const phone = currentUser ? (currentUser.phone || '').replace(/\D/g, '').slice(-10) : '';
 
-      fetch(`${API_BASE}/api/auth/change-password`, {
+      apiFetch('/api/auth/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -10996,7 +11036,7 @@
       const savedUser = localStorage.getItem('safe_bd_user');
 
       if (token) {
-        fetch(`${API_BASE}/api/auth/me`, {
+        apiFetch('/api/auth/me', {
           headers: { 'Authorization': `Bearer ${token}` }
         })
         .then(r => {
@@ -11187,7 +11227,7 @@
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Unlocking Profile...';
       }
 
-      fetch(`${API_BASE}/api/auth/login`, {
+      apiFetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: cleanPhone, password: password })
@@ -13184,7 +13224,7 @@
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Profile...';
       }
 
-      fetch(`${API_BASE}/api/auth/register`, {
+      apiFetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -13340,7 +13380,7 @@
       const token = localStorage.getItem('safe_bd_token');
 
       // Sync logout event to persistent database
-      fetch(`${API_BASE}/api/auth/logout`, {
+      apiFetch('/api/auth/logout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: userPhone, token: token })
