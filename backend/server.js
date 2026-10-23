@@ -34,13 +34,11 @@ process.on('unhandledRejection', (reason, promise) => {
 
 app.disable('x-powered-by');
 
-// Military-Grade HTTP Security Headers (OWASP Top 10 Defense)
+// HTTP Security Headers
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'geolocation=(self), microphone=(self), camera=(self)');
   if (process.env.NODE_ENV === 'production') {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   }
@@ -49,19 +47,30 @@ app.use((req, res, next) => {
 
 const ALLOWED_ORIGINS = [
   'https://safebd.onrender.com',
+  'http://safebd.onrender.com',
   'http://localhost:5000',
   'http://127.0.0.1:5000',
   'http://localhost:3000',
-  'http://127.0.0.1:3000'
+  'http://127.0.0.1:3000',
+  'http://localhost',
+  'capacitor://localhost',
+  'ionic://localhost'
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
-    if (ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.onrender.com') || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+    const isAllowed = ALLOWED_ORIGINS.includes(origin) 
+      || origin.endsWith('.onrender.com') 
+      || origin.includes('safebd.com') 
+      || origin.startsWith('http://localhost') 
+      || origin.startsWith('http://127.0.0.1')
+      || origin.startsWith('capacitor://')
+      || origin.startsWith('ionic://');
+    if (isAllowed) {
       return callback(null, true);
     }
-    return callback(new Error('CORS origin not allowed by policy'), false);
+    return callback(null, false);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -212,6 +221,11 @@ function createSlidingRateLimiter(bucketName, windowMs, maxRequests, customMessa
   }, 5 * 60 * 1000).unref();
 
   return (req, res, next) => {
+    // Exempt read-only telemetry, reverse-geocoding, and health checks from rate limiting
+    if (req.path === '/api/health' || req.path === '/health' || req.path === '/ping' || req.path.startsWith('/api/geo/') || (req.method === 'GET' && req.path === '/api/feed/posts')) {
+      return next();
+    }
+
     const rawIp = req.ip || (req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : (req.socket.remoteAddress || '127.0.0.1'));
     const phone = req.body && req.body.phone ? db.normalizePhone(req.body.phone) : '';
     // Key by phone if present so one citizen/phone number never blocks other users on shared mobile carrier CGNAT IPs
@@ -237,7 +251,7 @@ function createSlidingRateLimiter(bucketName, windowMs, maxRequests, customMessa
   };
 }
 
-const apiLimiter = createSlidingRateLimiter('api', 60 * 1000, 200, "General request rate limit reached. Please wait a minute.");
+const apiLimiter = createSlidingRateLimiter('api', 60 * 1000, 1200, "General request rate limit reached. Please wait a minute.");
 const authLimiter = createSlidingRateLimiter('auth', 5 * 60 * 1000, 60, "Too many authentication attempts. Please wait 2 minutes.");
 const otpLimiter = createSlidingRateLimiter('otp', 10 * 60 * 1000, 10, "SMS OTP request quota reached for this number. Please wait 10 minutes.");
 
