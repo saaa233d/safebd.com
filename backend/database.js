@@ -42,12 +42,12 @@ const EVIDENCE_FILE = path.join(DATA_DIR, 'safe_bd_evidence.json');
 const POSTS_FILE = path.join(DATA_DIR, 'safe_bd_posts.json');
 const BLOOD_DONORS_FILE = path.join(DATA_DIR, 'safe_bd_blood_donors.json');
 
-// Global Cloud Infrastructure Fallbacks (Google Drive 5TB Vault & Supabase Cloud)
-const DEFAULT_GDRIVE_URL = process.env.GDRIVE_VAULT_URL || 'https://script.google.com/macros/s/AKfycby3O-1dfJeGE5DJ8dDrhBHtkdgnk-IKSXFRtUswiTblka1M3GoC8uxGHfOM2kvyOVmq/exec';
-const DEFAULT_GDRIVE_KEY = process.env.GDRIVE_SECRET_KEY || 'SAFEBD_PRIVATE_VAULT_2026';
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://sdpewbutexztzspagjqu.supabase.co';
-const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY || Buffer.from('c2Jfc2VjcmV0X21aRldPalRvTi04Uy1fZG5WZVVGUWdfV1VsTEdVSGs=', 'base64').toString('utf8');
-const SUPABASE_PUB_KEY = process.env.SUPABASE_PUB_KEY || Buffer.from('c2JfcHVibGlzaGFibGVfU2c5X2RWeDZMUWYzN1ZUZFdiNEZrZ19lVkVZNERidQ==', 'base64').toString('utf8');
+// Global Cloud Infrastructure Configuration (Strictly from Environment Variables - Zero Hardcoded Fallbacks)
+const DEFAULT_GDRIVE_URL = process.env.GDRIVE_VAULT_URL || '';
+let vaultRuntimeSecret = process.env.GDRIVE_SECRET_KEY || '';
+const SUPABASE_URL = process.env.SUPABASE_URL || '';
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY || '';
+const SUPABASE_PUB_KEY = process.env.SUPABASE_PUB_KEY || '';
 
 // In-Memory Indexed Stores for sub-millisecond retrieval (Scales to Millions of Posts & Users)
 let dbState = {
@@ -63,8 +63,7 @@ let dbState = {
   bloodDonors: [],      // Emergency volunteer blood donors list (রক্তবন্ধু)
   cloudVault: {
     scriptUrl: DEFAULT_GDRIVE_URL,
-    secretKey: DEFAULT_GDRIVE_KEY,
-    enabled: true,
+    enabled: Boolean(DEFAULT_GDRIVE_URL && vaultRuntimeSecret),
     folderName: 'SAFE_BD_VAULT',
     lastSyncedAt: null
   },
@@ -170,7 +169,9 @@ function initDatabase() {
 
       const savedCloudVault = parsed.cloudVault || {};
       const scriptUrl = process.env.GDRIVE_VAULT_URL || savedCloudVault.scriptUrl || DEFAULT_GDRIVE_URL;
-      const secretKey = process.env.GDRIVE_SECRET_KEY || savedCloudVault.secretKey || DEFAULT_GDRIVE_KEY;
+      if (process.env.GDRIVE_SECRET_KEY) {
+        vaultRuntimeSecret = process.env.GDRIVE_SECRET_KEY;
+      }
 
       dbState = {
         users: parsed.users || {},
@@ -184,8 +185,7 @@ function initDatabase() {
         otpCodes: {}, // OTPs are ephemeral and cleared on startup
         cloudVault: {
           scriptUrl: scriptUrl,
-          secretKey: secretKey,
-          enabled: true,
+          enabled: Boolean(scriptUrl && vaultRuntimeSecret),
           folderName: savedCloudVault.folderName || 'SAFE_BD_VAULT',
           lastSyncedAt: savedCloudVault.lastSyncedAt || null
         },
@@ -362,19 +362,26 @@ function getDefaultUserContacts() {
   ];
 }
 
-// Pre-seed Chief Administrator & Founder Account
+// Secure Chief Administrator Bootstrap (No Predictable Default Passwords)
 function seedChiefAdmin() {
-  const adminPhone = '1316750712';
-  const adminPassword = process.env.ADMIN_PASSWORD || 'SafeBd@2026Admin!';
+  const adminPhone = process.env.ADMIN_PHONE ? normalizePhone(process.env.ADMIN_PHONE) : '1316750712';
+  const bootstrapPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD || process.env.ADMIN_PASSWORD;
 
   if (!dbState.users[adminPhone]) {
     const salt = crypto.randomBytes(16).toString('hex');
-    const hash = hashPassword(adminPassword, salt);
+    let effectivePassword = bootstrapPassword;
+
+    if (!effectivePassword) {
+      effectivePassword = crypto.randomBytes(12).toString('base64url') + '!A9';
+      console.warn(`[🛡️ ADMIN BOOTSTRAP NOTICE] No ADMIN_PASSWORD provided in environment. Secure one-time password generated for ${adminPhone}: ${effectivePassword}`);
+    }
+
+    const hash = hashPassword(effectivePassword, salt);
 
     dbState.users[adminPhone] = {
-      id: 'usr_admin_1316750712',
+      id: `usr_admin_${adminPhone}`,
       phone: adminPhone,
-      displayPhone: '+880 1316-750712',
+      displayPhone: `+880 ${adminPhone}`,
       name: 'SAAD RIZWAN',
       role: 'Founder & CEO, SAFE bd',
       isFounder: true,
@@ -389,15 +396,13 @@ function seedChiefAdmin() {
       loginCount: 0,
       contacts: getDefaultUserContacts()
     };
-    console.log('[🛡️ ADMIN ACCOUNT SEEDED] SAAD RIZWAN (Founder & CEO) (+880 1316-750712) ready.');
+    console.log(`[🛡️ ADMIN ACCOUNT INITIALIZED] Phone: +880 ${adminPhone} (Zero hardcoded secrets).`);
   } else {
-    // Keep founder and admin privileges guaranteed
-    dbState.users[adminPhone].name = 'SAAD RIZWAN';
-    dbState.users[adminPhone].role = 'Founder & CEO, SAFE bd';
-    dbState.users[adminPhone].isFounder = true;
-    dbState.users[adminPhone].isAdmin = true;
-    if (process.env.ADMIN_PASSWORD) {
-      dbState.users[adminPhone].passwordHash = hashPassword(process.env.ADMIN_PASSWORD, dbState.users[adminPhone].salt || 'default_salt');
+    // If account already exists, retain its existing secure passwordHash unless explicitly overridden via env
+    if (bootstrapPassword) {
+      const salt = dbState.users[adminPhone].salt || crypto.randomBytes(16).toString('hex');
+      dbState.users[adminPhone].salt = salt;
+      dbState.users[adminPhone].passwordHash = hashPassword(bootstrapPassword, salt);
     }
     if (!dbState.users[adminPhone].contacts || !Array.isArray(dbState.users[adminPhone].contacts)) {
       dbState.users[adminPhone].contacts = getDefaultUserContacts();
@@ -486,6 +491,13 @@ function persistToDisk() {
   saveDebounceTimer = setTimeout(() => {
     try {
       dbState.stats.lastSaved = new Date().toISOString();
+      const safeCloudVault = {
+        scriptUrl: (dbState.cloudVault && dbState.cloudVault.scriptUrl) || '',
+        enabled: Boolean(dbState.cloudVault && dbState.cloudVault.enabled),
+        folderName: (dbState.cloudVault && dbState.cloudVault.folderName) || 'SAFE_BD_VAULT',
+        lastSyncedAt: (dbState.cloudVault && dbState.cloudVault.lastSyncedAt) || null,
+        stateFileId: (dbState.cloudVault && dbState.cloudVault.stateFileId) || null
+      };
       const payload = JSON.stringify({
         users: dbState.users,
         sessions: dbState.sessions,
@@ -493,7 +505,7 @@ function persistToDisk() {
         emergencyEvidence: dbState.emergencyEvidence || [],
         sosAlerts: dbState.sosAlerts || [],
         posts: dbState.posts || {},
-        cloudVault: dbState.cloudVault || {},
+        cloudVault: safeCloudVault,
         stats: dbState.stats
       }, null, 2);
 
@@ -1021,7 +1033,7 @@ function verifyOtp(phone, inputCode, expectedPurpose = null) {
   return { success: false, message: 'Incorrect OTP verification code. Please check SMS and try again.' };
 }
 
-const TOKEN_SECRET = process.env.SESSION_SECRET || process.env.SUPABASE_SECRET_KEY || 'SAFE_BD_SECURE_AUTH_TOKEN_KEY_2026_SAAD_RIZWAN';
+const TOKEN_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
 
 function parseSignedToken(token) {
   if (!token || typeof token !== 'string') return null;
@@ -1040,10 +1052,10 @@ function parseSignedToken(token) {
     const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
     if (isNaN(timestamp) || (Date.now() - timestamp > SESSION_TTL_MS)) return null;
     const cleanPhone = normalizePhone(phone);
-    const isChiefAdmin = cleanPhone === '1316750712' || adminFlag === '1';
+    const isAdmin = adminFlag === '1';
     return {
       phone: cleanPhone,
-      isAdmin: isChiefAdmin,
+      isAdmin: isAdmin,
       timestamp
     };
   } catch (e) {
@@ -1073,12 +1085,12 @@ function getSession(token) {
   const tokenMeta = parseSignedToken(token);
   if (tokenMeta && tokenMeta.phone) {
     const cleanPhone = tokenMeta.phone;
-    const isChiefAdmin = cleanPhone === '1316750712' || tokenMeta.isAdmin;
     let user = dbState.users[cleanPhone];
     if (!user) {
-      if (isChiefAdmin) {
+      const configuredAdminPhone = process.env.ADMIN_PHONE ? normalizePhone(process.env.ADMIN_PHONE) : '1316750712';
+      if (tokenMeta.isAdmin && cleanPhone === configuredAdminPhone) {
         seedChiefAdmin();
-        user = dbState.users['1316750712'];
+        user = dbState.users[configuredAdminPhone];
       } else {
         user = {
           id: `usr_${cleanPhone}`,
@@ -1178,6 +1190,18 @@ function getAllEmergencyEvidence() {
 function getEmergencyEvidenceById(id) {
   if (!dbState.emergencyEvidence) return null;
   return dbState.emergencyEvidence.find(e => e.id === id) || null;
+}
+
+function getEmergencyEvidenceByFilename(filename) {
+  if (!dbState.emergencyEvidence || !filename) return null;
+  const target = String(filename).trim().toLowerCase();
+  return dbState.emergencyEvidence.find(e => {
+    if (!e) return false;
+    if (e.fileName && e.fileName.toLowerCase() === target) return true;
+    if (e.id && e.id.toLowerCase() === target) return true;
+    if (e.videoUrl && (e.videoUrl.toLowerCase().endsWith('/' + target) || e.videoUrl.toLowerCase().endsWith(target))) return true;
+    return false;
+  }) || null;
 }
 
 function markEmergencyEvidenceReviewed(id, notes = "") {
@@ -2002,17 +2026,33 @@ function getAllAdmins() {
   return admins;
 }
 
+const ALLOWED_ADMIN_PERMISSIONS = [
+  'manage_posts',
+  'delete_posts',
+  'approve_posts',
+  'view_evidence',
+  'view_sos',
+  'dispatch_cad',
+  'manage_users',
+  'system_admin'
+];
+
 function grantAdminAccess(phone, { name = '', role = 'Moderator Admin', permissions = [], assignedBy = 'Chief Administrator' } = {}) {
   const cleanPhone = normalizePhone(phone);
   if (!cleanPhone || cleanPhone.length !== 10) {
     throw new Error('Valid 10-digit Bangladeshi mobile number required.');
   }
 
+  const validPermissions = Array.isArray(permissions) && permissions.length
+    ? permissions.filter(p => ALLOWED_ADMIN_PERMISSIONS.includes(p))
+    : ['manage_posts', 'delete_posts', 'approve_posts', 'view_evidence'];
+
+  let tempPassword = null;
   let user = dbState.users[cleanPhone];
   if (!user) {
     const salt = crypto.randomBytes(16).toString('hex');
-    const defaultPassword = 'SafeBD@' + cleanPhone.slice(-4);
-    const hash = hashPassword(defaultPassword, salt);
+    tempPassword = crypto.randomBytes(10).toString('hex') + 'A1!';
+    const hash = hashPassword(tempPassword, salt);
     user = {
       id: `usr_admin_${cleanPhone}`,
       phone: cleanPhone,
@@ -2024,12 +2064,7 @@ function grantAdminAccess(phone, { name = '', role = 'Moderator Admin', permissi
       passwordHash: hash,
       nidVerified: true,
       isAdmin: true,
-      permissions: permissions && permissions.length ? permissions : [
-        'manage_posts',
-        'delete_posts',
-        'approve_posts',
-        'view_evidence'
-      ],
+      permissions: validPermissions,
       adminAssignedAt: new Date().toISOString(),
       adminAssignedBy: assignedBy,
       isLoggedIn: false,
@@ -2044,12 +2079,7 @@ function grantAdminAccess(phone, { name = '', role = 'Moderator Admin', permissi
     user.isAdmin = true;
     if (name && name.trim()) user.name = name.trim();
     user.role = role || user.role || 'Moderator Admin';
-    user.permissions = permissions && permissions.length ? permissions : (user.permissions || [
-      'manage_posts',
-      'delete_posts',
-      'approve_posts',
-      'view_evidence'
-    ]);
+    user.permissions = validPermissions;
     user.adminAssignedAt = new Date().toISOString();
     user.adminAssignedBy = assignedBy;
   }
@@ -2061,7 +2091,8 @@ function grantAdminAccess(phone, { name = '', role = 'Moderator Admin', permissi
     name: user.name,
     role: user.role,
     isAdmin: user.isAdmin,
-    permissions: user.permissions
+    permissions: user.permissions,
+    ...(tempPassword ? { temporaryPassword: tempPassword } : {})
   };
 }
 
@@ -2605,6 +2636,7 @@ module.exports = {
   addEmergencyEvidence,
   getAllEmergencyEvidence,
   getEmergencyEvidenceById,
+  getEmergencyEvidenceByFilename,
   markEmergencyEvidenceReviewed,
   deleteEmergencyEvidence,
   createPost,
