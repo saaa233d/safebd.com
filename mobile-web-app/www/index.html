@@ -3770,57 +3770,6 @@
         </div>
       </div>
 
-      <!-- TACTICAL 2x2 ACTION MATRIX -->
-      <div class="help-tactical-grid" style="margin-bottom: 20px;">
-        <!-- OPTION 1: STUCK WITH AN AMBULANCE? -->
-        <button type="button" onclick="selectEmergencyHelp('ambulance_traffic')" class="help-card-tile theme-ambulance">
-          <div class="help-card-top">
-            <div class="help-icon-bubble"><i class="fas fa-truck-medical"></i></div>
-            <span class="help-pill-badge"><span class="live-beacon-dot"></span> <span data-i18n="help_opt1_btn">Call 999</span></span>
-          </div>
-          <div>
-            <div class="help-card-title" data-i18n="help_opt1_title">Stuck in Traffic with Ambulance?</div>
-            <div class="help-card-desc" data-i18n="help_opt1_desc">Urgent police traffic clearance &amp; green corridor</div>
-          </div>
-        </button>
-
-        <!-- OPTION 2: CRITICAL PATIENT CONDITION AT HOME -->
-        <button type="button" onclick="selectEmergencyHelp('critical_patient')" class="help-card-tile theme-patient">
-          <div class="help-card-top">
-            <div class="help-icon-bubble"><i class="fas fa-heart-pulse"></i></div>
-            <span class="help-pill-badge"><span class="live-beacon-dot"></span> <span data-i18n="help_opt2_btn">Call 999</span></span>
-          </div>
-          <div>
-            <div class="help-card-title" data-i18n="help_opt2_title">Critical Patient Condition at Home</div>
-            <div class="help-card-desc" data-i18n="help_opt2_desc">Urgent ambulance dispatch &amp; rapid medical response</div>
-          </div>
-        </button>
-
-        <!-- OPTION 3: FIRE SERVICE & RESCUE -->
-        <button type="button" onclick="selectEmergencyHelp('fire_service')" class="help-card-tile theme-fire">
-          <div class="help-card-top">
-            <div class="help-icon-bubble"><i class="fas fa-fire-flame-curved"></i></div>
-            <span class="help-pill-badge"><span class="live-beacon-dot"></span> <span data-i18n="help_opt3_btn">Call 102</span></span>
-          </div>
-          <div>
-            <div class="help-card-title" data-i18n="help_opt3_title">Fire Service &amp; Rescue Emergency</div>
-            <div class="help-card-desc" data-i18n="help_opt3_desc">Direct hotline to Bangladesh Fire Service Control</div>
-          </div>
-        </button>
-
-        <!-- OPTION 4: EMERGENCY BLOOD LIFELINE (রক্তবন্ধু) -->
-        <button type="button" onclick="openBloodDonorModal()" class="help-card-tile theme-blood">
-          <div class="help-card-top">
-            <div class="help-icon-bubble"><i class="fas fa-droplet"></i></div>
-            <span class="help-pill-badge"><i class="fas fa-hand-holding-heart" style="font-size: 8.5px;"></i> <span data-i18n="help_opt4_btn">Find Donors</span></span>
-          </div>
-          <div>
-            <div class="help-card-title" data-i18n="help_opt4_title">Emergency Blood Lifeline (রক্তবন্ধু)</div>
-            <div class="help-card-desc" data-i18n="help_opt4_desc">Find immediate blood donors nearby or donate blood</div>
-          </div>
-        </button>
-      </div>
-
       <!-- SECTION: DHAKA CITY BUS FARE CALCULATOR (BRTA 2.70 TK/KM & 50% STUDENT HALF-PASS) -->
       <div id="section-help-busfare" style="background: rgba(26, 28, 38, 0.78); backdrop-filter: blur(20px); border: 1px solid rgba(245, 158, 11, 0.28); border-radius: 20px; padding: 16px; margin-bottom: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.35); position: relative; overflow: hidden;">
         <!-- Glowing accent top bar -->
@@ -3846,7 +3795,7 @@
               <i class="fas fa-circle-dot" style="color: #10b981; font-size: 12px;"></i>
               <div style="flex: 1;">
                 <label style="display: block; font-size: 9px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 1px;">From (শুরুর স্থান / বাস স্টপ)</label>
-                <input type="text" id="busfare-start" placeholder="e.g. Farmgate, Mirpur 10, Shahbagh..." list="dhaka-bus-stops-list" autocomplete="off" style="width: 100%; background: none; border: none; outline: none; color: #fff; font-size: 12.5px; font-weight: 600;" oninput="onBusFareInputChanged()">
+                <input type="text" id="busfare-start" placeholder="e.g. Farmgate, Mirpur 10, Shahbagh..." list="dhaka-bus-stops-list" autocomplete="off" style="width: 100%; background: none; border: none; outline: none; color: #fff; font-size: 12.5px; font-weight: 600;" onkeydown="if(event.key==='Enter') calculateDhakaBusFare()">
               </div>
               <button type="button" onclick="setBusFareStartGPS()" title="Use live GPS location" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: #34d399; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
                 <i class="fas fa-crosshairs"></i> GPS
@@ -3867,7 +3816,7 @@
               <i class="fas fa-location-dot" style="color: #ef4444; font-size: 12px;"></i>
               <div style="flex: 1;">
                 <label style="display: block; font-size: 9px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 1px;">To (গন্তব্য বাস স্টপ)</label>
-                <input type="text" id="busfare-dest" placeholder="e.g. Motijheel, Uttara, Dhanmondi 27..." list="dhaka-bus-stops-list" autocomplete="off" style="width: 100%; background: none; border: none; outline: none; color: #fff; font-size: 12.5px; font-weight: 600;" oninput="onBusFareInputChanged()">
+                <input type="text" id="busfare-dest" placeholder="e.g. Motijheel, Uttara, Dhanmondi 27..." list="dhaka-bus-stops-list" autocomplete="off" style="width: 100%; background: none; border: none; outline: none; color: #fff; font-size: 12.5px; font-weight: 600;" onkeydown="if(event.key==='Enter') calculateDhakaBusFare()">
               </div>
             </div>
           </div>
@@ -3879,6 +3828,7 @@
           <button type="button" class="busfare-quick-pill" onclick="quickFillBusFare('Farmgate', 'Motijheel')">Farmgate ➔ Motijheel</button>
           <button type="button" class="busfare-quick-pill" onclick="quickFillBusFare('Mirpur 10', 'Shahbagh')">Mirpur 10 ➔ Shahbagh</button>
           <button type="button" class="busfare-quick-pill" onclick="quickFillBusFare('Uttara', 'Farmgate')">Uttara ➔ Farmgate</button>
+          <button type="button" class="busfare-quick-pill" onclick="quickFillBusFare('Mohammadpur', 'Motijheel')">Mohammadpur ➔ Motijheel</button>
           <button type="button" class="busfare-quick-pill" onclick="quickFillBusFare('Gabtoli', 'Sayedabad')">Gabtoli ➔ Sayedabad</button>
           <button type="button" class="busfare-quick-pill" onclick="quickFillBusFare('Dhanmondi 27', 'New Market')">Dhanmondi ➔ New Market</button>
         </div>
@@ -3946,6 +3896,57 @@
 
         <!-- Hidden datalist with all major Dhaka stoppages -->
         <datalist id="dhaka-bus-stops-list"></datalist>
+      </div>
+
+      <!-- TACTICAL 2x2 ACTION MATRIX -->
+      <div class="help-tactical-grid" style="margin-bottom: 20px;">
+        <!-- OPTION 1: STUCK WITH AN AMBULANCE? -->
+        <button type="button" onclick="selectEmergencyHelp('ambulance_traffic')" class="help-card-tile theme-ambulance">
+          <div class="help-card-top">
+            <div class="help-icon-bubble"><i class="fas fa-truck-medical"></i></div>
+            <span class="help-pill-badge"><span class="live-beacon-dot"></span> <span data-i18n="help_opt1_btn">Call 999</span></span>
+          </div>
+          <div>
+            <div class="help-card-title" data-i18n="help_opt1_title">Stuck in Traffic with Ambulance?</div>
+            <div class="help-card-desc" data-i18n="help_opt1_desc">Urgent police traffic clearance &amp; green corridor</div>
+          </div>
+        </button>
+
+        <!-- OPTION 2: CRITICAL PATIENT CONDITION AT HOME -->
+        <button type="button" onclick="selectEmergencyHelp('critical_patient')" class="help-card-tile theme-patient">
+          <div class="help-card-top">
+            <div class="help-icon-bubble"><i class="fas fa-heart-pulse"></i></div>
+            <span class="help-pill-badge"><span class="live-beacon-dot"></span> <span data-i18n="help_opt2_btn">Call 999</span></span>
+          </div>
+          <div>
+            <div class="help-card-title" data-i18n="help_opt2_title">Critical Patient Condition at Home</div>
+            <div class="help-card-desc" data-i18n="help_opt2_desc">Urgent ambulance dispatch &amp; rapid medical response</div>
+          </div>
+        </button>
+
+        <!-- OPTION 3: FIRE SERVICE & RESCUE -->
+        <button type="button" onclick="selectEmergencyHelp('fire_service')" class="help-card-tile theme-fire">
+          <div class="help-card-top">
+            <div class="help-icon-bubble"><i class="fas fa-fire-flame-curved"></i></div>
+            <span class="help-pill-badge"><span class="live-beacon-dot"></span> <span data-i18n="help_opt3_btn">Call 102</span></span>
+          </div>
+          <div>
+            <div class="help-card-title" data-i18n="help_opt3_title">Fire Service &amp; Rescue Emergency</div>
+            <div class="help-card-desc" data-i18n="help_opt3_desc">Direct hotline to Bangladesh Fire Service Control</div>
+          </div>
+        </button>
+
+        <!-- OPTION 4: EMERGENCY BLOOD LIFELINE (রক্তবন্ধু) -->
+        <button type="button" onclick="openBloodDonorModal()" class="help-card-tile theme-blood">
+          <div class="help-card-top">
+            <div class="help-icon-bubble"><i class="fas fa-droplet"></i></div>
+            <span class="help-pill-badge"><i class="fas fa-hand-holding-heart" style="font-size: 8.5px;"></i> <span data-i18n="help_opt4_btn">Find Donors</span></span>
+          </div>
+          <div>
+            <div class="help-card-title" data-i18n="help_opt4_title">Emergency Blood Lifeline (রক্তবন্ধু)</div>
+            <div class="help-card-desc" data-i18n="help_opt4_desc">Find immediate blood donors nearby or donate blood</div>
+          </div>
+        </button>
       </div>
 
       <!-- SECTION: SPECIALIZED EMERGENCY HOTLINES -->
@@ -10966,17 +10967,25 @@
       { name: "Mirpur 2 / Stadium", bn: "মিরপুর ২", lat: 23.8041, lon: 90.3615 },
       { name: "Mirpur 11", bn: "মিরপুর ১১", lat: 23.8185, lon: 90.3662 },
       { name: "Mirpur 12 / Bus Stand", bn: "মিরপুর ১২", lat: 23.8242, lon: 90.3653 },
+      { name: "Mirpur 14", bn: "মিরপুর ১৪", lat: 23.7990, lon: 90.3835 },
+      { name: "Pallabi", bn: "পল্লবী", lat: 23.8245, lon: 90.3645 },
+      { name: "Diabari (Metro Station)", bn: "দিয়াবাড়ী", lat: 23.8720, lon: 90.3705 },
       { name: "Uttara (Azampur / Sector 3)", bn: "উত্তরা আজমপুর", lat: 23.8687, lon: 90.3995 },
       { name: "Uttara (House Building)", bn: "উত্তরা হাউস বিল্ডিং", lat: 23.8735, lon: 90.3980 },
       { name: "Uttara (Jashimuddin)", bn: "উত্তরা জসীমউদ্দীন", lat: 23.8580, lon: 90.4010 },
       { name: "Airport (হযরত শাহজালাল বিমানবন্দর)", bn: "বিমানবন্দর", lat: 23.8515, lon: 90.4076 },
       { name: "Abdullahpur", bn: "আব্দুল্লাহপুর", lat: 23.8825, lon: 90.3990 },
+      { name: "Tongi (Station Road)", bn: "টঙ্গী", lat: 23.8960, lon: 90.4030 },
+      { name: "Gazipur Chowrasta", bn: "গাজীপুর চৌরাস্তা", lat: 23.9960, lon: 90.3800 },
       { name: "Mohakhali", bn: "মহাখালী", lat: 23.7778, lon: 90.4005 },
       { name: "Mohakhali Bus Terminal", bn: "মহাখালী বাস টার্মিনাল", lat: 23.7745, lon: 90.4008 },
       { name: "Motijheel", bn: "মতিঝিল", lat: 23.7330, lon: 90.4172 },
       { name: "Dhanmondi 27", bn: "ধানমন্ডি ২৭", lat: 23.7538, lon: 90.3768 },
       { name: "Dhanmondi 32", bn: "ধানমন্ডি ৩২", lat: 23.7508, lon: 90.3792 },
       { name: "Dhanmondi 15 (Star Kabab)", bn: "ধানমন্ডি ১৫", lat: 23.7515, lon: 90.3725 },
+      { name: "Mohammadpur (Town Hall)", bn: "মোহাম্মদপুর টাউন হল", lat: 23.7658, lon: 90.3585 },
+      { name: "Mohammadpur Bus Stand", bn: "মোহাম্মদপুর বাস স্ট্যান্ড", lat: 23.7540, lon: 90.3580 },
+      { name: "Mohammadpur (Shia Masjid / Ring Road)", bn: "শিয়া মসজিদ", lat: 23.7715, lon: 90.3590 },
       { name: "Science Lab", bn: "সায়েন্স ল্যাব", lat: 23.7388, lon: 90.3831 },
       { name: "New Market / Nilkhet", bn: "নিউ মার্কেট / নীলক্ষেত", lat: 23.7329, lon: 90.3854 },
       { name: "Azimpur Bus Stand", bn: "আজিমপুর", lat: 23.7291, lon: 90.3858 },
@@ -10994,6 +11003,7 @@
       { name: "Natun Bazar (Badda)", bn: "নতুন বাজার", lat: 23.7985, lon: 90.4265 },
       { name: "Badda (Link Road)", bn: "বাড্ডা লিঙ্ক রোড", lat: 23.7820, lon: 90.4260 },
       { name: "Rampura Bridge", bn: "রামপুরা ব্রিজ", lat: 23.7635, lon: 90.4258 },
+      { name: "Banasree", bn: "বনশ্রী", lat: 23.7630, lon: 90.4350 },
       { name: "Malibagh / Mouchak", bn: "মালিবাগ / মৌচাক", lat: 23.7485, lon: 90.4125 },
       { name: "Mogbazar", bn: "মগবাজার", lat: 23.7495, lon: 90.4035 },
       { name: "Bangla Motor", bn: "বাংলামোটর", lat: 23.7455, lon: 90.3945 },
@@ -11003,7 +11013,14 @@
       { name: "Khilkhet", bn: "খিলক্ষেত", lat: 23.8315, lon: 90.4185 },
       { name: "Bashundhara Gate (Jamuna Future Park)", bn: "বসুন্ধরা গেট", lat: 23.8155, lon: 90.4235 },
       { name: "Agargaon (Metro Station)", bn: "আগারগাঁও", lat: 23.7770, lon: 90.3785 },
-      { name: "Bijoy Sarani", bn: "বিজয় সরণি", lat: 23.7665, lon: 90.3860 }
+      { name: "Bijoy Sarani", bn: "বিজয় সরণি", lat: 23.7665, lon: 90.3860 },
+      { name: "Kawran Bazar", bn: "কারওয়ান বাজার", lat: 23.7510, lon: 90.3925 },
+      { name: "Panthapath", bn: "পান্থপথ", lat: 23.7515, lon: 90.3855 },
+      { name: "Kakrail", bn: "কাকরাইল", lat: 23.7385, lon: 90.4075 },
+      { name: "Shantinagar", bn: "শান্তিনগর", lat: 23.7425, lon: 90.4125 },
+      { name: "Khilgaon", bn: "খিলগাঁও", lat: 23.7535, lon: 90.4215 },
+      { name: "Savar Bus Stand", bn: "সাভার", lat: 23.8445, lon: 90.2580 },
+      { name: "Signboard", bn: "সাইনবোর্ড", lat: 23.6820, lon: 90.4850 }
     ];
 
     function initDhakaBusStoppagesDatalist() {
@@ -11019,8 +11036,14 @@
     setTimeout(initDhakaBusStoppagesDatalist, 300);
 
     function onBusFareInputChanged() {
-      const resultCard = document.getElementById('busfare-result-card');
-      if (resultCard) resultCard.style.display = 'none';
+      // Keep results visible; only clear if both fields become completely blank
+      const sInput = document.getElementById('busfare-start');
+      const dInput = document.getElementById('busfare-dest');
+      if (!sInput || !dInput) return;
+      if (!sInput.value.trim() && !dInput.value.trim()) {
+        const resultCard = document.getElementById('busfare-result-card');
+        if (resultCard) resultCard.style.display = 'none';
+      }
     }
 
     function setBusFareStartGPS() {
@@ -11041,7 +11064,6 @@
         } else {
           sInput.value = "Current GPS Location";
         }
-        onBusFareInputChanged();
       } else {
         if (typeof acquireRealLocation === 'function') acquireRealLocation(true);
         sInput.value = "Current GPS Location";
@@ -11055,7 +11077,6 @@
         const tmp = s.value;
         s.value = d.value;
         d.value = tmp;
-        onBusFareInputChanged();
         if (s.value && d.value) calculateDhakaBusFare();
       }
     }
@@ -11070,19 +11091,31 @@
 
     function resolveDhakaStoppageCoords(name) {
       if (!name) return null;
-      const q = name.toLowerCase().trim();
-      if (q === 'current gps location' && currentCoords.lat && currentCoords.lon) {
-        return { lat: currentCoords.lat, lon: currentCoords.lon };
+      const clean = name.toLowerCase().replace(/[-–—/]/g, ' ').replace(/\s+/g, ' ').trim();
+      if ((clean.includes('gps') || clean.includes('current')) && currentCoords && currentCoords.lat && currentCoords.lon) {
+        return { lat: currentCoords.lat, lon: currentCoords.lon, name: "Current GPS Location" };
       }
-      const match = DHAKA_BUS_STOPPAGES.find(s => 
-        s.name.toLowerCase().includes(q) || 
-        q.includes(s.name.toLowerCase()) || 
-        (s.bn && (s.bn.includes(q) || q.includes(s.bn)))
-      );
-      if (match) return { lat: match.lat, lon: match.lon };
+
+      // 1. Direct or normalized match in DHAKA_BUS_STOPPAGES
+      let match = DHAKA_BUS_STOPPAGES.find(s => {
+        const sName = s.name.toLowerCase().replace(/[-–—/]/g, ' ').replace(/\s+/g, ' ');
+        const sBn = (s.bn || '').toLowerCase().replace(/[-–—/]/g, ' ').replace(/\s+/g, ' ');
+        return sName === clean || sBn === clean;
+      });
+      if (match) return { lat: match.lat, lon: match.lon, name: match.name };
+
+      // 2. Substring & keyword match in DHAKA_BUS_STOPPAGES
+      match = DHAKA_BUS_STOPPAGES.find(s => {
+        const sName = s.name.toLowerCase().replace(/[-–—/]/g, ' ');
+        const sBn = (s.bn || '').toLowerCase();
+        return sName.includes(clean) || clean.includes(sName) || (sBn && (sBn.includes(clean) || clean.includes(sBn)));
+      });
+      if (match) return { lat: match.lat, lon: match.lon, name: match.name };
+
+      // 3. Fallback to BANGLADESH_LOCATIONS master list
       if (typeof findBestLocationMatch === 'function') {
         const best = findBestLocationMatch(name);
-        if (best && best.lat && best.lon) return { lat: best.lat, lon: best.lon };
+        if (best && best.lat && best.lon) return { lat: best.lat, lon: best.lon, name: best.name };
       }
       return null;
     }
@@ -11090,8 +11123,20 @@
     async function calculateDhakaBusFare() {
       const sInput = document.getElementById('busfare-start');
       const dInput = document.getElementById('busfare-dest');
-      const startVal = (sInput ? sInput.value : '').trim();
-      const destVal = (dInput ? dInput.value : '').trim();
+      let startVal = (sInput ? sInput.value : '').trim();
+      let destVal = (dInput ? dInput.value : '').trim();
+
+      // Smart Single-Box Parser: If user typed "Farmgate to Motijheel" or "ফার্মগেট থেকে মতিঝিল" into first field
+      if (startVal && !destVal) {
+        const splitRegex = /\s+(?:to|➔|->|-|থেকে|হতে|পর্যন্ত)\s+/i;
+        const parts = startVal.split(splitRegex);
+        if (parts.length >= 2) {
+          startVal = parts[0].trim();
+          destVal = parts[1].trim();
+          if (sInput) sInput.value = startVal;
+          if (dInput) dInput.value = destVal;
+        }
+      }
 
       if (!startVal || !destVal) {
         alert("অনুগ্রহ করে শুরুর স্থান ও গন্তব্য বাস স্টপ লিখুন বা সিলেক্ট করুন (Please enter both Start and Destination stoppages).");
@@ -11109,39 +11154,56 @@
         let sCoords = resolveDhakaStoppageCoords(startVal);
         let dCoords = resolveDhakaStoppageCoords(destVal);
 
-        // Fallback default Dhaka coordinates if not pinpointed
-        if (!sCoords) sCoords = { lat: 23.7561, lon: 90.3872 }; // Farmgate default
-        if (!dCoords) dCoords = { lat: 23.7330, lon: 90.4172 }; // Motijheel default
+        // Fallback geocoding if online and coordinates missing
+        if (!sCoords) {
+          try {
+            const geoRes = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(startVal + ' Dhaka')}&lat=23.8103&lon=90.4125&limit=1`, { signal: AbortSignal.timeout(2000) });
+            const pData = await geoRes.json();
+            if (pData && pData.features && pData.features[0] && pData.features[0].geometry) {
+              const c = pData.features[0].geometry.coordinates;
+              sCoords = { lat: c[1], lon: c[0], name: startVal };
+            }
+          } catch (e) {}
+        }
+        if (!dCoords) {
+          try {
+            const geoRes = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(destVal + ' Dhaka')}&lat=23.8103&lon=90.4125&limit=1`, { signal: AbortSignal.timeout(2000) });
+            const pData = await geoRes.json();
+            if (pData && pData.features && pData.features[0] && pData.features[0].geometry) {
+              const c = pData.features[0].geometry.coordinates;
+              dCoords = { lat: c[1], lon: c[0], name: destVal };
+            }
+          } catch (e) {}
+        }
 
-        let distanceKm = 0;
+        // Final resilient defaults if non-locatable
+        if (!sCoords) sCoords = { lat: 23.7561, lon: 90.3872, name: startVal }; // Farmgate default
+        if (!dCoords) dCoords = { lat: 23.7330, lon: 90.4172, name: destVal }; // Motijheel default
 
-        // Fetch precise road network distance from backend directions API with fast timeout
+        // 1. Instant local road estimation so the card appears immediately without lag
+        let hKm = computeHaversineKm(sCoords.lat, sCoords.lon, dCoords.lat, dCoords.lon);
+        let distanceKm = hKm ? Math.max(0.5, Math.round(hKm * 1.35 * 10) / 10) : 5.5;
+
+        // 2. Fetch precise Google Maps / OSRM road distance from backend with 2.5s fast timeout
         try {
           const qUrl = `${API_BASE}/api/routing/directions?originLat=${sCoords.lat}&originLon=${sCoords.lon}&destLat=${dCoords.lat}&destLon=${dCoords.lon}&mode=driving`;
           const controller = new AbortController();
-          const tId = setTimeout(() => controller.abort(), 4000);
+          const tId = setTimeout(() => controller.abort(), 2500);
           const res = await fetch(qUrl, { signal: controller.signal });
           clearTimeout(tId);
-          const data = await res.json();
-          if (data && data.success && data.distanceKm) {
-            distanceKm = data.distanceKm;
-          } else {
-            const hKm = computeHaversineKm(sCoords.lat, sCoords.lon, dCoords.lat, dCoords.lon);
-            distanceKm = hKm ? Math.round(hKm * 1.35 * 10) / 10 : 5.2;
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.success && data.distanceKm && data.distanceKm > 0) {
+              distanceKm = data.distanceKm;
+            }
           }
-        } catch (netErr) {
-          const hKm = computeHaversineKm(sCoords.lat, sCoords.lon, dCoords.lat, dCoords.lon);
-          distanceKm = hKm ? Math.round(hKm * 1.35 * 10) / 10 : 5.2;
-        }
+        } catch (netErr) {}
 
         // BRTA DHAKA CITY METRO FARE RULES:
-        // 1. Rate: 2.70 Taka per kilometer
-        // 2. Minimum Regular Fare: 10.00 Taka
-        // 3. Student Half-Pass Discount: 50% Off (Minimum 5.00 Taka)
+        // Rate: 2.70 Taka per km | Min regular: 10 Taka | Student Half-Pass: 50% Off (Min 5 Taka)
         const RATE_PER_KM = 2.70;
         const MIN_FARE = 10;
-        const rawFare = distanceKm * RATE_PER_KM;
-        const regularFare = Math.max(MIN_FARE, Math.round(rawFare));
+        const regularFare = Math.max(MIN_FARE, Math.round(distanceKm * RATE_PER_KM));
         const studentFare = Math.max(5, Math.ceil(regularFare * 0.50));
 
         // Update UI Card
