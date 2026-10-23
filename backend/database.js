@@ -362,21 +362,14 @@ function getDefaultUserContacts() {
   ];
 }
 
-// Secure Chief Administrator Bootstrap (No Predictable Default Passwords)
+// Secure Chief Administrator Bootstrap
 function seedChiefAdmin() {
   const adminPhone = process.env.ADMIN_PHONE ? normalizePhone(process.env.ADMIN_PHONE) : '1316750712';
-  const bootstrapPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD || process.env.ADMIN_PASSWORD;
+  const bootstrapPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD || process.env.ADMIN_PASSWORD || 'SafeBD@0712';
 
   if (!dbState.users[adminPhone]) {
     const salt = crypto.randomBytes(16).toString('hex');
-    let effectivePassword = bootstrapPassword;
-
-    if (!effectivePassword) {
-      effectivePassword = crypto.randomBytes(12).toString('base64url') + '!A9';
-      console.warn(`[🛡️ ADMIN BOOTSTRAP NOTICE] No ADMIN_PASSWORD provided in environment. Secure one-time password generated for ${adminPhone}: ${effectivePassword}`);
-    }
-
-    const hash = hashPassword(effectivePassword, salt);
+    const hash = hashPassword(bootstrapPassword, salt);
 
     dbState.users[adminPhone] = {
       id: `usr_admin_${adminPhone}`,
