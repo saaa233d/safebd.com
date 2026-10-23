@@ -47,21 +47,56 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+const ALLOWED_ORIGINS = [
+  'https://safebd.onrender.com',
+  'http://localhost:5000',
+  'http://127.0.0.1:5000',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.onrender.com') || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS origin not allowed by policy'), false);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+}));
+
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
 // Persistent Database Engine (Scales to Millions of Citizen Accounts)
 const db = require('./database');
 
+// Password Complexity Validator (OWASP Compliance - Min 8 chars, at least 1 letter and 1 number)
+function validatePasswordStrength(pwd) {
+  if (!pwd || typeof pwd !== 'string') {
+    return { valid: false, message: 'Password is required.' };
+  }
+  if (pwd.length < 8) {
+    return { valid: false, message: 'Password must be at least 8 characters long.' };
+  }
+  if (!/[A-Za-z]/.test(pwd) || !/[0-9]/.test(pwd)) {
+    return { valid: false, message: 'Password must contain at least one letter and one number.' };
+  }
+  return { valid: true };
+}
+
 // =========================================================================
 // SUPABASE CLOUD AUTHENTICATION & SECURE IDENTITY ENGINE
 // =========================================================================
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://sdpewbutexztzspagjqu.supabase.co';
-const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY || Buffer.from('c2Jfc2VjcmV0X21aRldPalRvTi04Uy1fZG5WZVVGUWdfV1VsTEdVSGs=', 'base64').toString('utf8');
-const SUPABASE_PUB_KEY = process.env.SUPABASE_PUB_KEY || Buffer.from('c2JfcHVibGlzaGFibGVfU2c5X2RWeDZMUWYzN1ZUZFdiNEZrZ19lVkVZNERidQ==', 'base64').toString('utf8');
+const SUPABASE_URL = process.env.SUPABASE_URL || '';
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY || '';
+const SUPABASE_PUB_KEY = process.env.SUPABASE_PUB_KEY || '';
 
 async function verifySupabaseCredentials(cleanPhone, password) {
+  if (!SUPABASE_URL || !SUPABASE_PUB_KEY) return { valid: false };
   const rawPhone = String(cleanPhone || '').trim();
   const noZero = rawPhone.replace(/^0+/, '');
   const withZero = '0' + noZero;
@@ -90,6 +125,7 @@ async function verifySupabaseCredentials(cleanPhone, password) {
 }
 
 async function registerSupabaseUser(cleanPhone, name, password) {
+  if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) return { ok: false, error: 'Supabase cloud auth not configured.' };
   try {
     const email = `${cleanPhone}@safebd.com`;
     const adminUrl = `${SUPABASE_URL}/auth/v1/admin/users`;
@@ -107,7 +143,7 @@ async function registerSupabaseUser(cleanPhone, name, password) {
         user_metadata: {
           name,
           phone: cleanPhone,
-          isFounder: cleanPhone === '1316750712'
+          isFounder: false
         }
       })
     });
@@ -119,6 +155,7 @@ async function registerSupabaseUser(cleanPhone, name, password) {
 }
 
 async function updateSupabasePassword(cleanPhone, newPassword) {
+  if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) return false;
   try {
     const listRes = await fetch(`${SUPABASE_URL}/auth/v1/admin/users`, {
       headers: {
@@ -204,24 +241,54 @@ const apiLimiter = createSlidingRateLimiter('api', 60 * 1000, 200, "General requ
 const authLimiter = createSlidingRateLimiter('auth', 5 * 60 * 1000, 60, "Too many authentication attempts. Please wait 2 minutes.");
 const otpLimiter = createSlidingRateLimiter('otp', 10 * 60 * 1000, 10, "SMS OTP request quota reached for this number. Please wait 10 minutes.");
 
-// Admin Token Authentication Guard (Enforced on all /api/admin/* endpoints)
-function requireAdminAuth(req, res, next) {
+// Citizen Token Authentication Guard (Enforced on protected citizen endpoints)
+function requireAuth(req, res, next) {
   const authHeader = req.headers['authorization'] || '';
-  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.query.token || (req.body && req.body.token);
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
 
   if (!token) {
-    return res.status(401).json({ error: "UNAUTHORIZED", message: "Admin authorization token required." });
+    return res.status(401).json({ error: "UNAUTHORIZED", message: "Authentication token required in Authorization header." });
   }
 
   const session = db.getSession(token);
-  const user = session ? db.getUserByPhone(session.phone) : null;
-  const isChiefAdmin = (session && (session.phone === '1316750712' || session.isAdmin)) || (user && (user.phone === '1316750712' || user.isAdmin));
-  if (!session || !isChiefAdmin) {
-    return res.status(403).json({ error: "FORBIDDEN", message: "Access denied. Chief Administrator clearance required." });
+  if (!session || !session.phone) {
+    return res.status(401).json({ error: "UNAUTHORIZED", message: "Invalid or expired session. Please sign in again." });
   }
 
+  const user = db.getUserByPhone(session.phone);
+  if (!user) {
+    return res.status(401).json({ error: "UNAUTHORIZED", message: "User account not found." });
+  }
+
+  req.session = session;
+  req.user = user;
+  next();
+}
+
+// Admin Token Authentication Guard (Enforced on all /api/admin/* endpoints)
+function requireAdminAuth(req, res, next) {
+  const authHeader = req.headers['authorization'] || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+
+  if (!token) {
+    return res.status(401).json({ error: "UNAUTHORIZED", message: "Admin authorization token required in Authorization header." });
+  }
+
+  const session = db.getSession(token);
+  if (!session || !session.phone) {
+    return res.status(401).json({ error: "UNAUTHORIZED", message: "Invalid or expired session. Please sign in again." });
+  }
+
+  const user = db.getUserByPhone(session.phone);
+  const isAdmin = Boolean((user && user.isAdmin) || (session && session.isAdmin));
+  if (!isAdmin) {
+    return res.status(403).json({ error: "FORBIDDEN", message: "Access denied. Administrator clearance required." });
+  }
+
+  req.session = session;
   req.adminSession = session;
-  req.adminUser = user || { phone: '1316750712', name: 'SAAD RIZWAN', isAdmin: true, isFounder: true, displayPhone: '+880 1316-750712' };
+  req.adminUser = user;
+  req.user = user;
   next();
 }
 
@@ -267,17 +334,26 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
   }
   const cleanPhone = phoneValidation.cleanPhone;
 
-  if (!password || password.length < 6) {
-    return res.status(400).json({ error: "Password must be at least 6 characters long." });
+  const pwCheck = validatePasswordStrength(password);
+  if (!pwCheck.valid) {
+    return res.status(400).json({ error: pwCheck.message });
   }
 
   const registeredName = (name && name.trim()) || "Verified Citizen";
-  const isFounder = cleanPhone === '1316750712';
 
-  // 1. Register with Supabase Cloud Auth (non-blocking — local DB is always the source of truth)
-  const supaRes = await registerSupabaseUser(cleanPhone, isFounder ? 'SAAD RIZWAN' : registeredName, password);
+  // Check local database first before making external calls
+  const existingUser = db.getUserByPhone(cleanPhone);
+  if (existingUser && existingUser.passwordHash) {
+    return res.status(400).json({ 
+      error: `An account is already registered with +880 ${cleanPhone}. Please sign in with your password.`,
+      code: "ACCOUNT_EXISTS",
+      phone: cleanPhone
+    });
+  }
 
-  // If Supabase reports the account already exists, block re-registration
+  // 1. Register with Supabase Cloud Auth (non-blocking)
+  const supaRes = await registerSupabaseUser(cleanPhone, registeredName, password);
+
   if (!supaRes.ok && supaRes.data && supaRes.data.msg && supaRes.data.msg.includes('already been registered')) {
     return res.status(400).json({ 
       error: `An account is already registered with +880 ${cleanPhone}. Please sign in with your password to unlock your profile.`,
@@ -287,38 +363,25 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
   }
 
   if (!supaRes.ok) {
-    console.warn(`[⚠️ SUPABASE REGISTER WARNING] +880 ${cleanPhone} Supabase registration failed (status ${supaRes.status}). Storing credentials locally only.`);
+    console.warn(`[⚠️ SUPABASE REGISTER WARNING] +880 ${cleanPhone} Supabase registration: local fallback active.`);
   }
 
-  // 2. Always persist to local DB with a proper password hash — this is the crash-safe fallback
-  //    that guarantees login works even if Supabase registration fails or the server restarts.
+  // 2. Persist to local DB with verified password hash
   try {
-    // Check if already registered locally
-    const existingUser = db.getUserByPhone(cleanPhone);
-    if (existingUser && existingUser.passwordHash) {
-      return res.status(400).json({ 
-        error: `An account is already registered with +880 ${cleanPhone}. Please sign in with your password to unlock your profile.`,
-        code: "ACCOUNT_EXISTS",
-        phone: cleanPhone
-      });
-    }
+    db.upsertUserWithPassword(cleanPhone, registeredName, password);
 
-    // Upsert: create local record with verified password hash
-    db.upsertUserWithPassword(cleanPhone, isFounder ? 'SAAD RIZWAN' : registeredName, password);
-
-    // Save blood group info if citizen opted in during registration
     if (bloodGroup) {
       db.updateUserBloodProfile(cleanPhone, { bloodGroup, isBloodDonor, district, thana });
     }
 
-    const token = db.generateSecureToken(isFounder ? 'safe_token_admin_' : 'safe_token_', cleanPhone, isFounder);
-    db.markUserLogin(cleanPhone, token, { name: isFounder ? 'SAAD RIZWAN' : registeredName });
+    const token = db.generateSecureToken('safe_token_', cleanPhone, false);
+    db.markUserLogin(cleanPhone, token, { name: registeredName });
 
     const safeUser = {
       phone: cleanPhone,
-      name: isFounder ? 'SAAD RIZWAN' : registeredName,
-      isFounder: isFounder,
-      isAdmin: isFounder,
+      name: registeredName,
+      isFounder: false,
+      isAdmin: false,
       bloodGroup: bloodGroup ? bloodGroup.toUpperCase() : '',
       isBloodDonor: Boolean(isBloodDonor),
       bloodDistrict: district || '',
@@ -326,7 +389,7 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
       contacts: db.getUserContacts(cleanPhone)
     };
 
-    console.log(`[⚡ CITIZEN REGISTERED] ${safeUser.name} (+880 ${cleanPhone}) — Supabase: ${supaRes.ok ? '✅' : '⚠️ local-only'}`);
+    console.log(`[⚡ CITIZEN REGISTERED] ${safeUser.name} (+880 ${cleanPhone})`);
 
     return res.json({
       success: true,
@@ -353,17 +416,12 @@ app.post('/api/auth/request-otp', otpLimiter, (req, res) => {
     return res.status(400).json({ error: "An account is already registered with this phone number. Please sign in instead." });
   }
 
-  const { code } = db.issueOtp(cleanPhone, 'REGISTER');
+  db.issueOtp(cleanPhone, 'REGISTER');
 
-  const responsePayload = {
+  return res.json({
     success: true,
     message: `OTP dispatched to +880 ${cleanPhone} via Bangladesh Telecom Gateway.`
-  };
-  if (process.env.NODE_ENV !== 'production') {
-    responsePayload.debugOtp = code;
-  }
-
-  return res.json(responsePayload);
+  });
 });
 
 app.post('/api/auth/verify-otp', authLimiter, (req, res) => {
@@ -374,8 +432,9 @@ app.post('/api/auth/verify-otp', authLimiter, (req, res) => {
   }
   const cleanPhone = phoneValidation.cleanPhone;
 
-  if (!password || password.length < 6) {
-    return res.status(400).json({ error: "Password must be at least 6 characters long." });
+  const pwCheck = validatePasswordStrength(password);
+  if (!pwCheck.valid) {
+    return res.status(400).json({ error: pwCheck.message });
   }
 
   const otpResult = db.verifyOtp(cleanPhone, code, 'REGISTER');
@@ -391,8 +450,7 @@ app.post('/api/auth/verify-otp', authLimiter, (req, res) => {
       nidVerified: true
     });
 
-    const isChiefAdmin = cleanPhone === '1316750712';
-    const token = db.generateSecureToken(isChiefAdmin ? 'safe_token_admin_' : 'safe_token_', cleanPhone, isChiefAdmin);
+    const token = db.generateSecureToken('safe_token_', cleanPhone, false);
     db.markUserLogin(cleanPhone, token, { name: newUser.name });
 
     const { salt: _, passwordHash: __, ...safeUser } = newUser;
@@ -420,84 +478,76 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
   const cleanPhone = db.normalizePhone(phone);
   const trimmedPassword = String(password).trim();
 
-  // Validate Operator Prefix (013 - 019 valid; 011 and 012 strictly rejected)
   const phoneValidation = db.validateBdPhone(cleanPhone);
   if (!phoneValidation.valid) {
     return res.status(400).json({ error: phoneValidation.message });
   }
   const validatedPhone = phoneValidation.cleanPhone;
-  const isAdminUser = validatedPhone === '1316750712';
 
   // 1. Authenticate with Supabase Cloud Auth
   const supaCheck = await verifySupabaseCredentials(validatedPhone, trimmedPassword);
   
-  // 2. If Supabase succeeds:
   if (supaCheck.valid) {
     const meta = (supaCheck.user && supaCheck.user.user_metadata) || {};
-    let userName = isAdminUser ? 'SAAD RIZWAN' : (meta.name || 'Citizen');
-    if (!isAdminUser && userName.toUpperCase().includes('SAAD RIZWAN')) {
-      userName = 'Citizen';
-    }
+    let localUser = db.getUserByPhone(validatedPhone);
+    const isAdmin = Boolean(localUser && localUser.isAdmin);
+    const isFounder = Boolean(localUser && localUser.isFounder);
+    let userName = (localUser && localUser.name) || meta.name || 'Citizen';
 
-    // Persist verified credentials into local DB so login works after server restarts
-    // (Render ephemeral FS wipes JSON files on restart — this upsert ensures the local
-    // fallback path always has a valid password hash after any successful Supabase auth)
     db.upsertUserWithPassword(validatedPhone, userName, trimmedPassword);
 
-    const token = db.generateSecureToken(isAdminUser ? 'safe_token_admin_' : 'safe_token_', validatedPhone, isAdminUser);
+    const token = db.generateSecureToken(isAdmin ? 'safe_token_admin_' : 'safe_token_', validatedPhone, isAdmin);
     db.markUserLogin(validatedPhone, token, { name: userName });
 
     const safeUser = {
       phone: validatedPhone,
       name: userName,
-      isFounder: isAdminUser,
-      isAdmin: isAdminUser,
+      isFounder: isFounder,
+      isAdmin: isAdmin,
       contacts: db.getUserContacts(validatedPhone)
     };
 
-    console.log(`[⚡ SUPABASE CLOUD LOGIN SUCCESS] ${isAdminUser ? 'Chief Admin' : 'Citizen'} ${safeUser.name} (+880 ${validatedPhone}) authenticated.`);
+    console.log(`[⚡ SUPABASE CLOUD LOGIN SUCCESS] ${isAdmin ? 'Admin' : 'Citizen'} ${safeUser.name} (+880 ${validatedPhone}) authenticated.`);
 
     return res.json({
       success: true,
       requireOtp: false,
       token,
       user: safeUser,
-      message: isAdminUser ? "Chief Administrator authenticated." : `Welcome back, ${safeUser.name}!`
+      message: isAdmin ? "Administrator authenticated." : `Welcome back, ${safeUser.name}!`
     });
   }
 
-  // 3. Fallback to local database credentials
+  // 2. Fallback to local database credentials
   const check = db.verifyUserCredentials(validatedPhone, trimmedPassword);
   if (!check.valid) {
     return res.status(401).json({ error: "Incorrect mobile number or password.", code: "INVALID_CREDENTIALS" });
   }
 
-  const token = db.generateSecureToken(isAdminUser ? 'safe_token_admin_' : 'safe_token_', validatedPhone, isAdminUser);
+  const isAdmin = Boolean(check.user && check.user.isAdmin);
+  const isFounder = Boolean(check.user && check.user.isFounder);
+  const token = db.generateSecureToken(isAdmin ? 'safe_token_admin_' : 'safe_token_', validatedPhone, isAdmin);
   db.markUserLogin(validatedPhone, token, { name: check.user ? check.user.name : undefined });
 
   const { salt: _, passwordHash: __, ...safeUser } = check.user;
-  if (!isAdminUser) {
-    safeUser.isFounder = false;
-    if (safeUser.name && safeUser.name.toUpperCase().includes('SAAD RIZWAN')) {
-      safeUser.name = 'Citizen';
-    }
-  }
+  safeUser.isAdmin = isAdmin;
+  safeUser.isFounder = isFounder;
   safeUser.contacts = db.getUserContacts(validatedPhone);
-  console.log(`[🔐 LOCAL DB LOGIN SUCCESSFUL] ${isAdminUser ? 'Chief Admin' : 'Citizen'} ${safeUser.name} (+880 ${validatedPhone}) logged in.`);
+  console.log(`[🔐 LOCAL DB LOGIN SUCCESSFUL] ${isAdmin ? 'Admin' : 'Citizen'} ${safeUser.name} (+880 ${validatedPhone}) logged in.`);
 
   return res.json({
     success: true,
     requireOtp: false,
     token,
     user: safeUser,
-    message: isAdminUser ? "Chief Administrator authenticated." : `Welcome back, ${safeUser.name}!`
+    message: isAdmin ? "Administrator authenticated." : `Welcome back, ${safeUser.name}!`
   });
 });
 
 // 1.3.1 Active Session Verification & Profile Fetcher
 app.get('/api/auth/me', (req, res) => {
   const authHeader = req.headers['authorization'] || '';
-  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.query.token;
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
 
   if (!token) {
     return res.status(401).json({ error: "UNAUTHORIZED", message: "No active session token." });
@@ -514,12 +564,8 @@ app.get('/api/auth/me', (req, res) => {
   }
 
   const { salt: _, passwordHash: __, ...safeUser } = user;
-  if (session.phone !== '1316750712') {
-    safeUser.isFounder = false;
-    if (safeUser.name && safeUser.name.toUpperCase().includes('SAAD RIZWAN')) {
-      safeUser.name = 'Citizen';
-    }
-  }
+  safeUser.isAdmin = Boolean(user.isAdmin);
+  safeUser.isFounder = Boolean(user.isFounder);
   safeUser.contacts = db.getUserContacts(session.phone);
   return res.json({
     success: true,
@@ -528,24 +574,20 @@ app.get('/api/auth/me', (req, res) => {
 });
 
 // 1.3.2 Authenticated Password Change
-app.post('/api/auth/change-password', authLimiter, (req, res) => {
-  const authHeader = req.headers['authorization'] || '';
-  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.body.token;
-  const session = token ? db.getSession(token) : null;
-  const phone = (session && session.phone) || (req.body && req.body.phone);
-
-  if (!phone) {
-    return res.status(401).json({ error: "UNAUTHORIZED", message: "Authentication required to change password." });
-  }
-
+app.post('/api/auth/change-password', requireAuth, authLimiter, (req, res) => {
+  const phone = req.user.phone;
   const { oldPassword, newPassword } = req.body;
   if (!oldPassword || !newPassword) {
     return res.status(400).json({ error: "Both current password and new password are required." });
   }
 
+  const pwCheck = validatePasswordStrength(newPassword);
+  if (!pwCheck.valid) {
+    return res.status(400).json({ error: pwCheck.message });
+  }
+
   try {
     db.changeUserPassword(phone, oldPassword, newPassword);
-    // Also update in Supabase Cloud
     updateSupabasePassword(phone, newPassword).catch(e => console.warn('[Supabase Change Password Warn]', e.message));
     return res.json({ success: true, message: "Password updated successfully in cloud vault." });
   } catch (err) {
@@ -568,11 +610,12 @@ app.post('/api/auth/login-verify-otp', authLimiter, (req, res) => {
     return res.status(404).json({ error: "Account not found." });
   }
 
-  const isChiefAdmin = cleanPhone === '1316750712' || !!user.isAdmin;
+  const isChiefAdmin = Boolean(user.isAdmin);
   const token = db.generateSecureToken(isChiefAdmin ? 'safe_token_admin_' : 'safe_token_', cleanPhone, isChiefAdmin);
   db.markUserLogin(cleanPhone, token, { name: user.name });
 
   const { salt: _, passwordHash: __, ...safeUser } = user;
+  safeUser.isAdmin = isChiefAdmin;
   console.log(`[🔐 2FA LOGIN VERIFIED] Citizen ${safeUser.name} (+880 ${cleanPhone}) signed in.`);
 
   return res.json({
@@ -593,7 +636,7 @@ app.post('/api/auth/forgot-password/request-otp', otpLimiter, async (req, res) =
   const cleanPhone = phoneValidation.cleanPhone;
 
   let user = db.getUserByPhone(cleanPhone);
-  if (!user) {
+  if (!user && SUPABASE_URL && SUPABASE_SECRET_KEY) {
     // Cloud recovery: Check if account exists in Supabase Cloud
     try {
       const listRes = await fetch(`${SUPABASE_URL}/auth/v1/admin/users`, {
@@ -619,17 +662,12 @@ app.post('/api/auth/forgot-password/request-otp', otpLimiter, async (req, res) =
     return res.status(404).json({ error: "No account found with this phone number. Please create an account first." });
   }
 
-  const { code } = db.issueOtp(cleanPhone, 'FORGOT_PASSWORD');
+  db.issueOtp(cleanPhone, 'FORGOT_PASSWORD');
 
-  const responsePayload = {
+  return res.json({
     success: true,
     message: `Password reset code sent to +880 ${cleanPhone}.`
-  };
-  if (process.env.NODE_ENV !== 'production') {
-    responsePayload.debugOtp = code;
-  }
-
-  return res.json(responsePayload);
+  });
 });
 
 // 1.6 Forgot Password Step 2: Verify OTP & Set New Password (Rate-Limited)
@@ -641,8 +679,9 @@ app.post('/api/auth/forgot-password/verify-reset', authLimiter, async (req, res)
   }
   const cleanPhone = phoneValidation.cleanPhone;
 
-  if (!newPassword || newPassword.length < 6) {
-    return res.status(400).json({ error: "New password must be at least 6 characters long." });
+  const pwCheck = validatePasswordStrength(newPassword);
+  if (!pwCheck.valid) {
+    return res.status(400).json({ error: pwCheck.message });
   }
 
   const otpCheck = db.verifyOtp(cleanPhone, code, 'FORGOT_PASSWORD');
@@ -652,14 +691,14 @@ app.post('/api/auth/forgot-password/verify-reset', authLimiter, async (req, res)
 
   try {
     const updatedUser = db.resetPassword(cleanPhone, newPassword);
-    // Also sync the new password to Supabase Cloud Auth
     updateSupabasePassword(cleanPhone, newPassword).catch(e => console.warn('[Supabase Reset Password Warn]', e.message));
 
-    const isChiefAdmin = cleanPhone === '1316750712' || !!updatedUser.isAdmin;
+    const isChiefAdmin = Boolean(updatedUser.isAdmin);
     const token = db.generateSecureToken(isChiefAdmin ? 'safe_token_admin_' : 'safe_token_', cleanPhone, isChiefAdmin);
     db.markUserLogin(cleanPhone, token, { name: updatedUser.name });
 
     const { salt: _, passwordHash: __, ...safeUser } = updatedUser;
+    safeUser.isAdmin = isChiefAdmin;
     console.log(`[🔑 PASSWORD RESET SUCCESSFUL] Account +880 ${cleanPhone} updated password.`);
 
     return res.json({
@@ -681,42 +720,19 @@ app.post('/api/auth/logout', (req, res) => {
 });
 
 // 1.8 Citizen Emergency Contacts Sync (Per-Profile Cloud Storage — Strict Auth Enforced)
-app.get('/api/user/contacts', (req, res) => {
-  const authHeader = req.headers['authorization'] || '';
-  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.query.token;
-  const session = token ? db.getSession(token) : null;
-
-  if (!session || !session.phone) {
-    return res.status(401).json({ error: "UNAUTHORIZED", message: "Active citizen authentication required to access emergency contacts." });
-  }
-
-  // If admin is inspecting another citizen
-  if (session.isAdmin && req.query.phone) {
+app.get('/api/user/contacts', requireAuth, (req, res) => {
+  if (req.user.isAdmin && req.query.phone) {
     const targetPhone = db.normalizePhone(req.query.phone);
     return res.json({ success: true, contacts: db.getUserContacts(targetPhone) });
   }
-  const cleanPhone = db.normalizePhone(session.phone);
-  const contacts = db.getUserContacts(cleanPhone);
+  const contacts = db.getUserContacts(req.user.phone);
   return res.json({ success: true, contacts });
 });
 
-app.put('/api/user/contacts', apiLimiter, (req, res) => {
-  const authHeader = req.headers['authorization'] || '';
-  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.body.token;
-
-  if (!token) {
-    return res.status(401).json({ error: "UNAUTHORIZED", message: "Active citizen authentication required to update emergency contacts." });
-  }
-
-  const session = db.getSession(token);
-  if (!session || !session.phone) {
-    return res.status(401).json({ error: "SESSION_EXPIRED", message: "Session expired or invalid. Please sign in to update your profile." });
-  }
-
-  const cleanPhone = db.normalizePhone(session.phone);
+app.put('/api/user/contacts', requireAuth, apiLimiter, (req, res) => {
   try {
-    const updated = db.updateUserContacts(cleanPhone, req.body.contacts);
-    console.log(`[👥 CONTACTS SYNCED TO DB] Citizen +880 ${cleanPhone} saved emergency contacts.`);
+    const updated = db.updateUserContacts(req.user.phone, req.body.contacts);
+    console.log(`[👥 CONTACTS SYNCED TO DB] Citizen +880 ${req.user.phone} saved emergency contacts.`);
     return res.json({
       success: true,
       message: "Emergency contacts updated in user profile.",
@@ -727,22 +743,9 @@ app.put('/api/user/contacts', apiLimiter, (req, res) => {
   }
 });
 
-app.post('/api/user/contacts', apiLimiter, (req, res) => {
-  const authHeader = req.headers['authorization'] || '';
-  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.body.token;
-
-  if (!token) {
-    return res.status(401).json({ error: "UNAUTHORIZED", message: "Active citizen authentication required to update emergency contacts." });
-  }
-
-  const session = db.getSession(token);
-  if (!session || !session.phone) {
-    return res.status(401).json({ error: "SESSION_EXPIRED", message: "Session expired or invalid. Please sign in to update your profile." });
-  }
-
-  const cleanPhone = db.normalizePhone(session.phone);
+app.post('/api/user/contacts', requireAuth, apiLimiter, (req, res) => {
   try {
-    const updated = db.updateUserContacts(cleanPhone, req.body.contacts);
+    const updated = db.updateUserContacts(req.user.phone, req.body.contacts);
     return res.json({
       success: true,
       message: "Emergency contacts updated in user profile.",
@@ -752,7 +755,6 @@ app.post('/api/user/contacts', apiLimiter, (req, res) => {
     return res.status(400).json({ error: err.message });
   }
 });
-
 // 1.9 Database Scale & Health Metrics (Protected by Admin Auth)
 app.get('/api/database/metrics', requireAdminAuth, (req, res) => {
   const metrics = db.getDatabaseMetrics();
@@ -760,7 +762,7 @@ app.get('/api/database/metrics', requireAdminAuth, (req, res) => {
 });
 
 /* ==========================================================
-   2. 999 EMERGENCY SOS & CAD DISPATCH
+   2. 999 EMERGENCY SOS & FAMILY/COMMUNITY ALERT
 ========================================================== */
 
 app.post('/api/emergency/sos-trigger', (req, res) => {
@@ -785,12 +787,12 @@ app.post('/api/emergency/sos-trigger', (req, res) => {
     timestamp: savedAlert.timestamp,
     emergencyType: savedAlert.emergencyType,
     location: savedAlert.location,
-    cadUnitAssigned: "Dhaka North Quick Response Unit #4",
+    dispatchStatus: "INTERNAL_BROADCAST_ACTIVE",
     googleMapsUrl: savedAlert.googleMapsUrl
   };
 
   liveIncidents.set(savedAlert.incidentId, incident);
-  console.log(`[🚨 999 DISPATCH CAD] Incident ${savedAlert.incidentId} received from ${savedAlert.userName} (${savedAlert.displayPhone}). Routing units to:`, incident.location);
+  console.log(`[🚨 EMERGENCY SOS] Incident ${savedAlert.incidentId} logged from ${savedAlert.userName} (${savedAlert.displayPhone}). Coordinates:`, incident.location);
 
   // Broadcast to all active emergency circle listeners & admin consoles via WebSocket
   broadcastLocationUpdate({
@@ -802,7 +804,8 @@ app.post('/api/emergency/sos-trigger', (req, res) => {
   return res.json({
     success: true,
     incidentId: savedAlert.incidentId,
-    message: "Distress signal accepted by Bangladesh 999 Emergency CAD.",
+    message: "Distress signal logged and broadcasted to emergency contacts. In a life-threatening emergency, always dial 999 directly.",
+    warning: "Internal citizen safety broadcast only. If you are in immediate danger, dial 999 immediately.",
     incident,
     alert: savedAlert
   });
@@ -873,7 +876,7 @@ if (!fs.existsSync(EVIDENCE_DIR)) {
 }
 
 // 2.2 Covert Background Emergency Video & Audio Evidence Receiver (Spy Feature)
-app.post('/api/emergency/covert-recording', async (req, res) => {
+app.post('/api/emergency/covert-recording', express.json({ limit: '25mb' }), async (req, res) => {
   try {
     const { id, userId, userName, userPhone, location, videoData, mimeType, durationSeconds, fileName: clientFileName } = req.body;
 
@@ -992,41 +995,37 @@ app.get('/api/emergency/evidence/:filename', async (req, res) => {
   const filename = path.basename(req.params.filename);
   let filePath = path.join(EVIDENCE_DIR, filename);
 
-  // Universal Cross-Origin headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', '*');
-  res.setHeader('Access-Control-Expose-Headers', 'Content-Range, Content-Length, Accept-Ranges, Content-Disposition');
-
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
-  // Authorization Guard: Emergency recording contains sensitive citizen distress video & audio
+  // Authorization Guard: Emergency recording contains sensitive citizen distress video & audio (Header-only Bearer token)
   const authHeader = req.headers['authorization'] || '';
-  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.query.token;
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
   const session = token ? db.getSession(token) : null;
 
-  if (!session) {
+  if (!session || !session.phone) {
     return res.status(401).json({
       error: "UNAUTHORIZED",
-      message: "Authentication required to access emergency evidence records."
+      message: "Authentication token required in Authorization header to access emergency evidence records."
     });
   }
 
-  const user = session ? db.getUserByPhone(session.phone) : null;
+  const user = db.getUserByPhone(session.phone);
+  const evidence = db.getEmergencyEvidenceByFilename(filename);
+  const isAdmin = Boolean((user && user.isAdmin) || (session && session.isAdmin));
+  const isOwner = Boolean(
+    evidence && (
+      (evidence.userPhone && db.normalizePhone(evidence.userPhone) === db.normalizePhone(session.phone)) ||
+      (evidence.userId && evidence.userId === session.phone) ||
+      (user && evidence.userId && evidence.userId === user.id)
+    )
+  );
 
-  // Extract phone number from filename (e.g. "01316750712_SOS_..." or "1316750712_SOS_...")
-  const phonePrefixMatch = filename.match(/^0?(\d{10})_SOS_/);
-  const targetPhone = phonePrefixMatch ? phonePrefixMatch[1] : null;
-
-  const isOwner = !!(session && targetPhone && (db.normalizePhone(session.phone) === db.normalizePhone(targetPhone)));
-  const isAdmin = !!((user && user.isAdmin) || (session && session.isAdmin) || (session && session.phone === '1316750712'));
-
-  if (!isOwner && !isAdmin) {
+  if (!isAdmin && !isOwner) {
     return res.status(403).json({
       error: "FORBIDDEN",
-      message: "Access denied. Emergency evidence records require citizen owner or administrator authorization."
+      message: "Access denied. Emergency evidence records require verified citizen owner or administrator authorization."
     });
   }
 
@@ -1176,18 +1175,10 @@ app.get('/api/blood/donors', (req, res) => {
   }
 });
 
-app.post('/api/blood/donors', (req, res) => {
+app.post('/api/blood/donors', requireAuth, (req, res) => {
   try {
-    const { phone, bloodGroup, district, thana, available } = req.body;
-
-    if (!phone || !phone.trim()) {
-      return res.status(400).json({ error: "PHONE_REQUIRED", message: "Contact phone number is required." });
-    }
-
-    const phoneValidation = db.validateBdPhone ? db.validateBdPhone(phone) : { valid: phone.replace(/\D/g, '').length >= 10, cleanPhone: phone.trim() };
-    if (!phoneValidation.valid) {
-      return res.status(400).json({ error: "INVALID_PHONE", message: "Please provide a valid 11-digit Bangladeshi mobile number (e.g., 017XXXXXXXX)." });
-    }
+    const { bloodGroup, district, thana, available } = req.body;
+    const cleanPhone = req.user.phone;
 
     const validGroups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
     const cleanGroup = (bloodGroup || 'O+').trim().toUpperCase();
@@ -1195,9 +1186,9 @@ app.post('/api/blood/donors', (req, res) => {
       return res.status(400).json({ error: "INVALID_BLOOD_GROUP", message: "Please select a valid blood group (A+, A-, B+, B-, O+, O-, AB+, AB-)." });
     }
 
-    // Anonymous Life Saver: Zero personal names stored or broadcast
+    // Anonymous Life Saver: Tied securely to verified citizen phone
     const donor = db.addOrUpdateBloodDonor({
-      phone: phoneValidation.cleanPhone || phone.trim(),
+      phone: cleanPhone,
       bloodGroup: cleanGroup,
       district: (district || 'Dhaka').trim(),
       thana: (thana || '').trim(),
@@ -1215,12 +1206,22 @@ app.post('/api/blood/donors', (req, res) => {
   }
 });
 
-app.post('/api/blood/donors/:id/toggle', (req, res) => {
+app.post('/api/blood/donors/:id/toggle', requireAuth, (req, res) => {
   try {
-    const updated = db.toggleDonorAvailability(req.params.id, req.body.available);
-    if (!updated) {
+    const donorId = req.params.id;
+    const allDonors = db.getBloodDonors ? db.getBloodDonors() : [];
+    const targetDonor = (allDonors || []).find(d => d.id === donorId || d.phone === donorId);
+
+    if (!targetDonor) {
       return res.status(404).json({ error: "NOT_FOUND", message: "Donor profile not found." });
     }
+
+    const isOwner = db.normalizePhone(targetDonor.phone) === db.normalizePhone(req.user.phone);
+    if (!isOwner && !req.user.isAdmin) {
+      return res.status(403).json({ error: "FORBIDDEN", message: "Access denied. You can only toggle your own donor profile." });
+    }
+
+    const updated = db.toggleDonorAvailability(donorId, req.body.available);
     return res.json({ success: true, donor: updated });
   } catch (err) {
     return res.status(500).json({ error: "SERVER_ERROR", message: "Failed to update donor status." });
@@ -1228,23 +1229,9 @@ app.post('/api/blood/donors/:id/toggle', (req, res) => {
 });
 
 // 2.6.3 Save Blood Information on Citizen Profile (Optional Donor Opt-in)
-app.post(['/api/user/blood-profile', '/api/user/blood'], (req, res) => {
+app.post(['/api/user/blood-profile', '/api/user/blood'], requireAuth, (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    let userPhone = null;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.split(' ')[1];
-      const sess = db.getSession(token);
-      if (sess && sess.user) userPhone = sess.user.phone;
-    }
-    if (!userPhone && req.body.phone) {
-      userPhone = req.body.phone;
-    }
-
-    if (!userPhone) {
-      return res.status(401).json({ error: "UNAUTHORIZED", message: "User phone or active login session required." });
-    }
-
+    const userPhone = req.user.phone;
     const { bloodGroup, isBloodDonor, district, thana } = req.body;
     const updatedUser = db.updateUserBloodProfile(userPhone, {
       bloodGroup,
@@ -1259,11 +1246,10 @@ app.post(['/api/user/blood-profile', '/api/user/blood'], (req, res) => {
 
     return res.json({
       success: true,
-      message: "Blood profile information successfully saved to account.",
+      message: "Blood profile updated successfully.",
       user: updatedUser
     });
   } catch (err) {
-    console.error('[USER BLOOD PROFILE SAVE ERROR]:', err);
     return res.status(500).json({ error: "SERVER_ERROR", message: "Failed to update blood profile." });
   }
 });
@@ -1273,19 +1259,10 @@ app.post(['/api/user/blood-profile', '/api/user/blood'], (req, res) => {
 ========================================================== */
 
 // Start / Register Personal Walk With Me Companion Session (User-Isolated)
-app.post('/api/walk/start', (req, res) => {
-  const authHeader = req.headers.authorization;
-  let authenticatedUser = null;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.split(' ')[1];
-    const sess = db.getSession(token);
-    if (sess && sess.user) authenticatedUser = sess.user;
-  }
-
-  const { userId, userName, userPhone, origin, destination, travelMode, estimatedMinutes, currentCoords, destCoords } = req.body;
-  const rawPhone = (authenticatedUser && authenticatedUser.phone) || userPhone || userId || ('guest_' + Date.now());
-  const cleanPhone = db.normalizePhone(rawPhone) || rawPhone;
-  const displayName = (authenticatedUser && authenticatedUser.name) || userName || "Citizen Traveler";
+app.post('/api/walk/start', requireAuth, (req, res) => {
+  const cleanPhone = req.user.phone;
+  const displayName = req.user.name || "Citizen Traveler";
+  const { origin, destination, travelMode, estimatedMinutes, currentCoords, destCoords } = req.body;
   const sessionId = "journey_" + crypto.randomBytes(16).toString('hex');
 
   const session = {
@@ -1309,7 +1286,7 @@ app.post('/api/walk/start', (req, res) => {
   // 1. Fast in-memory session lookup
   activeWalkSessions.set(sessionId, session);
 
-  // 2. User-isolated persistence in Database & 5TB Cloud Vault
+  // 2. User-isolated persistence in Database & Cloud Vault
   db.saveUserActiveJourney(cleanPhone, session);
 
   console.log(`[🚗 JOURNEY STARTED] User: ${session.userName} (${cleanPhone}) | Mode: ${session.travelMode} -> ${session.destination} | Est: ${session.estimatedMinutes} mins`);
@@ -1317,39 +1294,32 @@ app.post('/api/walk/start', (req, res) => {
 });
 
 // Retrieve Logged-in User's Personal Active Walk Session
-app.get('/api/walk/my-session', (req, res) => {
-  const authHeader = req.headers.authorization;
-  let phone = req.query.phone;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.split(' ')[1];
-    const sess = db.getSession(token);
-    if (sess && sess.user) phone = sess.user.phone;
-  }
-
-  if (!phone) {
-    return res.json({ success: true, session: null });
-  }
-
-  const cleanPhone = db.normalizePhone(phone) || phone;
+app.get('/api/walk/my-session', requireAuth, (req, res) => {
+  const cleanPhone = req.user.phone;
   const userJourney = db.getUserActiveJourney(cleanPhone);
   return res.json({ success: true, session: userJourney || null });
 });
 
 // Update location during transit (Updates user's private session)
-app.post('/api/walk/update-location', (req, res) => {
-  const { sessionId, phone, lat, lon, address } = req.body;
-  let session = sessionId ? activeWalkSessions.get(sessionId) : null;
+app.post('/api/walk/update-location', requireAuth, (req, res) => {
+  const { sessionId, lat, lon, address } = req.body;
+  const cleanPhone = req.user.phone;
   
-  const targetPhone = phone || (session && session.userPhone);
-  if (targetPhone) {
-    const cleanPhone = db.normalizePhone(targetPhone) || targetPhone;
-    const dbJourney = db.getUserActiveJourney(cleanPhone);
-    if (dbJourney) {
-      dbJourney.currentCoords = { lat, lon, address };
-      dbJourney.lastPing = Date.now();
-      db.saveUserActiveJourney(cleanPhone, dbJourney);
-      if (!session) session = dbJourney;
-    }
+  let dbJourney = db.getUserActiveJourney(cleanPhone);
+  if (sessionId && dbJourney && dbJourney.sessionId !== sessionId) {
+    return res.status(403).json({ error: "FORBIDDEN", message: "You are not authorized to update this journey session." });
+  }
+
+  let session = sessionId ? activeWalkSessions.get(sessionId) : null;
+  if (session && session.userPhone !== cleanPhone) {
+    return res.status(403).json({ error: "FORBIDDEN", message: "You do not own this journey session." });
+  }
+
+  if (dbJourney) {
+    dbJourney.currentCoords = { lat, lon, address };
+    dbJourney.lastPing = Date.now();
+    db.saveUserActiveJourney(cleanPhone, dbJourney);
+    if (!session) session = dbJourney;
   }
 
   if (session) {
@@ -1357,28 +1327,34 @@ app.post('/api/walk/update-location', (req, res) => {
     session.lastPing = Date.now();
     return res.json({ success: true, session });
   }
+
   return res.status(404).json({ error: "Session not found" });
 });
 
 // Flag session as Overdue / Unresponsive (Uploaded to Admin Page)
-app.post('/api/walk/report-overdue', (req, res) => {
-  const { sessionId, phone, lat, lon, address } = req.body;
-  let session = sessionId ? activeWalkSessions.get(sessionId) : null;
+app.post('/api/walk/report-overdue', requireAuth, (req, res) => {
+  const { sessionId, lat, lon, address } = req.body;
+  const cleanPhone = req.user.phone;
 
-  const targetPhone = phone || (session && session.userPhone);
-  if (targetPhone) {
-    const cleanPhone = db.normalizePhone(targetPhone) || targetPhone;
-    const dbJourney = db.getUserActiveJourney(cleanPhone);
-    if (dbJourney) {
-      dbJourney.status = "OVERDUE_ALERT";
-      dbJourney.isOverdue = true;
-      dbJourney.overdueUploadedToAdmin = true;
-      if (lat && lon) {
-        dbJourney.currentCoords = { lat, lon, address: address || dbJourney.currentCoords.address };
-      }
-      db.saveUserActiveJourney(cleanPhone, dbJourney);
-      if (!session) session = dbJourney;
+  let dbJourney = db.getUserActiveJourney(cleanPhone);
+  if (sessionId && dbJourney && dbJourney.sessionId !== sessionId) {
+    return res.status(403).json({ error: "FORBIDDEN", message: "You are not authorized to report on this journey session." });
+  }
+
+  let session = sessionId ? activeWalkSessions.get(sessionId) : null;
+  if (session && session.userPhone !== cleanPhone) {
+    return res.status(403).json({ error: "FORBIDDEN", message: "You do not own this journey session." });
+  }
+
+  if (dbJourney) {
+    dbJourney.status = "OVERDUE_ALERT";
+    dbJourney.isOverdue = true;
+    dbJourney.overdueUploadedToAdmin = true;
+    if (lat && lon) {
+      dbJourney.currentCoords = { lat, lon, address: address || dbJourney.currentCoords.address };
     }
+    db.saveUserActiveJourney(cleanPhone, dbJourney);
+    if (!session) session = dbJourney;
   }
 
   if (session) {
@@ -1407,20 +1383,24 @@ app.get('/api/admin/active-journeys', requireAdminAuth, (req, res) => {
 });
 
 // Finish / Clear Walk Session (Per User)
-app.post('/api/walk/finish', (req, res) => {
-  const { sessionId, phone } = req.body;
-  let targetPhone = phone;
+app.post('/api/walk/finish', requireAuth, (req, res) => {
+  const { sessionId } = req.body;
+  const cleanPhone = req.user.phone;
+
+  let dbJourney = db.getUserActiveJourney(cleanPhone);
+  if (sessionId && dbJourney && dbJourney.sessionId !== sessionId) {
+    return res.status(403).json({ error: "FORBIDDEN", message: "You do not own this journey session." });
+  }
 
   if (sessionId && activeWalkSessions.has(sessionId)) {
     const sess = activeWalkSessions.get(sessionId);
-    if (sess && sess.userPhone) targetPhone = sess.userPhone;
+    if (sess && sess.userPhone && sess.userPhone !== cleanPhone && !req.user.isAdmin) {
+      return res.status(403).json({ error: "FORBIDDEN", message: "You do not own this journey session." });
+    }
     activeWalkSessions.delete(sessionId);
   }
 
-  if (targetPhone) {
-    db.finishUserActiveJourney(targetPhone);
-  }
-
+  db.finishUserActiveJourney(cleanPhone);
   return res.json({ success: true, message: "Walk With Me session completed safely." });
 });
 
@@ -1838,7 +1818,7 @@ app.post('/api/feed/posts', postCreateLimiter, async (req, res) => {
       validatedAuthor = user.name || session.userName || "Verified Citizen";
       validatedPhone = session.phone;
       validatedRole = user.role || (user.isAdmin ? "Administrator" : "Citizen");
-      isChiefAdminVerified = Boolean(user.isAdmin || session.isAdmin || session.phone === '1316750712');
+      isChiefAdminVerified = Boolean(user.isAdmin || session.isAdmin);
     } else {
       let rawAuthor = (author || "").trim();
       if (rawAuthor.toUpperCase().includes('SAAD RIZWAN') || rawAuthor.toLowerCase().includes('admin') || rawAuthor.toLowerCase().includes('founder') || rawAuthor.toLowerCase().includes('chief')) {
@@ -1977,7 +1957,7 @@ function handlePostDeletion(req, res) {
 
   const postId = req.params.id;
   const post = db.getPostById(postId);
-  const isAdmin = !!(req.adminUser || (session && session.isAdmin) || (user && user.isAdmin) || (session && session.phone === '1316750712') || (user && user.phone === '1316750712'));
+  const isAdmin = !!(req.adminUser || (session && session.isAdmin) || (user && user.isAdmin));
   const callerPhone = (user && user.phone) || (session && session.phone) || '';
 
   if (!post) {
@@ -2381,7 +2361,7 @@ app.post('/api/feed/posts/:id/comment', (req, res) => {
     if (session && user) {
       author = user.name || session.userName || "Verified Citizen";
       authorPhone = session.phone;
-      isFounder = Boolean(user.isFounder || session.phone === '1316750712');
+      isFounder = Boolean(user.isFounder);
       isAdmin = Boolean(user.isAdmin || session.isAdmin);
     } else {
       let raw = (author || "").trim();
@@ -2545,7 +2525,7 @@ wss.on('connection', (ws, req) => {
         ws.authenticated = true;
         ws.phone = session.phone;
         ws.userName = session.userName;
-        ws.isAdmin = !!(session.isAdmin || (user && user.isAdmin) || session.phone === '1316750712');
+        ws.isAdmin = !!(session.isAdmin || (user && user.isAdmin));
       }
     }
   } catch (e) {
@@ -2570,7 +2550,7 @@ wss.on('connection', (ws, req) => {
           ws.authenticated = true;
           ws.phone = session.phone;
           ws.userName = session.userName;
-          ws.isAdmin = !!(session.isAdmin || (user && user.isAdmin) || session.phone === '1316750712');
+          ws.isAdmin = !!(session.isAdmin || (user && user.isAdmin));
           ws.send(JSON.stringify({ type: "AUTH_SUCCESS", phone: ws.phone, isAdmin: ws.isAdmin }));
         } else {
           ws.send(JSON.stringify({ type: "AUTH_ERROR", message: "Invalid or expired session token" }));
@@ -4020,6 +4000,20 @@ app.post('/api/ai/chat', async (req, res) => {
       reply: "I am having a brief connection pause. In an emergency, please press the Red SOS Button or dial 999 directly!"
     });
   }
+});
+
+// Sanitized Global Error Handler (Section 3: OWASP Stack Trace Protection)
+app.use((err, req, res, next) => {
+  console.error('[🚨 ROUTE EXCEPTION]:', err && err.message ? err.message : err);
+  if (res.headersSent) {
+    return next(err);
+  }
+  return res.status(err.status || 500).json({
+    error: err.code || 'INTERNAL_SERVER_ERROR',
+    message: process.env.NODE_ENV === 'production'
+      ? 'An unexpected error occurred. Please try again later.'
+      : (err.message || 'Internal server error.')
+  });
 });
 
 // SPA Fallback: Serve web app for any unmatched route
