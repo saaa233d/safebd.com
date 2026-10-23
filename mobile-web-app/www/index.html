@@ -5811,10 +5811,11 @@
     }
 
     // Live High-Precision Geolocation (Device GPS Only)
+    let hasRealGpsFix = false;
     let currentCoords = {
-      lat: 23.8103,
-      lon: 90.4125,
-      address: "Acquiring live satellite fix...",
+      lat: null,
+      lon: null,
+      address: "Tap to Acquire GPS",
       accuracy: 0
     };
 
@@ -6409,61 +6410,46 @@
     let gpsWatchId = null;
 
     function fallbackToNetworkLocation(reason) {
-      const defaultLat = 23.8103;
-      const defaultLon = 90.4125;
-      const defaultAddr = "Dhaka, Bangladesh";
-
-      fetch('https://ipapi.co/json/')
-        .then(r => r.json())
-        .then(data => {
-          if (data && data.latitude && data.longitude) {
-            const locName = `${data.city || 'Dhaka'}, ${data.region || 'Bangladesh'}`;
-            currentCoords.lat = Number(data.latitude);
-            currentCoords.lon = Number(data.longitude);
-            currentCoords.accuracy = 250;
-            currentCoords.address = locName;
-            applyLocationToInterface(locName, currentCoords.lat, currentCoords.lon, false);
-          } else {
-            throw new Error("No IP coords");
-          }
-        })
-        .catch(() => {
-          currentCoords.lat = defaultLat;
-          currentCoords.lon = defaultLon;
-          currentCoords.accuracy = 500;
-          currentCoords.address = defaultAddr;
-          applyLocationToInterface(defaultAddr, defaultLat, defaultLon, false);
-        });
+      if (hasRealGpsFix && currentCoords.lat && currentCoords.lon) return;
+      updateTelemetryUI("Location Access Needed", "Tap here to allow browser location access", "Allow GPS", "#f59e0b");
     }
 
     function acquireRealLocation(forceAlert = false) {
-      updateTelemetryUI("Connecting to Satellite GPS...", "Requesting live device sensor coordinates", "Connecting...", "#f59e0b");
+      updateTelemetryUI("Locating...", "Requesting live device GPS sensor coordinates", "Connecting...", "#f59e0b");
 
       if (!navigator.geolocation) {
-        fallbackToNetworkLocation("Geolocation is not supported by your device browser.");
+        updateTelemetryUI("GPS Unavailable", "Browser does not support geolocation sensor", "Unavailable", "#ef4444");
+        if (forceAlert) alert("⚠️ Geolocation is not supported by your device browser.");
         return;
       }
 
       const highAccuracyOptions = {
         enableHighAccuracy: true,
-        timeout: 8000,
-        maximumAge: 5000
+        timeout: 12000,
+        maximumAge: 0
       };
 
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          hasRealGpsFix = true;
           handleDirectGpsSuccess(position, forceAlert);
         },
         (err) => {
-          console.warn("High-accuracy GPS attempt failed, trying standard cellular/wifi position:", err.message);
-          // Fallback Step 2: Try standard accuracy (works immediately indoors / on WiFi / laptops)
+          console.warn("High-accuracy GPS attempt:", err.message);
+          // Try standard accuracy if high-accuracy times out (e.g. indoors or laptop)
           navigator.geolocation.getCurrentPosition(
-            (pos) => handleDirectGpsSuccess(pos, forceAlert),
-            (secondErr) => {
-              console.warn("Standard geolocation failed, falling back to network IP location:", secondErr.message);
-              fallbackToNetworkLocation(secondErr.code === 1 ? "Location permission denied" : "GPS sensor unavailable");
+            (pos) => {
+              hasRealGpsFix = true;
+              handleDirectGpsSuccess(pos, forceAlert);
             },
-            { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+            (secondErr) => {
+              console.warn("Standard geolocation failed:", secondErr.message);
+              fallbackToNetworkLocation(secondErr.code === 1 ? "Location permission denied" : "GPS sensor unavailable");
+              if (forceAlert) {
+                alert("⚠️ " + (secondErr.code === 1 ? "Location permission was denied. Please allow location in your browser settings." : "GPS signal unavailable. Please ensure device location is switched ON."));
+              }
+            },
+            { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
           );
         },
         highAccuracyOptions
@@ -6472,9 +6458,12 @@
       // Continuously monitor precise position
       if (!gpsWatchId) {
         gpsWatchId = navigator.geolocation.watchPosition(
-          (pos) => handleDirectGpsSuccess(pos, false),
+          (pos) => {
+            hasRealGpsFix = true;
+            handleDirectGpsSuccess(pos, false);
+          },
           (err) => console.log("watchPosition ping:", err.message),
-          { enableHighAccuracy: false, timeout: 20000, maximumAge: 10000 }
+          { enableHighAccuracy: true, timeout: 25000, maximumAge: 5000 }
         );
       }
     }
@@ -6593,28 +6582,36 @@
     }
 
     function fetchAccurateReverseGeocode(lat, lon, showAlert = false) {
-      const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
-
-      fetch(url)
+      apiFetch(`/api/geo/reverse?lat=${lat}&lon=${lon}`)
         .then(res => res.json())
         .then(data => {
-          let readableName = "";
-          if (data && data.address) {
-            const addr = data.address;
-            const road = addr.road || addr.suburb || addr.neighbourhood || addr.residential || addr.quarter || "";
-            const district = addr.city || addr.town || addr.county || addr.state_district || "Bangladesh";
-            readableName = road ? `${road}, ${district}` : (data.display_name.split(',').slice(0, 2).join(',') || `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`);
-          } else {
-            readableName = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
-          }
-
+          const readableName = (data && data.address) ? data.address : `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
           currentCoords.address = readableName;
           applyLocationToInterface(readableName, lat, lon, showAlert);
         })
         .catch(() => {
-          const fallbackText = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
-          currentCoords.address = fallbackText;
-          applyLocationToInterface(fallbackText, lat, lon, showAlert);
+          // Direct fallback to OpenStreetMap if server proxy is momentarily unreachable
+          const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
+          fetch(url)
+            .then(res => res.json())
+            .then(data => {
+              let readableName = "";
+              if (data && data.address) {
+                const addr = data.address;
+                const road = addr.road || addr.suburb || addr.neighbourhood || addr.residential || addr.quarter || "";
+                const district = addr.city || addr.town || addr.county || addr.state_district || "Bangladesh";
+                readableName = road ? `${road}, ${district}` : (data.display_name ? data.display_name.split(',').slice(0, 3).join(', ') : `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`);
+              } else {
+                readableName = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+              }
+              currentCoords.address = readableName;
+              applyLocationToInterface(readableName, lat, lon, showAlert);
+            })
+            .catch(() => {
+              const fallbackText = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+              currentCoords.address = fallbackText;
+              applyLocationToInterface(fallbackText, lat, lon, showAlert);
+            });
         });
     }
 
@@ -6844,13 +6841,10 @@
 
     // Scalable Live Public Feed Fetcher (Only Admin-Approved Posts, supports millions)
     function fetchLiveFeedPosts(page = 1, append = false) {
-      if (isLoadingFeed) return;
-      isLoadingFeed = true;
-
       const catParam = (activeFeedFilter === 'all' || activeFeedFilter === 'community') ? 'all' : activeFeedFilter;
-      const url = `${API_BASE}/api/feed/posts?page=${page}&limit=20&category=${encodeURIComponent(catParam)}`;
+      const endpoint = `/api/feed/posts?page=${page}&limit=20&category=${encodeURIComponent(catParam)}`;
 
-      fetch(url)
+      apiFetch(endpoint)
         .then(r => r.json())
         .then(data => {
           isLoadingFeed = false;
@@ -6860,24 +6854,8 @@
             const existingIds = new Set(liveApprovedPosts.map(p => p.id));
             serverPosts.forEach(p => { if (!existingIds.has(p.id)) liveApprovedPosts.push(p); });
           } else {
-            // Intelligent Merge: Server is the authoritative source of truth across all profiles!
-            // Preserve newer local comments if cloud sync is momentarily in flight.
-            const mergedPosts = serverPosts.map(sp => {
-              if (sp && sp.id) {
-                const localExisting = liveApprovedPosts.find(lp => lp && lp.id === sp.id);
-                if (localExisting && Array.isArray(localExisting.comments) && localExisting.comments.length > (sp.comments || []).length) {
-                  const existingCommentIds = new Set((sp.comments || []).map(c => c.id));
-                  localExisting.comments.forEach(c => {
-                    if (!existingCommentIds.has(c.id)) {
-                      if (!Array.isArray(sp.comments)) sp.comments = [];
-                      sp.comments.push(c);
-                    }
-                  });
-                }
-              }
-              return sp;
-            });
-            liveApprovedPosts = mergedPosts;
+            // Server is the authoritative source of truth across all profiles
+            liveApprovedPosts = serverPosts;
           }
 
           feedPage = page;
