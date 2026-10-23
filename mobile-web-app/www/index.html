@@ -208,6 +208,9 @@
       display: flex;
       flex-direction: column;
     }
+    .screen > * {
+      flex-shrink: 0;
+    }
     .screen-padded {
       padding: 16px 20px 84px;
     }
@@ -3440,7 +3443,7 @@
       </div>
 
       <!-- Quick Walk With Me Shortcut Card (Apple Inset Grouped) -->
-      <div class="clean-tile" style="padding: 14px 16px; margin-bottom: 20px; cursor: pointer;" onclick="switchTab('screen-map', document.querySelectorAll('.nav-tab-btn')[1])">
+      <div class="clean-tile" style="padding: 14px 16px; margin-bottom: 12px; cursor: pointer;" onclick="switchTab('screen-map', document.querySelectorAll('.nav-tab-btn')[1])">
         <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
           <div class="apple-squircle squircle-walk">
             <i class="fas fa-person-walking"></i>
@@ -3448,6 +3451,20 @@
           <div>
             <div class="tile-main" data-i18n="sos_walk_card_title">Walk With Me Companion</div>
             <div class="tile-sub" data-i18n="sos_walk_card_sub">Search any place in Bangladesh & route with Google Maps</div>
+          </div>
+        </div>
+        <i class="fas fa-chevron-right apple-chevron"></i>
+      </div>
+
+      <!-- Quick Dhaka Bus Fare Generator Shortcut Card -->
+      <div class="clean-tile" style="padding: 14px 16px; margin-bottom: 20px; cursor: pointer;" onclick="openBusFareFromHome()">
+        <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
+          <div class="apple-squircle" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #f59e0b;">
+            <i class="fas fa-bus-simple"></i>
+          </div>
+          <div>
+            <div class="tile-main">Dhaka Bus Fare Generator</div>
+            <div class="tile-sub">Official BRTA ৳2.70/km • 50% Student Half-Pass</div>
           </div>
         </div>
         <i class="fas fa-chevron-right apple-chevron"></i>
@@ -3771,7 +3788,7 @@
       </div>
 
       <!-- SECTION: DHAKA CITY BUS FARE CALCULATOR (BRTA 2.70 TK/KM & 50% STUDENT HALF-PASS) -->
-      <div id="section-help-busfare" style="background: rgba(26, 28, 38, 0.78); backdrop-filter: blur(20px); border: 1px solid rgba(245, 158, 11, 0.28); border-radius: 20px; padding: 16px; margin-bottom: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.35); position: relative; overflow: hidden;">
+      <div id="section-help-busfare" style="flex-shrink: 0; width: 100%; box-sizing: border-box; background: rgba(26, 28, 38, 0.78); backdrop-filter: blur(20px); border: 1px solid rgba(245, 158, 11, 0.28); border-radius: 20px; padding: 16px; margin-bottom: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.35); position: relative;">
         <!-- Glowing accent top bar -->
         <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #f59e0b, #eab308, #10b981);"></div>
 
@@ -11034,6 +11051,21 @@
       });
     }
     setTimeout(initDhakaBusStoppagesDatalist, 300);
+
+    function openBusFareFromHome() {
+      switchTab('screen-help', document.getElementById('nav-tab-help'));
+      const busFareBtn = document.querySelectorAll('#screen-help .apple-segment-btn')[1];
+      if (typeof filterHelpSection === 'function') {
+        filterHelpSection('busfare', busFareBtn);
+      }
+      setTimeout(() => {
+        const sInput = document.getElementById('busfare-start');
+        if (sInput) {
+          sInput.focus();
+          sInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 200);
+    }
 
     function onBusFareInputChanged() {
       // Keep results visible; only clear if both fields become completely blank
