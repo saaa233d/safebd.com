@@ -5705,6 +5705,11 @@
     let attachedMediaBase64 = null;
     let selectedCategory = "General Safety";
     let activeFeedFilter = 'all';
+    var bgTimerWorker = null;
+    var screenWakeLock = null;
+    var isAutoArrivalTriggered = false;
+    var isTimerAutoPredicted = true;
+    var latestGoogleMapsPredictedMinutes = null;
 
     let API_BASE = (() => {
       try {
@@ -8629,8 +8634,8 @@
     /* ----------------------------------------------------
        COMPANION SAFETY TIMER ENGINE (AUTO-PREDICTED VIA GOOGLE MAPS + USER-EDITABLE)
     ---------------------------------------------------- */
-    let latestGoogleMapsPredictedMinutes = null;
-    let isTimerAutoPredicted = true;
+    latestGoogleMapsPredictedMinutes = null;
+    isTimerAutoPredicted = true;
 
     function applyPredictedGoogleMapsTimer(mins, distanceKm, isSilent = false) {
       if (!mins || isNaN(mins) || mins <= 0) return;
@@ -8859,7 +8864,7 @@
     /* ----------------------------------------------------
        PROXIMITY DETECTION & 10-15M AUTO-STOP DISCLOSE ENGINE
     ---------------------------------------------------- */
-    let isAutoArrivalTriggered = false;
+    isAutoArrivalTriggered = false;
 
     function updateLiveDestinationProximityUI(meters) {
       if (meters === null || meters === undefined) return;
@@ -8991,8 +8996,8 @@
     /* ----------------------------------------------------
        BACKGROUND EXECUTION ENGINE (WEB WORKER & WAKE-LOCK)
     ---------------------------------------------------- */
-    let bgTimerWorker = null;
-    let screenWakeLock = null;
+    bgTimerWorker = null;
+    screenWakeLock = null;
 
     function startBackgroundTimerWorker() {
       try {
