@@ -295,8 +295,28 @@ function requireAdminAuth(req, res, next) {
 app.use('/api/', apiLimiter);
 app.use('/api/admin', requireAdminAuth);
 
+// Ensure index.html and HTML pages are never cached by browsers, proxies, or CDNs
+app.use((req, res, next) => {
+  if (req.path === '/' || req.path === '/index.html' || req.path.endsWith('.html')) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Surrogate-Control', 'no-store');
+  }
+  next();
+});
+
 // Serve the Cross-Platform Web & Mobile App to any connected phone, iPad, or desktop
-app.use(express.static(path.join(__dirname, '../mobile-web-app/www')));
+app.use(express.static(path.join(__dirname, '../mobile-web-app/www'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.setHeader('Surrogate-Control', 'no-store');
+    }
+  }
+}));
 
 // Lightweight 24/7 Keep-Alive & Health Check Endpoints (Prevents Render Cold-Start Sleep)
 app.get(['/api/health', '/ping'], (req, res) => {
@@ -329,9 +349,29 @@ app.get('/api/geo/reverse', async (req, res) => {
       const data = await geoRes.json();
       if (data && data.address) {
         const addr = data.address;
-        const road = addr.road || addr.suburb || addr.neighbourhood || addr.residential || addr.quarter || "";
-        const city = addr.city || addr.town || addr.county || addr.state_district || addr.state || "Bangladesh";
-        const readable = road ? `${road}, ${city}` : (data.display_name ? data.display_name.split(',').slice(0, 3).join(', ') : `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`);
+        const road = addr.road || addr.pedestrian || addr.footway || "";
+        const area = addr.residential || addr.neighbourhood || addr.quarter || addr.suburb || addr.subdistrict || "";
+        const city = addr.city || addr.town || addr.municipality || addr.state_district || "Dhaka";
+
+        let readable = "";
+        if (road && area) {
+          readable = `${road}, ${area}, ${city}`;
+        } else if (area) {
+          readable = `${area}, ${city}`;
+        } else if (road) {
+          readable = `${road}, ${city}`;
+        } else if (data.display_name) {
+          const parts = data.display_name.split(',').map(s => s.trim()).filter(s => {
+            if (!s) return false;
+            if (/^\d{4,}$/.test(s)) return false;
+            if (['বাংলাদেশ', 'Bangladesh', 'ঢাকা বিভাগ', 'Dhaka Division', 'ঢাকা জেলা', 'Dhaka District', 'ঢাকা মহানগর', 'Dhaka City'].includes(s)) return false;
+            return true;
+          });
+          readable = parts.slice(0, 3).join(', ');
+        } else {
+          readable = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+        }
+
         return res.json({ success: true, address: readable, fullAddress: data.display_name || readable });
       }
     }
@@ -4052,6 +4092,10 @@ app.use((err, req, res, next) => {
 
 // SPA Fallback: Serve web app for any unmatched route
 app.get('*', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
   res.sendFile(path.join(__dirname, '../mobile-web-app/www/index.html'));
 });
 
