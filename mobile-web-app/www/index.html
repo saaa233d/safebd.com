@@ -2348,6 +2348,159 @@
     .theme-patient .help-card-desc { color: rgba(255, 243, 215, 0.75); }
     .theme-fire .help-card-desc { color: rgba(255, 235, 220, 0.75); }
     .theme-blood .help-card-desc { color: rgba(255, 225, 235, 0.75); }
+
+    /* Apple Segmented Bar for Help Page */
+    .apple-segment-bar {
+      display: flex;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 3px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    .apple-segment-btn {
+      flex: 1;
+      padding: 7px 0;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 11.5px;
+      font-weight: 700;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+      user-select: none;
+    }
+    .apple-segment-btn.active {
+      background: rgba(255, 255, 255, 0.16) !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    }
+
+    /* Posh Apple Hotline Rows */
+    .hotline-row-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 11px 13px;
+      border-radius: 15px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .hotline-row-item:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+    .hotline-row-item:active {
+      transform: scale(0.985);
+    }
+    .hotline-squircle {
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    }
+    .hotline-call-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: linear-gradient(135deg, rgba(48, 209, 88, 0.2) 0%, rgba(52, 199, 89, 0.12) 100%);
+      border: 1px solid rgba(48, 209, 88, 0.4);
+      color: #30d158;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 5px 11px;
+      border-radius: 9999px;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .hotline-row-item:hover .hotline-call-pill {
+      background: #30d158;
+      color: #000;
+      box-shadow: 0 0 12px rgba(48, 209, 88, 0.45);
+    }
+
+    /* Posh First Aid Accordion */
+    .firstaid-accordion-card {
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .firstaid-accordion-card:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .firstaid-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .firstaid-body {
+      display: none;
+      padding: 0 14px 14px 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      margin-top: 4px;
+      padding-top: 12px;
+    }
+    .firstaid-step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .firstaid-step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 12px;
+      color: #cbd5e1;
+      line-height: 1.45;
+    }
+    .firstaid-step-num {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .firstaid-warning-box {
+      margin-top: 10px;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      border-radius: 10px;
+      padding: 8px 11px;
+      font-size: 11px;
+      color: #fca5a5;
+      line-height: 1.4;
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+    }
     .form-group {
       margin-bottom: 14px;
       text-align: left;
@@ -3582,8 +3735,8 @@
     </div>
 
     <!-- SCREEN 4: EMERGENCY TACTICAL HELP & HOTLINES -->
-    <div id="screen-help" class="screen screen-padded" style="display: none;">
-      <!-- Apple Clean Header -->
+    <div id="screen-help" class="screen screen-padded" style="display: none; padding-bottom: 90px;">
+      <!-- Apple Clean Header with Segmented Filter -->
       <div style="margin-bottom: 16px;">
         <div style="display: flex; align-items: center; justify-content: space-between;">
           <div>
@@ -3593,6 +3746,13 @@
           <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); display: flex; align-items: center; justify-content: center; color: #ef4444; font-size: 16px; box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);">
             <i class="fas fa-hand-holding-medical"></i>
           </div>
+        </div>
+
+        <!-- Apple Segmented Capsule Filter -->
+        <div class="apple-segment-bar" style="margin-top: 14px;">
+          <button type="button" class="apple-segment-btn active" onclick="filterHelpSection('all', this)" data-i18n="help_filter_all">All</button>
+          <button type="button" class="apple-segment-btn" onclick="filterHelpSection('hotlines', this)" data-i18n="help_filter_hotlines">Hotlines</button>
+          <button type="button" class="apple-segment-btn" onclick="filterHelpSection('firstaid', this)" data-i18n="help_filter_firstaid">First Aid</button>
         </div>
       </div>
 
@@ -3647,43 +3807,341 @@
         </button>
       </div>
 
-      <!-- Quick National Speed-Dial Section -->
-      <div style="background: rgba(26, 28, 38, 0.72); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 18px; padding: 16px; margin-bottom: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.25);">
-        <div style="font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-          <i class="fas fa-phone-volume" style="color: #30d158;"></i>
-          <span>National Emergency Speed Dials</span>
+      <!-- SECTION: SPECIALIZED EMERGENCY HOTLINES -->
+      <div id="section-help-hotlines" style="background: rgba(26, 28, 38, 0.72); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 16px; margin-bottom: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+          <div>
+            <span style="font-size: 13.5px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 7px;" data-i18n="help_sec_hotlines">
+              <i class="fas fa-phone-volume" style="color: #30d158;"></i> Specialized Emergency Hotlines
+            </span>
+            <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px;" data-i18n="help_sec_hotlines_sub">Direct hotlines across Bangladesh (Toll-free / 24/7)</span>
+          </div>
         </div>
+
         <div style="display: flex; flex-direction: column; gap: 8px;">
-          <a href="tel:999" style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 12px; text-decoration: none; color: inherit;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 14px; font-weight: 800; color: #ff453a; background: rgba(255,69,58,0.15); padding: 3px 8px; border-radius: 6px;">999</span>
-              <div>
-                <div style="font-size: 12.5px; font-weight: 700; color: #fff;">National Emergency Dispatch</div>
-                <div style="font-size: 10.5px; color: var(--text-muted);">Police, Fire &amp; Ambulance Services</div>
+          <!-- 1. National 999 -->
+          <div class="hotline-row-item">
+            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(255, 69, 58, 0.18); border: 1px solid rgba(255, 69, 58, 0.5); color: #ff453a;">
+                <i class="fas fa-shield-halved"></i>
+              </div>
+              <div style="min-width: 0;">
+                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                  <span>National Emergency CAD</span>
+                  <span style="font-size: 9.5px; background: rgba(255,69,58,0.2); color: #ff6b6b; padding: 1px 6px; border-radius: 6px; font-weight: 800;">999</span>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Police, Fire &amp; Ambulance Central Command</div>
               </div>
             </div>
-            <i class="fas fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
-          </a>
-          <a href="tel:109" style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 12px; text-decoration: none; color: inherit;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 14px; font-weight: 800; color: #bf5af2; background: rgba(191,90,242,0.15); padding: 3px 8px; border-radius: 6px;">109</span>
-              <div>
-                <div style="font-size: 12.5px; font-weight: 700; color: #fff;">Women &amp; Child Safety Helpline</div>
-                <div style="font-size: 10.5px; color: var(--text-muted);">Toll-free 24/7 legal aid &amp; distress response</div>
+            <a href="tel:999" class="hotline-call-pill"><i class="fas fa-phone"></i> Call 999</a>
+          </div>
+
+          <!-- 2. Fire Service 102 -->
+          <div class="hotline-row-item">
+            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(255, 107, 53, 0.18); border: 1px solid rgba(255, 107, 53, 0.5); color: #ff6b35;">
+                <i class="fas fa-fire-extinguisher"></i>
+              </div>
+              <div style="min-width: 0;">
+                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                  <span>Fire Service &amp; Civil Defence</span>
+                  <span style="font-size: 9.5px; background: rgba(255,107,53,0.2); color: #ff8c5a; padding: 1px 6px; border-radius: 6px; font-weight: 800;">102</span>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Direct Fire Control &amp; Disaster Rescue Operations</div>
               </div>
             </div>
-            <i class="fas fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
-          </a>
-          <a href="tel:1090" style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 12px; text-decoration: none; color: inherit;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 14px; font-weight: 800; color: #ff9f0a; background: rgba(255,159,10,0.15); padding: 3px 8px; border-radius: 6px;">1090</span>
-              <div>
-                <div style="font-size: 12.5px; font-weight: 700; color: #fff;">Disaster Early Warning System</div>
-                <div style="font-size: 10.5px; color: var(--text-muted);">Flood, cyclone &amp; weather emergencies</div>
+            <a href="tel:102" class="hotline-call-pill" style="border-color: rgba(255, 107, 53, 0.4); color: #ff8c5a; background: rgba(255, 107, 53, 0.15);"><i class="fas fa-phone"></i> Call 102</a>
+          </div>
+
+          <!-- 3. Women & Child 109 -->
+          <div class="hotline-row-item">
+            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(191, 90, 242, 0.18); border: 1px solid rgba(191, 90, 242, 0.5); color: #bf5af2;">
+                <i class="fas fa-person-breastfeeding"></i>
+              </div>
+              <div style="min-width: 0;">
+                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                  <span>Women &amp; Child Safety Line</span>
+                  <span style="font-size: 9.5px; background: rgba(191,90,242,0.2); color: #da8fff; padding: 1px 6px; border-radius: 6px; font-weight: 800;">109</span>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">24/7 Violence, harassment prevention &amp; legal aid</div>
               </div>
             </div>
-            <i class="fas fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
-          </a>
+            <a href="tel:109" class="hotline-call-pill" style="border-color: rgba(191, 90, 242, 0.4); color: #da8fff; background: rgba(191, 90, 242, 0.15);"><i class="fas fa-phone"></i> Call 109</a>
+          </div>
+
+          <!-- 4. Police Cyber Support for Women (PCSC) -->
+          <div class="hotline-row-item">
+            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(244, 63, 94, 0.18); border: 1px solid rgba(244, 63, 94, 0.5); color: #f43f5e;">
+                <i class="fas fa-user-shield"></i>
+              </div>
+              <div style="min-width: 0;">
+                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                  <span>Police Cyber Support (PCSC)</span>
+                  <span style="font-size: 9.5px; background: rgba(244,63,94,0.2); color: #fda4af; padding: 1px 6px; border-radius: 6px; font-weight: 800;">Women</span>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Online harassment, fake ID, blackmail &amp; hacking</div>
+              </div>
+            </div>
+            <a href="tel:01320000888" class="hotline-call-pill" style="border-color: rgba(244, 63, 94, 0.4); color: #fda4af; background: rgba(244, 63, 94, 0.15);"><i class="fas fa-phone"></i> 01320000888</a>
+          </div>
+
+          <!-- 5. Sheikh Hasina National Burn Institute -->
+          <div class="hotline-row-item">
+            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(245, 158, 11, 0.18); border: 1px solid rgba(245, 158, 11, 0.5); color: #f59e0b;">
+                <i class="fas fa-hospital"></i>
+              </div>
+              <div style="min-width: 0;">
+                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                  <span>National Burn &amp; Plastic Surgery</span>
+                  <span style="font-size: 9.5px; background: rgba(245,158,11,0.2); color: #fcd34d; padding: 1px 6px; border-radius: 6px; font-weight: 800;">Emergency</span>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Critical burn ICU &amp; acute plastic trauma response</div>
+              </div>
+            </div>
+            <a href="tel:02223363345" class="hotline-call-pill" style="border-color: rgba(245, 158, 11, 0.4); color: #fcd34d; background: rgba(245, 158, 11, 0.15);"><i class="fas fa-phone"></i> Call Burn Unit</a>
+          </div>
+
+          <!-- 6. Child Helpline 1098 -->
+          <div class="hotline-row-item">
+            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(14, 165, 233, 0.18); border: 1px solid rgba(14, 165, 233, 0.5); color: #0ea5e9;">
+                <i class="fas fa-children"></i>
+              </div>
+              <div style="min-width: 0;">
+                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                  <span>Child Helpline Bangladesh</span>
+                  <span style="font-size: 9.5px; background: rgba(14,165,233,0.2); color: #7dd3fc; padding: 1px 6px; border-radius: 6px; font-weight: 800;">1098</span>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Child protection, abuse response &amp; lost children</div>
+              </div>
+            </div>
+            <a href="tel:1098" class="hotline-call-pill" style="border-color: rgba(14, 165, 233, 0.4); color: #7dd3fc; background: rgba(14, 165, 233, 0.15);"><i class="fas fa-phone"></i> Call 1098</a>
+          </div>
+
+          <!-- 7. RAB Control Room -->
+          <div class="hotline-row-item">
+            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(99, 102, 241, 0.18); border: 1px solid rgba(99, 102, 241, 0.5); color: #6366f1;">
+                <i class="fas fa-person-rifle"></i>
+              </div>
+              <div style="min-width: 0;">
+                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                  <span>RAB Emergency Control Room</span>
+                  <span style="font-size: 9.5px; background: rgba(99,102,241,0.2); color: #a5b4fc; padding: 1px 6px; border-radius: 6px; font-weight: 800;">HQ</span>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Rapid Action Battalion quick response force</div>
+              </div>
+            </div>
+            <a href="tel:01777720029" class="hotline-call-pill" style="border-color: rgba(99, 102, 241, 0.4); color: #a5b4fc; background: rgba(99, 102, 241, 0.15);"><i class="fas fa-phone"></i> 01777720029</a>
+          </div>
+
+          <!-- 8. Kaan Pete Roi (Emotional Support) -->
+          <div class="hotline-row-item">
+            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16, 185, 129, 0.5); color: #10b981;">
+                <i class="fas fa-hand-holding-heart"></i>
+              </div>
+              <div style="min-width: 0;">
+                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                  <span>Kaan Pete Roi (কান পেতে রই)</span>
+                  <span style="font-size: 9.5px; background: rgba(16,185,129,0.2); color: #6ee7b7; padding: 1px 6px; border-radius: 6px; font-weight: 800;">Mental Health</span>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Confidential emotional support &amp; suicide prevention</div>
+              </div>
+            </div>
+            <a href="tel:01779554391" class="hotline-call-pill" style="border-color: rgba(16, 185, 129, 0.4); color: #6ee7b7; background: rgba(16, 185, 129, 0.15);"><i class="fas fa-phone"></i> 01779554391</a>
+          </div>
+
+          <!-- 9. Disaster Early Warning 1090 -->
+          <div class="hotline-row-item">
+            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(234, 179, 8, 0.18); border: 1px solid rgba(234, 179, 8, 0.5); color: #eab308;">
+                <i class="fas fa-cloud-bolt"></i>
+              </div>
+              <div style="min-width: 0;">
+                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                  <span>Disaster Early Warning System</span>
+                  <span style="font-size: 9.5px; background: rgba(234,179,8,0.2); color: #fde047; padding: 1px 6px; border-radius: 6px; font-weight: 800;">1090</span>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Flood, cyclone &amp; severe weather emergencies</div>
+              </div>
+            </div>
+            <a href="tel:1090" class="hotline-call-pill" style="border-color: rgba(234, 179, 8, 0.4); color: #fde047; background: rgba(234, 179, 8, 0.15);"><i class="fas fa-phone"></i> Call 1090</a>
+          </div>
+
+          <!-- 10. Anti-Corruption 106 -->
+          <div class="hotline-row-item">
+            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(168, 85, 247, 0.18); border: 1px solid rgba(168, 85, 247, 0.5); color: #a855f7;">
+                <i class="fas fa-gavel"></i>
+              </div>
+              <div style="min-width: 0;">
+                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                  <span>Anti-Corruption Commission</span>
+                  <span style="font-size: 9.5px; background: rgba(168,85,247,0.2); color: #d8b4fe; padding: 1px 6px; border-radius: 6px; font-weight: 800;">106</span>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Report bribery, extortion &amp; citizen rights violations</div>
+              </div>
+            </div>
+            <a href="tel:106" class="hotline-call-pill" style="border-color: rgba(168, 85, 247, 0.4); color: #d8b4fe; background: rgba(168, 85, 247, 0.15);"><i class="fas fa-phone"></i> Call 106</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION: CRITICAL FIRST AID PROTOCOLS -->
+      <div id="section-help-firstaid" style="background: rgba(26, 28, 38, 0.72); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 16px; margin-bottom: 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+          <div>
+            <span style="font-size: 13.5px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 7px;" data-i18n="help_sec_firstaid">
+              <i class="fas fa-kit-medical" style="color: #ff375f;"></i> Critical First Aid Protocols
+            </span>
+            <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px;" data-i18n="help_sec_firstaid_sub">Immediate step-by-step actions before medics arrive</span>
+          </div>
+        </div>
+
+        <div>
+          <!-- GUIDE 1: SEVERE BLEEDING -->
+          <div class="firstaid-accordion-card" id="guide-bleeding">
+            <div class="firstaid-head" onclick="toggleFirstAidGuide('guide-bleeding')">
+              <div style="display: flex; align-items: center; gap: 11px;">
+                <div class="hotline-squircle" style="background: rgba(255, 55, 95, 0.18); border: 1px solid rgba(255, 55, 95, 0.5); color: #ff375f;">
+                  <i class="fas fa-droplet"></i>
+                </div>
+                <div>
+                  <div style="font-size: 13px; font-weight: 800; color: #fff;">Severe Bleeding &amp; Trauma</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">Direct pressure, elevation &amp; clotting</div>
+                </div>
+              </div>
+              <i class="fas fa-chevron-down" style="color: var(--text-muted); font-size: 12px; transition: transform 0.25s ease;"></i>
+            </div>
+            <div class="firstaid-body">
+              <div class="firstaid-step-list">
+                <div class="firstaid-step-item">
+                  <div class="firstaid-step-num">1</div>
+                  <div><strong>Apply Firm Direct Pressure:</strong> Place a clean cloth, sterile gauze, or clothing over the wound and press firmly with both hands without lifting.</div>
+                </div>
+                <div class="firstaid-step-item">
+                  <div class="firstaid-step-num">2</div>
+                  <div><strong>Elevate the Injured Limb:</strong> Raise the bleeding area above heart level if no bone fracture is suspected to reduce blood flow.</div>
+                </div>
+                <div class="firstaid-step-item">
+                  <div class="firstaid-step-num">3</div>
+                  <div><strong>Do Not Remove Soaked Dressing:</strong> If blood seeps through, place another cloth directly on top of it. Removing the first cloth disrupts clotting.</div>
+                </div>
+              </div>
+              <div class="firstaid-warning-box">
+                <i class="fas fa-triangle-exclamation" style="margin-top: 2px; font-size: 13px; color: #ef4444;"></i>
+                <div><strong>Caution:</strong> Never pull out embedded knives, glass, or foreign objects. Secure them in place with rolled cloths and call 999.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- GUIDE 2: CPR & CHOKING -->
+          <div class="firstaid-accordion-card" id="guide-cpr">
+            <div class="firstaid-head" onclick="toggleFirstAidGuide('guide-cpr')">
+              <div style="display: flex; align-items: center; gap: 11px;">
+                <div class="hotline-squircle" style="background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.5); color: #ef4444;">
+                  <i class="fas fa-heart-pulse"></i>
+                </div>
+                <div>
+                  <div style="font-size: 13px; font-weight: 800; color: #fff;">Hands-Only CPR &amp; Choking</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">Cardiac arrest &amp; Heimlich maneuver</div>
+                </div>
+              </div>
+              <i class="fas fa-chevron-down" style="color: var(--text-muted); font-size: 12px; transition: transform 0.25s ease;"></i>
+            </div>
+            <div class="firstaid-body">
+              <div class="firstaid-step-list">
+                <div class="firstaid-step-item">
+                  <div class="firstaid-step-num">1</div>
+                  <div><strong>Check Response &amp; Call 999:</strong> Shake shoulders gently and shout. If no normal breathing or response, call 999 CAD immediately.</div>
+                </div>
+                <div class="firstaid-step-item">
+                  <div class="firstaid-step-num">2</div>
+                  <div><strong>Hard &amp; Fast Chest Compressions:</strong> Place heel of hand on center of chest. Interlock fingers. Push hard and fast (100–120 bpm, ~2 inches deep).</div>
+                </div>
+                <div class="firstaid-step-item">
+                  <div class="firstaid-step-num">3</div>
+                  <div><strong>For Choking (Heimlich Maneuver):</strong> Stand behind victim. Give 5 sharp blows between shoulder blades, then 5 quick inward &amp; upward abdominal thrusts above the navel.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- GUIDE 3: BURNS & SCALDS -->
+          <div class="firstaid-accordion-card" id="guide-burns">
+            <div class="firstaid-head" onclick="toggleFirstAidGuide('guide-burns')">
+              <div style="display: flex; align-items: center; gap: 11px;">
+                <div class="hotline-squircle" style="background: rgba(245, 158, 11, 0.18); border: 1px solid rgba(245, 158, 11, 0.5); color: #f59e0b;">
+                  <i class="fas fa-fire-burner"></i>
+                </div>
+                <div>
+                  <div style="font-size: 13px; font-weight: 800; color: #fff;">Burns &amp; Chemical Scalds</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">Cool tap water &amp; sterile protection</div>
+                </div>
+              </div>
+              <i class="fas fa-chevron-down" style="color: var(--text-muted); font-size: 12px; transition: transform 0.25s ease;"></i>
+            </div>
+            <div class="firstaid-body">
+              <div class="firstaid-step-list">
+                <div class="firstaid-step-item">
+                  <div class="firstaid-step-num">1</div>
+                  <div><strong>Cool Under Running Water for 20 Mins:</strong> Immediately flush the burn under cool, gentle tap water. This halts the thermal burn process in deep tissue.</div>
+                </div>
+                <div class="firstaid-step-item">
+                  <div class="firstaid-step-num">2</div>
+                  <div><strong>Cover Loosely:</strong> Use sterile non-stick plastic wrap (cling film) or clean lint-free cloth to shield from airborne infections.</div>
+                </div>
+                <div class="firstaid-step-item">
+                  <div class="firstaid-step-num">3</div>
+                  <div><strong>Remove Accessories:</strong> Quickly and gently remove rings, watches, or tight clothing around the burn before swelling starts.</div>
+                </div>
+              </div>
+              <div class="firstaid-warning-box">
+                <i class="fas fa-triangle-exclamation" style="margin-top: 2px; font-size: 13px; color: #ef4444;"></i>
+                <div><strong>Never:</strong> Apply ice, toothpaste, butter, raw egg, or oil. Never pop blisters or peel clothing stuck to burnt skin.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- GUIDE 4: SNAKE BITE -->
+          <div class="firstaid-accordion-card" id="guide-snake">
+            <div class="firstaid-head" onclick="toggleFirstAidGuide('guide-snake')">
+              <div style="display: flex; align-items: center; gap: 11px;">
+                <div class="hotline-squircle" style="background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16, 185, 129, 0.5); color: #10b981;">
+                  <i class="fas fa-staff-snake"></i>
+                </div>
+                <div>
+                  <div style="font-size: 13px; font-weight: 800; color: #fff;">Snake Bite Emergency Protocol</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">Immobilization &amp; anti-venom hospital transfer</div>
+                </div>
+              </div>
+              <i class="fas fa-chevron-down" style="color: var(--text-muted); font-size: 12px; transition: transform 0.25s ease;"></i>
+            </div>
+            <div class="firstaid-body">
+              <div class="firstaid-step-list">
+                <div class="firstaid-step-item">
+                  <div class="firstaid-step-num">1</div>
+                  <div><strong>Keep Patient Absolutely Calm:</strong> Panic increases heart rate, circulating venom faster. Lie down and keep the bitten limb still below heart level.</div>
+                </div>
+                <div class="firstaid-step-item">
+                  <div class="firstaid-step-num">2</div>
+                  <div><strong>Immobilize with a Splint:</strong> Tie a soft splint or bandage comfortably around the limb (firm but NOT a tight tourniquet) to prevent movement.</div>
+                </div>
+                <div class="firstaid-step-item">
+                  <div class="firstaid-step-num">3</div>
+                  <div><strong>Rush to Government Hospital:</strong> Immediately transfer to the nearest Upazila Health Complex, District Sadar Hospital, or Medical College Hospital with Anti-Venom.</div>
+                </div>
+              </div>
+              <div class="firstaid-warning-box">
+                <i class="fas fa-triangle-exclamation" style="margin-top: 2px; font-size: 13px; color: #ef4444;"></i>
+                <div><strong>Dangerous Myths:</strong> DO NOT cut the bite mark, DO NOT suck venom, DO NOT apply battery acid/herbal paste, and DO NOT apply tight arterial tourniquets.</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -4669,6 +5127,13 @@
 
         help_screen_title: "Emergency Tactical Help",
         help_screen_sub: "Direct hotlines, immediate dispatches & life-saving lifelines",
+        help_filter_all: "All",
+        help_filter_hotlines: "Hotlines",
+        help_filter_firstaid: "First Aid",
+        help_sec_hotlines: "Specialized Emergency Hotlines",
+        help_sec_hotlines_sub: "Direct hotlines across Bangladesh (Toll-free / 24/7)",
+        help_sec_firstaid: "Critical First Aid Protocols",
+        help_sec_firstaid_sub: "Immediate step-by-step actions before medics arrive",
         profile_page_title: "Citizen Profile",
         profile_page_sub: "Personal identity, emergency blood & password security",
 
@@ -4825,6 +5290,13 @@
 
         help_screen_title: "জরুরি ট্যাকটিক্যাল সহায়তা",
         help_screen_sub: "সরাসরি হটলাইন, তাৎক্ষণিক ডিসপ্যাচ ও জীবনরক্ষাকারী নেটওয়ার্ক",
+        help_filter_all: "সকল",
+        help_filter_hotlines: "জরুরি নম্বর",
+        help_filter_firstaid: "ফার্স্ট এইড",
+        help_sec_hotlines: "বিশেষায়িত জরুরি হটলাইনসমূহ",
+        help_sec_hotlines_sub: "বাংলাদেশব্যাপী জরুরি হটলাইন (টোল-ফ্রি / ২৪/৭ সেবা)",
+        help_sec_firstaid: "জরুরি প্রাথমিক চিকিৎসা গাইড",
+        help_sec_firstaid_sub: "চিকিৎসক পৌঁছানোর আগে জীবন রক্ষায় জরুরি পদক্ষেপ",
         profile_page_title: "নাগরিক প্রোফাইল",
         profile_page_sub: "ব্যক্তিগত পরিচয়, জরুরি রক্তের গ্রুপ ও পাসওয়ার্ড পরিবর্তন",
 
@@ -10148,6 +10620,51 @@
       }
 
       if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+    }
+
+    /* ----------------------------------------------------
+       HELP SCREEN FILTER & FIRST AID ACCORDION
+    ---------------------------------------------------- */
+    function filterHelpSection(section, btn) {
+      document.querySelectorAll('#screen-help .apple-segment-btn').forEach(b => {
+        b.classList.remove('active');
+      });
+      if (btn) btn.classList.add('active');
+
+      const tacticalGrid = document.querySelector('#screen-help .help-tactical-grid');
+      const secHotlines = document.getElementById('section-help-hotlines');
+      const secFirstAid = document.getElementById('section-help-firstaid');
+
+      if (section === 'all') {
+        if (tacticalGrid) tacticalGrid.style.display = 'grid';
+        if (secHotlines) secHotlines.style.display = 'block';
+        if (secFirstAid) secFirstAid.style.display = 'block';
+      } else if (section === 'hotlines') {
+        if (tacticalGrid) tacticalGrid.style.display = 'grid';
+        if (secHotlines) secHotlines.style.display = 'block';
+        if (secFirstAid) secFirstAid.style.display = 'none';
+      } else if (section === 'firstaid') {
+        if (tacticalGrid) tacticalGrid.style.display = 'none';
+        if (secHotlines) secHotlines.style.display = 'none';
+        if (secFirstAid) secFirstAid.style.display = 'block';
+      }
+    }
+
+    function toggleFirstAidGuide(id) {
+      const card = document.getElementById(id);
+      if (!card) return;
+      const body = card.querySelector('.firstaid-body');
+      const chevron = card.querySelector('.fa-chevron-down');
+      const isOpen = body && body.style.display === 'block';
+
+      // Clean single-open accordion behavior
+      document.querySelectorAll('#screen-help .firstaid-body').forEach(b => b.style.display = 'none');
+      document.querySelectorAll('#screen-help .fa-chevron-down').forEach(c => c.style.transform = 'rotate(0deg)');
+
+      if (!isOpen && body) {
+        body.style.display = 'block';
+        if (chevron) chevron.style.transform = 'rotate(180deg)';
+      }
     }
 
     /* ----------------------------------------------------
