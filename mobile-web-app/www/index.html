@@ -6417,9 +6417,13 @@
             timeEl.innerHTML = `<span style="color: #10b981; font-weight: 800; font-size: 12px;">ETA ~${etaFormatted}</span>`;
           }
 
-          const dockDist = document.getElementById('dock-live-accuracy');
-          if (dockDist && calculatedRouteDistanceKm) {
-            dockDist.innerText = `Route: ${calculatedRouteDistanceKm} km (~${etaFormatted})`;
+            const dockDist = document.getElementById('dock-live-accuracy');
+            if (dockDist && calculatedRouteDistanceKm) {
+              dockDist.innerText = `Route: ${calculatedRouteDistanceKm} km (~${etaFormatted})`;
+            }
+          } else {
+            // Fallback to straight line if road geometry was unavailable
+            renderTurnByTurnPolyline([[userLat, userLon], [destLat, destLon]]);
           }
         } else {
           // Fallback to straight line if road geometry was unavailable
@@ -11111,18 +11115,23 @@
 
         let distanceKm = 0;
 
-        // Fetch precise road network distance from backend directions API
+        // Fetch precise road network distance from backend directions API with fast timeout
         try {
           const qUrl = `${API_BASE}/api/routing/directions?originLat=${sCoords.lat}&originLon=${sCoords.lon}&destLat=${dCoords.lat}&destLon=${dCoords.lon}&mode=driving`;
-          const res = await fetch(qUrl);
+          const controller = new AbortController();
+          const tId = setTimeout(() => controller.abort(), 4000);
+          const res = await fetch(qUrl, { signal: controller.signal });
+          clearTimeout(tId);
           const data = await res.json();
           if (data && data.success && data.distanceKm) {
             distanceKm = data.distanceKm;
           } else {
-            distanceKm = computeHaversineKm(sCoords.lat, sCoords.lon, dCoords.lat, dCoords.lon) || 5.2;
+            const hKm = computeHaversineKm(sCoords.lat, sCoords.lon, dCoords.lat, dCoords.lon);
+            distanceKm = hKm ? Math.round(hKm * 1.35 * 10) / 10 : 5.2;
           }
         } catch (netErr) {
-          distanceKm = computeHaversineKm(sCoords.lat, sCoords.lon, dCoords.lat, dCoords.lon) || 5.2;
+          const hKm = computeHaversineKm(sCoords.lat, sCoords.lon, dCoords.lat, dCoords.lon);
+          distanceKm = hKm ? Math.round(hKm * 1.35 * 10) / 10 : 5.2;
         }
 
         // BRTA DHAKA CITY METRO FARE RULES:
