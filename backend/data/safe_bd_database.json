@@ -5,15 +5,15 @@
       "phone": "1316750712",
       "displayPhone": "+880 1316-750712",
       "name": "SAAD RIZWAN",
-      "salt": "c8e2475b3c2701de9410a72a40465aaf",
-      "passwordHash": "7aa30d7fe08746144d3f5f263cf08b584886df6a4ec97391796b35c57af3ac9b703857613e20651717c5c2d85ca6828bf12349e8ba43b4b6daec093b79f22a8c",
+      "salt": "1b93cb0e6c4536c576dafb153f03eec7",
+      "passwordHash": "73560cedf34d5d57896a5cd40752396a48df6bf0b56df6fed9c0f60e5e5d9a50d1ae4a3a1cc50059730066d30545c8cef142649a85dba3c4e3af0f9f76b85dfb",
       "nidVerified": true,
       "isAdmin": true,
       "isLoggedIn": true,
       "createdAt": "2026-10-12T03:45:26.505Z",
-      "lastLoginAt": "2026-10-17T08:04:30.215Z",
+      "lastLoginAt": "2026-10-23T04:54:16.424Z",
       "lastLogoutAt": "2026-10-12T03:59:10.498Z",
-      "loginCount": 17,
+      "loginCount": 18,
       "contacts": [
         {
           "id": "c1",
@@ -42,16 +42,16 @@
       "phone": "1406311605",
       "displayPhone": "+880 1406311605",
       "name": "Verified Citizen",
-      "salt": "b8e165ad2ced1770ac55c007a0925cb9",
-      "passwordHash": "2136a9abb0abe0b68a2a15ad8c0b1e1fdd60da84f7492dedd3d954257ec07ae9beef012f22ee0c10eb4d5a3aa4a8558bfafb62364c899bcf3c43cc8821cb58d4",
+      "salt": "17acd350fc7a1e467dd7ffa0b810c628",
+      "passwordHash": "5d62652514627e1fbe392dc7f6da1dd158a821e627621dfb558f215fc71501d6333016b23d75ee267fb4efb1d2699e233cf4fffb452b500269ed84da18db4241",
       "nidVerified": true,
       "isAdmin": false,
       "isFounder": false,
       "isLoggedIn": true,
       "createdAt": "2026-10-14T12:43:02.406Z",
-      "lastLoginAt": "2026-10-14T12:43:10.782Z",
+      "lastLoginAt": "2026-10-23T04:54:17.267Z",
       "lastLogoutAt": null,
-      "loginCount": 3,
+      "loginCount": 4,
       "contacts": [
         {
           "id": "c1",
@@ -110,9 +110,7 @@
       "bloodGroup": "O-",
       "isBloodDonor": true,
       "bloodDistrict": "Dhaka",
-      "bloodThana": "mohammadpur",
-      "salt": "206e08483203fb76784f87f41d400884",
-      "passwordHash": "897291eec7d33ed8b188803e9b42aa55b7efceb69d2ce044fb7c17312ea91da09c006b05ade4c92665884ee86fb7e286c77d73d038cdf3ba574ae3342a745488"
+      "bloodThana": "mohammadpur"
     },
     "1700112233": {
       "id": "usr_1700112233",
@@ -148,17 +146,15 @@
       "isBloodDonor": true,
       "bloodDistrict": "Dhaka",
       "bloodThana": "Dhanmondi",
-      "updatedAt": "2026-10-21T03:19:52.871Z",
-      "salt": "755dc721fd63302739a1195f27d3915d",
-      "passwordHash": "f18c466fc7ccfbf13a516ba302e7b4b7e640aaa89c0ceb8a43180611d00af2cf09ceaea8e332d124cb773e2ebe6c32a5ffefc5deb72ea3add0b92464ac5b9348"
+      "updatedAt": "2026-10-21T03:19:52.871Z"
     },
     "1700998877": {
       "id": "usr_1700998877",
       "phone": "1700998877",
       "displayPhone": "+880 1700998877",
       "name": "Zayan Ahmed",
-      "salt": "488d01be4c9ee29ee9035a3c506ecf2b",
-      "passwordHash": "8220b7f454985f74b6041b5275fc51f39766f85b9a310b90c76c8e363ac19d9e9151456e4b7a4e9eb8d5690e05d68cba57f5972e4e194f26968eb8937bad0e97",
+      "salt": "f85f858f057550535b0d2a1ff0836280",
+      "passwordHash": "56c9dc95512237bce21b72270253c1408dba07ec9bdbd2c2ab642981710b5395e031ca80726a69139d59b0121dc97943e70d800649d0d32483d54de00b91d1aa",
       "nidVerified": true,
       "isAdmin": false,
       "isFounder": false,
@@ -193,8 +189,8 @@
       "phone": "1711223344",
       "displayPhone": "+880 1711223344",
       "name": "Rahim Khan",
-      "salt": "8f2f1f17e37e757b2171359e7afd05b3",
-      "passwordHash": "aeb49933274100c48e03f2020837542d55394c26fbc2342d81b0a611bc444dd0314991a6b1d9890f88303207439a9c2dcd9c71ab9dbe9755e0c7afb2a3a468cd",
+      "salt": "87ea2d0a4fc5cfc6e8ec10abf5d51ab7",
+      "passwordHash": "0d4deab202e4f37f9b3f5327f78732e048c5ce74e9ff35675e7e5f6f1dd660ef16f90dc788334e9abc5ca769832c5611e7fac3e9adf9318e37e617ba264320a3",
       "nidVerified": true,
       "isAdmin": false,
       "isLoggedIn": true,
@@ -229,8 +225,8 @@
       "phone": "1712345678",
       "displayPhone": "+880 1712345678",
       "name": "Test Citizen",
-      "salt": "ab36eab76ba5914af3a52f5031222f67",
-      "passwordHash": "07315ddcffb8d6c58d8899ba2d0e5cd4fd1ffd4d4c540dc275fec3048e7f4d38aefc62221e0be2313995cd5c9fb71e81dafba8a1b3e3c13bc8bb98e8ae2e5803",
+      "salt": "01fb7a445483af8c26fed7bf10cf3fab",
+      "passwordHash": "9a0f10dce31d903690e87a1bb95ac85dd5368ce849f1d3820d319f1b29010d59fc2c57368e05dc3ee6fbad3dba630ade77f61ac18da6c14dd72c6c33798e5a67",
       "nidVerified": true,
       "isAdmin": false,
       "isLoggedIn": true,
@@ -265,8 +261,8 @@
       "displayPhone": "+880 1723456789",
       "name": "Mehnaz Akter",
       "role": "Citizen",
-      "salt": "93f83cfb2684bda45aa077c7c2492841",
-      "passwordHash": "cd0cdd9856380a7c198c1341e83272c6f707715dd8d75067eed2c5d062c4762ba94a6d859f40d51cc63a4c89a12a13e46d50adaf73622f6308de7ce25ed56047",
+      "salt": "27b305b32ee74267697e8fcc6a38f8e7",
+      "passwordHash": "47fff7119e8d1000c69c84b9c410536b9004e2d5c2086e3c51da226e580dbae39f51924c0d74783b04b42687afb4b5973cda29805870e535680a722a22a609da",
       "nidVerified": true,
       "isAdmin": false,
       "isFounder": false,
@@ -302,8 +298,8 @@
       "displayPhone": "+880 1753699913",
       "name": "Brand New Citizen",
       "role": "Citizen",
-      "salt": "9df7d5d933aa5ab049dbdef92ff29a19",
-      "passwordHash": "36a65f391beb5082e2d7ac9ad14966a63c84f1b42d6a0096f47a3410cedad6437139c88cdca90f9ba1e332484e2f5f340a968ec95e4e796ab8a2bc19fe86395c",
+      "salt": "42f2d5451bef870cefccf762a8fe7218",
+      "passwordHash": "7535251632f07fcb62be8b41f75ddce8c42d07f193478c7c735c2bd236802b193fbc051fa1f7462bead85c49b5a97cde0d04636fd16e098859631d0e13e9074e",
       "nidVerified": true,
       "isAdmin": false,
       "isFounder": false,
@@ -374,8 +370,8 @@
       "phone": "1799887766",
       "displayPhone": "+880 1799887766",
       "name": "Ashikur Rahman",
-      "salt": "a7984bdb60bb18cf7b6c517ea96f4df5",
-      "passwordHash": "04b8b555888bf62aa1ead95a5e5119a5815258e5bde10d5b50d95ec4928baa861713fccdc2052d09fc23a81b86d6856e7a981a2edc2ad5063be25e39a1b590b0",
+      "salt": "d54110c5d99148c4d462cde08c02248a",
+      "passwordHash": "06c8dc3a18d8d5cafe52e3c5ccca0e6d1f691f210ffca69017a05717a270385ab7d5144a4067acda066ff7bb637cbb08541d5e25a8f016b9b5af2790d21a008c",
       "nidVerified": true,
       "isAdmin": false,
       "isLoggedIn": true,
@@ -410,8 +406,8 @@
       "phone": "1799921101",
       "displayPhone": "+880 1799921101",
       "name": "Tanvir Hossain",
-      "salt": "3720e98ae7bb47edd699204fb3569e4e",
-      "passwordHash": "b8e25709de491a8eacfc9d9bd7dc2d697c4d577ded414fec19f78458e5450997821f3b30e04b32f54cdfe147318fdc6885900b0c6ed5634334c5411f6765dc31",
+      "salt": "f9cb0ab9a513ed5d09cc7e0c6634f683",
+      "passwordHash": "296d48eed2ee307f0d7be8e2f91c2a473368c4cbfafc85cf1f1119d9ba859b6c148bff352d1b3b28910a4428597816eff33e6052e0c81b6469606be6e6bbe4b7",
       "nidVerified": true,
       "isAdmin": false,
       "isLoggedIn": true,
@@ -470,17 +466,15 @@
           "phone": "",
           "initial": "G"
         }
-      ],
-      "salt": "10332aff851325e5ecad5422c8608bc9",
-      "passwordHash": "c202fcaf4b87c71df367a0b4fe995a57014a7846a4c5ac322a5f1ce361c8160546d3acfd3c33d28d3ce1997215c8e9a720095c9c719431c0540f7655ea0c01f8"
+      ]
     },
     "1800000001": {
       "id": "usr_1800000001",
       "phone": "1800000001",
       "displayPhone": "+880 1800000001",
       "name": "Test User",
-      "salt": "79aa760cb576b658939e093787ba7594",
-      "passwordHash": "a8f03adc72febe628440a377ffab9392497217a581ca5fc6695335415159d1040342bf8701c10efff8221adab9363bc6ac3132fd7a207726345a2d2ba5856638",
+      "salt": "c05bd863f17cfd9734151ab346f66ba8",
+      "passwordHash": "be5b9b9636f244b01a6a1db843c4601531de2218dfe8ff37e66f7c52717bfa6e83ccf4f834e9757da4cfa39a8499dd012b68deda6f8ad9bf5546b34ee81c6ef6",
       "nidVerified": true,
       "isAdmin": false,
       "isFounder": false,
@@ -515,8 +509,8 @@
       "phone": "1899581575",
       "displayPhone": "+880 1899581575",
       "name": "User B",
-      "salt": "0dd59c0567f1fc8d705fcf1e44947981",
-      "passwordHash": "6ba9acfa570dafef1bceeee08b571d997c690b4ecfaf4ce59807fd106e91b64fcc50779f8fc74fffb2226438e5c2f86a1f67016979bdcc5b7a906c62bae6df19",
+      "salt": "798f897a074ca19a202f91d977030908",
+      "passwordHash": "92c5d3eed789dfd0a770b4d076210d363dcdd3fa0e855edb4a56582ad4f4c2b286c93d7c3158961d2cea3f54ff3b7cce2f10fca45a8944345a410e950b7c0563",
       "nidVerified": true,
       "isAdmin": false,
       "isLoggedIn": true,
@@ -1049,6 +1043,24 @@
       "createdAt": "2026-10-18T14:19:43.752Z",
       "expiresAt": 1794925183752,
       "active": true
+    },
+    "safe_token_admin_MTMxNjc1MDcxMnwxfDE3OTI3MzEyNTY0MjR8NTMyNDY1MWM0ZWVlYjViMQ.33bb8e6eae58e9f0a9952ee3d5b86120": {
+      "token": "safe_token_admin_MTMxNjc1MDcxMnwxfDE3OTI3MzEyNTY0MjR8NTMyNDY1MWM0ZWVlYjViMQ.33bb8e6eae58e9f0a9952ee3d5b86120",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-23T04:54:16.424Z",
+      "expiresAt": 1795323257324,
+      "active": true
+    },
+    "safe_token_MTQwNjMxMTYwNXwwfDE3OTI3MzEyNTcyNjd8ZDI2Yzk5MWI3YWFkNDlkNw.3819c12a14483b01248b95bb119fa3bf": {
+      "token": "safe_token_MTQwNjMxMTYwNXwwfDE3OTI3MzEyNTcyNjd8ZDI2Yzk5MWI3YWFkNDlkNw.3819c12a14483b01248b95bb119fa3bf",
+      "phone": "1406311605",
+      "userName": "Verified Citizen",
+      "isAdmin": false,
+      "createdAt": "2026-10-23T04:54:17.267Z",
+      "expiresAt": 1795323257267,
+      "active": true
     }
   },
   "activeJourneys": {
@@ -1354,9 +1366,9 @@
     "stateFileId": null
   },
   "stats": {
-    "totalLogins": 61,
+    "totalLogins": 63,
     "totalRegistrations": 11,
-    "lastSaved": "2026-10-23T04:38:30.748Z",
+    "lastSaved": "2026-10-23T05:03:15.313Z",
     "totalPosts": 9
   }
 }
