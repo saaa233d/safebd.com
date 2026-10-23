@@ -12270,14 +12270,52 @@
       return [];
     }
 
+    // Validate cached and server evidence metadata before it reaches templates or URL attributes
+    function sanitizeEvidenceRecord(item) {
+      if (!item || typeof item !== 'object') return null;
+      const id = String(item.id || '');
+      if (!/^[A-Za-z0-9_-]{1,80}$/.test(id)) return null;
+
+      const rawFileName = String(item.fileName || '');
+      const fileName = /^\d{10,13}_SOS_\d{10,16}(?:_[a-f0-9]{12})?\.(?:mp4|webm)$/i.test(rawFileName) ? rawFileName : '';
+      const rawLocation = item.location && typeof item.location === 'object' ? item.location : {};
+      const rawLat = rawLocation.lat === null || rawLocation.lat === undefined ? NaN : Number(rawLocation.lat);
+      const rawLon = rawLocation.lon === null || rawLocation.lon === undefined ? NaN : Number(rawLocation.lon);
+      const hasCoordinates = Number.isFinite(rawLat) && Number.isFinite(rawLon) && rawLat >= -90 && rawLat <= 90 && rawLon >= -180 && rawLon <= 180;
+      const address = String(rawLocation.address || '').replace(/[\x00-\x1F\x7F]/g, ' ').trim().slice(0, 200);
+      const rawDuration = Number(item.durationSeconds);
+      const rawSize = Number(item.fileSizeKb);
+      const recordedAt = item.recordedAt && Number.isFinite(Date.parse(item.recordedAt)) ? new Date(item.recordedAt).toISOString() : '';
+      const extensionMime = fileName.toLowerCase().endsWith('.mp4') ? 'video/mp4' : 'video/webm';
+      const mimeType = item.mimeType === 'video/mp4' || item.mimeType === 'video/webm' ? item.mimeType : extensionMime;
+
+      return {
+        ...item,
+        id,
+        userName: String(item.userName || 'Citizen').replace(/[\x00-\x1F\x7F]/g, ' ').trim().slice(0, 80) || 'Citizen',
+        userPhone: String(item.userPhone || item.userId || '').replace(/\D/g, '').slice(-13),
+        location: {
+          lat: hasCoordinates ? Number(rawLat.toFixed(6)) : null,
+          lon: hasCoordinates ? Number(rawLon.toFixed(6)) : null,
+          address: address || (hasCoordinates ? 'GPS location' : 'Location unavailable')
+        },
+        fileName,
+        videoUrl: fileName ? '/api/emergency/evidence/' + encodeURIComponent(fileName) : '',
+        mimeType,
+        durationSeconds: Number.isFinite(rawDuration) ? Math.min(300, Math.max(1, Math.round(rawDuration))) : 15,
+        fileSizeKb: Number.isFinite(rawSize) ? Math.min(20000, Math.max(0, Math.round(rawSize))) : 0,
+        recordedAt
+      };
+    }
+
     // Strip stale blob URLs from cached items — they expire across sessions and cause black video players
     let adminEmergencyEvidenceList = loadCachedEvidenceMeta().map(item => {
       if (item) {
         delete item._blobUrl;   // Blob URLs are session-specific and expire on page reload
         delete item.videoBlob;  // Blob objects are not serializable and are always lost on reload
       }
-      return item;
-    });
+      return sanitizeEvidenceRecord(item);
+    }).filter(Boolean);
 
     // Fast synchronous Base64 to Blob conversion (Safe on all mobile browsers with chunked arrays)
     function base64ToBlobSync(dataUri, fallbackMime) {
