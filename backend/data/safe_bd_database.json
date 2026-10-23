@@ -1,0 +1,1356 @@
+{
+  "users": {
+    "1316750712": {
+      "id": "usr_admin_1316750712",
+      "phone": "1316750712",
+      "displayPhone": "+880 1316-750712",
+      "name": "SAAD RIZWAN",
+      "salt": "ffc252e71b0c1e792b60d2c76b5fb621",
+      "passwordHash": "877ae28272c6627b1ddfae3d9a839f3d9541459a4cbe2e5d5e62b8649db28e8a928a3f970ea92c6ff1ae15088bc24446acf32291e504dd667abbb833bd3e86d5",
+      "nidVerified": true,
+      "isAdmin": true,
+      "isLoggedIn": true,
+      "createdAt": "2026-10-12T03:45:26.505Z",
+      "lastLoginAt": "2026-10-17T08:04:30.215Z",
+      "lastLogoutAt": "2026-10-12T03:59:10.498Z",
+      "loginCount": 17,
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Father",
+          "phone": "1552381622",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Mother",
+          "phone": "1614872060",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "Guardian",
+          "phone": "1406311605",
+          "initial": "G"
+        }
+      ],
+      "role": "Founder & CEO, SAFE bd",
+      "isFounder": true
+    },
+    "1406311605": {
+      "id": "usr_1406311605",
+      "phone": "1406311605",
+      "displayPhone": "+880 1406311605",
+      "name": "Verified Citizen",
+      "salt": "1002ef4faba6757c8e91fe064bb51ff6",
+      "passwordHash": "6e5d8353b0c57835e301d630e4c78244babae2194baecceafd83d7dfb0c79a9e76733748b49e663e2708050d00d88de02762e8d9de9cf8d4c20b0d3793aae1de",
+      "nidVerified": true,
+      "isAdmin": false,
+      "isFounder": false,
+      "isLoggedIn": true,
+      "createdAt": "2026-10-14T12:43:02.406Z",
+      "lastLoginAt": "2026-10-14T12:43:10.782Z",
+      "lastLogoutAt": null,
+      "loginCount": 3,
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Father",
+          "phone": "1914872060",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Mother",
+          "phone": "1552381922",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "SOS LIVELOCATION SEND",
+          "phone": "",
+          "initial": "S"
+        }
+      ],
+      "bloodGroup": "B+",
+      "isBloodDonor": true,
+      "bloodDistrict": "Dhaka",
+      "bloodThana": "Shantinagar"
+    },
+    "1552381922": {
+      "id": "usr_1552381922",
+      "phone": "1552381922",
+      "displayPhone": "+880 1552381922",
+      "name": "Shabbir",
+      "role": "Citizen Member",
+      "isFounder": false,
+      "isAdmin": false,
+      "nidVerified": true,
+      "createdAt": "2026-10-14T15:26:52.487537Z",
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Father",
+          "phone": "1316750712",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Mother",
+          "phone": "1914872060",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "Guardian",
+          "phone": "",
+          "initial": "G"
+        }
+      ],
+      "bloodGroup": "O-",
+      "isBloodDonor": true,
+      "bloodDistrict": "Dhaka",
+      "bloodThana": "mohammadpur"
+    },
+    "1700112233": {
+      "id": "usr_1700112233",
+      "phone": "1700112233",
+      "displayPhone": "+880 1700112233",
+      "name": "Verified Donor",
+      "role": "Citizen Member",
+      "isFounder": false,
+      "isAdmin": false,
+      "nidVerified": false,
+      "createdAt": "2026-10-21T03:19:52.871Z",
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Father",
+          "phone": "",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Mother",
+          "phone": "",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "Guardian",
+          "phone": "",
+          "initial": "G"
+        }
+      ],
+      "bloodGroup": "B+",
+      "isBloodDonor": true,
+      "bloodDistrict": "Dhaka",
+      "bloodThana": "Dhanmondi",
+      "updatedAt": "2026-10-21T03:19:52.871Z"
+    },
+    "1700998877": {
+      "id": "usr_1700998877",
+      "phone": "1700998877",
+      "displayPhone": "+880 1700998877",
+      "name": "Zayan Ahmed",
+      "salt": "f85f858f057550535b0d2a1ff0836280",
+      "passwordHash": "56c9dc95512237bce21b72270253c1408dba07ec9bdbd2c2ab642981710b5395e031ca80726a69139d59b0121dc97943e70d800649d0d32483d54de00b91d1aa",
+      "nidVerified": true,
+      "isAdmin": false,
+      "isFounder": false,
+      "isLoggedIn": true,
+      "createdAt": "2026-10-14T03:17:17.007Z",
+      "lastLoginAt": "2026-10-14T03:17:17.741Z",
+      "lastLogoutAt": null,
+      "loginCount": 3,
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Father",
+          "phone": "",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Mother",
+          "phone": "",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "Guardian",
+          "phone": "",
+          "initial": "G"
+        }
+      ]
+    },
+    "1711223344": {
+      "id": "usr_1711223344",
+      "phone": "1711223344",
+      "displayPhone": "+880 1711223344",
+      "name": "Rahim Khan",
+      "salt": "87ea2d0a4fc5cfc6e8ec10abf5d51ab7",
+      "passwordHash": "0d4deab202e4f37f9b3f5327f78732e048c5ce74e9ff35675e7e5f6f1dd660ef16f90dc788334e9abc5ca769832c5611e7fac3e9adf9318e37e617ba264320a3",
+      "nidVerified": true,
+      "isAdmin": false,
+      "isLoggedIn": true,
+      "createdAt": "2026-10-12T03:48:48.089Z",
+      "lastLoginAt": "2026-10-14T01:38:40.557Z",
+      "lastLogoutAt": null,
+      "loginCount": 6,
+      "updatedAt": "2026-10-12T03:51:42.166Z",
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Father",
+          "phone": "",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Mother",
+          "phone": "",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "Guardian",
+          "phone": "",
+          "initial": "G"
+        }
+      ]
+    },
+    "1712345678": {
+      "id": "usr_1712345678",
+      "phone": "1712345678",
+      "displayPhone": "+880 1712345678",
+      "name": "Test Citizen",
+      "salt": "01fb7a445483af8c26fed7bf10cf3fab",
+      "passwordHash": "9a0f10dce31d903690e87a1bb95ac85dd5368ce849f1d3820d319f1b29010d59fc2c57368e05dc3ee6fbad3dba630ade77f61ac18da6c14dd72c6c33798e5a67",
+      "nidVerified": true,
+      "isAdmin": false,
+      "isLoggedIn": true,
+      "createdAt": "2026-10-14T01:29:58.646Z",
+      "lastLoginAt": "2026-10-14T01:30:04.838Z",
+      "lastLogoutAt": null,
+      "loginCount": 3,
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Father",
+          "phone": "",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Mother",
+          "phone": "",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "Guardian",
+          "phone": "",
+          "initial": "G"
+        }
+      ]
+    },
+    "1723456789": {
+      "id": "usr_1723456789",
+      "phone": "1723456789",
+      "displayPhone": "+880 1723456789",
+      "name": "Mehnaz Akter",
+      "role": "Citizen",
+      "salt": "27b305b32ee74267697e8fcc6a38f8e7",
+      "passwordHash": "47fff7119e8d1000c69c84b9c410536b9004e2d5c2086e3c51da226e580dbae39f51924c0d74783b04b42687afb4b5973cda29805870e535680a722a22a609da",
+      "nidVerified": true,
+      "isAdmin": false,
+      "isFounder": false,
+      "isLoggedIn": true,
+      "createdAt": "2026-10-14T12:46:51.092Z",
+      "lastLoginAt": "2026-10-18T14:19:43.752Z",
+      "lastLogoutAt": null,
+      "loginCount": 12,
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Father",
+          "phone": "",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Mother",
+          "phone": "",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "Guardian",
+          "phone": "",
+          "initial": "G"
+        }
+      ]
+    },
+    "1753699913": {
+      "id": "usr_1753699913",
+      "phone": "1753699913",
+      "displayPhone": "+880 1753699913",
+      "name": "Brand New Citizen",
+      "role": "Citizen",
+      "salt": "42f2d5451bef870cefccf762a8fe7218",
+      "passwordHash": "7535251632f07fcb62be8b41f75ddce8c42d07f193478c7c735c2bd236802b193fbc051fa1f7462bead85c49b5a97cde0d04636fd16e098859631d0e13e9074e",
+      "nidVerified": true,
+      "isAdmin": false,
+      "isFounder": false,
+      "isLoggedIn": true,
+      "createdAt": "2026-10-14T14:21:54.896Z",
+      "lastLoginAt": "2026-10-14T14:21:55.356Z",
+      "lastLogoutAt": null,
+      "loginCount": 3,
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Father",
+          "phone": "",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Mother",
+          "phone": "",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "Guardian",
+          "phone": "",
+          "initial": "G"
+        }
+      ]
+    },
+    "1788221731": {
+      "id": "usr_1788221731",
+      "phone": "1788221731",
+      "displayPhone": "+880 1788221731",
+      "name": "User A",
+      "salt": "1aa6bd78e5387ef1103df0e5aacb9cf6",
+      "passwordHash": "427c5cf378075fde152a5dec14441dc2803d7cc83a86db61d8bdd6f6e691d479f28a0016f76cdc84d08200f376ab9efe22bc30d8ce7e58ca74556e79719fcc95",
+      "nidVerified": true,
+      "isAdmin": false,
+      "isLoggedIn": true,
+      "createdAt": "2026-10-12T05:24:00.968Z",
+      "lastLoginAt": "2026-10-12T05:24:00.969Z",
+      "lastLogoutAt": null,
+      "loginCount": 2,
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Abbu",
+          "phone": "",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Ammu",
+          "phone": "",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "Bhaiya",
+          "phone": "",
+          "initial": "G"
+        }
+      ],
+      "updatedAt": "2026-10-12T05:24:00.990Z"
+    },
+    "1799887766": {
+      "id": "usr_1799887766",
+      "phone": "1799887766",
+      "displayPhone": "+880 1799887766",
+      "name": "Ashikur Rahman",
+      "salt": "d54110c5d99148c4d462cde08c02248a",
+      "passwordHash": "06c8dc3a18d8d5cafe52e3c5ccca0e6d1f691f210ffca69017a05717a270385ab7d5144a4067acda066ff7bb637cbb08541d5e25a8f016b9b5af2790d21a008c",
+      "nidVerified": true,
+      "isAdmin": false,
+      "isLoggedIn": true,
+      "createdAt": "2026-10-13T18:10:40.966Z",
+      "lastLoginAt": "2026-10-14T01:38:40.946Z",
+      "lastLogoutAt": null,
+      "loginCount": 3,
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Father",
+          "phone": "",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Mother",
+          "phone": "",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "Guardian",
+          "phone": "",
+          "initial": "G"
+        }
+      ],
+      "updatedAt": "2026-10-13T18:14:47.648Z"
+    },
+    "1799921101": {
+      "id": "usr_1799921101",
+      "phone": "1799921101",
+      "displayPhone": "+880 1799921101",
+      "name": "Tanvir Hossain",
+      "salt": "f9cb0ab9a513ed5d09cc7e0c6634f683",
+      "passwordHash": "296d48eed2ee307f0d7be8e2f91c2a473368c4cbfafc85cf1f1119d9ba859b6c148bff352d1b3b28910a4428597816eff33e6052e0c81b6469606be6e6bbe4b7",
+      "nidVerified": true,
+      "isAdmin": false,
+      "isLoggedIn": true,
+      "createdAt": "2026-10-12T04:59:04.628Z",
+      "lastLoginAt": "2026-10-12T04:59:04.927Z",
+      "lastLogoutAt": null,
+      "loginCount": 5,
+      "updatedAt": "2026-10-12T04:59:04.862Z",
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Father",
+          "phone": "",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Mother",
+          "phone": "",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "Guardian",
+          "phone": "",
+          "initial": "G"
+        }
+      ]
+    },
+    "1799999999": {
+      "id": "usr_1799999999",
+      "phone": "1799999999",
+      "displayPhone": "+880 1799999999",
+      "name": "Test Citizen",
+      "role": "Citizen Member",
+      "isFounder": false,
+      "isAdmin": false,
+      "nidVerified": true,
+      "createdAt": "2026-10-14T14:10:42.296601Z",
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Father",
+          "phone": "",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Mother",
+          "phone": "",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "Guardian",
+          "phone": "",
+          "initial": "G"
+        }
+      ]
+    },
+    "1800000001": {
+      "id": "usr_1800000001",
+      "phone": "1800000001",
+      "displayPhone": "+880 1800000001",
+      "name": "Test User",
+      "salt": "c05bd863f17cfd9734151ab346f66ba8",
+      "passwordHash": "be5b9b9636f244b01a6a1db843c4601531de2218dfe8ff37e66f7c52717bfa6e83ccf4f834e9757da4cfa39a8499dd012b68deda6f8ad9bf5546b34ee81c6ef6",
+      "nidVerified": true,
+      "isAdmin": false,
+      "isFounder": false,
+      "isLoggedIn": true,
+      "createdAt": "2026-10-14T12:42:26.086Z",
+      "lastLoginAt": "2026-10-14T12:42:26.406Z",
+      "lastLogoutAt": null,
+      "loginCount": 3,
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Father",
+          "phone": "",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Mother",
+          "phone": "",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "Guardian",
+          "phone": "",
+          "initial": "G"
+        }
+      ]
+    },
+    "1899581575": {
+      "id": "usr_1899581575",
+      "phone": "1899581575",
+      "displayPhone": "+880 1899581575",
+      "name": "User B",
+      "salt": "798f897a074ca19a202f91d977030908",
+      "passwordHash": "92c5d3eed789dfd0a770b4d076210d363dcdd3fa0e855edb4a56582ad4f4c2b286c93d7c3158961d2cea3f54ff3b7cce2f10fca45a8944345a410e950b7c0563",
+      "nidVerified": true,
+      "isAdmin": false,
+      "isLoggedIn": true,
+      "createdAt": "2026-10-12T05:24:01.071Z",
+      "lastLoginAt": "2026-10-12T05:24:01.071Z",
+      "lastLogoutAt": null,
+      "loginCount": 2,
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Uncle",
+          "phone": "",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Aunt",
+          "phone": "",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "Guardian",
+          "phone": "",
+          "initial": "G"
+        }
+      ],
+      "updatedAt": "2026-10-12T05:24:01.083Z"
+    },
+    "1914872060": {
+      "id": "usr_admin_1914872060",
+      "phone": "1914872060",
+      "displayPhone": "+880 1914872060",
+      "name": "SHABAB",
+      "role": "Citizen Reporter",
+      "isFounder": false,
+      "salt": "4af31c14331af03cc49fe68f2db704fb",
+      "passwordHash": "7b199c35b47a2d56915c31f08e10d7882a8af7cff62ca5b0474c92305bab5151f0d2c2faa2ead7ea32383c9a59823ec7dbf8779af8ccffb4d064a57a25c67460",
+      "nidVerified": true,
+      "isAdmin": false,
+      "permissions": [],
+      "adminAssignedAt": "2026-10-13T06:34:06.002Z",
+      "adminAssignedBy": "SAAD RIZWAN",
+      "isLoggedIn": true,
+      "createdAt": "2026-10-13T06:34:06.002Z",
+      "lastLoginAt": "2026-10-14T02:48:02.109Z",
+      "lastLogoutAt": null,
+      "loginCount": 1,
+      "contacts": [
+        {
+          "id": "c1",
+          "name": "Father",
+          "phone": "",
+          "initial": "F"
+        },
+        {
+          "id": "c2",
+          "name": "Mother",
+          "phone": "",
+          "initial": "M"
+        },
+        {
+          "id": "c3",
+          "name": "Guardian",
+          "phone": "",
+          "initial": "G"
+        }
+      ],
+      "adminRevokedAt": "2026-10-13T06:34:15.860Z",
+      "adminRevokedBy": "SAAD RIZWAN"
+    }
+  },
+  "sessions": {
+    "safe_token_admin_1791776809592": {
+      "token": "safe_token_admin_1791776809592",
+      "phone": "1316750712",
+      "userName": "Chief Administrator",
+      "isAdmin": true,
+      "createdAt": "2026-10-12T03:46:49.592Z",
+      "active": true
+    },
+    "safe_token_MTcxMTIyMzM0NDE3OTE3NzY5MjgwODk=": {
+      "token": "safe_token_MTcxMTIyMzM0NDE3OTE3NzY5MjgwODk=",
+      "phone": "1711223344",
+      "userName": "Rahim Khan",
+      "isAdmin": false,
+      "createdAt": "2026-10-12T03:48:48.089Z",
+      "active": true
+    },
+    "safe_token_MTcxMTIyMzM0NDE3OTE3NzcwOTQxNjA=": {
+      "token": "safe_token_MTcxMTIyMzM0NDE3OTE3NzcwOTQxNjA=",
+      "phone": "1711223344",
+      "userName": "Rahim Khan",
+      "isAdmin": false,
+      "createdAt": "2026-10-12T03:51:34.160Z",
+      "active": true
+    },
+    "safe_token_MTcxMTIyMzM0NDE3OTE3NzcxMDIxNjY=": {
+      "token": "safe_token_MTcxMTIyMzM0NDE3OTE3NzcxMDIxNjY=",
+      "phone": "1711223344",
+      "userName": "Rahim Khan",
+      "isAdmin": false,
+      "createdAt": "2026-10-12T03:51:42.166Z",
+      "active": true
+    },
+    "safe_token_MTcxMTIyMzM0NDE3OTE3Nzc0NDI3MzA=": {
+      "token": "safe_token_MTcxMTIyMzM0NDE3OTE3Nzc0NDI3MzA=",
+      "phone": "1711223344",
+      "userName": "Rahim Khan",
+      "isAdmin": false,
+      "createdAt": "2026-10-12T03:57:22.730Z",
+      "active": true
+    },
+    "safe_token_admin_1791777442742": {
+      "token": "safe_token_admin_1791777442742",
+      "phone": "1316750712",
+      "userName": "Chief Administrator",
+      "isAdmin": true,
+      "createdAt": "2026-10-12T03:57:22.742Z",
+      "active": true
+    },
+    "safe_token_admin_dec4ac5683ef9e9bd2e4d6cf74d9a0e3a7e4bae139400d5b1f80c12f4e05157f": {
+      "token": "safe_token_admin_dec4ac5683ef9e9bd2e4d6cf74d9a0e3a7e4bae139400d5b1f80c12f4e05157f",
+      "phone": "1316750712",
+      "userName": "Chief Administrator",
+      "isAdmin": true,
+      "createdAt": "2026-10-12T04:06:58.339Z",
+      "active": true
+    },
+    "safe_token_4d0eae27df77e12fa4f22a71945da8f2638fe5791eab8b15a9485d6d7f4c9245": {
+      "token": "safe_token_4d0eae27df77e12fa4f22a71945da8f2638fe5791eab8b15a9485d6d7f4c9245",
+      "phone": "1799921101",
+      "userName": "Tanvir Hossain",
+      "isAdmin": false,
+      "createdAt": "2026-10-12T04:59:04.629Z",
+      "active": true
+    },
+    "safe_token_6a2679ccb85cb6cb9a6bdb5e1470a2a22977689fff4b9016f95dae79d04a759e": {
+      "token": "safe_token_6a2679ccb85cb6cb9a6bdb5e1470a2a22977689fff4b9016f95dae79d04a759e",
+      "phone": "1799921101",
+      "userName": "Tanvir Hossain",
+      "isAdmin": false,
+      "createdAt": "2026-10-12T04:59:04.703Z",
+      "active": true
+    },
+    "safe_token_admin_cf9317ce7f5fe4653bbc389e05526611511ef425cd64fd534584f2b0c882130d": {
+      "token": "safe_token_admin_cf9317ce7f5fe4653bbc389e05526611511ef425cd64fd534584f2b0c882130d",
+      "phone": "1316750712",
+      "userName": "Chief Administrator",
+      "isAdmin": true,
+      "createdAt": "2026-10-12T04:59:04.785Z",
+      "active": true
+    },
+    "safe_token_6f7d944400869581dec9bc2576fc986f09f720327da0820c60439228a9b1636c": {
+      "token": "safe_token_6f7d944400869581dec9bc2576fc986f09f720327da0820c60439228a9b1636c",
+      "phone": "1799921101",
+      "userName": "Tanvir Hossain",
+      "isAdmin": false,
+      "createdAt": "2026-10-12T04:59:04.862Z",
+      "active": true
+    },
+    "safe_token_83fc9dc8d92cc26461e302fd8a8179aad30d6396f321620263e603e21ed495e3": {
+      "token": "safe_token_83fc9dc8d92cc26461e302fd8a8179aad30d6396f321620263e603e21ed495e3",
+      "phone": "1799921101",
+      "userName": "Tanvir Hossain",
+      "isAdmin": false,
+      "createdAt": "2026-10-12T04:59:04.927Z",
+      "active": true
+    },
+    "safe_token_fcc458c9ca249149561a8a2b1b9753324078cbff3a4d266a9661d29826d77100": {
+      "token": "safe_token_fcc458c9ca249149561a8a2b1b9753324078cbff3a4d266a9661d29826d77100",
+      "phone": "1788221731",
+      "userName": "User A",
+      "isAdmin": false,
+      "createdAt": "2026-10-12T05:24:00.969Z",
+      "active": true
+    },
+    "safe_token_c5f4d993d2b15cec33e5dd927ee65eeeb7133c1d26a0ba6646a44d28f0dd54c4": {
+      "token": "safe_token_c5f4d993d2b15cec33e5dd927ee65eeeb7133c1d26a0ba6646a44d28f0dd54c4",
+      "phone": "1899581575",
+      "userName": "User B",
+      "isAdmin": false,
+      "createdAt": "2026-10-12T05:24:01.071Z",
+      "active": true
+    },
+    "safe_token_admin_9430f0fe4140edcc5e96388c8b1f55b38e8cc1767fe26260ca39a28fbee66e2a": {
+      "token": "safe_token_admin_9430f0fe4140edcc5e96388c8b1f55b38e8cc1767fe26260ca39a28fbee66e2a",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-13T06:33:26.701Z",
+      "active": true,
+      "expiresAt": 1794839735411
+    },
+    "safe_token_admin_e638a6a1f69fb7d58630e0f21b040d02680a0688e38d2a215b9356beafbcb1b6": {
+      "token": "safe_token_admin_e638a6a1f69fb7d58630e0f21b040d02680a0688e38d2a215b9356beafbcb1b6",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-13T10:33:35.905Z",
+      "active": true
+    },
+    "safe_token_admin_feba8c7c7416fd1d70d34e83b6981209f8690921b6624aa03f043387faf5ef1b": {
+      "token": "safe_token_admin_feba8c7c7416fd1d70d34e83b6981209f8690921b6624aa03f043387faf5ef1b",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-13T13:03:58.342Z",
+      "active": true
+    },
+    "safe_token_58c41bbed790bc47ce4e63ff17c224af8fa81912ad592433616b9516b0fd5424": {
+      "token": "safe_token_58c41bbed790bc47ce4e63ff17c224af8fa81912ad592433616b9516b0fd5424",
+      "phone": "1799887766",
+      "userName": "Ashikur Rahman",
+      "isAdmin": false,
+      "createdAt": "2026-10-13T18:12:22.164Z",
+      "active": true
+    },
+    "safe_token_admin_f828c1fd483193d377c987ac48a0a1d91491f273fbcf97c0a3b44fd43fb855f0": {
+      "token": "safe_token_admin_f828c1fd483193d377c987ac48a0a1d91491f273fbcf97c0a3b44fd43fb855f0",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-14T01:28:43.830Z",
+      "expiresAt": 1794533323830,
+      "active": true
+    },
+    "safe_token_b66d2982b1cde40d52868401093af05f49cf80fd434edc95e94d6a9a330363be": {
+      "token": "safe_token_b66d2982b1cde40d52868401093af05f49cf80fd434edc95e94d6a9a330363be",
+      "phone": "1712345678",
+      "userName": "Test Citizen",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T01:29:58.646Z",
+      "expiresAt": 1794533398646,
+      "active": true
+    },
+    "safe_token_896eb901d626b7031f0b6b591ee035915726c0d88a0036c0cdaec51fe51d8d94": {
+      "token": "safe_token_896eb901d626b7031f0b6b591ee035915726c0d88a0036c0cdaec51fe51d8d94",
+      "phone": "1712345678",
+      "userName": "Test Citizen",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T01:30:04.838Z",
+      "expiresAt": 1794533404838,
+      "active": true
+    },
+    "safe_token_admin_b097772640478a0cea135aab521ad9ac985f13d070967d2b0eae094a98209fc3": {
+      "token": "safe_token_admin_b097772640478a0cea135aab521ad9ac985f13d070967d2b0eae094a98209fc3",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-14T01:38:40.110Z",
+      "expiresAt": 1794533920110,
+      "active": true
+    },
+    "safe_token_dc6f5b983c92c66bdeea4ede3f2be1e3e4a053191e8a33f8d9b80cf276d2359b": {
+      "token": "safe_token_dc6f5b983c92c66bdeea4ede3f2be1e3e4a053191e8a33f8d9b80cf276d2359b",
+      "phone": "1711223344",
+      "userName": "Rahim Khan",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T01:38:40.557Z",
+      "expiresAt": 1794533920557,
+      "active": true
+    },
+    "safe_token_1cd964f4750b40769d680d03553c37c4cf20a764a57251b35bcf60888e302fa1": {
+      "token": "safe_token_1cd964f4750b40769d680d03553c37c4cf20a764a57251b35bcf60888e302fa1",
+      "phone": "1799887766",
+      "userName": "Ashikur Rahman",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T01:38:40.946Z",
+      "expiresAt": 1794533920946,
+      "active": true
+    },
+    "safe_token_admin_0abae2ec4d1b7e79baf3a034f68fd023360f6f9a7afbaa04d2a5037a575c1f76": {
+      "token": "safe_token_admin_0abae2ec4d1b7e79baf3a034f68fd023360f6f9a7afbaa04d2a5037a575c1f76",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-14T01:58:59.482Z",
+      "expiresAt": 1794535139482,
+      "active": true
+    },
+    "safe_token_ab3524f614c49d4622dad3294642fa084bc5a13c6b2ddf73f777d4176b6ad19c": {
+      "token": "safe_token_ab3524f614c49d4622dad3294642fa084bc5a13c6b2ddf73f777d4176b6ad19c",
+      "phone": "1914872060",
+      "userName": "SHABAB",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T02:48:02.109Z",
+      "expiresAt": 1794538082109,
+      "active": true
+    },
+    "safe_token_admin_7b15812b4d8f5d11a4cdfcbab77c7159b6d5d3dfee9355b901cb42afbda0b31f": {
+      "token": "safe_token_admin_7b15812b4d8f5d11a4cdfcbab77c7159b6d5d3dfee9355b901cb42afbda0b31f",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-14T02:48:08.646Z",
+      "expiresAt": 1794538088646,
+      "active": true
+    },
+    "safe_token_fafabe24c5ceeee8b1211dfab284fcf1fcafbe9d527ffef9da179a5f09e56d94": {
+      "token": "safe_token_fafabe24c5ceeee8b1211dfab284fcf1fcafbe9d527ffef9da179a5f09e56d94",
+      "phone": "1700998877",
+      "userName": "Zayan Ahmed",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T03:17:17.007Z",
+      "expiresAt": 1794539837007,
+      "active": true
+    },
+    "safe_token_3c80d55e426fbe0eb904fd8d9a1125196ac24e6aeb77bf8b89dd31de72d50d34": {
+      "token": "safe_token_3c80d55e426fbe0eb904fd8d9a1125196ac24e6aeb77bf8b89dd31de72d50d34",
+      "phone": "1700998877",
+      "userName": "Zayan Ahmed",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T03:17:17.742Z",
+      "expiresAt": 1794539837741,
+      "active": true
+    },
+    "safe_token_admin_109e25484c5b3401f084208afd8cdc3d0dc5d067cde637039139e04a2c8f5050": {
+      "token": "safe_token_admin_109e25484c5b3401f084208afd8cdc3d0dc5d067cde637039139e04a2c8f5050",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-14T03:17:18.066Z",
+      "expiresAt": 1794539838066,
+      "active": true
+    },
+    "safe_token_admin_MTMxNjc1MDcxMnwxfDE3OTE5NzkwMDMzMDB8ZGRmMDJjYTVkYWIwMTY5Nw.c0416f24673153e1fce7a01cf4540749": {
+      "token": "safe_token_admin_MTMxNjc1MDcxMnwxfDE3OTE5NzkwMDMzMDB8ZGRmMDJjYTVkYWIwMTY5Nw.c0416f24673153e1fce7a01cf4540749",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-14T11:56:43.300Z",
+      "expiresAt": 1794571003376,
+      "active": true
+    },
+    "safe_token_admin_MTMxNjc1MDcxMnwxfDE3OTE5ODE0Njg3ODh8MDIzMTYwYTE0ZGQ2ZmZmNA.32d741d1e47cfd875136276430be0faa": {
+      "token": "safe_token_admin_MTMxNjc1MDcxMnwxfDE3OTE5ODE0Njg3ODh8MDIzMTYwYTE0ZGQ2ZmZmNA.32d741d1e47cfd875136276430be0faa",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-14T12:37:48.788Z",
+      "expiresAt": 1794573468799,
+      "active": true
+    },
+    "safe_token_admin_MTMxNjc1MDcxMnwxfDE3OTE5ODE0OTY0NTF8NmFlYjdkNmM4ZTZlYzE5OQ.46498a43c7c03441eee3c1ddb75e7088": {
+      "token": "safe_token_admin_MTMxNjc1MDcxMnwxfDE3OTE5ODE0OTY0NTF8NmFlYjdkNmM4ZTZlYzE5OQ.46498a43c7c03441eee3c1ddb75e7088",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-14T12:38:16.452Z",
+      "expiresAt": 1794573496460,
+      "active": true
+    },
+    "safe_token_MTgwMDAwMDAwMXwwfDE3OTE5ODE3NDYwODZ8OTJmMmRjMmMwMzc0YzRiNA.1a8d5b321195fe16ff329d42fb6be51b": {
+      "token": "safe_token_MTgwMDAwMDAwMXwwfDE3OTE5ODE3NDYwODZ8OTJmMmRjMmMwMzc0YzRiNA.1a8d5b321195fe16ff329d42fb6be51b",
+      "phone": "1800000001",
+      "userName": "Test User",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T12:42:26.087Z",
+      "expiresAt": 1794573746086,
+      "active": true
+    },
+    "safe_token_MTgwMDAwMDAwMXwwfDE3OTE5ODE3NDY0MDZ8YjM3ZDM0ZDUyNzMxMThlMQ.059147d047165879acb61247b2e1ba48": {
+      "token": "safe_token_MTgwMDAwMDAwMXwwfDE3OTE5ODE3NDY0MDZ8YjM3ZDM0ZDUyNzMxMThlMQ.059147d047165879acb61247b2e1ba48",
+      "phone": "1800000001",
+      "userName": "Test User",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T12:42:26.406Z",
+      "expiresAt": 1794573746406,
+      "active": true
+    },
+    "safe_token_MTQwNjMxMTYwNXwwfDE3OTE5ODE3ODI0MDZ8MTk0MDA0YzhlMTQ0ZTU0Mg.c1b7b281176cbdd9b7789ecb641d182d": {
+      "token": "safe_token_MTQwNjMxMTYwNXwwfDE3OTE5ODE3ODI0MDZ8MTk0MDA0YzhlMTQ0ZTU0Mg.c1b7b281176cbdd9b7789ecb641d182d",
+      "phone": "1406311605",
+      "userName": "Verified Citizen",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T12:43:02.406Z",
+      "expiresAt": 1794573782406,
+      "active": true
+    },
+    "safe_token_MTQwNjMxMTYwNXwwfDE3OTE5ODE3OTA3ODJ8ZWFlMmNlNjA0NmU2ZTAzZA.f484fea2e47dbe178f55f2bd86d50553": {
+      "token": "safe_token_MTQwNjMxMTYwNXwwfDE3OTE5ODE3OTA3ODJ8ZWFlMmNlNjA0NmU2ZTAzZA.f484fea2e47dbe178f55f2bd86d50553",
+      "phone": "1406311605",
+      "userName": "Verified Citizen",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T12:43:10.782Z",
+      "expiresAt": 1794573790782,
+      "active": true
+    },
+    "safe_token_admin_MTMxNjc1MDcxMnwxfDE3OTE5ODE5Nzk4MjR8NGIyMGU0MGRhYzY3NDBjZQ.41eb72928d3cfccad618d7f6bf04bb31": {
+      "token": "safe_token_admin_MTMxNjc1MDcxMnwxfDE3OTE5ODE5Nzk4MjR8NGIyMGU0MGRhYzY3NDBjZQ.41eb72928d3cfccad618d7f6bf04bb31",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-14T12:46:19.825Z",
+      "expiresAt": 1794573979838,
+      "active": true
+    },
+    "safe_token_MTcyMzQ1Njc4OXwwfDE3OTE5ODIwMTEwOTN8MmY2OGJhMmQ5ZDI4MDZhNA.809165bf091a257d6e90e633795206fe": {
+      "token": "safe_token_MTcyMzQ1Njc4OXwwfDE3OTE5ODIwMTEwOTN8MmY2OGJhMmQ5ZDI4MDZhNA.809165bf091a257d6e90e633795206fe",
+      "phone": "1723456789",
+      "userName": "Mehnaz Akter",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T12:46:51.093Z",
+      "expiresAt": 1794574011093,
+      "active": true
+    },
+    "safe_token_MTcyMzQ1Njc4OXwwfDE3OTE5ODIwMTE1MTB8MWEwNjE3OTk3NjAyZDRmZA.120e38b6f23bff6b36cb858154311b06": {
+      "token": "safe_token_MTcyMzQ1Njc4OXwwfDE3OTE5ODIwMTE1MTB8MWEwNjE3OTk3NjAyZDRmZA.120e38b6f23bff6b36cb858154311b06",
+      "phone": "1723456789",
+      "userName": "Mehnaz Akter",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T12:46:51.510Z",
+      "expiresAt": 1794574011510,
+      "active": true
+    },
+    "safe_token_MTcyMzQ1Njc4OXwwfDE3OTE5ODIwMTI2OTV8YzA0ZjY3YTQ0NTdiNWUxYw.d91297d5babb787147ec09e31cf3bf15": {
+      "token": "safe_token_MTcyMzQ1Njc4OXwwfDE3OTE5ODIwMTI2OTV8YzA0ZjY3YTQ0NTdiNWUxYw.d91297d5babb787147ec09e31cf3bf15",
+      "phone": "1723456789",
+      "userName": "Mehnaz Akter",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T12:46:52.695Z",
+      "expiresAt": 1794574012695,
+      "active": true
+    },
+    "safe_token_MTcyMzQ1Njc4OXwwfDE3OTE5ODc2OTI3MjN8NTcwMTU1Zjc1NTY4YTUzMw.93489e5b5f15957d263a6bbf46dfca86": {
+      "token": "safe_token_MTcyMzQ1Njc4OXwwfDE3OTE5ODc2OTI3MjN8NTcwMTU1Zjc1NTY4YTUzMw.93489e5b5f15957d263a6bbf46dfca86",
+      "phone": "1723456789",
+      "userName": "Mehnaz Akter",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T14:21:32.724Z",
+      "expiresAt": 1794579692724,
+      "active": true
+    },
+    "safe_token_MTcyMzQ1Njc4OXwwfDE3OTE5ODc2OTM4OTd8YjhiNzYxYTgyYTI3MDFjYg.b8cea2cee2220268e70c264aa8c69019": {
+      "token": "safe_token_MTcyMzQ1Njc4OXwwfDE3OTE5ODc2OTM4OTd8YjhiNzYxYTgyYTI3MDFjYg.b8cea2cee2220268e70c264aa8c69019",
+      "phone": "1723456789",
+      "userName": "Mehnaz Akter",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T14:21:33.897Z",
+      "expiresAt": 1794579693897,
+      "active": true
+    },
+    "safe_token_MTc1MzY5OTkxM3wwfDE3OTE5ODc3MTQ4OTZ8ZjYwNzljZDQ2MjllZTFjOQ.68a426be427d655a0a151a23a72c626a": {
+      "token": "safe_token_MTc1MzY5OTkxM3wwfDE3OTE5ODc3MTQ4OTZ8ZjYwNzljZDQ2MjllZTFjOQ.68a426be427d655a0a151a23a72c626a",
+      "phone": "1753699913",
+      "userName": "Brand New Citizen",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T14:21:54.897Z",
+      "expiresAt": 1794579714897,
+      "active": true
+    },
+    "safe_token_MTc1MzY5OTkxM3wwfDE3OTE5ODc3MTUzNTZ8ODFkYTliNzIyNzFjMGJiMA.85687b3f06cc7fdcd5fd419e1038aa69": {
+      "token": "safe_token_MTc1MzY5OTkxM3wwfDE3OTE5ODc3MTUzNTZ8ODFkYTliNzIyNzFjMGJiMA.85687b3f06cc7fdcd5fd419e1038aa69",
+      "phone": "1753699913",
+      "userName": "Brand New Citizen",
+      "isAdmin": false,
+      "createdAt": "2026-10-14T14:21:55.356Z",
+      "expiresAt": 1794579715356,
+      "active": true
+    },
+    "safe_token_MTcyMzQ1Njc4OXwwfDE3OTIwNTQ1MTg4ODZ8NTA2Y2MxYTE4YTA2NmVmYg.de3bc692aa67e56e99e4a4422cfed652": {
+      "token": "safe_token_MTcyMzQ1Njc4OXwwfDE3OTIwNTQ1MTg4ODZ8NTA2Y2MxYTE4YTA2NmVmYg.de3bc692aa67e56e99e4a4422cfed652",
+      "phone": "1723456789",
+      "userName": "Mehnaz Akter",
+      "isAdmin": false,
+      "createdAt": "2026-10-15T08:55:18.887Z",
+      "expiresAt": 1794646518887,
+      "active": true
+    },
+    "safe_token_MTcyMzQ1Njc4OXwwfDE3OTIwNTQ1MjAxODB8N2Q1MGZkOTJiODg3NTI5Zg.587d1ffdaea463ad802368c00c39d759": {
+      "token": "safe_token_MTcyMzQ1Njc4OXwwfDE3OTIwNTQ1MjAxODB8N2Q1MGZkOTJiODg3NTI5Zg.587d1ffdaea463ad802368c00c39d759",
+      "phone": "1723456789",
+      "userName": "Mehnaz Akter",
+      "isAdmin": false,
+      "createdAt": "2026-10-15T08:55:20.180Z",
+      "expiresAt": 1794646520180,
+      "active": true
+    },
+    "safe_token_admin_MTMxNjc1MDcxMnwxfDE3OTIyMjQwNDE5NzR8ZDdhMGZjOWQ3ZmY4NzY0NA.ad8f4bb876c3abf6b41e9966d0c3f122": {
+      "token": "safe_token_admin_MTMxNjc1MDcxMnwxfDE3OTIyMjQwNDE5NzR8ZDdhMGZjOWQ3ZmY4NzY0NA.ad8f4bb876c3abf6b41e9966d0c3f122",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-17T08:00:41.976Z",
+      "expiresAt": 1794816041986,
+      "active": true
+    },
+    "safe_token_MTcyMzQ1Njc4OXwwfDE3OTIyMjQwNjI3MTh8MzUzZGU1YjZkZGE0YWVmZg.b45cae08c867b1194cd2979fc6767c89": {
+      "token": "safe_token_MTcyMzQ1Njc4OXwwfDE3OTIyMjQwNjI3MTh8MzUzZGU1YjZkZGE0YWVmZg.b45cae08c867b1194cd2979fc6767c89",
+      "phone": "1723456789",
+      "userName": "Mehnaz Akter",
+      "isAdmin": false,
+      "createdAt": "2026-10-17T08:01:02.718Z",
+      "expiresAt": 1794816062718,
+      "active": true
+    },
+    "safe_token_MTcyMzQ1Njc4OXwwfDE3OTIyMjQwNjM4NTR8MjBhNWZhYmRiMWVjZGVjOA.9168fcf6610087622acf5608382629c9": {
+      "token": "safe_token_MTcyMzQ1Njc4OXwwfDE3OTIyMjQwNjM4NTR8MjBhNWZhYmRiMWVjZGVjOA.9168fcf6610087622acf5608382629c9",
+      "phone": "1723456789",
+      "userName": "Mehnaz Akter",
+      "isAdmin": false,
+      "createdAt": "2026-10-17T08:01:03.854Z",
+      "expiresAt": 1794816063854,
+      "active": true
+    },
+    "safe_token_admin_MTMxNjc1MDcxMnwxfDE3OTIyMjQyNzAyMTR8OTM3MWEyZjkxMDlmYzBmNw.6f797a7028342b17851965decfe87874": {
+      "token": "safe_token_admin_MTMxNjc1MDcxMnwxfDE3OTIyMjQyNzAyMTR8OTM3MWEyZjkxMDlmYzBmNw.6f797a7028342b17851965decfe87874",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-17T08:04:30.215Z",
+      "expiresAt": 1794816270222,
+      "active": true
+    },
+    "safe_token_MTcyMzQ1Njc4OXwwfDE3OTIzMzMxODI1ODN8ZTA4MzNhZmUyMzJhMThiNA.68ec81b5eca6bd7f6a69cff53369b9c0": {
+      "token": "safe_token_MTcyMzQ1Njc4OXwwfDE3OTIzMzMxODI1ODN8ZTA4MzNhZmUyMzJhMThiNA.68ec81b5eca6bd7f6a69cff53369b9c0",
+      "phone": "1723456789",
+      "userName": "Mehnaz Akter",
+      "isAdmin": false,
+      "createdAt": "2026-10-18T14:19:42.583Z",
+      "expiresAt": 1794925182583,
+      "active": true
+    },
+    "safe_token_MTcyMzQ1Njc4OXwwfDE3OTIzMzMxODM3NTJ8OWI4NzkwODIxM2MyODhhZQ.bcffc9560045cf170790dd951287fc33": {
+      "token": "safe_token_MTcyMzQ1Njc4OXwwfDE3OTIzMzMxODM3NTJ8OWI4NzkwODIxM2MyODhhZQ.bcffc9560045cf170790dd951287fc33",
+      "phone": "1723456789",
+      "userName": "Mehnaz Akter",
+      "isAdmin": false,
+      "createdAt": "2026-10-18T14:19:43.752Z",
+      "expiresAt": 1794925183752,
+      "active": true
+    }
+  },
+  "activeJourneys": {
+    "1316750712": {
+      "sessionId": "journey_d80b9aa1d439de00d5dda5dd286435c2",
+      "userId": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "userPhone": "1316750712",
+      "origin": "Shantinagar, Dhaka",
+      "destination": "Kemal Ataturk Avenue",
+      "destCoords": {
+        "lat": 23.7937,
+        "lon": 90.4066
+      },
+      "travelMode": "walking",
+      "estimatedMinutes": 30,
+      "startTime": "2026-10-17T14:35:12.542Z",
+      "currentCoords": {
+        "lat": 23.738249487891043,
+        "lon": 90.41432373800724,
+        "address": "Shantinagar, Dhaka"
+      },
+      "status": "IN_TRANSIT",
+      "lastPing": 1792247737823,
+      "isOverdue": false,
+      "overdueUploadedToAdmin": false,
+      "updatedAt": "2026-10-17T14:35:37.823Z"
+    },
+    "1711111111": {
+      "sessionId": "journey_6aac808bfec9e29d5667cfac1e6a476c",
+      "userId": "1711111111",
+      "userName": "Citizen Traveler",
+      "userPhone": "1711111111",
+      "origin": "Current Location",
+      "destination": "Dhanmondi",
+      "destCoords": null,
+      "travelMode": "walking",
+      "estimatedMinutes": 20,
+      "startTime": "2026-10-18T16:47:50.250Z",
+      "currentCoords": {
+        "lat": 23.7388,
+        "lon": 90.4143
+      },
+      "status": "IN_TRANSIT",
+      "lastPing": 1792342070250,
+      "isOverdue": false,
+      "overdueUploadedToAdmin": false,
+      "updatedAt": "2026-10-18T16:47:50.250Z"
+    },
+    "2224270222": {
+      "sessionId": "journey_b6679ca444380f358a19446005a8b943",
+      "userId": "2224270222",
+      "userName": "Citizen Traveler",
+      "userPhone": "2224270222",
+      "origin": "Current Location",
+      "destination": "Hazrat Shahjalal International Airport",
+      "destCoords": null,
+      "travelMode": "walking",
+      "estimatedMinutes": 20,
+      "startTime": "2026-10-17T08:04:30.222Z",
+      "currentCoords": {
+        "lat": 23.7388,
+        "lon": 90.4143
+      },
+      "status": "IN_TRANSIT",
+      "lastPing": 1792224270222,
+      "isOverdue": false,
+      "overdueUploadedToAdmin": false,
+      "updatedAt": "2026-10-17T08:04:30.222Z"
+    }
+  },
+  "emergencyEvidence": [
+    {
+      "id": "EVID-1791873285243",
+      "userId": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "userPhone": "1316750712",
+      "location": {
+        "lat": 23.738223598810663,
+        "lon": 90.41432693039847,
+        "address": "Shantinagar, Dhaka"
+      },
+      "videoUrl": "/api/emergency/evidence/01316750712_SOS_1791873285383.mp4",
+      "gdriveFileId": "148oA689tvNA6a_k4vklbCa4k65xrcki0",
+      "fileName": "01316750712_SOS_1791873285383.mp4",
+      "fileSizeKb": 4883,
+      "mimeType": "video/mp4",
+      "durationSeconds": 15,
+      "recordedAt": "2026-10-13T06:34:54.922Z",
+      "status": "PENDING_ADMIN_DISPATCH",
+      "reviewed": false
+    }
+  ],
+  "sosAlerts": [
+    {
+      "id": "sos_1792224241896_4597",
+      "incidentId": "BD-EMG-999-723501",
+      "userId": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "userPhone": "1316750712",
+      "displayPhone": "+880 1316-750712",
+      "emergencyType": "SILENT_PANIC_SOS",
+      "location": {
+        "lat": 23.7461,
+        "lon": 90.4125,
+        "address": "Dhaka, Bangladesh"
+      },
+      "status": "RESOLVED",
+      "timestamp": "2026-10-17T08:04:01.896Z",
+      "createdAt": "2026-10-17T08:04:01.896Z",
+      "googleMapsUrl": "https://maps.google.com/?q=23.7461,90.4125",
+      "resolvedBy": "SAAD RIZWAN",
+      "resolvedAt": "2026-10-17T08:09:54.322Z"
+    }
+  ],
+  "posts": {
+    "post_saad_rizwan_founder_01": {
+      "id": "post_saad_rizwan_founder_01",
+      "author": "SAAD RIZWAN",
+      "authorPhone": "01316750712",
+      "authorRole": "Founder & CEO, SAFE bd",
+      "isFounder": true,
+      "verified": true,
+      "type": "official",
+      "category": "Official Announcement",
+      "content": "In an emergency, every second counts. That is why I founded SAFE bd—a national digital safety and emergency response ecosystem designed to bridge the gap between citizens and rapid assistance.\n\nSAFE (Safety • Awareness • Fast Response • Emergency Assistance) brings critical tools right to your fingertips:\n\nInstant SOS: A simple, high-priority emergency button to summon help immediately.\n\nLive Location Sharing: Securely alerts your trusted contacts and authorities when you need it most.\n\nCommunity Awareness: Structured safety reporting and emergency preparedness tools for a safer society.\n\nWe are building a future where trusted help is always within reach. Stay tuned for more updates on our journey!\n\n— Saad Rizwan\n\nFounder, SAFE bd.",
+      "media": null,
+      "likes": 0,
+      "approved": true,
+      "rejected": false,
+      "createdAt": "2026-10-12T13:30:00.000Z",
+      "approvedAt": "2026-10-12T13:30:00.000Z",
+      "reviewedBy": "Founder & CEO",
+      "likedBy": [],
+      "comments": [
+        {
+          "id": "c_1791968262632_384",
+          "author": "Dhaka Citizen",
+          "authorPhone": "",
+          "text": "Incredible initiative for Bangladesh safety!",
+          "isFounder": false,
+          "isAdmin": false,
+          "createdAt": "2026-10-14T08:57:42.632Z"
+        }
+      ]
+    },
+    "post_1791823903222_5256": {
+      "id": "post_1791823903222_5256",
+      "author": "SAAD RIZWAN",
+      "authorPhone": "01316750712",
+      "authorRole": "Founder & CEO, SAFE bd",
+      "isFounder": true,
+      "verified": true,
+      "type": "official",
+      "category": "Official Announcement",
+      "content": "Official SAFE bd system video demonstration.",
+      "media": "data:video/mp4;base64,ZmFrZSBtcDQgdmlkZW8gYnl0ZXMgdGVzdA==",
+      "likes": 0,
+      "likedBy": [],
+      "approved": true,
+      "rejected": false,
+      "createdAt": "2026-10-12T16:51:43.222Z",
+      "approvedAt": "2026-10-12T16:51:43.222Z",
+      "reviewedBy": "Chief Administrator (Official)"
+    },
+    "post_1791991755691_1775": {
+      "id": "post_1791991755691_1775",
+      "author": "Shabbir",
+      "authorPhone": "",
+      "authorRole": "Citizen Reporter",
+      "isFounder": false,
+      "verified": false,
+      "type": "community",
+      "category": "General Safety",
+      "content": "we need to be more aware.",
+      "media": null,
+      "likes": 0,
+      "likedBy": [],
+      "comments": [],
+      "approved": true,
+      "rejected": false,
+      "createdAt": "2026-10-14T15:29:15.691+00:00",
+      "approvedAt": "2026-10-14T15:29:15.691+00:00"
+    },
+    "post_1792118171175_8360": {
+      "id": "post_1792118171175_8360",
+      "author": "Verified Citizen",
+      "authorPhone": "1406311605",
+      "authorRole": "Citizen Member",
+      "isFounder": false,
+      "verified": false,
+      "type": "community",
+      "category": "General Safety",
+      "content": "We need to become more aware and teach our children about the importance of speaking up and expressing themselves. So many people struggle to share what they’re going through and end up keeping everything to themselves. That’s why SAFE BD aims to create a safer environment where people feel comfortable speaking out, seeking help, and finding solutions before things get worse.",
+      "media": null,
+      "likes": 1,
+      "likedBy": [
+        "user_1552381922"
+      ],
+      "comments": [
+        {
+          "id": "c_1792123731338_524",
+          "text": "i agree",
+          "author": "Shabbir",
+          "isAdmin": false,
+          "createdAt": "2026-10-16T04:08:51.338Z",
+          "isFounder": false,
+          "authorPhone": "1552381922"
+        }
+      ],
+      "approved": true,
+      "rejected": false,
+      "createdAt": "2026-10-16T02:36:11.175+00:00",
+      "approvedAt": "2026-10-16T02:36:11.175+00:00"
+    },
+    "post_1792081435440_9363": {
+      "id": "post_1792081435440_9363",
+      "author": "Shabbir",
+      "authorPhone": "1552381922",
+      "authorRole": "Citizen Member",
+      "isFounder": false,
+      "verified": false,
+      "type": "community",
+      "category": "General Safety",
+      "content": "I see every day how crime, harassment, and the fear of assault affect our neighbors, families, and particularly women and youth. Safety isn't just the job of law enforcement—it is a collective responsibility. Crime thrives where there is isolation and silence, but it retreats when a community stands together, alert and unified.\nWe cannot always predict danger, but we can make our neighborhoods hostile to it by taking these four key steps together:\n1️⃣ Banish the \"Not My Business\" Mindset (Active Bystander Intervention):\nIf you see someone being followed, harassed, or cornered on the street, don’t look away. Move closer, create a distraction, ask them a neutral question (like \"Do you know what time it is?\"), or stay nearby until they are safe. Your presence can disrupt a crime.\n2️⃣ Illuminate the Dark Spaces:\nWork with local youth, community groups, and local leaders to identify poorly lit streets, quiet alleyways, and blind spots. Demand better lighting, and encourage shop owners and residents to keep their exterior lights on at night. A well-lit neighborhood is a safer neighborhood.\n3️⃣ Establish Instant Check-Ins & Digital Escorts:\nNever travel alone late at night without sharing your route. Utilize technology to your advantage. Setting up silent emergency triggers like SAFE bd (⁠safebd.onrender.com⁠) allows you to silently alert your family or dispatchers, broadcast your live GPS, and even preserve evidence without having to type or make a call during a panic.\n4️⃣ Keep Every Number That Counts Close:\nEducate your children, peers, and elderly neighbors on key national emergency contacts. Ensure these are saved on speed dial and taught in every household:\n 📞 999 – National Emergency Service (Police, Fire, Ambulance)\n 📞 109 – National Helpline for Violence Against Women and Children\n 👥 Local Community Watch / Thana (Police Station)\n5️⃣ Look Out for the Most Vulnerable:\nBuild a \"buddy system\" for kids walking home from school, workers returning late at night, and elderly residents. Knowing our neighbors’ routines means we notice when something is off.\nLet's refuse to let fear dictate how we live. Reach out to your neighbor, keep your eyes open, and support one another. Together, we are an unbreakable shield.\n📥 Share this post, take this image, and pass it on to your friends, family, and local groups to show we stand together!",
+      "media": "/api/feed/posts/post_1792081435440_9363/media.jpg",
+      "likes": 2,
+      "likedBy": [
+        "user_1552381922",
+        "user_1316750712"
+      ],
+      "comments": [
+        {
+          "id": "c_1792084904520_475",
+          "text": "we need more people like you",
+          "author": "SAAD RIZWAN",
+          "isAdmin": true,
+          "createdAt": "2026-10-15T17:21:44.520Z",
+          "isFounder": true,
+          "authorPhone": "1316750712"
+        },
+        {
+          "id": "c_1792086067393_595",
+          "text": "yes sir",
+          "author": "Shabbir",
+          "isAdmin": false,
+          "createdAt": "2026-10-15T17:41:07.393Z",
+          "isFounder": false,
+          "authorPhone": "1552381922"
+        }
+      ],
+      "approved": true,
+      "rejected": false,
+      "createdAt": "2026-10-15T16:24:00.214+00:00",
+      "approvedAt": "2026-10-15T16:24:00.214+00:00"
+    },
+    "post_1792207988283_3186": {
+      "id": "post_1792207988283_3186",
+      "author": "Verified Citizen",
+      "authorPhone": "1406311605",
+      "authorRole": "Citizen Member",
+      "isFounder": false,
+      "verified": false,
+      "type": "community",
+      "category": "General Safety",
+      "content": "we need to be more aware.",
+      "media": null,
+      "likes": 1,
+      "likedBy": [
+        "user_1316750712"
+      ],
+      "comments": [],
+      "approved": true,
+      "rejected": false,
+      "createdAt": "2026-10-17T03:33:08.283+00:00",
+      "approvedAt": "2026-10-17T03:33:08.283+00:00"
+    },
+    "post_1792257041801_3264": {
+      "id": "post_1792257041801_3264",
+      "author": "Verified Citizen",
+      "authorPhone": "1406311605",
+      "authorRole": "Citizen Member",
+      "isFounder": false,
+      "verified": false,
+      "type": "community",
+      "category": "General Safety",
+      "content": "we need to be more aware.",
+      "media": null,
+      "likes": 0,
+      "likedBy": [],
+      "comments": [],
+      "approved": true,
+      "rejected": false,
+      "createdAt": "2026-10-17T17:10:41.801+00:00",
+      "approvedAt": "2026-10-17T17:10:41.801+00:00"
+    }
+  },
+  "cloudVault": {
+    "scriptUrl": "https://script.google.com/macros/s/AKfycby3O-1dfJeGE5DJ8dDrhBHtkdgnk-IKSXFRtUswiTblka1M3GoC8uxGHfOM2kvyOVmq/exec",
+    "enabled": true,
+    "folderName": "SAFE_BD_VAULT",
+    "lastSyncedAt": "2026-10-18T14:19:49.269Z",
+    "stateFileId": null
+  },
+  "stats": {
+    "totalLogins": 61,
+    "totalRegistrations": 11,
+    "lastSaved": "2026-10-23T03:59:22.926Z",
+    "totalPosts": 9
+  }
+}
