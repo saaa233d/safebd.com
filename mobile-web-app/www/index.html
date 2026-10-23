@@ -10663,6 +10663,10 @@
         fetchAdminActiveJourneys();
       } else if (id === 'screen-feed') {
         fetchLiveFeedPosts(1, false);
+      } else if (id === 'screen-profile') {
+        if (typeof renderProfileScreenState === 'function') {
+          renderProfileScreenState();
+        }
       } else if (id === 'screen-map') {
         setTimeout(() => {
           if (navMap) {
