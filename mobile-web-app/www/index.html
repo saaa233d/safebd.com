@@ -5735,8 +5735,14 @@
         const res = await fetch(primaryUrl, options);
         return res;
       } catch (err) {
-        // High-availability auto-failover: if localhost:5000 fails, retry on live Render; if Render fails, retry localhost
+        const isHttpsPage = typeof window !== 'undefined' && window.location && window.location.protocol === 'https:';
         const isLocal = primaryUrl.includes('localhost') || primaryUrl.includes('127.0.0.1');
+
+        // On HTTPS pages, never attempt insecure http:// fallback to avoid browser mixed content blocks
+        if (isHttpsPage && !isLocal) {
+          throw err;
+        }
+
         const fallbackHost = isLocal ? 'https://safebd.onrender.com' : 'http://localhost:5000';
         const failoverUrl = endpoint.startsWith('http') ? endpoint.replace(/https?:\/\/[^\/]+/, fallbackHost) : `${fallbackHost}${endpoint}`;
         console.warn(`[API FAILOVER] ${primaryUrl} failed (${err.message}). Retrying against ${failoverUrl}...`);
@@ -6554,7 +6560,8 @@
 
       // STABILIZER: If user moved less than 35 meters (and not forced alert), suppress heavy re-render
       if (!isFirstFix && movedMeters !== null && movedMeters < 35 && !showAlert) {
-        updateTelemetryUI(currentCoords.address, `Coordinates: ${lat.toFixed(5)}, ${lon.toFixed(5)}`, `GPS Live (±${acc}m)`, "#10b981");
+        const accLabel = acc > 200 ? `WiFi Est (±${(acc / 1000).toFixed(1)}km)` : `GPS Live (±${acc}m)`;
+        updateTelemetryUI(currentCoords.address, `Coordinates: ${lat.toFixed(5)}, ${lon.toFixed(5)}`, accLabel, "#10b981");
 
         // Sync coordinates silently if on an active journey
         if (activeJourneySessionId) {
@@ -6616,13 +6623,15 @@
     }
 
     function applyLocationToInterface(locName, lat, lon, showAlert) {
-      updateTelemetryUI(locName, `Coordinates: ${lat.toFixed(5)}, ${lon.toFixed(5)}`, `GPS Live (±${currentCoords.accuracy}m)`, "#10b981");
+      const acc = Math.round(currentCoords.accuracy || 10);
+      const accLabel = acc > 200 ? `WiFi Est (±${(acc / 1000).toFixed(1)}km)` : `GPS Live (±${acc}m)`;
+      updateTelemetryUI(locName, `Coordinates: ${lat.toFixed(5)}, ${lon.toFixed(5)}`, accLabel, "#10b981");
 
       const walkStartEl = document.getElementById('walk-start');
       if (walkStartEl) walkStartEl.value = `📍 ${locName}`;
 
       const transitStreet = document.getElementById('transit-current-street');
-      if (transitStreet) transitStreet.innerText = `${locName} (GPS ±${currentCoords.accuracy}m)`;
+      if (transitStreet) transitStreet.innerText = `${locName} (${accLabel})`;
 
       // If user is tracking their live pin, center Google Maps on moving coordinates
       if (mapTrackingViewMode === 'live_location' || !currentDestinationQuery) {
