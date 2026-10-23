@@ -3462,18 +3462,6 @@
         </div>
       </div>
 
-      <!-- Floating shurokhaAI Assistant Trigger (Bottom Left Portion of SOS Screen) -->
-      <div id="shurokha-ai-trigger" class="shurokha-fab" onclick="openShurokhaChat()" title="Talk to shurokhaAI (Live AI & Google Search)">
-        <div class="shurokha-fab-icon-wrap">
-          <i class="fas fa-robot"></i>
-          <span class="shurokha-fab-pulse"></span>
-        </div>
-        <div class="shurokha-fab-label">
-          <span class="shurokha-fab-title">shurokhaAI</span>
-          <span class="shurokha-fab-status"><span class="shurokha-dot"></span> Online</span>
-        </div>
-      </div>
-
     </div>
 
     <!-- SCREEN 2: GOOGLE MAPS + BANGLADESH AUTOCOMPLETE -->
@@ -4428,6 +4416,18 @@
     </div>
 
     <div id="screen-admin" class="screen screen-padded" style="display: none;"></div>
+
+    <!-- Floating shurokhaAI Assistant Trigger (Universal Cross-Screen Assistant) -->
+    <div id="shurokha-ai-trigger" class="shurokha-fab" onclick="openShurokhaChat()" title="Talk to shurokhaAI (Live AI & Google Search)">
+      <div class="shurokha-fab-icon-wrap">
+        <i class="fas fa-robot"></i>
+        <span class="shurokha-fab-pulse"></span>
+      </div>
+      <div class="shurokha-fab-label">
+        <span class="shurokha-fab-title">shurokhaAI</span>
+        <span class="shurokha-fab-status"><span class="shurokha-dot"></span> Online</span>
+      </div>
+    </div>
 
     <!-- Apple Floating Liquid Glass Bottom Navigation -->
     <div class="bottom-bar">
@@ -6408,18 +6408,46 @@
     // =========================================================================
     let gpsWatchId = null;
 
+    function fallbackToNetworkLocation(reason) {
+      const defaultLat = 23.8103;
+      const defaultLon = 90.4125;
+      const defaultAddr = "Dhaka, Bangladesh";
+
+      fetch('https://ipapi.co/json/')
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.latitude && data.longitude) {
+            const locName = `${data.city || 'Dhaka'}, ${data.region || 'Bangladesh'}`;
+            currentCoords.lat = Number(data.latitude);
+            currentCoords.lon = Number(data.longitude);
+            currentCoords.accuracy = 250;
+            currentCoords.address = locName;
+            applyLocationToInterface(locName, currentCoords.lat, currentCoords.lon, false);
+          } else {
+            throw new Error("No IP coords");
+          }
+        })
+        .catch(() => {
+          currentCoords.lat = defaultLat;
+          currentCoords.lon = defaultLon;
+          currentCoords.accuracy = 500;
+          currentCoords.address = defaultAddr;
+          applyLocationToInterface(defaultAddr, defaultLat, defaultLon, false);
+        });
+    }
+
     function acquireRealLocation(forceAlert = false) {
       updateTelemetryUI("Connecting to Satellite GPS...", "Requesting live device sensor coordinates", "Connecting...", "#f59e0b");
 
       if (!navigator.geolocation) {
-        alert("⚠️ Geolocation is not supported by your device browser.");
+        fallbackToNetworkLocation("Geolocation is not supported by your device browser.");
         return;
       }
 
-      const geoOptions = {
+      const highAccuracyOptions = {
         enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0
+        timeout: 8000,
+        maximumAge: 5000
       };
 
       navigator.geolocation.getCurrentPosition(
@@ -6427,15 +6455,18 @@
           handleDirectGpsSuccess(position, forceAlert);
         },
         (err) => {
-          console.warn("GPS lookup error:", err.code, err.message);
-          let errText = "Unable to retrieve device GPS.";
-          if (err.code === 1) errText = "Location permission denied. Please allow device location access.";
-          if (err.code === 2) errText = "GPS position unavailable. Please ensure GPS / Location is turned ON.";
-          if (err.code === 3) errText = "GPS request timed out. Retrying high-accuracy fix...";
-          updateTelemetryUI("GPS Permission Required", errText, "Signal Lost", "#ef4444");
-          if (forceAlert) alert("⚠️ " + errText);
+          console.warn("High-accuracy GPS attempt failed, trying standard cellular/wifi position:", err.message);
+          // Fallback Step 2: Try standard accuracy (works immediately indoors / on WiFi / laptops)
+          navigator.geolocation.getCurrentPosition(
+            (pos) => handleDirectGpsSuccess(pos, forceAlert),
+            (secondErr) => {
+              console.warn("Standard geolocation failed, falling back to network IP location:", secondErr.message);
+              fallbackToNetworkLocation(secondErr.code === 1 ? "Location permission denied" : "GPS sensor unavailable");
+            },
+            { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+          );
         },
-        geoOptions
+        highAccuracyOptions
       );
 
       // Continuously monitor precise position
@@ -6443,7 +6474,7 @@
         gpsWatchId = navigator.geolocation.watchPosition(
           (pos) => handleDirectGpsSuccess(pos, false),
           (err) => console.log("watchPosition ping:", err.message),
-          { enableHighAccuracy: true, timeout: 20000, maximumAge: 3000 }
+          { enableHighAccuracy: false, timeout: 20000, maximumAge: 10000 }
         );
       }
     }
@@ -11262,19 +11293,28 @@
           setLoggedInState();
           renderCommunityPosts();
 
-          document.getElementById('view-auth-forms').style.display = 'none';
-          document.getElementById('view-profile-active').style.display = 'block';
-          const titleEl = document.getElementById('auth-title');
-          if (titleEl) titleEl.innerText = "Citizen Profile (Unlocked)";
+          // Refresh and display active profile state
+          renderProfileScreenState();
 
-          // Immediately dismiss modal so unlocked screens and features are responsive
-          closeAuthModal();
+          // Refresh live device GPS positioning immediately upon sign in
+          acquireRealLocation(false);
 
-          if (currentUser.isAdmin) {
-            alert(`🛡️ Profile Unlocked: Welcome Chief Admin!\nAdmin Command Portal unlocked. Opening Moderation Queue.`);
-            openAdminPortal();
-          } else {
-            alert(`🔓 Profile Unlocked Successfully!\n\nWelcome back, ${currentUser.name}!\nRegistered Mobile: +880 ${cleanPhone}`);
+          const profileScreen = document.getElementById('screen-profile');
+          const isProfileActive = profileScreen && profileScreen.classList.contains('active');
+
+          if (!isProfileActive) {
+            closeAuthModal();
+          }
+
+          // Gentle feedback banner
+          const welcomeMsg = currentUser.isAdmin 
+            ? "🛡️ Chief Admin Profile Unlocked. You have full command clearance."
+            : `🔓 Welcome back, ${currentUser.name}! Profile unlocked.`;
+          
+          const profileSub = document.querySelector('#screen-profile [data-i18n="profile_page_sub"]');
+          if (profileSub) {
+            profileSub.innerText = welcomeMsg;
+            profileSub.style.color = '#34d399';
           }
         }
       })
@@ -13440,7 +13480,7 @@
       const hasAnyModalOpen = !!document.querySelector(
         '.contact-modal-backdrop.open, .auth-modal-backdrop.open, .edit-contact-modal-backdrop.open, .sos-modal-backdrop.open, .walk-timer-modal-backdrop.open, .author-profile-modal-backdrop.open, .shurokha-modal-backdrop.open, #evidence-player-modal.open'
       );
-      const shouldShow = Boolean(isSosActive && !hasAnyModalOpen);
+      const shouldShow = !hasAnyModalOpen;
       if (shouldShow) {
         if (fab.style.display !== 'flex') {
           fab.style.display = 'flex';
@@ -13661,7 +13701,7 @@
       if (messagesContainer) messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
       const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-      const timeoutId = controller ? setTimeout(() => controller.abort(), 12000) : null;
+      const timeoutId = controller ? setTimeout(() => controller.abort(), 35000) : null;
 
       try {
         const fetchOptions = {
@@ -13674,7 +13714,7 @@
         };
         if (controller) fetchOptions.signal = controller.signal;
 
-        const res = await fetch(`${API_BASE}/api/ai/chat`, fetchOptions);
+        const res = await apiFetch('/api/ai/chat', fetchOptions);
         if (timeoutId) clearTimeout(timeoutId);
 
         const data = await res.json();
@@ -13690,6 +13730,7 @@
       } catch (err) {
         if (timeoutId) clearTimeout(timeoutId);
         if (typing) typing.style.display = 'none';
+        console.warn("shurokhaAI fetch error:", err);
         appendShurokhaBubble('model', "I am right here with you! If you are facing an emergency or need urgent police/ambulance assistance, please use our Red SOS Button or dial 999 directly.");
       }
     }
