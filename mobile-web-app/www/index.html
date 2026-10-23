@@ -2436,29 +2436,6 @@
       box-shadow: 0 0 12px rgba(48, 209, 88, 0.45);
     }
 
-    /* Dhaka Bus Fare Generator Styles */
-    .busfare-quick-pill {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 8px;
-      color: #cbd5e1;
-      font-size: 10px;
-      padding: 4px 9px;
-      white-space: nowrap;
-      cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-      flex-shrink: 0;
-    }
-    .busfare-quick-pill:hover {
-      background: rgba(245, 158, 11, 0.18);
-      border-color: rgba(245, 158, 11, 0.45);
-      color: #fbbf24;
-      transform: translateY(-1px);
-    }
-    .busfare-quick-pill:active {
-      transform: scale(0.96);
-    }
-
     /* Posh First Aid Accordion */
     .firstaid-accordion-card {
       background: rgba(255, 255, 255, 0.035);
@@ -3443,7 +3420,7 @@
       </div>
 
       <!-- Quick Walk With Me Shortcut Card (Apple Inset Grouped) -->
-      <div class="clean-tile" style="padding: 14px 16px; margin-bottom: 12px; cursor: pointer;" onclick="switchTab('screen-map', document.querySelectorAll('.nav-tab-btn')[1])">
+      <div class="clean-tile" style="padding: 14px 16px; margin-bottom: 20px; cursor: pointer;" onclick="switchTab('screen-map', document.querySelectorAll('.nav-tab-btn')[1])">
         <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
           <div class="apple-squircle squircle-walk">
             <i class="fas fa-person-walking"></i>
@@ -3451,20 +3428,6 @@
           <div>
             <div class="tile-main" data-i18n="sos_walk_card_title">Walk With Me Companion</div>
             <div class="tile-sub" data-i18n="sos_walk_card_sub">Search any place in Bangladesh & route with Google Maps</div>
-          </div>
-        </div>
-        <i class="fas fa-chevron-right apple-chevron"></i>
-      </div>
-
-      <!-- Quick Dhaka Bus Fare Generator Shortcut Card -->
-      <div class="clean-tile" style="padding: 14px 16px; margin-bottom: 20px; cursor: pointer;" onclick="openBusFareFromHome()">
-        <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
-          <div class="apple-squircle" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #f59e0b;">
-            <i class="fas fa-bus-simple"></i>
-          </div>
-          <div>
-            <div class="tile-main">Dhaka Bus Fare Generator</div>
-            <div class="tile-sub">Official BRTA ৳2.70/km • 50% Student Half-Pass</div>
           </div>
         </div>
         <i class="fas fa-chevron-right apple-chevron"></i>
@@ -3779,140 +3742,9 @@
         <!-- Apple Segmented Capsule Filter -->
         <div class="apple-segment-bar" style="margin-top: 14px;">
           <button type="button" class="apple-segment-btn active" onclick="filterHelpSection('all', this)" data-i18n="help_filter_all">All</button>
-          <button type="button" class="apple-segment-btn" onclick="filterHelpSection('busfare', this)">
-            <i class="fas fa-bus-simple" style="margin-right: 4px; color: #f59e0b;"></i> Bus Fare
-          </button>
           <button type="button" class="apple-segment-btn" onclick="filterHelpSection('hotlines', this)" data-i18n="help_filter_hotlines">Hotlines</button>
           <button type="button" class="apple-segment-btn" onclick="filterHelpSection('firstaid', this)" data-i18n="help_filter_firstaid">First Aid</button>
         </div>
-      </div>
-
-      <!-- SECTION: DHAKA CITY BUS FARE CALCULATOR (BRTA 2.70 TK/KM & 50% STUDENT HALF-PASS) -->
-      <div id="section-help-busfare" style="flex-shrink: 0; width: 100%; box-sizing: border-box; background: rgba(26, 28, 38, 0.78); backdrop-filter: blur(20px); border: 1px solid rgba(245, 158, 11, 0.28); border-radius: 20px; padding: 16px; margin-bottom: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.35); position: relative;">
-        <!-- Glowing accent top bar -->
-        <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #f59e0b, #eab308, #10b981);"></div>
-
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-          <div>
-            <span style="font-size: 14px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 7px;">
-              <i class="fas fa-bus-simple" style="color: #f59e0b;"></i> Dhaka Bus Fare Calculator
-              <span style="font-size: 9.5px; background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); padding: 1.5px 6px; border-radius: 6px; font-weight: 800;">BRTA ৳2.70/km</span>
-            </span>
-            <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px;">Dhaka City Metro Bus Route • 50% Student Discount • Min ৳10</span>
-          </div>
-          <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(245, 158, 11, 0.15); display: flex; align-items: center; justify-content: center; color: #f59e0b; font-size: 14px;">
-            <i class="fas fa-calculator"></i>
-          </div>
-        </div>
-
-        <!-- Input Box: Start Stoppage -->
-        <div style="display: flex; flex-direction: column; gap: 9px; margin-bottom: 12px;">
-          <div style="position: relative;">
-            <div style="display: flex; align-items: center; background: rgba(15, 17, 26, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 6px 10px; gap: 8px;">
-              <i class="fas fa-circle-dot" style="color: #10b981; font-size: 12px;"></i>
-              <div style="flex: 1;">
-                <label style="display: block; font-size: 9px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 1px;">From (শুরুর স্থান / বাস স্টপ)</label>
-                <input type="text" id="busfare-start" placeholder="e.g. Farmgate, Mirpur 10, Shahbagh..." list="dhaka-bus-stops-list" autocomplete="off" style="width: 100%; background: none; border: none; outline: none; color: #fff; font-size: 12.5px; font-weight: 600;" onkeydown="if(event.key==='Enter') calculateDhakaBusFare()">
-              </div>
-              <button type="button" onclick="setBusFareStartGPS()" title="Use live GPS location" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: #34d399; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                <i class="fas fa-crosshairs"></i> GPS
-              </button>
-            </div>
-          </div>
-
-          <!-- Swap Button Center -->
-          <div style="display: flex; justify-content: center; margin: -5px 0;">
-            <button type="button" onclick="swapBusFareLocations()" title="Swap start and destination" style="width: 28px; height: 28px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18); color: #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; transition: all 0.2s;">
-              <i class="fas fa-arrow-down-up-across-line"></i>
-            </button>
-          </div>
-
-          <!-- Input Box: Destination Stoppage -->
-          <div style="position: relative;">
-            <div style="display: flex; align-items: center; background: rgba(15, 17, 26, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 6px 10px; gap: 8px;">
-              <i class="fas fa-location-dot" style="color: #ef4444; font-size: 12px;"></i>
-              <div style="flex: 1;">
-                <label style="display: block; font-size: 9px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 1px;">To (গন্তব্য বাস স্টপ)</label>
-                <input type="text" id="busfare-dest" placeholder="e.g. Motijheel, Uttara, Dhanmondi 27..." list="dhaka-bus-stops-list" autocomplete="off" style="width: 100%; background: none; border: none; outline: none; color: #fff; font-size: 12.5px; font-weight: 600;" onkeydown="if(event.key==='Enter') calculateDhakaBusFare()">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Quick Pick Bus Stoppage Pills -->
-        <div style="display: flex; gap: 5px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 10px; scrollbar-width: none;">
-          <span style="font-size: 10px; color: #94a3b8; align-self: center; white-space: nowrap; font-weight: 700;">Popular:</span>
-          <button type="button" class="busfare-quick-pill" onclick="quickFillBusFare('Farmgate', 'Motijheel')">Farmgate ➔ Motijheel</button>
-          <button type="button" class="busfare-quick-pill" onclick="quickFillBusFare('Mirpur 10', 'Shahbagh')">Mirpur 10 ➔ Shahbagh</button>
-          <button type="button" class="busfare-quick-pill" onclick="quickFillBusFare('Uttara', 'Farmgate')">Uttara ➔ Farmgate</button>
-          <button type="button" class="busfare-quick-pill" onclick="quickFillBusFare('Mohammadpur', 'Motijheel')">Mohammadpur ➔ Motijheel</button>
-          <button type="button" class="busfare-quick-pill" onclick="quickFillBusFare('Gabtoli', 'Sayedabad')">Gabtoli ➔ Sayedabad</button>
-          <button type="button" class="busfare-quick-pill" onclick="quickFillBusFare('Dhanmondi 27', 'New Market')">Dhanmondi ➔ New Market</button>
-        </div>
-
-        <!-- Calculate Fare Action Button -->
-        <button type="button" id="btn-calc-busfare" onclick="calculateDhakaBusFare()" style="width: 100%; padding: 11px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: none; border-radius: 12px; color: #000; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35); transition: transform 0.2s, box-shadow 0.2s;">
-          <i class="fas fa-calculator"></i> Calculate Official BRTA Bus Fare
-        </button>
-
-        <!-- Dynamic Result Card (Initially hidden) -->
-        <div id="busfare-result-card" style="display: none; margin-top: 14px; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 15px; padding: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
-          <!-- Top Row: Distance & Road route -->
-          <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 8px; margin-bottom: 12px;">
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <i class="fas fa-route" style="color: #38bdf8; font-size: 13px;"></i>
-              <span id="busfare-route-name" style="font-size: 12px; font-weight: 700; color: #fff;">Farmgate to Motijheel</span>
-            </div>
-            <div id="busfare-dist-badge" style="font-size: 11px; font-weight: 800; color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); padding: 2px 7px; border-radius: 9999px;">
-              6.5 km
-            </div>
-          </div>
-
-          <!-- Dual Fare Price Badges -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
-            <!-- General Passenger Fare -->
-            <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 10px; text-align: center;">
-              <div style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Regular Passenger</div>
-              <div id="busfare-regular-amount" style="font-size: 24px; font-weight: 900; color: #fbbf24; margin: 3px 0;">৳ 18</div>
-              <div style="font-size: 9.5px; color: #cbd5e1;">Rate: ৳2.70/km (Min ৳10)</div>
-            </div>
-
-            <!-- Student Half-Pass Fare -->
-            <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 10px; text-align: center;">
-              <div style="font-size: 10px; font-weight: 700; color: #38bdf8; text-transform: uppercase;">Student (হাফ পাস)</div>
-              <div id="busfare-student-amount" style="font-size: 24px; font-weight: 900; color: #38bdf8; margin: 3px 0;">৳ 9</div>
-              <div style="font-size: 9.5px; color: #7dd3fc;">50% Off (Min ৳5)</div>
-            </div>
-          </div>
-
-          <!-- Non-Dhaka Warning Badge if applicable -->
-          <div id="busfare-intercity-warning" style="display: none; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 10px; padding: 8px 10px; margin-bottom: 10px; font-size: 10.5px; color: #fca5a5; line-height: 1.4;">
-            <i class="fas fa-circle-exclamation" style="margin-right: 4px; color: #ef4444;"></i>
-            <strong>Dhaka City Scope Notice:</strong> This ৳2.70/km rate applies exclusively within Dhaka Metropolitan area. Intercity/long-distance highway buses follow separate inter-district fare charts.
-          </div>
-
-          <!-- Overcharging Consumer Defense Box -->
-          <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 9px 11px;">
-            <div style="font-size: 10.5px; color: #cbd5e1; line-height: 1.35; margin-bottom: 7px;">
-              <i class="fas fa-shield-halved" style="color: #10b981; margin-right: 4px;"></i>
-              <strong>Overcharging Protection:</strong> Under Section 34 of Road Transport Act 2018, conductors cannot demand above this official fare. If overcharged, report directly:
-            </div>
-            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-              <a href="tel:16107" class="hotline-call-pill" style="border-color: rgba(245,158,11,0.4); color: #fbbf24; background: rgba(245,158,11,0.15); font-size: 10px; padding: 3px 8px;">
-                <i class="fas fa-phone"></i> BRTA 16107
-              </a>
-              <a href="tel:16121" class="hotline-call-pill" style="border-color: rgba(56,189,248,0.4); color: #38bdf8; background: rgba(56,189,248,0.15); font-size: 10px; padding: 3px 8px;">
-                <i class="fas fa-phone"></i> Consumer Rights 16121
-              </a>
-              <a href="tel:999" class="hotline-call-pill" style="border-color: rgba(239,68,68,0.4); color: #f87171; background: rgba(239,68,68,0.15); font-size: 10px; padding: 3px 8px;">
-                <i class="fas fa-phone"></i> Police 999
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Hidden datalist with all major Dhaka stoppages -->
-        <datalist id="dhaka-bus-stops-list"></datalist>
       </div>
 
       <!-- TACTICAL 2x2 ACTION MATRIX -->
@@ -10883,8 +10715,6 @@
         fetchAdminActiveJourneys();
       } else if (id === 'screen-feed') {
         fetchLiveFeedPosts(1, false);
-      } else if (id === 'screen-help') {
-        if (typeof initDhakaBusStoppagesDatalist === 'function') initDhakaBusStoppagesDatalist();
       } else if (id === 'screen-profile') {
         if (typeof renderProfileScreenState === 'function') {
           renderProfileScreenState();
@@ -10929,28 +10759,19 @@
       if (btn) btn.classList.add('active');
 
       const tacticalGrid = document.querySelector('#screen-help .help-tactical-grid');
-      const secBusFare = document.getElementById('section-help-busfare');
       const secHotlines = document.getElementById('section-help-hotlines');
       const secFirstAid = document.getElementById('section-help-firstaid');
 
       if (section === 'all') {
         if (tacticalGrid) tacticalGrid.style.display = 'grid';
-        if (secBusFare) secBusFare.style.display = 'block';
         if (secHotlines) secHotlines.style.display = 'block';
         if (secFirstAid) secFirstAid.style.display = 'block';
-      } else if (section === 'busfare') {
-        if (tacticalGrid) tacticalGrid.style.display = 'none';
-        if (secBusFare) secBusFare.style.display = 'block';
-        if (secHotlines) secHotlines.style.display = 'none';
-        if (secFirstAid) secFirstAid.style.display = 'none';
       } else if (section === 'hotlines') {
-        if (tacticalGrid) tacticalGrid.style.display = 'grid';
-        if (secBusFare) secBusFare.style.display = 'none';
+        if (tacticalGrid) tacticalGrid.style.display = 'none';
         if (secHotlines) secHotlines.style.display = 'block';
         if (secFirstAid) secFirstAid.style.display = 'none';
       } else if (section === 'firstaid') {
         if (tacticalGrid) tacticalGrid.style.display = 'none';
-        if (secBusFare) secBusFare.style.display = 'none';
         if (secHotlines) secHotlines.style.display = 'none';
         if (secFirstAid) secFirstAid.style.display = 'block';
       }
@@ -10970,304 +10791,6 @@
       if (!isOpen && body) {
         body.style.display = 'block';
         if (chevron) chevron.style.transform = 'rotate(180deg)';
-      }
-    }
-
-    /* ----------------------------------------------------
-       BRTA DHAKA METRO BUS FARE GENERATOR (৳2.70/km & 50% Half-Pass)
-    ---------------------------------------------------- */
-    const DHAKA_BUS_STOPPAGES = [
-      { name: "Farmgate", bn: "ফার্মগেট", lat: 23.7561, lon: 90.3872 },
-      { name: "Shahbagh", bn: "শাহবাগ", lat: 23.7383, lon: 90.3957 },
-      { name: "Mirpur 10", bn: "মিরপুর ১০", lat: 23.8069, lon: 90.3687 },
-      { name: "Mirpur 1", bn: "মিরপুর ১", lat: 23.7956, lon: 90.3537 },
-      { name: "Mirpur 2 / Stadium", bn: "মিরপুর ২", lat: 23.8041, lon: 90.3615 },
-      { name: "Mirpur 11", bn: "মিরপুর ১১", lat: 23.8185, lon: 90.3662 },
-      { name: "Mirpur 12 / Bus Stand", bn: "মিরপুর ১২", lat: 23.8242, lon: 90.3653 },
-      { name: "Mirpur 14", bn: "মিরপুর ১৪", lat: 23.7990, lon: 90.3835 },
-      { name: "Pallabi", bn: "পল্লবী", lat: 23.8245, lon: 90.3645 },
-      { name: "Diabari (Metro Station)", bn: "দিয়াবাড়ী", lat: 23.8720, lon: 90.3705 },
-      { name: "Uttara (Azampur / Sector 3)", bn: "উত্তরা আজমপুর", lat: 23.8687, lon: 90.3995 },
-      { name: "Uttara (House Building)", bn: "উত্তরা হাউস বিল্ডিং", lat: 23.8735, lon: 90.3980 },
-      { name: "Uttara (Jashimuddin)", bn: "উত্তরা জসীমউদ্দীন", lat: 23.8580, lon: 90.4010 },
-      { name: "Airport (হযরত শাহজালাল বিমানবন্দর)", bn: "বিমানবন্দর", lat: 23.8515, lon: 90.4076 },
-      { name: "Abdullahpur", bn: "আব্দুল্লাহপুর", lat: 23.8825, lon: 90.3990 },
-      { name: "Tongi (Station Road)", bn: "টঙ্গী", lat: 23.8960, lon: 90.4030 },
-      { name: "Gazipur Chowrasta", bn: "গাজীপুর চৌরাস্তা", lat: 23.9960, lon: 90.3800 },
-      { name: "Mohakhali", bn: "মহাখালী", lat: 23.7778, lon: 90.4005 },
-      { name: "Mohakhali Bus Terminal", bn: "মহাখালী বাস টার্মিনাল", lat: 23.7745, lon: 90.4008 },
-      { name: "Motijheel", bn: "মতিঝিল", lat: 23.7330, lon: 90.4172 },
-      { name: "Dhanmondi 27", bn: "ধানমন্ডি ২৭", lat: 23.7538, lon: 90.3768 },
-      { name: "Dhanmondi 32", bn: "ধানমন্ডি ৩২", lat: 23.7508, lon: 90.3792 },
-      { name: "Dhanmondi 15 (Star Kabab)", bn: "ধানমন্ডি ১৫", lat: 23.7515, lon: 90.3725 },
-      { name: "Mohammadpur (Town Hall)", bn: "মোহাম্মদপুর টাউন হল", lat: 23.7658, lon: 90.3585 },
-      { name: "Mohammadpur Bus Stand", bn: "মোহাম্মদপুর বাস স্ট্যান্ড", lat: 23.7540, lon: 90.3580 },
-      { name: "Mohammadpur (Shia Masjid / Ring Road)", bn: "শিয়া মসজিদ", lat: 23.7715, lon: 90.3590 },
-      { name: "Science Lab", bn: "সায়েন্স ল্যাব", lat: 23.7388, lon: 90.3831 },
-      { name: "New Market / Nilkhet", bn: "নিউ মার্কেট / নীলক্ষেত", lat: 23.7329, lon: 90.3854 },
-      { name: "Azimpur Bus Stand", bn: "আজিমপুর", lat: 23.7291, lon: 90.3858 },
-      { name: "Gabtoli Bus Terminal", bn: "গাবতলী", lat: 23.7842, lon: 90.3421 },
-      { name: "Technical Mor", bn: "টেকনিক্যাল মোড়", lat: 23.7810, lon: 90.3525 },
-      { name: "Kalyanpur", bn: "কল্যাণপুর", lat: 23.7788, lon: 90.3575 },
-      { name: "Shyamoli", bn: "শ্যামলী", lat: 23.7712, lon: 90.3635 },
-      { name: "Asad Gate / College Gate", bn: "আসাদ গেট", lat: 23.7598, lon: 90.3725 },
-      { name: "Sayedabad Bus Terminal", bn: "সায়েদাবাদ", lat: 23.7145, lon: 90.4285 },
-      { name: "Jatrabari Mor", bn: "যাত্রাবাড়ী", lat: 23.7107, lon: 90.4349 },
-      { name: "Gulshan 1 Circle", bn: "গুলশান ১", lat: 23.7785, lon: 90.4172 },
-      { name: "Gulshan 2 Circle", bn: "গুলশান ২", lat: 23.7925, lon: 90.4162 },
-      { name: "Banani Kakoli", bn: "কাকলী / বনানী", lat: 23.7937, lon: 90.4045 },
-      { name: "Kuril Biswa Road", bn: "কুড়িল বিশ্বরোড", lat: 23.8188, lon: 90.4215 },
-      { name: "Natun Bazar (Badda)", bn: "নতুন বাজার", lat: 23.7985, lon: 90.4265 },
-      { name: "Badda (Link Road)", bn: "বাড্ডা লিঙ্ক রোড", lat: 23.7820, lon: 90.4260 },
-      { name: "Rampura Bridge", bn: "রামপুরা ব্রিজ", lat: 23.7635, lon: 90.4258 },
-      { name: "Banasree", bn: "বনশ্রী", lat: 23.7630, lon: 90.4350 },
-      { name: "Malibagh / Mouchak", bn: "মালিবাগ / মৌচাক", lat: 23.7485, lon: 90.4125 },
-      { name: "Mogbazar", bn: "মগবাজার", lat: 23.7495, lon: 90.4035 },
-      { name: "Bangla Motor", bn: "বাংলামোটর", lat: 23.7455, lon: 90.3945 },
-      { name: "Press Club / Paltan", bn: "প্রেস ক্লাব / পল্টন", lat: 23.7295, lon: 90.4095 },
-      { name: "Gulistan (Zero Point)", bn: "গুলিস্তান", lat: 23.7258, lon: 90.4125 },
-      { name: "Sadarghat Launch Terminal", bn: "সদরঘাট", lat: 23.7047, lon: 90.4125 },
-      { name: "Khilkhet", bn: "খিলক্ষেত", lat: 23.8315, lon: 90.4185 },
-      { name: "Bashundhara Gate (Jamuna Future Park)", bn: "বসুন্ধরা গেট", lat: 23.8155, lon: 90.4235 },
-      { name: "Agargaon (Metro Station)", bn: "আগারগাঁও", lat: 23.7770, lon: 90.3785 },
-      { name: "Bijoy Sarani", bn: "বিজয় সরণি", lat: 23.7665, lon: 90.3860 },
-      { name: "Kawran Bazar", bn: "কারওয়ান বাজার", lat: 23.7510, lon: 90.3925 },
-      { name: "Panthapath", bn: "পান্থপথ", lat: 23.7515, lon: 90.3855 },
-      { name: "Kakrail", bn: "কাকরাইল", lat: 23.7385, lon: 90.4075 },
-      { name: "Shantinagar", bn: "শান্তিনগর", lat: 23.7425, lon: 90.4125 },
-      { name: "Khilgaon", bn: "খিলগাঁও", lat: 23.7535, lon: 90.4215 },
-      { name: "Savar Bus Stand", bn: "সাভার", lat: 23.8445, lon: 90.2580 },
-      { name: "Signboard", bn: "সাইনবোর্ড", lat: 23.6820, lon: 90.4850 }
-    ];
-
-    function initDhakaBusStoppagesDatalist() {
-      const dl = document.getElementById('dhaka-bus-stops-list');
-      if (!dl || dl.children.length > 0) return;
-      DHAKA_BUS_STOPPAGES.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s.name;
-        opt.label = s.bn ? `${s.name} (${s.bn})` : s.name;
-        dl.appendChild(opt);
-      });
-    }
-    setTimeout(initDhakaBusStoppagesDatalist, 300);
-
-    function openBusFareFromHome() {
-      switchTab('screen-help', document.getElementById('nav-tab-help'));
-      const busFareBtn = document.querySelectorAll('#screen-help .apple-segment-btn')[1];
-      if (typeof filterHelpSection === 'function') {
-        filterHelpSection('busfare', busFareBtn);
-      }
-      setTimeout(() => {
-        const sInput = document.getElementById('busfare-start');
-        if (sInput) {
-          sInput.focus();
-          sInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 200);
-    }
-
-    function onBusFareInputChanged() {
-      // Keep results visible; only clear if both fields become completely blank
-      const sInput = document.getElementById('busfare-start');
-      const dInput = document.getElementById('busfare-dest');
-      if (!sInput || !dInput) return;
-      if (!sInput.value.trim() && !dInput.value.trim()) {
-        const resultCard = document.getElementById('busfare-result-card');
-        if (resultCard) resultCard.style.display = 'none';
-      }
-    }
-
-    function setBusFareStartGPS() {
-      const sInput = document.getElementById('busfare-start');
-      if (!sInput) return;
-      if (currentCoords.lat && currentCoords.lon) {
-        let closest = null;
-        let minD = Infinity;
-        DHAKA_BUS_STOPPAGES.forEach(s => {
-          const d = computeHaversineKm(currentCoords.lat, currentCoords.lon, s.lat, s.lon);
-          if (d !== null && d < minD) {
-            minD = d;
-            closest = s;
-          }
-        });
-        if (closest && minD < 3.5) {
-          sInput.value = closest.name;
-        } else {
-          sInput.value = "Current GPS Location";
-        }
-      } else {
-        if (typeof acquireRealLocation === 'function') acquireRealLocation(true);
-        sInput.value = "Current GPS Location";
-      }
-    }
-
-    function swapBusFareLocations() {
-      const s = document.getElementById('busfare-start');
-      const d = document.getElementById('busfare-dest');
-      if (s && d) {
-        const tmp = s.value;
-        s.value = d.value;
-        d.value = tmp;
-        if (s.value && d.value) calculateDhakaBusFare();
-      }
-    }
-
-    function quickFillBusFare(startName, destName) {
-      const s = document.getElementById('busfare-start');
-      const d = document.getElementById('busfare-dest');
-      if (s) s.value = startName;
-      if (d) d.value = destName;
-      calculateDhakaBusFare();
-    }
-
-    function resolveDhakaStoppageCoords(name) {
-      if (!name) return null;
-      const clean = name.toLowerCase().replace(/[-–—/]/g, ' ').replace(/\s+/g, ' ').trim();
-      if ((clean.includes('gps') || clean.includes('current')) && currentCoords && currentCoords.lat && currentCoords.lon) {
-        return { lat: currentCoords.lat, lon: currentCoords.lon, name: "Current GPS Location" };
-      }
-
-      // 1. Direct or normalized match in DHAKA_BUS_STOPPAGES
-      let match = DHAKA_BUS_STOPPAGES.find(s => {
-        const sName = s.name.toLowerCase().replace(/[-–—/]/g, ' ').replace(/\s+/g, ' ');
-        const sBn = (s.bn || '').toLowerCase().replace(/[-–—/]/g, ' ').replace(/\s+/g, ' ');
-        return sName === clean || sBn === clean;
-      });
-      if (match) return { lat: match.lat, lon: match.lon, name: match.name };
-
-      // 2. Substring & keyword match in DHAKA_BUS_STOPPAGES
-      match = DHAKA_BUS_STOPPAGES.find(s => {
-        const sName = s.name.toLowerCase().replace(/[-–—/]/g, ' ');
-        const sBn = (s.bn || '').toLowerCase();
-        return sName.includes(clean) || clean.includes(sName) || (sBn && (sBn.includes(clean) || clean.includes(sBn)));
-      });
-      if (match) return { lat: match.lat, lon: match.lon, name: match.name };
-
-      // 3. Fallback to BANGLADESH_LOCATIONS master list
-      if (typeof findBestLocationMatch === 'function') {
-        const best = findBestLocationMatch(name);
-        if (best && best.lat && best.lon) return { lat: best.lat, lon: best.lon, name: best.name };
-      }
-      return null;
-    }
-
-    async function calculateDhakaBusFare() {
-      const sInput = document.getElementById('busfare-start');
-      const dInput = document.getElementById('busfare-dest');
-      let startVal = (sInput ? sInput.value : '').trim();
-      let destVal = (dInput ? dInput.value : '').trim();
-
-      // Smart Single-Box Parser: If user typed "Farmgate to Motijheel" or "ফার্মগেট থেকে মতিঝিল" into first field
-      if (startVal && !destVal) {
-        const splitRegex = /\s+(?:to|➔|->|-|থেকে|হতে|পর্যন্ত)\s+/i;
-        const parts = startVal.split(splitRegex);
-        if (parts.length >= 2) {
-          startVal = parts[0].trim();
-          destVal = parts[1].trim();
-          if (sInput) sInput.value = startVal;
-          if (dInput) dInput.value = destVal;
-        }
-      }
-
-      if (!startVal || !destVal) {
-        alert("অনুগ্রহ করে শুরুর স্থান ও গন্তব্য বাস স্টপ লিখুন বা সিলেক্ট করুন (Please enter both Start and Destination stoppages).");
-        return;
-      }
-
-      const calcBtn = document.getElementById('btn-calc-busfare');
-      const origText = calcBtn ? calcBtn.innerHTML : '';
-      if (calcBtn) {
-        calcBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Calculating Google Maps Road Distance...';
-        calcBtn.disabled = true;
-      }
-
-      try {
-        let sCoords = resolveDhakaStoppageCoords(startVal);
-        let dCoords = resolveDhakaStoppageCoords(destVal);
-
-        // Fallback geocoding if online and coordinates missing
-        if (!sCoords) {
-          try {
-            const geoRes = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(startVal + ' Dhaka')}&lat=23.8103&lon=90.4125&limit=1`, { signal: AbortSignal.timeout(2000) });
-            const pData = await geoRes.json();
-            if (pData && pData.features && pData.features[0] && pData.features[0].geometry) {
-              const c = pData.features[0].geometry.coordinates;
-              sCoords = { lat: c[1], lon: c[0], name: startVal };
-            }
-          } catch (e) {}
-        }
-        if (!dCoords) {
-          try {
-            const geoRes = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(destVal + ' Dhaka')}&lat=23.8103&lon=90.4125&limit=1`, { signal: AbortSignal.timeout(2000) });
-            const pData = await geoRes.json();
-            if (pData && pData.features && pData.features[0] && pData.features[0].geometry) {
-              const c = pData.features[0].geometry.coordinates;
-              dCoords = { lat: c[1], lon: c[0], name: destVal };
-            }
-          } catch (e) {}
-        }
-
-        // Final resilient defaults if non-locatable
-        if (!sCoords) sCoords = { lat: 23.7561, lon: 90.3872, name: startVal }; // Farmgate default
-        if (!dCoords) dCoords = { lat: 23.7330, lon: 90.4172, name: destVal }; // Motijheel default
-
-        // 1. Instant local road estimation so the card appears immediately without lag
-        let hKm = computeHaversineKm(sCoords.lat, sCoords.lon, dCoords.lat, dCoords.lon);
-        let distanceKm = hKm ? Math.max(0.5, Math.round(hKm * 1.35 * 10) / 10) : 5.5;
-
-        // 2. Fetch precise Google Maps / OSRM road distance from backend with 2.5s fast timeout
-        try {
-          const qUrl = `${API_BASE}/api/routing/directions?originLat=${sCoords.lat}&originLon=${sCoords.lon}&destLat=${dCoords.lat}&destLon=${dCoords.lon}&mode=driving`;
-          const controller = new AbortController();
-          const tId = setTimeout(() => controller.abort(), 2500);
-          const res = await fetch(qUrl, { signal: controller.signal });
-          clearTimeout(tId);
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.success && data.distanceKm && data.distanceKm > 0) {
-              distanceKm = data.distanceKm;
-            }
-          }
-        } catch (netErr) {}
-
-        // BRTA DHAKA CITY METRO FARE RULES:
-        // Rate: 2.70 Taka per km | Min regular: 10 Taka | Student Half-Pass: 50% Off (Min 5 Taka)
-        const RATE_PER_KM = 2.70;
-        const MIN_FARE = 10;
-        const regularFare = Math.max(MIN_FARE, Math.round(distanceKm * RATE_PER_KM));
-        const studentFare = Math.max(5, Math.ceil(regularFare * 0.50));
-
-        // Update UI Card
-        const resultCard = document.getElementById('busfare-result-card');
-        const routeNameEl = document.getElementById('busfare-route-name');
-        const distBadgeEl = document.getElementById('busfare-dist-badge');
-        const regAmtEl = document.getElementById('busfare-regular-amount');
-        const stuAmtEl = document.getElementById('busfare-student-amount');
-        const intercityWarning = document.getElementById('busfare-intercity-warning');
-
-        if (routeNameEl) routeNameEl.innerText = `${startVal} ➔ ${destVal}`;
-        if (distBadgeEl) distBadgeEl.innerText = `${distanceKm} km (Road Distance)`;
-        if (regAmtEl) regAmtEl.innerText = `৳ ${regularFare}`;
-        if (stuAmtEl) stuAmtEl.innerText = `৳ ${studentFare}`;
-
-        // Flag intercity routes (> 38 km or outside Dhaka)
-        if (intercityWarning) {
-          intercityWarning.style.display = distanceKm > 38 ? 'block' : 'none';
-        }
-
-        if (resultCard) {
-          resultCard.style.display = 'block';
-          resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-      } catch (err) {
-        console.error("Bus fare calculation error:", err);
-        alert("ভাড়া হিসাব করতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।");
-      } finally {
-        if (calcBtn) {
-          calcBtn.innerHTML = origText;
-          calcBtn.disabled = false;
-        }
       }
     }
 
