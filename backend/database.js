@@ -1026,7 +1026,7 @@ function verifyOtp(phone, inputCode, expectedPurpose = null) {
   return { success: false, message: 'Incorrect OTP verification code. Please check SMS and try again.' };
 }
 
-const TOKEN_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
+const TOKEN_SECRET = process.env.SESSION_SECRET || 'SAFE_BD_SECURE_AUTH_TOKEN_KEY_2026_SAAD_RIZWAN_PERSISTENT';
 
 function parseSignedToken(token) {
   if (!token || typeof token !== 'string') return null;
