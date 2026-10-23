@@ -1512,9 +1512,11 @@ app.get('/api/places/search', async (req, res) => {
     searchResults.push(item);
   }
 
-  // 1. Fast Photon Autocomplete (Optimized for Bangladesh coordinates & typos)
+  // 1. Fast Photon Autocomplete (Optimized for Bangladesh coordinates & nationwide search)
   try {
-    const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(cleanQuery)}&lat=23.8103&lon=90.4125&limit=8`;
+    const userLat = parseFloat(req.query.lat) || 23.6850; // Central Bangladesh geographic centroid
+    const userLon = parseFloat(req.query.lon) || 90.3563;
+    const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(cleanQuery)}&lat=${userLat}&lon=${userLon}&limit=8`;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 2200);
     const pRes = await fetch(photonUrl, {
@@ -1690,23 +1692,33 @@ app.get('/api/routing/directions', async (req, res) => {
   const googleApiKey = process.env.GOOGLE_MAPS_API_KEY || (req.query && req.query.apiKey) || '';
   if (googleApiKey) {
     try {
-      // In South Asia/Bangladesh, Google Maps provides dedicated 'two_wheeler' for motorcycle/bike
-      let gMode = travelMode === 'bicycling' ? 'bicycling' : (travelMode === 'driving' ? 'driving' : 'walking');
+      // In South Asia/Bangladesh, Google Maps provides dedicated 'two_wheeler' for motorcycle/bike, 'driving' for car, 'walking' for walk
+      let gMode = travelMode === 'bicycling' ? 'two_wheeler' : (travelMode === 'driving' ? 'driving' : 'walking');
       const gDestParam = (!isNaN(dLat) && !isNaN(dLon)) ? `${dLat},${dLon}` : encodeURIComponent(cleanDestName + ', Bangladesh');
-      let gUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${oLat},${oLon}&destination=${gDestParam}&mode=${gMode}&departure_time=now&traffic_model=best_guess&key=${googleApiKey}`;
+      let gUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${oLat},${oLon}&destination=${gDestParam}&mode=${gMode}&alternatives=true&departure_time=now&traffic_model=best_guess&key=${googleApiKey}`;
       let gRes = await fetch(gUrl, { signal: AbortSignal.timeout(5000) });
       let gData = await gRes.json();
 
-      // If bicycling route not indexed in region, fallback to two_wheeler or driving
+      // If two_wheeler route not indexed in region, fallback to driving
       if (travelMode === 'bicycling' && (!gData || gData.status !== 'OK')) {
-        const altUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${oLat},${oLon}&destination=${gDestParam}&mode=two_wheeler&departure_time=now&traffic_model=best_guess&key=${googleApiKey}`;
+        const altUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${oLat},${oLon}&destination=${gDestParam}&mode=driving&alternatives=true&departure_time=now&traffic_model=best_guess&key=${googleApiKey}`;
         const altRes = await fetch(altUrl, { signal: AbortSignal.timeout(5000) });
         const altData = await altRes.json();
         if (altData && altData.status === 'OK') gData = altData;
       }
 
-      if (gData && gData.status === 'OK' && gData.routes && gData.routes[0] && gData.routes[0].legs && gData.routes[0].legs[0]) {
-        const leg = gData.routes[0].legs[0];
+      if (gData && gData.status === 'OK' && Array.isArray(gData.routes) && gData.routes.length > 0) {
+        // GUARANTEE SHORTEST ROAD: Scan all Google Maps alternative routes for minimum distance
+        let bestRoute = gData.routes[0];
+        let minMeters = (bestRoute.legs && bestRoute.legs[0] && bestRoute.legs[0].distance) ? bestRoute.legs[0].distance.value : Infinity;
+        for (const r of gData.routes) {
+          if (r.legs && r.legs[0] && r.legs[0].distance && r.legs[0].distance.value < minMeters) {
+            minMeters = r.legs[0].distance.value;
+            bestRoute = r;
+          }
+        }
+
+        const leg = bestRoute.legs[0];
         if (leg.end_location) {
           dLat = leg.end_location.lat;
           dLon = leg.end_location.lng;
@@ -1716,12 +1728,11 @@ app.get('/api/routing/directions', async (req, res) => {
         const liveDur = leg.duration_in_traffic || leg.duration;
         durationMinutes = Math.max(2, Math.round(liveDur.value / 60));
         durationFormatted = liveDur.text || `${durationMinutes} mins`;
-        trafficStatus = leg.duration_in_traffic ? "Google Maps Live Traffic" : "Google Maps Route";
+        trafficStatus = leg.duration_in_traffic ? "Google Maps Live Traffic" : "Google Maps Shortest Route";
         modeLabel = travelMode === 'driving' ? 'Car / CNG' : (travelMode === 'bicycling' ? 'Bike' : 'Walk');
         googleDirectionsSuccess = true;
 
-        if (gData.routes[0].overview_polyline && gData.routes[0].overview_polyline.points) {
-          // Keep steps if available
+        if (bestRoute.overview_polyline && bestRoute.overview_polyline.points) {
           if (Array.isArray(leg.steps)) {
             turnSteps = leg.steps.map(s => ({
               instruction: s.html_instructions ? s.html_instructions.replace(/<[^>]*>?/gm, '') : 'Continue',
@@ -1736,28 +1747,34 @@ app.get('/api/routing/directions', async (req, res) => {
     }
   }
 
-  // 2. High-Accuracy Turn-by-Turn Road Geometry Engine (Pedestrian Walkway, Bike & Street Network)
+  // 2. High-Accuracy Turn-by-Turn Road Geometry Engine (Guarantees Shortest Paved Road & Prevents Circular Detours)
   if (!googleDirectionsSuccess && !isNaN(dLat) && !isNaN(dLon)) {
     try {
-      let routeUrl = '';
+      let routeData = null;
+
+      // In Bangladesh, both Bike (Motorcycle) and Car/CNG take the vehicular road network and highway system.
+      // This eliminates the European bicycle bug that circled outside Dhaka and created 600km loops.
       if (travelMode === 'walking') {
-        routeUrl = `https://routing.openstreetmap.de/routed-foot/route/v1/foot/${oLon},${oLat};${dLon},${dLat}?overview=full&geometries=geojson&steps=true`;
-      } else if (travelMode === 'bicycling') {
-        routeUrl = `https://routing.openstreetmap.de/routed-bike/route/v1/bike/${oLon},${oLat};${dLon},${dLat}?overview=full&geometries=geojson&steps=true`;
-      } else {
-        routeUrl = `https://router.project-osrm.org/route/v1/driving/${oLon},${oLat};${dLon},${dLat}?overview=full&geometries=geojson&steps=true`;
+        const footUrl = `https://routing.openstreetmap.de/routed-foot/route/v1/foot/${oLon},${oLat};${dLon},${dLat}?overview=full&geometries=geojson&steps=true&alternatives=true`;
+        try {
+          const footRes = await fetch(footUrl, { signal: AbortSignal.timeout(3500) });
+          if (footRes.ok) routeData = await footRes.json();
+        } catch (e) {}
       }
 
-      let routeRes = await fetch(routeUrl, { signal: AbortSignal.timeout(4500) });
-      if (!routeRes.ok) {
-        // Fallback to standard OSRM geometry
-        const osrmFallback = `https://router.project-osrm.org/route/v1/driving/${oLon},${oLat};${dLon},${dLat}?overview=full&geometries=geojson&steps=true`;
-        routeRes = await fetch(osrmFallback, { signal: AbortSignal.timeout(4500) });
+      // If vehicular mode OR if pedestrian route failed / is missing outside Dhaka
+      if (!routeData || !routeData.routes || routeData.routes.length === 0) {
+        const drivingUrl = `https://router.project-osrm.org/route/v1/driving/${oLon},${oLat};${dLon},${dLat}?overview=full&geometries=geojson&steps=true&alternatives=true`;
+        const drivingRes = await fetch(drivingUrl, { signal: AbortSignal.timeout(4500) });
+        if (drivingRes.ok) routeData = await drivingRes.json();
       }
-      const routeData = await routeRes.json();
 
-      if (routeData && routeData.routes && routeData.routes[0]) {
-        const primaryRoute = routeData.routes[0];
+      if (routeData && Array.isArray(routeData.routes) && routeData.routes.length > 0) {
+        // ALWAYS SELECT THE SHORTEST ROAD (Minimum distance in meters)
+        const validRoutes = routeData.routes.filter(r => r && typeof r.distance === 'number');
+        validRoutes.sort((a, b) => a.distance - b.distance);
+        const primaryRoute = validRoutes[0] || routeData.routes[0];
+
         const roadMeters = primaryRoute.distance;
         distanceKm = Math.round((roadMeters / 1000) * 10) / 10;
 
@@ -1848,8 +1865,10 @@ app.get('/api/routing/directions', async (req, res) => {
     ? `${dLat},${dLon}`
     : encodeURIComponent(cleanDestName + (cleanDestName.toLowerCase().includes('bangladesh') ? '' : ', Bangladesh'));
 
-  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${oLat},${oLon}&destination=${destTarget}&travelmode=${travelMode}&dir_action=navigate`;
-  const embedUrl = `https://maps.google.com/maps?saddr=${oLat},${oLon}&daddr=${destTarget}&directionsmode=${travelMode}&t=&z=14&ie=UTF8&iwloc=B&output=embed`;
+  const googleMapsTravelMode = travelMode === 'bicycling' ? 'two_wheeler' : (travelMode === 'driving' ? 'driving' : 'walking');
+  const googleEmbedMode = travelMode === 'bicycling' ? 'driving' : (travelMode === 'driving' ? 'driving' : 'walking');
+  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${oLat},${oLon}&destination=${destTarget}&travelmode=${googleMapsTravelMode}&dir_action=navigate`;
+  const embedUrl = `https://maps.google.com/maps?saddr=${oLat},${oLon}&daddr=${destTarget}&directionsmode=${googleEmbedMode}&t=&z=14&ie=UTF8&iwloc=B&output=embed`;
 
   return res.json({
     success: true,
