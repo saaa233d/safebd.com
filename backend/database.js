@@ -1078,6 +1078,7 @@ function getSession(token) {
   const tokenMeta = parseSignedToken(token);
   if (tokenMeta && tokenMeta.phone) {
     const cleanPhone = tokenMeta.phone;
+    const isChiefAdmin = cleanPhone === '1316750712' || !!tokenMeta.isAdmin;
     let user = dbState.users[cleanPhone];
     if (!user) {
       const configuredAdminPhone = process.env.ADMIN_PHONE ? normalizePhone(process.env.ADMIN_PHONE) : '1316750712';
