@@ -3382,18 +3382,18 @@
     <!-- SCREEN 1: EMERGENCY SOS, WALK WITH ME & CONTACTS -->
     <div id="screen-sos" class="screen screen-padded active">
       
-      <!-- Apple Dynamic Island CAD Dispatch Strip -->
+      <!-- Apple Dynamic Island Quick Emergency Strip -->
       <div class="emergency-strip" style="justify-content: space-between; align-items: center;">
         <div class="strip-content-wrap">
           <div class="strip-title">
             <span class="cad-live-beacon"></span>
             <span data-i18n="sos_helpline_title">National Emergency Services</span>
           </div>
-          <div class="strip-sub" data-i18n="sos_helpline_sub">Police • Fire Service • Ambulance CAD</div>
+          <div class="strip-sub" data-i18n="sos_helpline_sub">Police • Fire Service • Ambulance (Dial 999)</div>
         </div>
         <div style="font-size: 10.5px; font-weight: 800; color: #34d399; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); padding: 4px 10px; border-radius: 9999px; display: flex; align-items: center; gap: 5px;">
           <span style="width: 5px; height: 5px; border-radius: 50%; background: #34d399; box-shadow: 0 0 6px #34d399;"></span>
-          <span>999 CAD Live</span>
+          <span>999 Direct Call Ready</span>
         </div>
       </div>
 
@@ -6500,7 +6500,10 @@
         if (activeJourneySessionId) {
           fetch(`${API_BASE}/api/walk/update-location`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('safe_bd_token') || ''}`
+            },
             body: JSON.stringify({
               sessionId: activeJourneySessionId,
               lat,
@@ -6573,7 +6576,10 @@
       if (activeJourneySessionId) {
         fetch(`${API_BASE}/api/walk/update-location`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('safe_bd_token') || ''}`
+          },
           body: JSON.stringify({
             sessionId: activeJourneySessionId,
             lat,
@@ -10011,9 +10017,13 @@
 
       try {
         const payload = { phone: cleanPhone, bloodGroup, district, thana, available };
+        const token = localStorage.getItem('safe_bd_token') || '';
         const res = await fetch(`${API_BASE}/api/blood/donors`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify(payload)
         });
 
@@ -10225,7 +10235,7 @@
       }
       showDynamicIsland({
         title: "EMERGENCY SOS INITIATED",
-        sub: "5-second CAD dispatcher countdown active",
+        sub: "5-second emergency alert countdown active",
         icon: "fa-triangle-exclamation",
         type: "warning",
         duration: 4500
@@ -10265,20 +10275,23 @@
       document.getElementById('sos-modal').classList.remove('open');
       if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
       showDynamicIsland({
-        title: "SOS DISPATCHED TO 999",
-        sub: "Live GPS coordinates broadcast to CAD",
+        title: "EMERGENCY SOS BROADCASTED",
+        sub: "Live coordinates sent to contacts. Dial 999 directly for help.",
         icon: "fa-shield-halved",
         type: "success",
-        duration: 5000
+        duration: 6000
       });
 
-      // 1. Dispatch Emergency Signal & Live GPS to 999 CAD Dispatcher
+      // 1. Dispatch Emergency Signal & Live GPS to Emergency Circle
       const userName = currentUser ? (currentUser.name || "Verified Citizen") : "Citizen in Distress";
       const cleanUserPhone = currentUser && currentUser.phone ? String(currentUser.phone).replace(/\D/g, '').slice(-10) : (contacts && contacts[0] && contacts[0].phone ? String(contacts[0].phone).replace(/\D/g, '').slice(-10) : "01XXXXXXXXX");
 
       fetch(`${API_BASE}/api/emergency/sos-trigger`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('safe_bd_token') || ''}`
+        },
         body: JSON.stringify({
           userId: cleanUserPhone,
           userName: userName,
@@ -10504,8 +10517,8 @@
               <i class="fas fa-shield-halved"></i>
             </div>
             <div>
-              <div style="font-size: 12.5px; font-weight: 700; color: #fff;">999 Emergency CAD Dispatched</div>
-              <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Distress packet & live GPS telemetry transmitted.</div>
+              <div style="font-size: 12.5px; font-weight: 700; color: #fff;">Emergency SOS Broadcast Active</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Distress signal broadcasted to contacts. Please dial 999 for immediate help.</div>
               <div style="font-size: 10.5px; color: #10b981; margin-top: 3px;"><i class="fas fa-location-dot"></i> ${currentCoords.address}</div>
             </div>
           </div>
@@ -12549,37 +12562,34 @@
 
       modal.classList.add('open');
       if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
-      setTimeout(() => {
+      setTimeout(async () => {
         const v = document.getElementById('evidence-modal-video');
         if (!v) return;
-        const initialSrc = blobUrl || mp4Url || serverDirectUrl;
-        v.src = initialSrc;
-        v.onerror = function() {
-          console.warn("[Video Player Fallback] Error playing:", v.src);
-          if (blobUrl && v.src !== blobUrl) {
-            v.src = blobUrl;
-            v.load();
-            v.play().catch(() => {});
-          } else if (v.src !== serverDirectUrl && serverDirectUrl) {
-            v.src = serverDirectUrl;
-            v.load();
-            v.play().catch(() => {});
+        if (blobUrl) {
+          v.src = blobUrl;
+          v.load();
+          v.play().catch(() => {});
+        } else {
+          const token = localStorage.getItem('safe_bd_token') || '';
+          try {
+            const vRes = await fetch(mp4Url, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (vRes.ok) {
+              const vBlob = await vRes.blob();
+              const authBlobUrl = URL.createObjectURL(vBlob);
+              item.videoBlob = vBlob;
+              v.src = authBlobUrl;
+              v.load();
+              v.play().catch(() => {});
+            }
+          } catch (e) {
+            console.warn('[Video Auth Fetch Failed]:', e);
           }
-        };
-        v.load();
-        v.play().catch(() => {});
+        }
       }, 50);
     }
 
     function openEvidenceStandaloneWindow(id) {
-      const item = adminEmergencyEvidenceList.find(e => e.id === id);
-      if (!item) return;
-      const mp4ServerName = (item.fileName || '').replace(/\.webm$/i, '.mp4');
-      const mp4Url = (item.videoUrl && item.videoUrl.endsWith('.mp4'))
-        ? ((item.videoUrl.startsWith('http')) ? item.videoUrl : `${API_BASE}${item.videoUrl}`)
-        : `${API_BASE}/api/emergency/evidence/${mp4ServerName}`;
-      const w = window.open(mp4Url, '_blank');
-      if (!w) openEvidenceInModal(id);
+      openEvidenceInModal(id);
     }
 
     function openEvidenceInNewTab(id) {
@@ -12627,10 +12637,32 @@
         }
       }
 
-      // 2. Direct MP4 stream & download from server (Server converts WebM -> MP4 with H.264/AAC for mobile)
+      // 2. Direct MP4 stream & download from server with Authorization header
       const mp4ServerName = (item.fileName || '').replace(/\.webm$/i, '.mp4');
-      const serverDlUrl = `${API_BASE}/api/emergency/evidence/${mp4ServerName}?download=1`;
-      window.location.href = serverDlUrl;
+      const token = localStorage.getItem('safe_bd_token') || '';
+      try {
+        const res = await fetch(`${API_BASE}/api/emergency/evidence/${mp4ServerName}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const fetchedBlob = await res.blob();
+          const fetchedBlobUrl = URL.createObjectURL(fetchedBlob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = fetchedBlobUrl;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            if (document.body.contains(a)) document.body.removeChild(a);
+            URL.revokeObjectURL(fetchedBlobUrl);
+          }, 4000);
+        } else {
+          alert('Failed to download evidence recording. Authorization required.');
+        }
+      } catch (err) {
+        console.error('Evidence download error:', err);
+      }
     }
 
     let lastRenderedEvidenceSignature = '';
