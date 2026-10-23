@@ -36,7 +36,7 @@ if (fs.existsSync(envPath)) {
   } catch (e) {}
 }
 
-const DATA_DIR = path.join(__dirname, 'data');
+const DATA_DIR = process.env.SAFEBD_DATA_DIR ? path.resolve(process.env.SAFEBD_DATA_DIR) : path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'safe_bd_database.json');
 const EVIDENCE_FILE = path.join(DATA_DIR, 'safe_bd_evidence.json');
 const POSTS_FILE = path.join(DATA_DIR, 'safe_bd_posts.json');
