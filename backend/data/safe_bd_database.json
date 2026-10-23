@@ -1350,6 +1350,25 @@
       "createdAt": "2026-10-17T17:10:41.801+00:00",
       "approvedAt": "2026-10-17T17:10:41.801+00:00"
     },
+    "post_1792775151803_9684": {
+      "id": "post_1792775151803_9684",
+      "author": "Citizen Reporter",
+      "authorPhone": "",
+      "authorRole": "Citizen Reporter",
+      "isFounder": false,
+      "verified": false,
+      "type": "community",
+      "category": "Urgent Alert",
+      "content": "I am claiming to be the founder without logging in.",
+      "media": null,
+      "likes": 0,
+      "likedBy": [],
+      "comments": [],
+      "approved": true,
+      "rejected": false,
+      "createdAt": "2026-10-23T17:05:51.803+00:00",
+      "approvedAt": "2026-10-23T17:05:51.803+00:00"
+    },
     "post_1792735724334_9801": {
       "id": "post_1792735724334_9801",
       "author": "Citizen Reporter",
@@ -1380,7 +1399,7 @@
   "stats": {
     "totalLogins": 65,
     "totalRegistrations": 11,
-    "lastSaved": "2026-10-23T17:05:53.302Z",
+    "lastSaved": "2026-10-23T17:21:38.731Z",
     "totalPosts": 9
   }
 }
