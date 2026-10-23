@@ -703,7 +703,7 @@
       "isAdmin": true,
       "createdAt": "2026-10-13T06:33:26.701Z",
       "active": true,
-      "expiresAt": 1794839735411
+      "expiresAt": 1795325203354
     },
     "safe_token_admin_e638a6a1f69fb7d58630e0f21b040d02680a0688e38d2a215b9356beafbcb1b6": {
       "token": "safe_token_admin_e638a6a1f69fb7d58630e0f21b040d02680a0688e38d2a215b9356beafbcb1b6",
@@ -1082,31 +1082,6 @@
     }
   },
   "activeJourneys": {
-    "1316750712": {
-      "sessionId": "journey_d80b9aa1d439de00d5dda5dd286435c2",
-      "userId": "1316750712",
-      "userName": "SAAD RIZWAN",
-      "userPhone": "1316750712",
-      "origin": "Shantinagar, Dhaka",
-      "destination": "Kemal Ataturk Avenue",
-      "destCoords": {
-        "lat": 23.7937,
-        "lon": 90.4066
-      },
-      "travelMode": "walking",
-      "estimatedMinutes": 30,
-      "startTime": "2026-10-17T14:35:12.542Z",
-      "currentCoords": {
-        "lat": 23.738249487891043,
-        "lon": 90.41432373800724,
-        "address": "Shantinagar, Dhaka"
-      },
-      "status": "IN_TRANSIT",
-      "lastPing": 1792247737823,
-      "isOverdue": false,
-      "overdueUploadedToAdmin": false,
-      "updatedAt": "2026-10-17T14:35:37.823Z"
-    },
     "1711111111": {
       "sessionId": "journey_6aac808bfec9e29d5667cfac1e6a476c",
       "userId": "1711111111",
@@ -1374,6 +1349,44 @@
       "rejected": false,
       "createdAt": "2026-10-17T17:10:41.801+00:00",
       "approvedAt": "2026-10-17T17:10:41.801+00:00"
+    },
+    "post_1792772946501_3550": {
+      "id": "post_1792772946501_3550",
+      "author": "Citizen Reporter",
+      "authorPhone": "",
+      "authorRole": "Citizen Reporter",
+      "isFounder": false,
+      "verified": false,
+      "type": "community",
+      "category": "Urgent Alert",
+      "content": "I am claiming to be the founder without logging in.",
+      "media": null,
+      "likes": 0,
+      "likedBy": [],
+      "comments": [],
+      "approved": true,
+      "rejected": false,
+      "createdAt": "2026-10-23T16:29:06.502+00:00",
+      "approvedAt": "2026-10-23T16:29:06.502+00:00"
+    },
+    "post_1792735724334_9801": {
+      "id": "post_1792735724334_9801",
+      "author": "Citizen Reporter",
+      "authorPhone": "",
+      "authorRole": "Citizen Reporter",
+      "isFounder": false,
+      "verified": false,
+      "type": "community",
+      "category": "Urgent Alert",
+      "content": "I am claiming to be the founder without logging in.",
+      "media": null,
+      "likes": 0,
+      "likedBy": [],
+      "comments": [],
+      "approved": true,
+      "rejected": false,
+      "createdAt": "2026-10-23T06:08:44.334+00:00",
+      "approvedAt": "2026-10-23T06:08:44.334+00:00"
     }
   },
   "cloudVault": {
@@ -1386,7 +1399,7 @@
   "stats": {
     "totalLogins": 65,
     "totalRegistrations": 11,
-    "lastSaved": "2026-10-23T05:19:07.545Z",
+    "lastSaved": "2026-10-23T16:29:07.267Z",
     "totalPosts": 9
   }
 }
