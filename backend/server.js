@@ -870,7 +870,7 @@ function processNextTranscode() {
 }
 
 // Ensure Evidence Directory exists
-const EVIDENCE_DIR = path.join(__dirname, 'data', 'evidence');
+const EVIDENCE_DIR = process.env.SAFEBD_DATA_DIR ? path.join(path.resolve(process.env.SAFEBD_DATA_DIR), 'evidence') : path.join(__dirname, 'data', 'evidence');
 if (!fs.existsSync(EVIDENCE_DIR)) {
   fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
 }
