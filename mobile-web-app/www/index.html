@@ -955,23 +955,28 @@
       display: none;
       position: absolute;
       bottom: 74px;
-      left: 14px;
-      right: 14px;
-      background: rgba(18, 22, 32, 0.88);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 20px;
-      padding: 14px 18px;
-      backdrop-filter: blur(28px) saturate(190%);
-      -webkit-backdrop-filter: blur(28px) saturate(190%);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      left: 12px;
+      right: 12px;
+      background: rgba(14, 18, 26, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 24px;
+      padding: 12px 16px 16px 16px;
+      backdrop-filter: blur(32px) saturate(200%);
+      -webkit-backdrop-filter: blur(32px) saturate(200%);
+      box-shadow: 
+        0 24px 50px rgba(0, 0, 0, 0.75),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.24);
       z-index: 95;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .dock-emergency-call-btn {
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .dock-emergency-call-btn:active {
-      transform: scale(0.96);
-      filter: brightness(1.2);
+    .walk-active-dock::before {
+      content: '';
+      display: block;
+      width: 38px;
+      height: 4.5px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.24);
+      margin: 0 auto 10px auto;
     }
 
     /* GOOGLE MAPS LIVE NAVIGATION GREEN PUCK & LOCATION TAG */
@@ -1128,39 +1133,151 @@
       background: transparent;
       border: none;
     }
+    /* Apple Live Activity Status Drawer */
     .dock-stat-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .dock-stat-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.2px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
     }
     .dock-timer-badge {
-      font-size: 12px;
-      font-weight: 700;
-      color: #e57373;
+      font-size: 14.5px;
+      font-weight: 800;
+      color: #64d2ff;
       font-variant-numeric: tabular-nums;
+      letter-spacing: -0.5px;
+      background: rgba(10, 132, 255, 0.14);
+      border: 1px solid rgba(10, 132, 255, 0.35);
+      padding: 3px 10px;
+      border-radius: 9999px;
+      box-shadow: 0 2px 10px rgba(10, 132, 255, 0.2);
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .dock-timer-badge:active {
+      transform: scale(0.95);
+    }
+    .dock-edit-timer-btn {
+      background: rgba(255, 255, 255, 0.08) !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      color: rgba(235, 235, 245, 0.8) !important;
+      border-radius: 9999px !important;
+      padding: 3.5px 9px !important;
+      font-size: 10.5px !important;
+      font-weight: 700 !important;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease !important;
+    }
+    .dock-edit-timer-btn:active {
+      transform: scale(0.94);
     }
     .dock-subtext {
       font-size: 11px;
-      color: var(--text-muted);
-      line-height: 1.4;
+      color: rgba(235, 235, 245, 0.6);
+      line-height: 1.35;
       margin-bottom: 10px;
+      letter-spacing: -0.1px;
     }
-    .dock-finish-btn {
-      width: 100%;
-      background: transparent;
-      border: 1px solid #10b981;
-      color: #10b981;
-      padding: 8px;
-      border-radius: 9px;
+    .dock-telemetry-pod {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 7px 11px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    .dock-telemetry-label {
+      color: rgba(235, 235, 245, 0.5);
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .dock-tool-btn {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      padding: 8px 12px;
+      border-radius: 12px;
       font-size: 11.5px;
       font-weight: 600;
+      letter-spacing: -0.1px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-decoration: none;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .dock-tool-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .dock-tool-btn:active {
+      transform: scale(0.96);
+    }
+    .dock-finish-btn {
+      flex: 1.3;
+      background: linear-gradient(135deg, #30d158 0%, #248a3d 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.3) !important;
+      color: #ffffff !important;
+      padding: 12px 14px !important;
+      border-radius: 14px !important;
+      font-weight: 800 !important;
+      font-size: 12.5px !important;
+      letter-spacing: -0.2px !important;
+      cursor: pointer !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 7px !important;
+      box-shadow: 0 6px 20px rgba(48, 209, 88, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .dock-finish-btn:active {
+      transform: scale(0.96);
+      filter: brightness(1.1);
+    }
+    .dock-emergency-call-btn {
+      flex: 1;
+      background: linear-gradient(135deg, #ff453a 0%, #b91c1c 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.3) !important;
+      color: #ffffff !important;
+      padding: 12px 14px !important;
+      border-radius: 14px !important;
+      font-weight: 800 !important;
+      font-size: 12.5px !important;
+      letter-spacing: -0.2px !important;
+      cursor: pointer !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 7px !important;
+      box-shadow: 0 6px 20px rgba(255, 69, 58, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+      animation: emergencyCallPulse 1.8s infinite;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .dock-emergency-call-btn:active {
+      transform: scale(0.96);
+      filter: brightness(1.1);
     }
 
     /* GOOGLE MAPS LIVE TRACKING HUD & FLOATING CONTROLS - Apple Liquid Glass & Dynamic Island */
@@ -3725,13 +3842,16 @@
           </a>
         </div>
 
-        <!-- Active Walk Tracking Status Drawer -->
+        <!-- Active Walk Tracking Status Drawer - Apple Live Activity Drawer -->
         <div id="walk-dock" class="walk-active-dock">
           <div class="dock-stat-row">
-            <div class="dock-stat-title"><i class="fas fa-shield-halved" style="color: #10b981;"></i> <span data-i18n="dock_title">Companion Guard Active</span></div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <div class="dock-timer-badge" id="walk-timer-display" onclick="openEditTimerModal()" title="Tap to edit timer" style="cursor: pointer;">20:00</div>
-              <button type="button" onclick="openEditTimerModal()" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; border-radius: 8px; padding: 4px 8px; font-size: 10.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Edit Timer">
+            <div class="dock-stat-title">
+              <i class="fas fa-shield-halved" style="color: #30d158;"></i> 
+              <span data-i18n="dock_title">Companion Guard Active</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 7px;">
+              <div class="dock-timer-badge" id="walk-timer-display" onclick="openEditTimerModal()" title="Tap to edit timer">20:00</div>
+              <button type="button" class="dock-edit-timer-btn" onclick="openEditTimerModal()" title="Edit Timer">
                 <i class="fas fa-clock-rotate-left"></i> <span data-i18n="dock_edit">Edit</span>
               </button>
             </div>
@@ -3740,33 +3860,34 @@
             Guarding route. An alert triggers if stationary or off-route for &gt; 3 mins.
           </div>
 
-          <!-- Live Telemetry Stats -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; font-size: 11px;">
-            <div style="background: rgba(255,255,255,0.04); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-quiet);">
-              <span style="color: var(--text-muted); font-size: 9.5px; display: block;" data-i18n="dock_speed_label">LIVE SPEED</span>
-              <strong id="dock-live-speed" style="color: #10b981; font-size: 12px;">0 km/h</strong>
+          <!-- Live Telemetry Stats (Apple Inset Pods) -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+            <div class="dock-telemetry-pod">
+              <span class="dock-telemetry-label" data-i18n="dock_speed_label">LIVE SPEED</span>
+              <strong id="dock-live-speed" style="color: #30d158; font-size: 13px; font-weight: 800;">0 km/h</strong>
             </div>
-            <div style="background: rgba(255,255,255,0.04); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-quiet);">
-              <span style="color: var(--text-muted); font-size: 9.5px; display: block;" data-i18n="dock_gps_label">GPS TRACKING</span>
-              <strong id="dock-live-accuracy" style="color: #38bdf8; font-size: 12px;" data-i18n="dock_satellite_active">Satellite Active</strong>
+            <div class="dock-telemetry-pod">
+              <span class="dock-telemetry-label" data-i18n="dock_gps_label">GPS TRACKING</span>
+              <strong id="dock-live-accuracy" style="color: #64d2ff; font-size: 13px; font-weight: 800;" data-i18n="dock_satellite_active">Satellite Active</strong>
             </div>
           </div>
 
-          <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-            <button type="button" onclick="centerOnUserLiveLocation(true)" style="flex: 1; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; padding: 7px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <i class="fas fa-crosshairs"></i> <span data-i18n="dock_btn_track">Track Live Pin</span>
+          <!-- Frosted Glass Utility Pills -->
+          <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+            <button type="button" class="dock-tool-btn" onclick="centerOnUserLiveLocation(true)">
+              <i class="fas fa-crosshairs" style="color: #64d2ff;"></i> <span data-i18n="dock_btn_track">Track Live Pin</span>
             </button>
-            <a id="btn-dock-external-nav" href="https://maps.google.com" target="_blank" onclick="openGoogleMapsDestinationDirect(event)" style="flex: 1; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #f59e0b; padding: 7px; border-radius: 8px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px;">
-              <i class="fas fa-diamond-turn-right"></i> <span data-i18n="dock_btn_nav">Live Google Nav</span>
+            <a id="btn-dock-external-nav" class="dock-tool-btn" href="https://maps.google.com" target="_blank" onclick="openGoogleMapsDestinationDirect(event)">
+              <i class="fas fa-diamond-turn-right" style="color: #ff9f0a;"></i> <span data-i18n="dock_btn_nav">Live Google Nav</span>
             </a>
           </div>
 
-          <!-- Emergency 999 Direct Dial & Safe Arrival Action Group -->
+          <!-- Emergency 999 Direct Dial & Safe Arrival Action Group (Apple Hero CTAs) -->
           <div style="display: flex; gap: 8px;">
-            <button type="button" class="dock-emergency-call-btn" onclick="directCall999()" style="flex: 1; background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); color: #fff; border: 1.5px solid #fca5a5; padding: 12px 10px; border-radius: 12px; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 18px rgba(239, 68, 68, 0.55); animation: emergencyCallPulse 1.8s infinite;">
-              <i class="fas fa-phone-volume" style="font-size: 14px;"></i> <span data-i18n="dock_btn_999">Call 999</span>
+            <button type="button" class="dock-emergency-call-btn" onclick="directCall999()">
+              <i class="fas fa-phone-volume"></i> <span data-i18n="dock_btn_999">Call 999</span>
             </button>
-            <button type="button" class="dock-finish-btn" onclick="finishWalkWithMe()" style="flex: 1.25; margin-top: 0; padding: 12px 10px; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <button type="button" class="dock-finish-btn" onclick="finishWalkWithMe()">
               <i class="fas fa-check"></i> <span data-i18n="dock_btn_arrived">I Have Arrived Safely</span>
             </button>
           </div>
