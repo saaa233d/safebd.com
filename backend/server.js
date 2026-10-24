@@ -1350,7 +1350,7 @@ app.post(['/api/user/blood-profile', '/api/user/blood'], requireAuth, (req, res)
 app.post('/api/walk/start', requireAuth, (req, res) => {
   const cleanPhone = req.user.phone;
   const displayName = req.user.name || "Citizen Traveler";
-  const { origin, destination, travelMode, estimatedMinutes, currentCoords, destCoords } = req.body;
+  const { origin, destination, travelMode, estimatedMinutes, currentCoords, destCoords, vehiclePlate } = req.body;
   const sessionId = "journey_" + crypto.randomBytes(16).toString('hex');
 
   const session = {
@@ -1362,6 +1362,7 @@ app.post('/api/walk/start', requireAuth, (req, res) => {
     destination: destination || "Destination",
     destCoords: destCoords || null,
     travelMode: travelMode || "walking",
+    vehiclePlate: vehiclePlate || "",
     estimatedMinutes: estimatedMinutes || 20,
     startTime: new Date().toISOString(),
     currentCoords: currentCoords || { lat: 23.7388, lon: 90.4143, address: origin },
