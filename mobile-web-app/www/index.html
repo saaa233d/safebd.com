@@ -3860,6 +3860,11 @@
             Guarding route. An alert triggers if stationary or off-route for &gt; 3 mins.
           </div>
 
+          <!-- Active Vehicle Number Plate Badge -->
+          <div id="walk-dock-vehicle-badge" style="display: none; align-items: center; gap: 6px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 9999px; padding: 3px 10px; margin-bottom: 8px; width: fit-content; font-size: 11px; font-weight: 700; color: #38bdf8;">
+            <i class="fas fa-car-side"></i> <span id="walk-dock-vehicle-text">Vehicle: --</span>
+          </div>
+
           <!-- Live Telemetry Stats (Apple Inset Pods) -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
             <div class="dock-telemetry-pod">
@@ -3882,10 +3887,10 @@
             </a>
           </div>
 
-          <!-- Emergency 999 Direct Dial & Safe Arrival Action Group (Apple Hero CTAs) -->
+          <!-- Emergency Action Group & Safe Arrival Action Group (Apple Hero CTAs) -->
           <div style="display: flex; gap: 8px;">
-            <button type="button" class="dock-emergency-call-btn" onclick="directCall999()">
-              <i class="fas fa-phone-volume"></i> <span data-i18n="dock_btn_999">Call 999</span>
+            <button type="button" class="dock-emergency-call-btn" onclick="openCompanionEmergencySheet()">
+              <i class="fas fa-triangle-exclamation"></i> <span data-i18n="dock_btn_emergency">EMERGENCY</span>
             </button>
             <button type="button" class="dock-finish-btn" onclick="finishWalkWithMe()">
               <i class="fas fa-check"></i> <span data-i18n="dock_btn_arrived">I Have Arrived Safely</span>
@@ -4724,6 +4729,165 @@
     </div>
 
     <!-- ========================================================
+         MODAL 0C: VEHICLE REGISTRATION NUMBER PLATE (COMPANION GUARD)
+    ======================================================== -->
+    <div id="modal-vehicle-plate" class="walk-timer-modal-backdrop" onclick="closeVehiclePlateModal(event)">
+      <div class="edit-sheet" onclick="event.stopPropagation()" style="max-width: 440px;">
+        <div class="sheet-handle"></div>
+        <div class="modal-head-row">
+          <div style="display: flex; align-items: center; gap: 9px;">
+            <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(10, 132, 255, 0.16); border: 1px solid rgba(10, 132, 255, 0.35); display: flex; align-items: center; justify-content: center; color: #64d2ff; font-size: 15px;">
+              <i class="fas fa-car"></i>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 15.5px; font-weight: 800; color: #fff;">Vehicle Number Plate</h3>
+              <div style="font-size: 11px; color: var(--text-muted);">গাড়ির নম্বর প্লেট (BRTA Registration)</div>
+            </div>
+          </div>
+          <button class="modal-close-x" onclick="closeVehiclePlateModal()"><i class="fas fa-xmark"></i></button>
+        </div>
+
+        <p style="font-size: 11.5px; color: rgba(235, 235, 245, 0.65); margin: 8px 0 14px 0; line-height: 1.4;">
+          Enter the registration number of the car, CNG, or ride you are boarding. In an emergency, this plate number is instantly sent to your saved contacts &amp; police dispatch.
+        </p>
+
+        <!-- Live Visual Bangladesh License Plate Display -->
+        <div class="bd-license-plate-preview" style="background: linear-gradient(135deg, #065f46 0%, #047857 100%); border: 3px solid #f1f5f9; border-radius: 12px; padding: 12px 14px; text-align: center; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2); position: relative; overflow: hidden;">
+          <div style="position: absolute; top: 4px; left: 8px; width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; border: 1px solid #475569;"></div>
+          <div style="position: absolute; top: 4px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; border: 1px solid #475569;"></div>
+          <div style="position: absolute; bottom: 4px; left: 8px; width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; border: 1px solid #475569;"></div>
+          <div style="position: absolute; bottom: 4px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; border: 1px solid #475569;"></div>
+          
+          <div style="font-size: 10px; font-weight: 800; color: #a7f3d0; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px;">
+            BANGLADESH BRTA
+          </div>
+          <div id="plate-preview-metro" style="font-size: 16px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px;">
+            ঢাকা মেট্রো
+          </div>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px;">
+            <span id="plate-preview-class" style="font-size: 20px; font-weight: 900; color: #fef08a; background: rgba(0,0,0,0.3); padding: 0 8px; border-radius: 6px; border: 1px solid rgba(254, 240, 138, 0.4);">গ</span>
+            <span style="font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: 2px;" id="plate-preview-number">১১-২৩৪৫</span>
+          </div>
+        </div>
+
+        <!-- Plate Input Fields -->
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
+          <!-- 1. Metro / City Prefix Selector -->
+          <div>
+            <label style="font-size: 11px; font-weight: 700; color: #cbd5e1; margin-bottom: 4px; display: block;">METRO / DISTRICT (মেট্রো / জেলা)</label>
+            <select id="plate-input-metro" class="form-input" onchange="updatePlatePreview()" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); color: #fff; font-size: 13px; font-weight: 700; border-radius: 10px; padding: 9px 12px; width: 100%;">
+              <option value="ঢাকা মেট্রো" selected>ঢাকা মেট্রো (Dhaka Metro)</option>
+              <option value="ঢাকা">ঢাকা (Dhaka District)</option>
+              <option value="চট্টগ্রাম মেট্রো">চট্টগ্রাম মেট্রো (Chattogram Metro)</option>
+              <option value="চট্টগ্রাম">চট্টগ্রাম (Chattogram District)</option>
+              <option value="সিলেট মেট্রো">সিলেট মেট্রো (Sylhet Metro)</option>
+              <option value="রাজশাহী মেট্রো">রাজশাহী মেট্রো (Rajshahi Metro)</option>
+              <option value="খুলনা মেট্রো">খুলনা মেট্রো (Khulna Metro)</option>
+              <option value="বরিশাল মেট্রো">বরিশাল মেট্রো (Barishal Metro)</option>
+              <option value="রংপুর মেট্রো">রংপুর মেট্রো (Rangpur Metro)</option>
+              <option value="গাজীপুর">গাজীপুর (Gazipur)</option>
+              <option value="নারায়ণগঞ্জ">নারায়ণগঞ্জ (Narayanganj)</option>
+            </select>
+          </div>
+
+          <!-- 2. Vehicle Class & Number Inputs -->
+          <div style="display: grid; grid-template-columns: 110px 1fr; gap: 8px;">
+            <div>
+              <label style="font-size: 11px; font-weight: 700; color: #cbd5e1; margin-bottom: 4px; display: block;">VEHICLE CLASS</label>
+              <select id="plate-input-class" class="form-input" onchange="updatePlatePreview()" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); color: #fef08a; font-size: 14px; font-weight: 800; border-radius: 10px; padding: 9px 8px; width: 100%;">
+                <option value="গ" selected>গ (Car/Sedan)</option>
+                <option value="ঘ">ঘ (Micro/SUV)</option>
+                <option value="থ">থ (CNG Auto)</option>
+                <option value="হ">হ (Motorcycle)</option>
+                <option value="ল">ল (Bus/Minibus)</option>
+                <option value="চ">চ (Taxi)</option>
+                <option value="দ">দ (Pickup)</option>
+                <option value="ক">ক (Car)</option>
+                <option value="খ">খ (Micro)</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 11px; font-weight: 700; color: #cbd5e1; margin-bottom: 4px; display: block;">NUMBER (নম্বর)</label>
+              <input type="text" id="plate-input-number" class="form-input" placeholder="e.g. 11-2345 or 1234" value="11-2345" oninput="updatePlatePreview()" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); color: #fff; font-size: 14px; font-weight: 800; border-radius: 10px; padding: 9px 12px; width: 100%; letter-spacing: 1px;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <button type="button" onclick="submitVehiclePlateAndStart()" style="width: 100%; background: linear-gradient(135deg, #0a84ff 0%, #0066cc 100%); color: #fff; border: 1px solid rgba(255,255,255,0.25); border-radius: 12px; padding: 12px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(10, 132, 255, 0.4);">
+            <i class="fas fa-shield-heart"></i> Confirm &amp; Start Companion Guard
+          </button>
+          <button type="button" onclick="skipVehiclePlateAndStart()" style="width: 100%; background: rgba(255,255,255,0.06); color: rgba(235,235,245,0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 10px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s ease;">
+            Walking on foot / No vehicle number (গাড়ি ছাড়া)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL 0D: COMPANION EMERGENCY DISTRESS CONSOLE
+    ======================================================== -->
+    <div id="modal-companion-emergency" class="walk-timer-modal-backdrop" onclick="closeCompanionEmergencySheet(event)">
+      <div class="edit-sheet" onclick="event.stopPropagation()" style="max-width: 440px;">
+        <div class="sheet-handle"></div>
+        <div class="modal-head-row">
+          <div style="display: flex; align-items: center; gap: 9px;">
+            <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.45); display: flex; align-items: center; justify-content: center; color: #f87171; font-size: 15px;">
+              <i class="fas fa-triangle-exclamation"></i>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #fff;">Emergency Distress Console</h3>
+              <div style="font-size: 11px; color: #f87171; font-weight: 700;">জরুরি নিরাপত্তা ও বিপদ সংকেত</div>
+            </div>
+          </div>
+          <button class="modal-close-x" onclick="closeCompanionEmergencySheet()"><i class="fas fa-xmark"></i></button>
+        </div>
+
+        <p style="font-size: 11.5px; color: rgba(235, 235, 245, 0.65); margin: 8px 0 14px 0; line-height: 1.4;">
+          Select an emergency action below. Your live GPS coordinates, Google Maps route link, and car plate number are ready to dispatch.
+        </p>
+
+        <!-- OPTION 1: CALL 999 NATIONAL EMERGENCY DIRECT -->
+        <div onclick="directCall999()" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(185, 28, 28, 0.35) 100%); border: 1.5px solid #ef4444; border-radius: 14px; padding: 13px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; margin-bottom: 14px; box-shadow: 0 4px 18px rgba(239, 68, 68, 0.3); transition: transform 0.15s ease;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='none'">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 38px; height: 38px; border-radius: 50%; background: #ef4444; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 0 14px rgba(239, 68, 68, 0.8);">
+              <i class="fas fa-phone-volume"></i>
+            </div>
+            <div>
+              <div style="font-size: 14px; font-weight: 800; color: #fff;">Call 999 (National Emergency)</div>
+              <div style="font-size: 11px; color: #fca5a5;">Immediate Police, Fire &amp; Ambulance Dispatch</div>
+            </div>
+          </div>
+          <span style="font-size: 11px; font-weight: 800; background: #ef4444; color: #fff; padding: 5px 12px; border-radius: 9999px;">
+            Dial 999
+          </span>
+        </div>
+
+        <!-- OPTION 2: SEND LIVE DISTRESS ALERT TO SAVED CONTACTS -->
+        <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 12px 14px; margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="font-size: 12px; font-weight: 800; color: #38bdf8; display: flex; align-items: center; gap: 6px;">
+              <i class="fas fa-paper-plane"></i> Send SOS to Saved Contacts
+            </div>
+            <button type="button" onclick="sendEmergencyDistressAlertToContacts('ALL')" style="background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; font-size: 10.5px; font-weight: 800; padding: 3px 8px; border-radius: 9999px; cursor: pointer;">
+              ⚡ Send to All
+            </button>
+          </div>
+
+          <div style="font-size: 10.5px; color: var(--text-muted); margin-bottom: 10px;">
+            Auto-attaches your live GPS link &amp; <span id="emergency-modal-car-tag" style="color: #fef08a; font-weight: 700;"></span>
+          </div>
+
+          <!-- Contact items dynamically rendered -->
+          <div id="companion-emergency-contacts-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+
+        <button type="button" class="btn-close-sheet" onclick="closeCompanionEmergencySheet()" data-i18n="btn_close">Close</button>
+      </div>
+    </div>
+
+    <!-- ========================================================
          MODAL 0B: WALK OVERDUE SAFETY CHECK MODAL
     ======================================================== -->
     <div id="walk-overdue-safety-modal" class="walk-timer-modal-backdrop" onclick="event.stopPropagation()" style="z-index: 100000;">
@@ -5337,6 +5501,7 @@
         dock_satellite_active: "Satellite Active",
         dock_btn_track: "Track Live Pin",
         dock_btn_nav: "Live Google Nav",
+        dock_btn_emergency: "EMERGENCY",
         dock_btn_999: "Call 999",
         dock_btn_arrived: "I Have Arrived Safely",
 
@@ -5500,6 +5665,7 @@
         dock_satellite_active: "স্যাটেলাইট সক্রিয়",
         dock_btn_track: "লাইভ পিন ট্র্যাক",
         dock_btn_nav: "গুগল ন্যাভ",
+        dock_btn_emergency: "জরুরি",
         dock_btn_999: "৯৯৯ কল করুন",
         dock_btn_arrived: "আমি নিরাপদে পৌঁছেছি",
 
@@ -8810,6 +8976,9 @@
         releaseScreenWakeLock();
       }
       isAutoArrivalTriggered = false;
+      activeVehiclePlateNumber = '';
+      const vehicleBadge = document.getElementById('walk-dock-vehicle-badge');
+      if (vehicleBadge) vehicleBadge.style.display = 'none';
 
       const dock = document.getElementById('walk-dock');
       if (dock) dock.style.display = 'none';
@@ -9443,6 +9612,16 @@
       if (dock) {
         document.getElementById('walk-dock-dest-text').innerText = 
           `${modeTitle} active to ${session.destination}. Dedicated to ${session.userName}.`;
+        
+        if (session.vehiclePlate) {
+          activeVehiclePlateNumber = session.vehiclePlate;
+          const vBadge = document.getElementById('walk-dock-vehicle-badge');
+          const vText = document.getElementById('walk-dock-vehicle-text');
+          if (vBadge && vText) {
+            vBadge.style.display = 'inline-flex';
+            vText.innerText = 'Vehicle: ' + activeVehiclePlateNumber;
+          }
+        }
         dock.style.display = 'block';
       }
 
@@ -9460,11 +9639,83 @@
       }
     }
 
+    /* ----------------------------------------------------
+       VEHICLE REGISTRATION NUMBER PLATE & EMERGENCY CONSOLE
+    ---------------------------------------------------- */
+    let activeVehiclePlateNumber = '';
+
+    function openVehiclePlateModal() {
+      const modal = document.getElementById('modal-vehicle-plate');
+      if (!modal) {
+        executeActualStartWalk();
+        return;
+      }
+      updatePlatePreview();
+      modal.classList.add('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+      setTimeout(() => {
+        const numInput = document.getElementById('plate-input-number');
+        if (numInput) numInput.focus();
+      }, 100);
+    }
+
+    function closeVehiclePlateModal(e) {
+      if (!e || e.target.id === 'modal-vehicle-plate' || e.target.classList.contains('modal-close-x') || e.target.closest('.modal-close-x')) {
+        const modal = document.getElementById('modal-vehicle-plate');
+        if (modal) modal.classList.remove('open');
+        if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+      }
+    }
+
+    function updatePlatePreview() {
+      const metroEl = document.getElementById('plate-input-metro');
+      const classEl = document.getElementById('plate-input-class');
+      const numEl = document.getElementById('plate-input-number');
+
+      const metroVal = metroEl ? metroEl.value : 'ঢাকা মেট্রো';
+      const classVal = classEl ? classEl.value : 'গ';
+      const numVal = numEl ? (numEl.value.trim() || '১১-২৩৪৫') : '১১-২৩৪৫';
+
+      const prevMetro = document.getElementById('plate-preview-metro');
+      const prevClass = document.getElementById('plate-preview-class');
+      const prevNum = document.getElementById('plate-preview-number');
+
+      if (prevMetro) prevMetro.innerText = metroVal;
+      if (prevClass) prevClass.innerText = classVal;
+      if (prevNum) prevNum.innerText = numVal;
+    }
+
+    function submitVehiclePlateAndStart() {
+      const metroEl = document.getElementById('plate-input-metro');
+      const classEl = document.getElementById('plate-input-class');
+      const numEl = document.getElementById('plate-input-number');
+
+      const metroVal = metroEl ? metroEl.value.trim() : 'ঢাকা মেট্রো';
+      const classVal = classEl ? classEl.value.trim() : 'গ';
+      const numVal = numEl ? numEl.value.trim() : '';
+
+      activeVehiclePlateNumber = numVal ? (metroVal + '-' + classVal + '-' + numVal) : (metroVal + '-' + classVal);
+      const modal = document.getElementById('modal-vehicle-plate');
+      if (modal) modal.classList.remove('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+
+      executeActualStartWalk();
+    }
+
+    function skipVehiclePlateAndStart() {
+      activeVehiclePlateNumber = '';
+      const modal = document.getElementById('modal-vehicle-plate');
+      if (modal) modal.classList.remove('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+
+      executeActualStartWalk();
+    }
+
     function startWalkWithMe() {
       // REQUIRE CITIZEN PROFILE SO COMPANION IS DEDICATED TO THIS CITIZEN
       if (!currentUser) {
         const proceed = confirm(
-          `🔒 Citizen Profile Required\n\nWalk With Me Companion provides personalized satellite GPS protection, personal 24/7 route observation, and direct escalation to your personal emergency circle.\n\nTap OK to Unlock or Create your Citizen Profile now.`
+          '🛡️ Citizen Profile Required\n\nWalk With Me Companion provides personalized satellite GPS protection, personal 24/7 route observation, and direct escalation to your personal emergency circle.\n\nTap OK to Unlock or Create your Citizen Profile now.'
         );
         if (proceed) {
           openAuthModal();
@@ -9474,7 +9725,7 @@
 
       const destination = document.getElementById('walk-destination').value.trim();
       if (!destination) {
-        alert("Please search or select your destination in Bangladesh.");
+        alert('Please search or select your destination in Bangladesh.');
         document.getElementById('walk-destination').focus();
         return;
       }
@@ -9486,7 +9737,12 @@
         }
       }
 
-      // Read user-configured timer or input
+      // Open Vehicle Registration Number Plate Modal Before Starting
+      openVehiclePlateModal();
+    }
+
+    function executeActualStartWalk() {
+      const destination = document.getElementById('walk-destination').value.trim();
       const timerInput = document.getElementById('user-custom-timer-mins');
       const inputVal = timerInput ? parseInt(timerInput.value, 10) : null;
       const finalMinutes = (inputVal && !isNaN(inputVal) && inputVal > 0)
@@ -9506,8 +9762,8 @@
       }
 
       const origin = currentCoords.address;
-      const userName = currentUser.name;
-      const userPhone = currentUser.phone;
+      const userName = currentUser ? currentUser.name : 'Citizen';
+      const userPhone = currentUser ? currentUser.phone : '';
       const userKey = getUserWalkKey(currentUser);
       const token = localStorage.getItem('safe_bd_token');
 
@@ -9519,6 +9775,7 @@
         destination,
         destCoords: selectedDestCoords,
         travelMode: selectedTravelMode,
+        vehiclePlate: activeVehiclePlateNumber,
         estimatedMinutes: finalMinutes,
         currentCoords
       };
@@ -9531,16 +9788,17 @@
         totalAllocatedSeconds: totalJourneyAllocatedSeconds,
         travelMode: selectedTravelMode,
         destCoords: selectedDestCoords,
+        vehiclePlate: activeVehiclePlateNumber,
         userName,
         userPhone
       });
 
       // Register session with backend database and 5TB Google Drive Vault
-      fetch(`${API_BASE}/api/walk/start`, {
+      fetch(API_BASE + '/api/walk/start', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          ...(token ? { 'Authorization': 'Bearer ' + token } : {})
         },
         body: JSON.stringify(sessionPayload)
       })
@@ -9553,7 +9811,7 @@
         }
       })
       .catch(() => {
-        activeJourneySessionId = "local_journey_" + Date.now();
+        activeJourneySessionId = 'local_journey_' + Date.now();
         localStorage.setItem('safe_bd_walk_' + userKey, JSON.stringify({
           ...sessionPayload,
           sessionId: activeJourneySessionId,
@@ -9564,7 +9822,20 @@
 
       const modeTitle = selectedTravelMode === 'driving' ? 'Car / CNG Companion' : (selectedTravelMode === 'bicycling' ? 'Bike Companion' : 'Walk Companion');
       document.getElementById('walk-dock-dest-text').innerText = 
-        `${modeTitle} active to ${destination} (${calculatedRouteDistanceKm} km). Dedicated to ${userName}.`;
+        modeTitle + ' active to ' + destination + ' (' + calculatedRouteDistanceKm + ' km). Dedicated to ' + userName + '.';
+
+      // Update vehicle badge in walk dock
+      const vehicleBadge = document.getElementById('walk-dock-vehicle-badge');
+      const vehicleText = document.getElementById('walk-dock-vehicle-text');
+      if (vehicleBadge && vehicleText) {
+        if (activeVehiclePlateNumber) {
+          vehicleBadge.style.display = 'inline-flex';
+          vehicleText.innerText = 'Vehicle: ' + activeVehiclePlateNumber;
+        } else {
+          vehicleBadge.style.display = 'none';
+        }
+      }
+
       document.getElementById('walk-dock').style.display = 'block';
 
       // Switch top header from input panel to Sleek Live Transit HUD
@@ -9583,14 +9854,14 @@
       const modeBadge = document.getElementById('transit-mode-badge');
       if (modeBadge) {
         const modeIcon = selectedTravelMode === 'driving' ? 'fa-car-side' : (selectedTravelMode === 'bicycling' ? 'fa-motorcycle' : 'fa-person-walking');
-        modeBadge.innerHTML = `<i class="fas ${modeIcon}"></i> ${modeTitle}`;
+        modeBadge.innerHTML = '<i class="fas ' + modeIcon + '"></i> ' + modeTitle;
       }
 
       const etaMetric = document.getElementById('transit-eta-metric');
       const etaDurationFormatted = formatDurationGoogleMaps(finalMinutes);
-      if (etaMetric) etaMetric.innerText = `Remaining: ~${etaDurationFormatted} (${calculatedRouteDistanceKm} km)`;
+      if (etaMetric) etaMetric.innerText = 'Remaining: ~' + etaDurationFormatted + ' (' + calculatedRouteDistanceKm + ' km)';
 
-      // Immediately focus Google Maps on user's live moving location
+      // Immediately focus Google Maps on user live moving location
       centerOnUserLiveLocation(true);
 
       // Initialize moving green navigation puck and route on live map
@@ -9609,7 +9880,144 @@
       if (typeof startBackgroundTimerWorker === 'function') startBackgroundTimerWorker();
       if (typeof requestScreenWakeLock === 'function') requestScreenWakeLock();
 
-      alert(`🛡️ Personal Walk Companion Activated!\n\nGuarding: ${userName}\nMode: ${selectedTravelMode.toUpperCase()}\nCompanion Timer: ${etaDurationFormatted}\nDestination: ${destination}\n\nYour companion timer runs automatically in the background even if your device is locked.`);
+      const vehicleNotif = activeVehiclePlateNumber ? ('\n🚗 Vehicle: ' + activeVehiclePlateNumber) : '';
+      alert('🛡️ Personal Walk Companion Activated!\n\nGuarding: ' + userName + '\nMode: ' + selectedTravelMode.toUpperCase() + vehicleNotif + '\nCompanion Timer: ' + etaDurationFormatted + '\nDestination: ' + destination + '\n\nYour companion timer runs automatically in the background even if your device is locked.');
+    }
+
+    /* ----------------------------------------------------
+       COMPANION EMERGENCY CONSOLE (CALL 999 OR SEND SOS TO CONTACTS)
+    ---------------------------------------------------- */
+    function openCompanionEmergencySheet() {
+      const modal = document.getElementById('modal-companion-emergency');
+      if (!modal) return;
+
+      const carTag = document.getElementById('emergency-modal-car-tag');
+      if (carTag) {
+        carTag.innerText = activeVehiclePlateNumber ? ('(Vehicle: ' + activeVehiclePlateNumber + ')') : '(Walking on foot)';
+      }
+
+      renderCompanionEmergencyContacts();
+
+      modal.classList.add('open');
+      if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+    }
+
+    function closeCompanionEmergencySheet(e) {
+      if (!e || e.target.id === 'modal-companion-emergency' || e.target.classList.contains('modal-close-x') || e.target.closest('.modal-close-x') || e.target.classList.contains('btn-close-sheet')) {
+        const modal = document.getElementById('modal-companion-emergency');
+        if (modal) modal.classList.remove('open');
+        if (typeof updateShurokhaFabVisibility === 'function') updateShurokhaFabVisibility();
+      }
+    }
+
+    function renderCompanionEmergencyContacts() {
+      const container = document.getElementById('companion-emergency-contacts-list');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (!Array.isArray(contacts) || contacts.length === 0) {
+        container.innerHTML = '<div style="font-size: 11.5px; color: #94a3b8; text-align: center; padding: 10px;">No saved contacts found.</div>';
+        return;
+      }
+
+      contacts.forEach(c => {
+        const isConfigured = c.phone && String(c.phone).trim() !== '' && c.phone !== '01XXXXXXXXX' && !isDummyPhone(c.phone);
+        const displayPhone = isConfigured ? ('+880 ' + String(c.phone).replace(/\D/g, '').slice(-10)) : '01XXXXXXXXX';
+        const displayName = typeof getLocalizedContactName === 'function' ? getLocalizedContactName(c.name) : c.name;
+
+        const row = document.createElement('div');
+        row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 9px 12px; gap: 8px;';
+        
+        row.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+            <div style="width: 34px; height: 34px; border-radius: 50%; background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; flex-shrink: 0;">
+              ${c.initial || (c.name ? c.name.charAt(0).toUpperCase() : '?')}
+            </div>
+            <div style="min-width: 0;">
+              <div style="font-size: 13px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(displayName)}</div>
+              <div style="font-size: 11px; color: ${isConfigured ? '#38bdf8' : '#94a3b8'}; font-family: monospace;">${displayPhone}</div>
+            </div>
+          </div>
+          <button type="button" onclick="sendEmergencyDistressAlertToContacts('${c.id}')" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: #fff; border: 1px solid rgba(255,255,255,0.25); border-radius: 9px; padding: 7px 12px; font-size: 11.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35); transition: transform 0.15s ease;" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='none'">
+            <i class="fas fa-paper-plane"></i> Send SOS
+          </button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function sendEmergencyDistressAlertToContacts(contactTarget) {
+      const lat = (currentCoords && currentCoords.lat) || 23.8103;
+      const lon = (currentCoords && currentCoords.lon) || 90.4125;
+      const address = (currentCoords && currentCoords.address) || 'Dhaka, Bangladesh';
+      const gmapsLiveUrl = 'https://maps.google.com/?q=' + lat + ',' + lon;
+      const carText = activeVehiclePlateNumber ? activeVehiclePlateNumber : 'On Foot / Walking (No Vehicle Plate)';
+      const isBn = currentAppLanguage === 'bn';
+      const timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+      const alertMessage = isBn
+        ? ('🚨 [জরুরি বিপদ সংকেত - সেইফ বিডি]\nআমি বিপদে আছি এবং তাৎক্ষণিক সাহায্য প্রয়োজন!\n📍 বর্তমান অবস্থান: ' + address + '\n🗺️ লাইভ জিপিএস লিংক: ' + gmapsLiveUrl + '\n🚗 গাড়ির নম্বর প্লেট: ' + carText + '\n⏱️ সময়: ' + timeStr + '\nদয়া করে দ্রুত পুলিশকে জানান বা আমাকে উদ্ধার করতে সহায়তা করুন!')
+        : ('🚨 [SAFE BD EMERGENCY DISTRESS ALERT]\nI AM NOT SAFE! I need immediate help!\n📍 Current Location: ' + address + '\n🗺️ Live GPS Map Link: ' + gmapsLiveUrl + '\n🚗 Vehicle / Car Number: ' + carText + '\n⏱️ Time: ' + timeStr + '\nVerified Distress Signal via SAFE BD');
+
+      // Determine recipient phone(s)
+      let targetPhones = [];
+      let targetNames = [];
+
+      if (contactTarget === 'ALL') {
+        contacts.forEach(c => {
+          if (c.phone && !isDummyPhone(c.phone)) {
+            const clean = String(c.phone).replace(/\D/g, '').slice(-10);
+            if (clean && !targetPhones.includes(clean)) {
+              targetPhones.push(clean);
+              targetNames.push(c.name || 'Contact');
+            }
+          }
+        });
+      } else {
+        const found = contacts.find(c => c.id === contactTarget);
+        if (found && found.phone && !isDummyPhone(found.phone)) {
+          const clean = String(found.phone).replace(/\D/g, '').slice(-10);
+          if (clean) {
+            targetPhones.push(clean);
+            targetNames.push(found.name || 'Contact');
+          }
+        }
+      }
+
+      if (targetPhones.length === 0) {
+        alert('⚠️ No phone number is saved for this contact yet. Please configure their phone number in the contacts section.\n\nOpening device SMS with your location & car number now...');
+        window.location.href = 'sms:?&body=' + encodeURIComponent(alertMessage);
+        return;
+      }
+
+      // Record emergency escalation to backend
+      const token = localStorage.getItem('safe_bd_token');
+      fetch(API_BASE + '/api/walk/report-overdue', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+        },
+        body: JSON.stringify({
+          sessionId: activeJourneySessionId,
+          phone: currentUser ? currentUser.phone : '',
+          guardianPhone: targetPhones.join(', '),
+          guardianName: targetNames.join(', '),
+          lat: lat,
+          lon: lon,
+          address: address,
+          vehiclePlate: activeVehiclePlateNumber,
+          alertType: 'MANUAL_EMERGENCY_TRIGGER'
+        })
+      }).catch(() => {});
+
+      // Launch native SMS on device with pre-filled distress message and recipient
+      const primaryPhone = targetPhones[0];
+      const smsUrl = 'sms:+880' + primaryPhone + '?&body=' + encodeURIComponent(alertMessage);
+      window.location.href = smsUrl;
+
+      // Close emergency sheet
+      closeCompanionEmergencySheet();
     }
 
     function handleJourneyTimerTick(destination) {
