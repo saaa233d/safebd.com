@@ -4864,19 +4864,19 @@
           </span>
         </div>
 
-        <!-- OPTION 2: SEND LIVE DISTRESS ALERT TO SAVED CONTACTS -->
-        <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 12px 14px; margin-bottom: 12px;">
+        <!-- OPTION 2: SEND LIVE DISTRESS ALERT TO SAVED CONTACTS VIA WHATSAPP -->
+        <div style="background: rgba(37, 211, 102, 0.05); border: 1px solid rgba(37, 211, 102, 0.25); border-radius: 16px; padding: 12px 14px; margin-bottom: 12px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <div style="font-size: 12px; font-weight: 800; color: #38bdf8; display: flex; align-items: center; gap: 6px;">
-              <i class="fas fa-paper-plane"></i> Send SOS to Saved Contacts
+            <div style="font-size: 12.5px; font-weight: 800; color: #25D366; display: flex; align-items: center; gap: 7px;">
+              <i class="fab fa-whatsapp" style="font-size: 16px;"></i> <span>Send WhatsApp SOS to Contacts</span>
             </div>
-            <button type="button" onclick="sendEmergencyDistressAlertToContacts('ALL')" style="background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; font-size: 10.5px; font-weight: 800; padding: 3px 8px; border-radius: 9999px; cursor: pointer;">
-              ⚡ Send to All
+            <button type="button" onclick="sendEmergencyDistressAlertToContacts('ALL')" style="background: rgba(37, 211, 102, 0.18); border: 1px solid rgba(37, 211, 102, 0.45); color: #25D366; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 9999px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: transform 0.15s ease;" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='none'">
+              <i class="fab fa-whatsapp"></i> Share All
             </button>
           </div>
 
-          <div style="font-size: 10.5px; color: var(--text-muted); margin-bottom: 10px;">
-            Auto-attaches your live GPS link &amp; <span id="emergency-modal-car-tag" style="color: #fef08a; font-weight: 700;"></span>
+          <div style="font-size: 10.5px; color: rgba(235, 235, 245, 0.7); margin-bottom: 10px;">
+            Auto-generates urgent alert with live GPS map &amp; <span id="emergency-modal-car-tag" style="color: #fef08a; font-weight: 700;"></span> directly in WhatsApp
           </div>
 
           <!-- Contact items dynamically rendered -->
@@ -9930,7 +9930,7 @@
         
         row.innerHTML = `
           <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
-            <div style="width: 34px; height: 34px; border-radius: 50%; background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; flex-shrink: 0;">
+            <div style="width: 34px; height: 34px; border-radius: 50%; background: rgba(37, 211, 102, 0.18); border: 1px solid rgba(37, 211, 102, 0.4); color: #25D366; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0;">
               ${c.initial || (c.name ? c.name.charAt(0).toUpperCase() : '?')}
             </div>
             <div style="min-width: 0;">
@@ -9938,8 +9938,8 @@
               <div style="font-size: 11px; color: ${isConfigured ? '#38bdf8' : '#94a3b8'}; font-family: monospace;">${displayPhone}</div>
             </div>
           </div>
-          <button type="button" onclick="sendEmergencyDistressAlertToContacts('${c.id}')" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: #fff; border: 1px solid rgba(255,255,255,0.25); border-radius: 9px; padding: 7px 12px; font-size: 11.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35); transition: transform 0.15s ease;" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='none'">
-            <i class="fas fa-paper-plane"></i> Send SOS
+          <button type="button" onclick="sendEmergencyDistressAlertToContacts('${c.id}')" style="background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: #fff; border: 1px solid rgba(255,255,255,0.25); border-radius: 9px; padding: 7px 12px; font-size: 11.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; flex-shrink: 0; box-shadow: 0 2px 10px rgba(37, 211, 102, 0.35); transition: transform 0.15s ease;" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='none'">
+            <i class="fab fa-whatsapp" style="font-size: 13px;"></i> WhatsApp
           </button>
         `;
         container.appendChild(row);
@@ -9951,13 +9951,24 @@
       const lon = (currentCoords && currentCoords.lon) || 90.4125;
       const address = (currentCoords && currentCoords.address) || 'Dhaka, Bangladesh';
       const gmapsLiveUrl = 'https://maps.google.com/?q=' + lat + ',' + lon;
-      const carText = activeVehiclePlateNumber ? activeVehiclePlateNumber : 'On Foot / Walking (No Vehicle Plate)';
       const isBn = currentAppLanguage === 'bn';
+      const carText = activeVehiclePlateNumber ? activeVehiclePlateNumber : (isBn ? 'গাড়ি ছাড়া (পায়ে হাঁটা)' : 'On Foot / Walking (No Vehicle Plate)');
       const timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
+      // Clean WhatsApp format with Markdown styling
       const alertMessage = isBn
-        ? ('🚨 [জরুরি বিপদ সংকেত - সেইফ বিডি]\nআমি বিপদে আছি এবং তাৎক্ষণিক সাহায্য প্রয়োজন!\n📍 বর্তমান অবস্থান: ' + address + '\n🗺️ লাইভ জিপিএস লিংক: ' + gmapsLiveUrl + '\n🚗 গাড়ির নম্বর প্লেট: ' + carText + '\n⏱️ সময়: ' + timeStr + '\nদয়া করে দ্রুত পুলিশকে জানান বা আমাকে উদ্ধার করতে সহায়তা করুন!')
-        : ('🚨 [SAFE BD EMERGENCY DISTRESS ALERT]\nI AM NOT SAFE! I need immediate help!\n📍 Current Location: ' + address + '\n🗺️ Live GPS Map Link: ' + gmapsLiveUrl + '\n🚗 Vehicle / Car Number: ' + carText + '\n⏱️ Time: ' + timeStr + '\nVerified Distress Signal via SAFE BD');
+        ? `🚨 *[জরুরি বিপদ সংকেত — সেইফ বিডি]* 🚨\n\n⚠️ *আমি বিপদে আছি এবং তাৎক্ষণিক সাহায্য প্রয়োজন!*\n\n📍 *বর্তমান অবস্থান:* ${address}\n🗺️ *লাইভ জিপিএস লিংক:* ${gmapsLiveUrl}\n🚗 *গাড়ির নম্বর প্লেট:* ${carText}\n⏱️ *সময়:* ${timeStr}\n\n🛡️ *সেইফ বিডি ওয়াক উইথ মি কম্প্যানিয়ন গার্ড থেকে প্রেরিত*\nদয়া করে দ্রুত পুলিশকে (৯৯৯) জানান বা আমাকে উদ্ধার করতে সহায়তা করুন!`
+        : `🚨 *[SAFE BD EMERGENCY DISTRESS ALERT]* 🚨\n\n⚠️ *I AM NOT SAFE! I NEED IMMEDIATE HELP!*\n\n📍 *Current Location:* ${address}\n🗺️ *Live GPS Map Link:* ${gmapsLiveUrl}\n🚗 *Vehicle / Car Number:* ${carText}\n⏱️ *Time:* ${timeStr}\n\n🛡️ *Verified Distress Signal via SAFE BD Companion Guard*\nPlease call 999 Police or dispatch immediate rescue!`;
+
+      // Helper to clean Bangladesh phone numbers for WhatsApp API (needs 8801XXXXXXXXX)
+      function normalizePhoneForWhatsApp(raw) {
+        if (!raw) return '';
+        const digits = String(raw).replace(/\D/g, '');
+        if (digits.startsWith('880')) return digits;
+        if (digits.startsWith('0')) return '880' + digits.slice(1);
+        if (digits.length === 10 && digits.startsWith('1')) return '880' + digits;
+        return digits;
+      }
 
       // Determine recipient phone(s)
       let targetPhones = [];
@@ -9966,9 +9977,9 @@
       if (contactTarget === 'ALL') {
         contacts.forEach(c => {
           if (c.phone && !isDummyPhone(c.phone)) {
-            const clean = String(c.phone).replace(/\D/g, '').slice(-10);
-            if (clean && !targetPhones.includes(clean)) {
-              targetPhones.push(clean);
+            const waPhone = normalizePhoneForWhatsApp(c.phone);
+            if (waPhone && !targetPhones.includes(waPhone)) {
+              targetPhones.push(waPhone);
               targetNames.push(c.name || 'Contact');
             }
           }
@@ -9976,18 +9987,12 @@
       } else {
         const found = contacts.find(c => c.id === contactTarget);
         if (found && found.phone && !isDummyPhone(found.phone)) {
-          const clean = String(found.phone).replace(/\D/g, '').slice(-10);
-          if (clean) {
-            targetPhones.push(clean);
+          const waPhone = normalizePhoneForWhatsApp(found.phone);
+          if (waPhone) {
+            targetPhones.push(waPhone);
             targetNames.push(found.name || 'Contact');
           }
         }
-      }
-
-      if (targetPhones.length === 0) {
-        alert('⚠️ No phone number is saved for this contact yet. Please configure their phone number in the contacts section.\n\nOpening device SMS with your location & car number now...');
-        window.location.href = 'sms:?&body=' + encodeURIComponent(alertMessage);
-        return;
       }
 
       // Record emergency escalation to backend
@@ -10007,14 +10012,31 @@
           lon: lon,
           address: address,
           vehiclePlate: activeVehiclePlateNumber,
-          alertType: 'MANUAL_EMERGENCY_TRIGGER'
+          alertType: 'MANUAL_EMERGENCY_TRIGGER_WHATSAPP'
         })
       }).catch(() => {});
 
-      // Launch native SMS on device with pre-filled distress message and recipient
-      const primaryPhone = targetPhones[0];
-      const smsUrl = 'sms:+880' + primaryPhone + '?&body=' + encodeURIComponent(alertMessage);
-      window.location.href = smsUrl;
+      // Construct WhatsApp URL
+      let whatsappUrl = '';
+      if (contactTarget === 'ALL' || targetPhones.length === 0) {
+        // Universal WhatsApp share sheet: allows user to pick any contact/group on WhatsApp
+        whatsappUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(alertMessage);
+      } else {
+        // Direct WhatsApp chat to the selected contact with pre-filled message
+        const primaryPhone = targetPhones[0];
+        whatsappUrl = 'https://wa.me/' + primaryPhone + '?text=' + encodeURIComponent(alertMessage);
+      }
+
+      // If user had no contact phone configured and chose specific contact, give clear notice
+      if (contactTarget !== 'ALL' && targetPhones.length === 0) {
+        alert('⚠️ No phone number is saved for this contact yet.\n\nOpening WhatsApp so you can choose a recipient now...');
+      }
+
+      // Launch WhatsApp (try popup/window, fallback to location)
+      const win = window.open(whatsappUrl, '_blank');
+      if (!win) {
+        window.location.href = whatsappUrl;
+      }
 
       // Close emergency sheet
       closeCompanionEmergencySheet();
