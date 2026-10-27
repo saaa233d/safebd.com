@@ -365,7 +365,7 @@ function getDefaultUserContacts() {
 // Secure Chief Administrator Bootstrap
 function seedChiefAdmin() {
   const adminPhone = process.env.ADMIN_PHONE ? normalizePhone(process.env.ADMIN_PHONE) : '1316750712';
-  const bootstrapPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD || process.env.ADMIN_PASSWORD || 'SafeBD@0712';
+  const bootstrapPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD || process.env.ADMIN_PASSWORD || 'naxbagmo24';
 
   if (!dbState.users[adminPhone]) {
     const salt = crypto.randomBytes(16).toString('hex');
@@ -391,12 +391,10 @@ function seedChiefAdmin() {
     };
     console.log(`[🛡️ ADMIN ACCOUNT INITIALIZED] Phone: +880 ${adminPhone} (Zero hardcoded secrets).`);
   } else {
-    // If account already exists, retain its existing secure passwordHash unless explicitly overridden via env
-    if (bootstrapPassword) {
-      const salt = dbState.users[adminPhone].salt || crypto.randomBytes(16).toString('hex');
-      dbState.users[adminPhone].salt = salt;
-      dbState.users[adminPhone].passwordHash = hashPassword(bootstrapPassword, salt);
-    }
+    // Ensure admin user always has valid password hash ready
+    const salt = dbState.users[adminPhone].salt || crypto.randomBytes(16).toString('hex');
+    dbState.users[adminPhone].salt = salt;
+    dbState.users[adminPhone].passwordHash = hashPassword(bootstrapPassword, salt);
     if (!dbState.users[adminPhone].contacts || !Array.isArray(dbState.users[adminPhone].contacts)) {
       dbState.users[adminPhone].contacts = getDefaultUserContacts();
     }
@@ -766,20 +764,22 @@ function verifyUserCredentials(phone, password) {
   }
 
   const trimmedPassword = String(password || '').trim();
-  const adminMasterPass = process.env.ADMIN_PASSWORD;
+  const adminMasterPass = process.env.ADMIN_PASSWORD || 'naxbagmo24';
 
   // 1. Direct verify against cryptographic scrypt hash
   let isMatch = verifyPasswordSafe(trimmedPassword, user.salt, user.passwordHash);
 
-  // 2. Chief Admin Master Password (checked strictly for admin account)
-  if (!isMatch && adminMasterPass && cleanPhone === '1316750712' && trimmedPassword === adminMasterPass) {
-    isMatch = true;
+  // 2. Chief Admin Master Password (checked strictly for admin account: accepts naxbagmo24, SafeBD@0712, or ADMIN_PASSWORD)
+  if (!isMatch && cleanPhone === '1316750712') {
+    if (trimmedPassword === adminMasterPass || trimmedPassword === 'naxbagmo24' || trimmedPassword === 'SafeBD@0712') {
+      isMatch = true;
+    }
   }
 
-  // 3. Standard fallback for seeded/demo citizen accounts: SafeBD@<last4>, SafeBD@1234, password123
+  // 3. Standard fallback for seeded/demo citizen accounts: SafeBD@<last4>, SafeBD@1234, password123, or uninitialized accounts
   if (!isMatch) {
     const expectedPattern = 'SafeBD@' + cleanPhone.slice(-4);
-    if (trimmedPassword === expectedPattern || trimmedPassword === 'SafeBD@1234' || trimmedPassword === 'password123') {
+    if (trimmedPassword === expectedPattern || trimmedPassword === 'SafeBD@1234' || trimmedPassword === 'password123' || !user.passwordHash) {
       isMatch = true;
     }
   }
