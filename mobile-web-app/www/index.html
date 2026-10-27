@@ -6134,6 +6134,8 @@
     var isAutoArrivalTriggered = false;
     var isTimerAutoPredicted = true;
     var latestGoogleMapsPredictedMinutes = null;
+    var activeVehiclePlateNumber = '';
+    var BLUE_TICK_SVG = `<svg viewBox="0 0 24 24" style="width: 17px; height: 17px; vertical-align: -3px; display: inline-block; margin-left: 5px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));" aria-label="Verified Tick"><path fill="#1d9bf0" d="M22.25 12c0-1.43-.88-2.67-2.19-3.15.2-1.4-.64-2.67-1.99-3.08-.34-1.37-1.57-2.3-2.99-2.22-1.07-.89-2.6-.89-3.67 0-1.42-.08-2.65.85-2.99 2.22-1.35.41-2.19 1.68-1.99 3.08-1.31.48-2.19 1.72-2.19 3.15s.88 2.67 2.19 3.15c-.2 1.4.64 2.67 1.99 3.08.34 1.37 1.57 2.3 2.99 2.22 1.07.89 2.6.89 3.67 0 1.42.08 2.65-.85 2.99-2.22 1.35-.41 2.19-1.68 1.99-3.08 1.31-.48 2.19-1.72 2.19-3.15z"/><path fill="#ffffff" d="M10.25 15.6l-3.2-3.2 1.4-1.4 1.8 1.8 5.6-5.6 1.4 1.4-7 7z"/></svg>`;
 
     let API_BASE = (() => {
       try {
@@ -7035,39 +7037,7 @@
       }
     }
 
-    try {
-      const saved = localStorage.getItem('safe_bd_user');
-      if (saved) {
-        currentUser = JSON.parse(saved);
-        const cleanPhone = String(currentUser.phone || '').replace(/\D/g, '').slice(-10);
-        if (cleanPhone !== '1316750712' && currentUser.name && currentUser.name.toUpperCase().includes('SAAD RIZWAN')) {
-          currentUser.name = 'Citizen';
-          currentUser.isFounder = false;
-          try { localStorage.setItem('safe_bd_user', JSON.stringify(currentUser)); } catch(e) {}
-        }
-        setLoggedInState();
-        loadUserContacts(currentUser);
-      } else {
-        loadUserContacts(null);
-      }
-    } catch(e) {
-      loadUserContacts(null);
-    }
-    try {
-      if (typeof initAuthOnPageLoad === 'function') {
-        initAuthOnPageLoad();
-      }
-    } catch(e) {}
-    try {
-      if (typeof initBackgroundWalkSessionOnLoad === 'function') {
-        initBackgroundWalkSessionOnLoad();
-      }
-    } catch(e) {}
-    loadFeedFromLocalStorage();
-    fetchLiveFeedPosts(1, false);
-    if (currentUser && currentUser.isAdmin) {
-      fetchAdminPendingPosts();
-    }
+    // (Startup application initialization deferred to startSafeBdApplication() at the bottom of the script)
 
     // =========================================================================
     // DIRECT HIGH-PRECISION DEVICE GPS ENGINE (VIA DEVICE SENSORS & GOOGLE MAPS)
@@ -7633,8 +7603,6 @@
       if (bannerBadge) bannerBadge.innerText = count;
       if (adminPendingStat) adminPendingStat.innerText = count;
     }
-
-    const BLUE_TICK_SVG = `<svg viewBox="0 0 24 24" style="width: 17px; height: 17px; vertical-align: -3px; display: inline-block; margin-left: 5px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));" aria-label="Verified Tick"><path fill="#1d9bf0" d="M22.25 12c0-1.43-.88-2.67-2.19-3.15.2-1.4-.64-2.67-1.99-3.08-.34-1.37-1.57-2.3-2.99-2.22-1.07-.89-2.6-.89-3.67 0-1.42-.08-2.65.85-2.99 2.22-1.35.41-2.19 1.68-1.99 3.08-1.31.48-2.19 1.72-2.19 3.15s.88 2.67 2.19 3.15c-.2 1.4.64 2.67 1.99 3.08.34 1.37 1.57 2.3 2.99 2.22 1.07.89 2.6.89 3.67 0 1.42.08 2.65-.85 2.99-2.22 1.35-.41 2.19-1.68 1.99-3.08 1.31-.48 2.19-1.72 2.19-3.15z"/><path fill="#ffffff" d="M10.25 15.6l-3.2-3.2 1.4-1.4 1.8 1.8 5.6-5.6 1.4 1.4-7 7z"/></svg>`;
 
     function isVideoMedia(mediaStr) {
       if (!mediaStr || typeof mediaStr !== 'string') return false;
@@ -9887,8 +9855,6 @@
     /* ----------------------------------------------------
        VEHICLE REGISTRATION NUMBER PLATE & EMERGENCY CONSOLE
     ---------------------------------------------------- */
-    let activeVehiclePlateNumber = '';
-
     function openVehiclePlateModal() {
       const modal = document.getElementById('modal-vehicle-plate');
       if (!modal) {
@@ -14741,6 +14707,59 @@
         if (typing) typing.style.display = 'none';
         console.warn("shurokhaAI fetch error:", err);
         appendShurokhaBubble('model', "I am right here with you! If you are facing an emergency or need urgent police/ambulance assistance, please use our Red SOS Button or dial 999 directly.");
+      }
+    }
+
+    // =========================================================================
+    // SAFE BD CORE APPLICATION LIFECYCLE & STARTUP ENGINE
+    // Executes safely when all DOM, variables, and handlers are fully defined
+    // =========================================================================
+    function startSafeBdApplication() {
+      try {
+        const saved = localStorage.getItem('safe_bd_user');
+        if (saved) {
+          currentUser = JSON.parse(saved);
+          const cleanPhone = String(currentUser.phone || '').replace(/\D/g, '').slice(-10);
+          if (cleanPhone !== '1316750712' && currentUser.name && currentUser.name.toUpperCase().includes('SAAD RIZWAN')) {
+            currentUser.name = 'Citizen';
+            currentUser.isFounder = false;
+            try { localStorage.setItem('safe_bd_user', JSON.stringify(currentUser)); } catch(e) {}
+          }
+          setLoggedInState();
+          loadUserContacts(currentUser);
+          if (typeof renderProfileScreenState === 'function') renderProfileScreenState();
+        } else {
+          loadUserContacts(null);
+        }
+      } catch(e) {
+        loadUserContacts(null);
+      }
+
+      try {
+        if (typeof initAuthOnPageLoad === 'function') {
+          initAuthOnPageLoad();
+        }
+      } catch(e) {}
+
+      try {
+        if (typeof initBackgroundWalkSessionOnLoad === 'function') {
+          initBackgroundWalkSessionOnLoad();
+        }
+      } catch(e) {}
+
+      loadFeedFromLocalStorage();
+      fetchLiveFeedPosts(1, false);
+
+      if (currentUser && currentUser.isAdmin) {
+        fetchAdminPendingPosts();
+      }
+    }
+
+    if (typeof document !== 'undefined') {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startSafeBdApplication);
+      } else {
+        startSafeBdApplication();
       }
     }
   </script>
