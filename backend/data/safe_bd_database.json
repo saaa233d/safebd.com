@@ -11,9 +11,9 @@
       "isAdmin": true,
       "isLoggedIn": true,
       "createdAt": "2026-10-12T03:45:26.505Z",
-      "lastLoginAt": "2026-10-27T08:59:45.137Z",
+      "lastLoginAt": "2026-10-27T09:37:57.616Z",
       "lastLogoutAt": "2026-10-12T03:59:10.498Z",
-      "loginCount": 22,
+      "loginCount": 24,
       "contacts": [
         {
           "id": "c1",
@@ -1120,6 +1120,24 @@
       "createdAt": "2026-10-27T08:59:45.137Z",
       "expiresAt": 1795683585137,
       "active": true
+    },
+    "safe_token_admin_MTMxNjc1MDcxMnwxfDE3OTMwOTE2ODk4Njl8NGZhZTA4YzBjNTk3Yzk2YQ.dabf4f7e9767f40c920f331e9b9ea88c": {
+      "token": "safe_token_admin_MTMxNjc1MDcxMnwxfDE3OTMwOTE2ODk4Njl8NGZhZTA4YzBjNTk3Yzk2YQ.dabf4f7e9767f40c920f331e9b9ea88c",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-27T09:01:29.869Z",
+      "expiresAt": 1795683689869,
+      "active": true
+    },
+    "safe_token_admin_MTMxNjc1MDcxMnwxfDE3OTMwOTM4Nzc2MTR8ZDM2ZmRkMmQ3YjMwMDM1Yw.026455cce70e7fc5dc672947d9bfc261": {
+      "token": "safe_token_admin_MTMxNjc1MDcxMnwxfDE3OTMwOTM4Nzc2MTR8ZDM2ZmRkMmQ3YjMwMDM1Yw.026455cce70e7fc5dc672947d9bfc261",
+      "phone": "1316750712",
+      "userName": "SAAD RIZWAN",
+      "isAdmin": true,
+      "createdAt": "2026-10-27T09:37:57.616Z",
+      "expiresAt": 1795685877616,
+      "active": true
     }
   },
   "activeJourneys": {
@@ -1401,9 +1419,9 @@
     "stateFileId": null
   },
   "stats": {
-    "totalLogins": 69,
+    "totalLogins": 71,
     "totalRegistrations": 11,
-    "lastSaved": "2026-10-27T08:59:45.243Z",
+    "lastSaved": "2026-10-27T09:37:57.717Z",
     "totalPosts": 9
   }
 }
