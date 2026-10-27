@@ -4140,4 +4140,22 @@ server.listen(PORT, () => {
   console.log(`📡 WebSocket: ws://localhost:${PORT}`);
   console.log(`🚨 999 CAD Dispatch Integration: ACTIVE`);
   console.log(`====================================================`);
+
+  // Render Free-Tier Self-Keepalive (Pings health check every 10 mins during active hours to minimize cold-starts)
+  if (process.env.RENDER || process.env.NODE_ENV === 'production') {
+    const KEEP_ALIVE_URL = process.env.RENDER_EXTERNAL_URL
+      ? `${process.env.RENDER_EXTERNAL_URL}/api/health`
+      : 'https://safebd.onrender.com/api/health';
+    
+    setInterval(async () => {
+      try {
+        const res = await fetch(KEEP_ALIVE_URL, { headers: { 'User-Agent': 'SAFE-BD-KeepAlive/1.0' } });
+        if (res.ok) {
+          console.log(`[KEEP-ALIVE] Pinged ${KEEP_ALIVE_URL} - Status: ${res.status}`);
+        }
+      } catch(err) {
+        console.warn(`[KEEP-ALIVE] Ping warning: ${err.message}`);
+      }
+    }, 10 * 60 * 1000);
+  }
 });
