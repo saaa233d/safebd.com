@@ -2394,8 +2394,56 @@
     }
 
     /* ========================================================
-       IMMEDIATE EMERGENCY HELP MODAL (APPLE-INSPIRED 2x2 ACTION MATRIX)
+       EMERGENCY TACTICAL HELP & HOTLINES (ULTRA-LUXURY APPLE VISIONOS & iOS 18 THEME)
     ======================================================== */
+    #screen-help {
+      animation: appleHelpGlide 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes appleHelpGlide {
+      from { opacity: 0; transform: translateY(12px) scale(0.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Apple Segmented Capsule Filter */
+    .apple-segment-bar {
+      display: flex;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 4px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-top: 1.5px solid rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(28px) saturate(210%);
+      -webkit-backdrop-filter: blur(28px) saturate(210%);
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.25);
+    }
+    .apple-segment-btn {
+      flex: 1;
+      padding: 8px 0;
+      border: none;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.65);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+    }
+    .apple-segment-btn:hover {
+      color: #ffffff;
+    }
+    .apple-segment-btn.active {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.12) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      border-top: 1.5px solid rgba(255, 255, 255, 0.55);
+      color: #ffffff !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.45) !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    }
+
+    /* Apple 2x2 Tactical Action Matrix */
     .help-tactical-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -2408,22 +2456,24 @@
       }
     }
     .help-card-tile {
-      background: rgba(30, 32, 42, 0.72);
-      backdrop-filter: blur(28px) saturate(190%);
-      -webkit-backdrop-filter: blur(28px) saturate(190%);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 20px;
-      padding: 14px 13px;
+      background: linear-gradient(145deg, rgba(28, 30, 44, 0.82) 0%, rgba(16, 18, 28, 0.92) 100%);
+      backdrop-filter: blur(36px) saturate(220%) brightness(1.06);
+      -webkit-backdrop-filter: blur(36px) saturate(220%) brightness(1.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-top: 1.5px solid rgba(255, 255, 255, 0.42);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 22px;
+      padding: 15px 14px;
       text-align: left;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 124px;
+      min-height: 128px;
       cursor: pointer;
       position: relative;
       overflow: hidden;
-      transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-      box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.45), inset 0 1px 1px 0 rgba(255, 255, 255, 0.15);
+      transition: all 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.18), 0 0 20px rgba(0, 0, 0, 0.2);
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
@@ -2433,57 +2483,65 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 48px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
+      height: 52px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 100%);
       pointer-events: none;
-      border-radius: 20px 20px 0 0;
+      border-radius: 22px 22px 0 0;
     }
     .help-card-tile:hover {
-      transform: translateY(-2px);
-      border-color: rgba(255, 255, 255, 0.22);
-      box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.55), inset 0 1px 1px 0 rgba(255, 255, 255, 0.25);
+      transform: translateY(-3px) scale(1.015);
+      border-color: rgba(255, 255, 255, 0.28);
+      border-top-color: rgba(255, 255, 255, 0.65);
+      box-shadow: 0 16px 42px rgba(0, 0, 0, 0.62), inset 0 1px 1px rgba(255, 255, 255, 0.32);
     }
     .help-card-tile:active {
       transform: scale(0.965);
-      filter: brightness(1.08);
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
     }
 
-    /* Apple-Themed Accents for Cards */
+    /* Apple-Themed Bioluminescent Accents for Tiles */
     .help-card-tile.theme-ambulance {
-      background: radial-gradient(circle at top left, rgba(255, 69, 58, 0.16), transparent 70%), rgba(28, 22, 26, 0.78);
-      border-color: rgba(255, 69, 58, 0.28);
+      background: radial-gradient(circle at 15% 15%, rgba(255, 59, 48, 0.26) 0%, transparent 68%), linear-gradient(145deg, rgba(34, 22, 28, 0.88) 0%, rgba(18, 14, 18, 0.94) 100%);
+      border-color: rgba(255, 59, 48, 0.35);
+      border-top-color: rgba(255, 105, 97, 0.68);
     }
     .help-card-tile.theme-ambulance:hover {
-      border-color: rgba(255, 69, 58, 0.5);
-      box-shadow: 0 12px 30px -4px rgba(255, 69, 58, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 59, 48, 0.6);
+      border-top-color: rgba(255, 120, 110, 0.85);
+      box-shadow: 0 16px 42px rgba(255, 59, 48, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.3);
     }
 
     .help-card-tile.theme-patient {
-      background: radial-gradient(circle at top left, rgba(255, 159, 10, 0.16), transparent 70%), rgba(28, 24, 20, 0.78);
-      border-color: rgba(255, 159, 10, 0.28);
+      background: radial-gradient(circle at 15% 15%, rgba(255, 149, 0, 0.26) 0%, transparent 68%), linear-gradient(145deg, rgba(34, 26, 20, 0.88) 0%, rgba(18, 15, 12, 0.94) 100%);
+      border-color: rgba(255, 149, 0, 0.35);
+      border-top-color: rgba(255, 180, 70, 0.68);
     }
     .help-card-tile.theme-patient:hover {
-      border-color: rgba(255, 159, 10, 0.5);
-      box-shadow: 0 12px 30px -4px rgba(255, 159, 10, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 149, 0, 0.6);
+      border-top-color: rgba(255, 195, 90, 0.85);
+      box-shadow: 0 16px 42px rgba(255, 149, 0, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.3);
     }
 
     .help-card-tile.theme-fire {
-      background: radial-gradient(circle at top left, rgba(255, 107, 53, 0.16), transparent 70%), rgba(28, 22, 18, 0.78);
-      border-color: rgba(255, 107, 53, 0.28);
+      background: radial-gradient(circle at 15% 15%, rgba(255, 107, 53, 0.26) 0%, transparent 68%), linear-gradient(145deg, rgba(36, 22, 18, 0.88) 0%, rgba(18, 13, 11, 0.94) 100%);
+      border-color: rgba(255, 107, 53, 0.35);
+      border-top-color: rgba(255, 140, 90, 0.68);
     }
     .help-card-tile.theme-fire:hover {
-      border-color: rgba(255, 107, 53, 0.5);
-      box-shadow: 0 12px 30px -4px rgba(255, 107, 53, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 107, 53, 0.6);
+      border-top-color: rgba(255, 160, 110, 0.85);
+      box-shadow: 0 16px 42px rgba(255, 107, 53, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.3);
     }
 
     .help-card-tile.theme-blood {
-      background: radial-gradient(circle at top left, rgba(255, 55, 95, 0.16), transparent 70%), rgba(28, 20, 24, 0.78);
-      border-color: rgba(255, 55, 95, 0.28);
+      background: radial-gradient(circle at 15% 15%, rgba(255, 45, 85, 0.26) 0%, transparent 68%), linear-gradient(145deg, rgba(34, 18, 26, 0.88) 0%, rgba(18, 12, 16, 0.94) 100%);
+      border-color: rgba(255, 45, 85, 0.35);
+      border-top-color: rgba(255, 95, 130, 0.68);
     }
     .help-card-tile.theme-blood:hover {
-      border-color: rgba(255, 55, 95, 0.5);
-      box-shadow: 0 12px 30px -4px rgba(255, 55, 95, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 45, 85, 0.6);
+      border-top-color: rgba(255, 115, 150, 0.85);
+      box-shadow: 0 16px 42px rgba(255, 45, 85, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.3);
     }
 
     .help-card-top {
@@ -2495,8 +2553,8 @@
 
     /* Apple iOS Vibrant Squircle Icons */
     .help-icon-bubble {
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       border-radius: 12px;
       display: flex;
       align-items: center;
@@ -2505,86 +2563,90 @@
       color: #ffffff;
       flex-shrink: 0;
       position: relative;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.45);
     }
     .theme-ambulance .help-icon-bubble {
-      background: linear-gradient(140deg, #ff453a 0%, #d70015 100%);
-      box-shadow: 0 4px 14px rgba(255, 69, 58, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      background: linear-gradient(140deg, #ff453a 0%, #c4001a 100%);
+      box-shadow: 0 6px 18px rgba(255, 69, 58, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.5);
     }
     .theme-patient .help-icon-bubble {
-      background: linear-gradient(140deg, #ff9f0a 0%, #d97706 100%);
-      box-shadow: 0 4px 14px rgba(255, 159, 10, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      background: linear-gradient(140deg, #ff9f0a 0%, #d46b08 100%);
+      box-shadow: 0 6px 18px rgba(255, 159, 10, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.5);
     }
     .theme-fire .help-icon-bubble {
-      background: linear-gradient(140deg, #ff6b35 0%, #ea580c 100%);
-      box-shadow: 0 4px 14px rgba(255, 107, 53, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      background: linear-gradient(140deg, #ff6b35 0%, #dc420e 100%);
+      box-shadow: 0 6px 18px rgba(255, 107, 53, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.5);
     }
     .theme-blood .help-icon-bubble {
-      background: linear-gradient(140deg, #ff375f 0%, #d61845 100%);
-      box-shadow: 0 4px 14px rgba(255, 55, 95, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      background: linear-gradient(140deg, #ff2d55 0%, #b8002d 100%);
+      box-shadow: 0 6px 18px rgba(255, 45, 85, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.5);
     }
 
-    /* Apple Frosted Capsule Pill Badge */
+    /* Apple Glass Status Pill */
     .help-pill-badge {
       display: inline-flex;
       align-items: center;
       gap: 5px;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
       font-size: 10px;
       font-weight: 700;
       letter-spacing: 0.2px;
       padding: 4px 9px;
-      border-radius: 9999px;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      border-radius: 999px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
     .theme-ambulance .help-pill-badge {
-      background: rgba(255, 69, 58, 0.15);
-      border: 1px solid rgba(255, 69, 58, 0.35);
-      color: #ff9d97;
+      background: rgba(255, 69, 58, 0.18);
+      border-color: rgba(255, 69, 58, 0.45);
+      color: #ff857d;
     }
     .theme-patient .help-pill-badge {
-      background: rgba(255, 159, 10, 0.15);
-      border: 1px solid rgba(255, 159, 10, 0.35);
-      color: #ffca80;
+      background: rgba(255, 159, 10, 0.18);
+      border-color: rgba(255, 159, 10, 0.45);
+      color: #ffb84d;
     }
     .theme-fire .help-pill-badge {
-      background: rgba(255, 107, 53, 0.15);
-      border: 1px solid rgba(255, 107, 53, 0.35);
-      color: #ffb794;
+      background: rgba(255, 107, 53, 0.18);
+      border-color: rgba(255, 107, 53, 0.45);
+      color: #ffa375;
     }
     .theme-blood .help-pill-badge {
-      background: rgba(255, 55, 95, 0.15);
-      border: 1px solid rgba(255, 55, 95, 0.35);
-      color: #ff9bb0;
+      background: rgba(255, 45, 85, 0.18);
+      border-color: rgba(255, 45, 85, 0.45);
+      color: #ff7597;
     }
 
     .live-beacon-dot {
-      width: 5px;
-      height: 5px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
-      background: currentColor;
-      display: inline-block;
-      box-shadow: 0 0 6px currentColor;
-      animation: appleBeaconPulse 1.6s infinite ease-in-out;
+      background: #30d158;
+      box-shadow: 0 0 8px #30d158;
+      animation: beaconPulse 1.8s infinite ease-in-out;
     }
-    @keyframes appleBeaconPulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.35; transform: scale(0.8); }
+    @keyframes beaconPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.7); opacity: 0.55; }
     }
 
-    /* Apple-style Card Typography */
+    /* Refined Typography */
     .help-card-title {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
       font-size: 13px;
       font-weight: 700;
       color: #ffffff;
-      line-height: 1.25;
-      letter-spacing: -0.15px;
-      margin-bottom: 3px;
+      line-height: 1.3;
+      letter-spacing: -0.2px;
+      margin-bottom: 4px;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
     }
     .help-card-desc {
-      font-size: 10px;
-      line-height: 1.35;
-      color: rgba(255, 255, 255, 0.68);
+      font-size: 10.5px;
+      line-height: 1.4;
+      color: rgba(255, 255, 255, 0.72);
       font-weight: 400;
       letter-spacing: -0.05px;
       display: -webkit-box;
@@ -2592,38 +2654,23 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .theme-ambulance .help-card-desc { color: rgba(255, 225, 225, 0.75); }
-    .theme-patient .help-card-desc { color: rgba(255, 243, 215, 0.75); }
-    .theme-fire .help-card-desc { color: rgba(255, 235, 220, 0.75); }
-    .theme-blood .help-card-desc { color: rgba(255, 225, 235, 0.75); }
+    .theme-ambulance .help-card-desc { color: rgba(255, 225, 225, 0.78); }
+    .theme-patient .help-card-desc { color: rgba(255, 243, 215, 0.78); }
+    .theme-fire .help-card-desc { color: rgba(255, 235, 220, 0.78); }
+    .theme-blood .help-card-desc { color: rgba(255, 225, 235, 0.78); }
 
-    /* Apple Segmented Bar for Help Page */
-    .apple-segment-bar {
-      display: flex;
-      background: rgba(255, 255, 255, 0.06);
-      padding: 3px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-    }
-    .apple-segment-btn {
-      flex: 1;
-      padding: 7px 0;
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      font-size: 11.5px;
-      font-weight: 700;
-      border-radius: 9px;
-      cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-      user-select: none;
-    }
-    .apple-segment-btn.active {
-      background: rgba(255, 255, 255, 0.16) !important;
-      color: #ffffff !important;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    /* Apple VisionOS Section Glass Panels */
+    #section-help-hotlines,
+    #section-help-firstaid {
+      background: linear-gradient(180deg, rgba(28, 30, 44, 0.84) 0%, rgba(16, 18, 28, 0.94) 100%) !important;
+      backdrop-filter: blur(40px) saturate(230%) !important;
+      -webkit-backdrop-filter: blur(40px) saturate(230%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      border-top: 1.5px solid rgba(255, 255, 255, 0.38) !important;
+      border-radius: 26px !important;
+      padding: 18px !important;
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.12) !important;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     /* Posh Apple Hotline Rows */
@@ -2632,122 +2679,149 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      background: rgba(255, 255, 255, 0.035);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 11px 13px;
-      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-top: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 12px 14px;
+      border-radius: 18px;
       text-decoration: none;
       color: inherit;
-      transition: all 0.2s ease;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
       overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
     .hotline-row-item:hover {
-      background: rgba(255, 255, 255, 0.07);
-      border-color: rgba(255, 255, 255, 0.18);
-      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(255, 255, 255, 0.24);
+      border-top-color: rgba(255, 255, 255, 0.45);
+      transform: translateX(3px) translateY(-1px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     }
     .hotline-row-item:active {
       transform: scale(0.985);
     }
     .hotline-squircle {
-      width: 36px;
-      height: 36px;
-      border-radius: 11px;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 15px;
       flex-shrink: 0;
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+      position: relative;
     }
     .hotline-call-pill {
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      background: linear-gradient(135deg, rgba(48, 209, 88, 0.2) 0%, rgba(52, 199, 89, 0.12) 100%);
-      border: 1px solid rgba(48, 209, 88, 0.4);
+      background: linear-gradient(135deg, rgba(48, 209, 88, 0.18) 0%, rgba(52, 199, 89, 0.1) 100%);
+      border: 1px solid rgba(48, 209, 88, 0.42);
+      border-top: 1px solid rgba(48, 209, 88, 0.65);
       color: #30d158;
-      font-size: 11px;
-      font-weight: 800;
-      padding: 5px 11px;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.1px;
+      padding: 6px 13px;
       border-radius: 9999px;
       flex-shrink: 0;
-      transition: all 0.2s;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 2px 8px rgba(48, 209, 88, 0.22);
     }
     .hotline-row-item:hover .hotline-call-pill {
-      background: #30d158;
-      color: #000;
-      box-shadow: 0 0 12px rgba(48, 209, 88, 0.45);
+      background: #30d158 !important;
+      color: #000000 !important;
+      font-weight: 800;
+      box-shadow: 0 0 18px rgba(48, 209, 88, 0.65) !important;
+      transform: scale(1.05);
+    }
+    .hotline-call-pill:active {
+      transform: scale(0.94);
     }
 
-    /* Posh First Aid Accordion */
+    /* Posh Apple First Aid Accordion */
     .firstaid-accordion-card {
-      background: rgba(255, 255, 255, 0.035);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 16px;
-      margin-bottom: 10px;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-top: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 18px;
+      margin-bottom: 12px;
       overflow: hidden;
-      transition: border-color 0.2s ease, background 0.2s ease;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
     .firstaid-accordion-card:hover {
-      border-color: rgba(255, 255, 255, 0.18);
-      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.24);
+      border-top-color: rgba(255, 255, 255, 0.45);
+      background: rgba(255, 255, 255, 0.07);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     }
     .firstaid-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 14px;
+      padding: 14px 16px;
       cursor: pointer;
       user-select: none;
     }
     .firstaid-body {
       display: none;
-      padding: 0 14px 14px 14px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 4px 16px 16px 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
       margin-top: 4px;
-      padding-top: 12px;
+      padding-top: 14px;
+      animation: appleFirstAidOpen 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes appleFirstAidOpen {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .firstaid-step-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
     .firstaid-step-item {
       display: flex;
       align-items: flex-start;
-      gap: 10px;
-      font-size: 12px;
-      color: #cbd5e1;
-      line-height: 1.45;
+      gap: 11px;
+      font-size: 12.5px;
+      color: #e2e8f0;
+      line-height: 1.5;
     }
     .firstaid-step-num {
-      width: 18px;
-      height: 18px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.12);
-      color: #fff;
-      font-size: 10px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.09) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      color: #ffffff;
+      font-size: 11px;
       font-weight: 800;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      margin-top: 2px;
+      margin-top: 1px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     }
     .firstaid-warning-box {
-      margin-top: 10px;
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.35);
-      border-radius: 10px;
-      padding: 8px 11px;
-      font-size: 11px;
-      color: #fca5a5;
-      line-height: 1.4;
+      margin-top: 12px;
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.16) 0%, rgba(185, 28, 28, 0.22) 100%);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      border-top: 1.5px solid rgba(239, 68, 68, 0.7);
+      border-radius: 14px;
+      padding: 11px 14px;
+      font-size: 11.5px;
+      color: #fecaca;
+      line-height: 1.45;
       display: flex;
       align-items: flex-start;
-      gap: 7px;
+      gap: 9px;
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.22);
     }
     .form-group {
       margin-bottom: 14px;
