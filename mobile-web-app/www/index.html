@@ -11992,6 +11992,8 @@
           renderCommunityPosts();
 
           // Refresh and display active profile state
+          document.getElementById('view-auth-forms').style.display = 'none';
+          document.getElementById('view-profile-active').style.display = 'block';
           renderProfileScreenState();
 
           // Refresh live device GPS positioning immediately upon sign in
@@ -12004,16 +12006,18 @@
             closeAuthModal();
           }
 
-          // Gentle feedback banner
-          const welcomeMsg = currentUser.isAdmin 
-            ? "🛡️ Chief Admin Profile Unlocked. You have full command clearance."
-            : `🔓 Welcome back, ${currentUser.name}! Profile unlocked.`;
+          // Visual feedback banner & alert
+          const welcomeMsg = (currentUser.isAdmin || cleanUserPhone === '1316750712')
+            ? "🛡️ Chief Admin Profile Unlocked!\n\nYou have full command clearance, Saad Rizwan."
+            : `🔓 Welcome back, ${currentUser.name}!\n\nYour citizen profile is now unlocked.`;
           
           const profileSub = document.querySelector('#screen-profile [data-i18n="profile_page_sub"]');
           if (profileSub) {
-            profileSub.innerText = welcomeMsg;
+            profileSub.innerText = welcomeMsg.replace(/\n+/g, ' ');
             profileSub.style.color = '#34d399';
           }
+
+          alert(welcomeMsg);
         }
       })
       .catch(err => {
