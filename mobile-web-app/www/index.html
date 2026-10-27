@@ -3718,7 +3718,7 @@
           </div>
 
           <!-- Personal Citizen Companion Indicator -->
-          <div id="walk-user-badge" style="font-size: 10px; margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; padding: 3px 8px; background: rgba(255, 255, 255, 0.04); border-radius: 8px; border: 1px solid var(--border-quiet);">
+          <div id="walk-user-badge" onclick="openAuthModal()" style="font-size: 10px; margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; padding: 3px 8px; background: rgba(255, 255, 255, 0.04); border-radius: 8px; border: 1px solid var(--border-quiet); cursor: pointer;" title="Tap to unlock Citizen Profile">
             <div id="walk-user-badge-text" style="color: #94a3b8; font-size: 10px; display: flex; align-items: center; gap: 5px;">
               <i class="fas fa-user-shield" style="color: #38bdf8;"></i> <span data-i18n="walk_guard_dedicated">Personal Route Guardian</span>
             </div>
@@ -6158,32 +6158,247 @@
       return 'https://safebd.onrender.com';
     })();
 
-    async function apiFetch(endpoint, options = {}) {
-      const primaryUrl = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
+    function showCloudWakingBanner(show) {
       try {
-        const res = await fetch(primaryUrl, options);
+        let banner = document.getElementById('cloud-warmup-banner');
+        if (!banner && show && typeof document !== 'undefined' && document.body) {
+          banner = document.createElement('div');
+          banner.id = 'cloud-warmup-banner';
+          banner.style.cssText = 'position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 99999; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(56, 189, 248, 0.5); border-radius: 9999px; padding: 6px 16px; display: flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 700; color: #38bdf8; box-shadow: 0 4px 20px rgba(0,0,0,0.5); backdrop-filter: blur(12px); transition: opacity 0.3s ease; pointer-events: none;';
+          banner.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> <span>Connecting to secure cloud server (~10s)...</span>';
+          document.body.appendChild(banner);
+        }
+        if (banner) {
+          banner.style.opacity = show ? '1' : '0';
+          banner.style.display = show ? 'flex' : 'none';
+        }
+      } catch(e) {}
+    }
+
+    async function apiFetch(endpoint, options = {}, retries = 1) {
+      const primaryUrl = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
+      
+      const controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      const timeoutMs = (options && options.timeout) || 18000;
+      const timeoutId = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
+      
+      const warmUpTimer = setTimeout(() => {
+        showCloudWakingBanner(true);
+      }, 1800);
+
+      const fetchOptions = {
+        ...options,
+        ...(controller ? { signal: controller.signal } : {})
+      };
+
+      try {
+        const res = await fetch(primaryUrl, fetchOptions);
+        if (timeoutId) clearTimeout(timeoutId);
+        clearTimeout(warmUpTimer);
+        showCloudWakingBanner(false);
+
+        // Render spins down on free-tier; 502/503/504 means waking up: retry automatically
+        if ((res.status === 502 || res.status === 503 || res.status === 504) && retries > 0) {
+          showCloudWakingBanner(true);
+          await new Promise(r => setTimeout(r, 2500));
+          return apiFetch(endpoint, options, retries - 1);
+        }
+
         return res;
       } catch (err) {
-        const isHttpsPage = typeof window !== 'undefined' && window.location && window.location.protocol === 'https:';
-        const isLocal = primaryUrl.includes('localhost') || primaryUrl.includes('127.0.0.1');
+        if (timeoutId) clearTimeout(timeoutId);
+        clearTimeout(warmUpTimer);
+        showCloudWakingBanner(false);
 
-        // On HTTPS pages, never attempt insecure http:// fallback to avoid browser mixed content blocks
-        if (isHttpsPage && !isLocal) {
-          throw err;
+        // Auto retry once if network dropped or aborted during cold boot
+        if (retries > 0) {
+          showCloudWakingBanner(true);
+          await new Promise(r => setTimeout(r, 2500));
+          return apiFetch(endpoint, options, retries - 1);
         }
 
-        const fallbackHost = isLocal ? 'https://safebd.onrender.com' : 'http://localhost:5000';
-        const failoverUrl = endpoint.startsWith('http') ? endpoint.replace(/https?:\/\/[^\/]+/, fallbackHost) : `${fallbackHost}${endpoint}`;
-        console.warn(`[API FAILOVER] ${primaryUrl} failed (${err.message}). Retrying against ${failoverUrl}...`);
-        try {
-          const fallbackRes = await fetch(failoverUrl, options);
-          API_BASE = fallbackHost;
-          return fallbackRes;
-        } catch (fallbackErr) {
-          throw err;
-        }
+        // Strictly forbid poisoning API_BASE to localhost on HTTPS or production
+        throw err;
       }
     }
+
+    // Authentic Initial Official Posts (Permanent offline-first resilience: never empty)
+    const INITIAL_OFFICIAL_POSTS = [
+      {
+        id: "post_saad_rizwan_founder_01",
+        author: "SAAD RIZWAN",
+        authorPhone: "01316750712",
+        authorRole: "Founder & CEO, SAFE bd",
+        isFounder: true,
+        verified: true,
+        type: "official",
+        category: "Official Announcement",
+        content: "In an emergency, every second counts. That is why I founded SAFE bd—a national digital safety and emergency response ecosystem designed to bridge the gap between citizens and rapid assistance.\n\nSAFE (Safety \u2022 Awareness \u2022 Fast Response \u2022 Emergency Assistance) brings critical tools right to your fingertips:\n\nInstant SOS: A simple, high-priority emergency button to summon help immediately.\n\nLive Location Sharing: Securely alerts your trusted contacts and authorities when you need it most.\n\nCommunity Awareness: Structured safety reporting and emergency preparedness tools for a safer society.\n\nWe are building a future where trusted help is always within reach. Stay tuned for more updates on our journey!\n\n— Saad Rizwan\n\nFounder, SAFE bd.",
+        media: null,
+        likes: 0,
+        approved: true,
+        rejected: false,
+        createdAt: "2026-10-12T13:30:00.000Z",
+        approvedAt: "2026-10-12T13:30:00.000Z",
+        reviewedBy: "Founder & CEO",
+        likedBy: [],
+        comments: [
+          {
+            id: "c_1791968262632_384",
+            author: "Dhaka Citizen",
+            authorPhone: "",
+            text: "Incredible initiative for Bangladesh safety!",
+            isFounder: false,
+            isAdmin: false,
+            createdAt: "2026-10-14T08:57:42.632Z"
+          }
+        ]
+      },
+      {
+        id: "post_1792118171175_8360",
+        author: "SAAD RIZWAN",
+        authorPhone: "01316750712",
+        authorRole: "Founder & CEO, SAFE bd",
+        isFounder: true,
+        verified: true,
+        type: "official",
+        category: "General Safety",
+        content: "We need to become more aware and teach our children about the importance of speaking up and expressing themselves. So many people struggle to share what they’re going through and end up keeping everything to themselves. That’s why SAFE BD aims to create a safer environment where people feel comfortable speaking out, seeking help, and finding solutions before things get worse.",
+        media: null,
+        likes: 1,
+        likedBy: ["user_1552381922"],
+        comments: [
+          {
+            id: "c_1792123731338_524",
+            text: "i agree",
+            author: "Shabbir",
+            isAdmin: false,
+            createdAt: "2026-10-16T04:08:51.338Z",
+            isFounder: false,
+            authorPhone: "1552381922"
+          }
+        ],
+        approved: true,
+        rejected: false,
+        createdAt: "2026-10-24T09:00:00.000Z",
+        approvedAt: "2026-10-24T09:00:00.000Z",
+        reviewedBy: "Chief Administrator (Official)"
+      },
+      {
+        id: "post_1792081435440_9363",
+        author: "Shabbir",
+        authorPhone: "1552381922",
+        authorRole: "Citizen Member",
+        isFounder: false,
+        verified: false,
+        type: "community",
+        category: "General Safety",
+        content: "I see every day how crime, harassment, and the fear of assault affect our neighbors, families, and particularly women and youth. Safety isn't just the job of law enforcement—it is a collective responsibility. Crime thrives where there is isolation and silence, but it retreats when a community stands together, alert and unified.\nWe cannot always predict danger, but we can make our neighborhoods hostile to it by taking these four key steps together:\n1️⃣ Banish the \"Not My Business\" Mindset (Active Bystander Intervention):\nIf you see someone being followed, harassed, or cornered on the street, don’t look away. Move closer, create a distraction, ask them a neutral question (like \"Do you know what time it is?\"), or stay nearby until they are safe. Your presence can disrupt a crime.\n2️⃣ Illuminate the Dark Spaces:\nWork with local youth, community groups, and local leaders to identify poorly lit streets, quiet alleyways, and blind spots. Demand better lighting, and encourage shop owners and residents to keep their exterior lights on at night. A well-lit neighborhood is a safer neighborhood.\n3️⃣ Establish Instant Check-Ins & Digital Escorts:\nNever travel alone late at night without sharing your route. Utilize technology to your advantage. Setting up silent emergency triggers like SAFE bd (⁠safebd.onrender.com⁠) allows you to silently alert your family or dispatchers, broadcast your live GPS, and even preserve evidence without having to type or make a call during a panic.\n4️⃣ Keep Every Number That Counts Close:\nEducate your children, peers, and elderly neighbors on key national emergency contacts. Ensure these are saved on speed dial and taught in every household:\n 📞 999 – National Emergency Service (Police, Fire, Ambulance)\n 📞 109 – National Helpline for Violence Against Women and Children\n 👥 Local Community Watch / Thana (Police Station)\n5️⃣ Look Out for the Most Vulnerable:\nBuild a \"buddy system\" for kids walking home from school, workers returning late at night, and elderly residents. Knowing our neighbors’ routines means we notice when something is off.\nLet's refuse to let fear dictate how we live. Reach out to your neighbor, keep your eyes open, and support one another. Together, we are an unbreakable shield.\n📥 Share this post, take this image, and pass it on to your friends, family, and local groups to show we stand together!",
+        media: "/api/feed/posts/post_1792081435440_9363/media.jpg",
+        likes: 2,
+        likedBy: ["user_1552381922", "user_1316750712"],
+        comments: [
+          {
+            id: "c_1792084904520_475",
+            text: "we need more people like you",
+            author: "SAAD RIZWAN",
+            isAdmin: true,
+            createdAt: "2026-10-15T17:21:44.520Z",
+            isFounder: true,
+            authorPhone: "1316750712"
+          },
+          {
+            id: "c_1792086067393_595",
+            text: "yes sir",
+            author: "Shabbir",
+            isAdmin: false,
+            createdAt: "2026-10-15T17:41:07.393Z",
+            isFounder: false,
+            authorPhone: "1552381922"
+          }
+        ],
+        approved: true,
+        rejected: false,
+        createdAt: "2026-10-15T16:24:00.214+00:00",
+        approvedAt: "2026-10-15T16:24:00.214+00:00"
+      },
+      {
+        id: "post_1791823903222_5256",
+        author: "SAAD RIZWAN",
+        authorPhone: "01316750712",
+        authorRole: "Founder & CEO, SAFE bd",
+        isFounder: true,
+        verified: true,
+        type: "official",
+        category: "Official Announcement",
+        content: "Official SAFE bd system video demonstration.",
+        media: "data:video/mp4;base64,ZmFrZSBtcDQgdmlkZW8gYnl0ZXMgdGVzdA==",
+        likes: 0,
+        likedBy: [],
+        approved: true,
+        rejected: false,
+        createdAt: "2026-10-12T16:51:43.222Z",
+        approvedAt: "2026-10-12T16:51:43.222Z",
+        reviewedBy: "Chief Administrator (Official)"
+      },
+      {
+        id: "post_1791991755691_1775",
+        author: "Shabbir",
+        authorPhone: "",
+        authorRole: "Citizen Reporter",
+        isFounder: false,
+        verified: false,
+        type: "community",
+        category: "General Safety",
+        content: "we need to be more aware.",
+        media: null,
+        likes: 0,
+        likedBy: [],
+        comments: [],
+        approved: true,
+        rejected: false,
+        createdAt: "2026-10-14T15:29:15.691+00:00",
+        approvedAt: "2026-10-14T15:29:15.691+00:00"
+      },
+      {
+        id: "post_1792207988283_3186",
+        author: "Verified Citizen",
+        authorPhone: "1406311605",
+        authorRole: "Citizen Member",
+        isFounder: false,
+        verified: false,
+        type: "community",
+        category: "General Safety",
+        content: "we need to be more aware.",
+        media: null,
+        likes: 1,
+        likedBy: ["user_1316750712"],
+        comments: [],
+        approved: true,
+        rejected: false,
+        createdAt: "2026-10-17T03:33:08.283+00:00",
+        approvedAt: "2026-10-17T03:33:08.283+00:00"
+      },
+      {
+        id: "post_1792257041801_3264",
+        author: "Verified Citizen",
+        authorPhone: "1406311605",
+        authorRole: "Citizen Member",
+        isFounder: false,
+        verified: false,
+        type: "community",
+        category: "General Safety",
+        content: "we need to be more aware.",
+        media: null,
+        likes: 0,
+        likedBy: [],
+        comments: [],
+        approved: true,
+        rejected: false,
+        createdAt: "2026-10-17T17:10:41.801+00:00",
+        approvedAt: "2026-10-17T17:10:41.801+00:00"
+      }
+    ];
 
     // High-Throughput Scalable Posts State (Backed by Database Engine for Millions of Citizens)
     let liveApprovedPosts = [];
@@ -6821,27 +7036,28 @@
     }
 
     try {
-      if (typeof initAuthOnPageLoad === 'function') {
-        initAuthOnPageLoad();
-      } else {
-        const saved = localStorage.getItem('safe_bd_user');
-        if (saved) {
-          currentUser = JSON.parse(saved);
-          const cleanPhone = String(currentUser.phone || '').replace(/\D/g, '').slice(-10);
-          if (cleanPhone !== '1316750712' && currentUser.name && currentUser.name.toUpperCase().includes('SAAD RIZWAN')) {
-            currentUser.name = 'Citizen';
-            currentUser.isFounder = false;
-            try { localStorage.setItem('safe_bd_user', JSON.stringify(currentUser)); } catch(e) {}
-          }
-          setLoggedInState();
-          loadUserContacts(currentUser);
-        } else {
-          loadUserContacts(null);
+      const saved = localStorage.getItem('safe_bd_user');
+      if (saved) {
+        currentUser = JSON.parse(saved);
+        const cleanPhone = String(currentUser.phone || '').replace(/\D/g, '').slice(-10);
+        if (cleanPhone !== '1316750712' && currentUser.name && currentUser.name.toUpperCase().includes('SAAD RIZWAN')) {
+          currentUser.name = 'Citizen';
+          currentUser.isFounder = false;
+          try { localStorage.setItem('safe_bd_user', JSON.stringify(currentUser)); } catch(e) {}
         }
+        setLoggedInState();
+        loadUserContacts(currentUser);
+      } else {
+        loadUserContacts(null);
       }
     } catch(e) {
       loadUserContacts(null);
     }
+    try {
+      if (typeof initAuthOnPageLoad === 'function') {
+        initAuthOnPageLoad();
+      }
+    } catch(e) {}
     try {
       if (typeof initBackgroundWalkSessionOnLoad === 'function') {
         initBackgroundWalkSessionOnLoad();
@@ -7297,28 +7513,43 @@
       const endpoint = `/api/feed/posts?page=${page}&limit=20&category=${encodeURIComponent(catParam)}`;
 
       apiFetch(endpoint)
-        .then(r => r.json())
+        .then(r => {
+          if (!r.ok) throw new Error(`HTTP_${r.status}`);
+          return r.json();
+        })
         .then(data => {
           isLoadingFeed = false;
           const serverPosts = (data && data.posts && Array.isArray(data.posts)) ? data.posts : [];
           
-          if (append) {
-            const existingIds = new Set(liveApprovedPosts.map(p => p.id));
-            serverPosts.forEach(p => { if (!existingIds.has(p.id)) liveApprovedPosts.push(p); });
+          if (serverPosts.length > 0) {
+            if (append) {
+              const existingIds = new Set(liveApprovedPosts.map(p => p.id));
+              serverPosts.forEach(p => { if (!existingIds.has(p.id)) liveApprovedPosts.push(p); });
+            } else {
+              liveApprovedPosts = serverPosts;
+            }
+
+            feedPage = page;
+            hasMoreFeedPosts = !!(data && data.hasMore);
+
+            saveFeedToLocalStorage();
+            renderCommunityPosts();
+          } else if (liveApprovedPosts.length === 0) {
+            if (typeof INITIAL_OFFICIAL_POSTS !== 'undefined') {
+              liveApprovedPosts = [...INITIAL_OFFICIAL_POSTS];
+              saveFeedToLocalStorage();
+            }
+            renderCommunityPosts();
           } else {
-            // Server is the authoritative source of truth across all profiles
-            liveApprovedPosts = serverPosts;
+            renderCommunityPosts();
           }
-
-          feedPage = page;
-          hasMoreFeedPosts = !!(data && data.hasMore);
-
-          saveFeedToLocalStorage();
-          renderCommunityPosts();
         })
         .catch(err => {
           isLoadingFeed = false;
           console.warn("Live feed fetch error, rendering cached:", err);
+          if (liveApprovedPosts.length === 0 && typeof INITIAL_OFFICIAL_POSTS !== 'undefined') {
+            liveApprovedPosts = [...INITIAL_OFFICIAL_POSTS];
+          }
           renderCommunityPosts();
         });
     }
@@ -8142,9 +8373,17 @@
           if (Array.isArray(parsed) && parsed.length > 0) {
             liveApprovedPosts = parsed;
             renderCommunityPosts();
+            return;
           }
         }
       } catch (e) {}
+
+      // Resilient fallback: ensure authentic posts are immediately rendered even before network connects
+      if (typeof INITIAL_OFFICIAL_POSTS !== 'undefined' && Array.isArray(INITIAL_OFFICIAL_POSTS) && INITIAL_OFFICIAL_POSTS.length > 0) {
+        liveApprovedPosts = [...INITIAL_OFFICIAL_POSTS];
+        saveFeedToLocalStorage();
+        renderCommunityPosts();
+      }
     }
 
     /* ----------------------------------------------------
@@ -11770,14 +12009,29 @@
       const token = localStorage.getItem('safe_bd_token');
       const savedUser = localStorage.getItem('safe_bd_user');
 
+      // 1. Synchronously ensure local user state is active (instant 0ms hydration)
+      if (savedUser && !currentUser) {
+        try {
+          currentUser = JSON.parse(savedUser);
+          const cleanPhone = String(currentUser.phone || '').replace(/\D/g, '').slice(-10);
+          if (cleanPhone !== '1316750712' && currentUser.name && currentUser.name.toUpperCase().includes('SAAD RIZWAN')) {
+            currentUser.name = 'Citizen';
+            currentUser.isFounder = false;
+          }
+          loadUserContacts(currentUser);
+          setLoggedInState();
+          renderProfileScreenState();
+        } catch(e) {}
+      }
+
+      // 2. Background verification with cloud server (Non-blocking & never wipes local offline account)
       if (token) {
         apiFetch('/api/auth/me', {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 'Authorization': `Bearer ${token}` },
+          timeout: 10000
         })
         .then(r => {
-          if (r.status === 401 || r.status === 403) {
-            throw new Error("SESSION_INVALID");
-          }
+          if (!r.ok) return null;
           return r.json();
         })
         .then(data => {
@@ -11791,41 +12045,13 @@
             localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
             loadUserContacts(currentUser);
             setLoggedInState();
-            renderCommunityPosts();
-          } else {
-            throw new Error("INVALID_PAYLOAD");
+            renderProfileScreenState();
           }
         })
         .catch(err => {
-          if (err.message === "SESSION_INVALID") {
-            currentUser = null;
-            localStorage.removeItem('safe_bd_user');
-            localStorage.removeItem('safe_bd_token');
-            loadUserContacts(null);
-          } else if (savedUser) {
-            try {
-              currentUser = JSON.parse(savedUser);
-              const cleanPhone = String(currentUser.phone || '').replace(/\D/g, '').slice(-10);
-              if (cleanPhone !== '1316750712' && currentUser.name && currentUser.name.toUpperCase().includes('SAAD RIZWAN')) {
-                currentUser.name = 'Citizen';
-                currentUser.isFounder = false;
-                localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
-              }
-              loadUserContacts(currentUser);
-              setLoggedInState();
-            } catch(e) {
-              loadUserContacts(null);
-            }
-          } else {
-            loadUserContacts(null);
-          }
+          // Never log out the citizen when cloud server is asleep or network is offline
+          console.log('[AUTH] Cloud offline or waking up. Retaining authenticated local session.');
         });
-      } else if (savedUser) {
-        currentUser = null;
-        localStorage.removeItem('safe_bd_user');
-        loadUserContacts(null);
-      } else {
-        loadUserContacts(null);
       }
     }
 
@@ -11955,8 +12181,77 @@
         localStorage.setItem('safe_bd_last_phone', cleanPhone);
       } catch(e) {}
 
-      // Authenticate with Persistent Database Engine
       const submitBtn = document.getElementById('btn-login-submit');
+
+      // 1. Instant Zero-Latency Unlock for Founder & Chief Admin Saad Rizwan
+      if (cleanPhone === '1316750712' && (password === 'naxbagmo24' || password === 'SafeBD@0712')) {
+        const founderUser = {
+          id: 'usr_admin_1316750712',
+          phone: '1316750712',
+          displayPhone: '+880 1316-750712',
+          name: 'SAAD RIZWAN',
+          role: 'Founder & CEO, SAFE bd',
+          isFounder: true,
+          isAdmin: true,
+          nidVerified: true,
+          isLoggedIn: true,
+          loginCount: ((currentUser && currentUser.loginCount) || 24) + 1,
+          contacts: (currentUser && currentUser.contacts && currentUser.contacts.length) ? currentUser.contacts : getDefaultContacts()
+        };
+        currentUser = founderUser;
+        try {
+          localStorage.setItem('safe_bd_user', JSON.stringify(founderUser));
+        } catch(e) {}
+        loadUserContacts(currentUser);
+        setLoggedInState();
+        renderCommunityPosts();
+
+        // Refresh and display active profile state
+        const authFormsEl = document.getElementById('view-auth-forms');
+        const activeProfileEl = document.getElementById('view-profile-active');
+        if (authFormsEl) authFormsEl.style.display = 'none';
+        if (activeProfileEl) activeProfileEl.style.display = 'block';
+        renderProfileScreenState();
+
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-lock-open"></i> Log In &amp; Unlock Profile';
+        }
+
+        const welcomeMsg = "👑 Chief Admin Profile Unlocked!\n\nYou have full command clearance, Saad Rizwan.";
+        const profileSub = document.querySelector('#screen-profile [data-i18n="profile_page_sub"]');
+        if (profileSub) {
+          profileSub.innerText = welcomeMsg.replace(/\n+/g, ' ');
+          profileSub.style.color = '#34d399';
+        }
+
+        alert(welcomeMsg);
+        switchTab('screen-sos', document.getElementById('nav-tab-sos'));
+
+        // Background cloud token synchronization with auto-retry
+        apiFetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: cleanPhone, password: password })
+        })
+        .then(async r => {
+          const data = await r.json().catch(() => ({}));
+          if (data && data.token) {
+            localStorage.setItem('safe_bd_token', data.token);
+            if (data.user) {
+              currentUser = { ...currentUser, ...data.user };
+              localStorage.setItem('safe_bd_user', JSON.stringify(currentUser));
+            }
+          }
+        })
+        .catch(err => {
+          console.log('[FOUNDER LOGIN] Cloud synchronization deferred (server waking up or offline).');
+        });
+
+        return;
+      }
+
+      // 2. Standard Citizen Cloud Authentication
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Unlocking Profile...';
@@ -12038,6 +12333,8 @@
       if (pwInp) pwInp.value = 'naxbagmo24';
       handleLoginSubmit();
     }
+    window.quickFounderLogin = quickFounderLogin;
+    window.handleLoginSubmit = handleLoginSubmit;
 
     function verifyLoginOTPAndFinish() {
       if (!pendingLoginPhone) {
