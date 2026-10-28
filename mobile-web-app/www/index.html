@@ -12720,7 +12720,7 @@
     }
 
     function switchAdminSection(section) {
-      ['reports', 'allposts', 'admins', 'users', 'evidence', 'journeys'].forEach(sec => {
+      ['reports', 'allposts', 'admins', 'users', 'evidence', 'journeys', 'sos', 'heatmap'].forEach(sec => {
         const tab = document.getElementById(`admin-tab-${sec}`);
         if (tab) tab.classList.remove('active');
         const s = document.getElementById(`admin-section-${sec}`);
@@ -12747,6 +12747,94 @@
         fetchAdminActiveJourneys();
       } else if (section === 'sos') {
         fetchAdminSosAlerts(true);
+      } else if (section === 'heatmap') {
+        fetchAdminHeatmapData();
+      }
+    }
+
+    async function fetchAdminHeatmapData() {
+      const container = document.getElementById('admin-heatmap-overview-container');
+      if (!container) return;
+      try {
+        const res = await apiFetch('/api/admin/heatmap-data');
+        const data = await res.json();
+        if (!data || !data.success) {
+          container.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">Failed to load heatmap telemetry.</div>';
+          return;
+        }
+
+        const hotspots = data.hotspots || [];
+        const stats = data.stats || {};
+        const audit = data.aiAudit || {};
+
+        container.innerHTML = `
+          <!-- Large Screen Launcher Card -->
+          <div style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.18) 0%, rgba(99, 102, 241, 0.25) 100%); border: 1.5px solid #22d3ee; border-radius: 14px; padding: 14px; margin-bottom: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-desktop" style="color: #22d3ee;"></i> Fullscreen PC Command Portal
+              </span>
+              <span style="background: rgba(239, 68, 68, 0.25); border: 1px solid #ef4444; color: #fca5a5; font-size: 9.5px; font-weight: 800; padding: 2px 7px; border-radius: 6px;">
+                LAPTOP HUD
+              </span>
+            </div>
+            <p style="font-size: 11px; color: #cbd5e1; line-height: 1.45; margin-bottom: 12px;">
+              Designed specifically for PC &amp; laptop screens to monitor real-time SOS distress clicks, interactive GIS heatmaps, and spatial AI crime audits.
+            </p>
+            <a href="/admin-command-center.html" target="_blank" style="display: block; text-align: center; background: linear-gradient(135deg, #06b6d4 0%, #2563eb 100%); color: #fff; font-size: 12px; font-weight: 800; padding: 10px; border-radius: 10px; text-decoration: none; box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);">
+              <i class="fas fa-up-right-from-square"></i> Open Large Screen PC Portal ↗
+            </a>
+          </div>
+
+          <!-- Hotspot Danger Ranking Table -->
+          <div style="background: var(--black-subtle); border: 1px solid var(--border-quiet); border-radius: 14px; padding: 14px; margin-bottom: 14px;">
+            <div style="font-size: 12px; font-weight: 800; color: #fff; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+              <span><i class="fas fa-fire" style="color: #ef4444;"></i> Top Danger Hotspots</span>
+              <span style="font-size: 10px; color: var(--text-muted);">Crime Trend (Up/Down)</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              ${hotspots.slice(0, 5).map((h, i) => {
+                const isUp = h.trend === 'up';
+                return `
+                  <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-quiet); border-radius: 10px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="width: 20px; height: 20px; border-radius: 6px; background: ${i === 0 ? '#ef4444' : (i === 1 ? '#f59e0b' : 'rgba(255,255,255,0.1)')}; color: #fff; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center;">#${i + 1}</span>
+                      <div>
+                        <div style="font-size: 11.5px; font-weight: 700; color: #fff;">${escapeHtml(h.name)}</div>
+                        <div style="font-size: 9.5px; color: var(--text-muted);">${h.alertCount} SOS Pings • ${escapeHtml(h.primaryReason)}</div>
+                      </div>
+                    </div>
+                    <span style="font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 6px; background: ${isUp ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)'}; border: 1px solid ${isUp ? '#ef4444' : '#10b981'}; color: ${isUp ? '#fca5a5' : '#a7f3d0'};">
+                      ${isUp ? '▲' : '▼'} ${h.crimeDelta}
+                    </span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- AI Executive Audit Brief -->
+          <div style="background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 14px; padding: 14px;">
+            <div style="font-size: 12px; font-weight: 800; color: #22d3ee; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+              <i class="fas fa-brain"></i> shurokhaAI Executive Threat Audit
+            </div>
+            <p style="font-size: 11px; color: #cbd5e1; line-height: 1.5; margin-bottom: 10px;">
+              ${escapeHtml(audit.executiveSummary || '')}
+            </p>
+            <div style="display: flex; gap: 6px;">
+              <div style="flex: 1; background: rgba(0,0,0,0.4); padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border-quiet);">
+                <div style="font-size: 9px; color: var(--text-muted);">PEAK DANGER WINDOW</div>
+                <div style="font-size: 10.5px; font-weight: 700; color: #f59e0b; margin-top: 2px;">${escapeHtml(audit.peakVulnerabilityWindow || '20:30 - 23:45 BST')}</div>
+              </div>
+              <div style="flex: 1; background: rgba(0,0,0,0.4); padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border-quiet);">
+                <div style="font-size: 9px; color: var(--text-muted);">TOP THREAT VECTOR</div>
+                <div style="font-size: 10.5px; font-weight: 700; color: #ef4444; margin-top: 2px;">${escapeHtml(audit.primaryThreatVector ? audit.primaryThreatVector.split('(')[0] : 'Snatching')}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      } catch (err) {
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: #ef4444;">Error connecting to Heatmap Telemetry API.</div>';
       }
     }
 
