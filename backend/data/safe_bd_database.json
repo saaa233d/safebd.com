@@ -586,6 +586,41 @@
       ],
       "adminRevokedAt": "2026-10-13T06:34:15.860Z",
       "adminRevokedBy": "SAAD RIZWAN"
+    },
+    "1933333333": {
+      "id": "usr_1933333333",
+      "phone": "1933333333",
+      "displayPhone": "+880 1933333333",
+      "name": "Sharmin",
+      "role": "Citizen Member",
+      "isFounder": false,
+      "isAdmin": false,
+      "nidVerified": true,
+      "createdAt": "2026-10-28T06:36:21.488929Z",
+      "bloodGroup": "B+",
+      "isBloodDonor": false,
+      "bloodDistrict": "",
+      "bloodThana": "",
+      "contacts": [
+        {
+          "id": "c1",
+          "initial": "F",
+          "name": "Father",
+          "phone": ""
+        },
+        {
+          "id": "c2",
+          "initial": "M",
+          "name": "Mother",
+          "phone": ""
+        },
+        {
+          "id": "c3",
+          "initial": "G",
+          "name": "Guardian",
+          "phone": ""
+        }
+      ]
     }
   },
   "sessions": {
@@ -1205,14 +1240,16 @@
         "address": "Shantinagar, Dhaka"
       },
       "videoUrl": "/api/emergency/evidence/01316750712_SOS_1791873285383.mp4",
-      "gdriveFileId": "148oA689tvNA6a_k4vklbCa4k65xrcki0",
+      "gdriveFileId": "1VhUCvV9Z7vW4ZLpvaRTY1JiBNCpbCgCJ",
       "fileName": "01316750712_SOS_1791873285383.mp4",
       "fileSizeKb": 4883,
       "mimeType": "video/mp4",
       "durationSeconds": 15,
       "recordedAt": "2026-10-13T06:34:54.922Z",
-      "status": "PENDING_ADMIN_DISPATCH",
-      "reviewed": false
+      "status": "STORED_IN_GOOGLE_DRIVE",
+      "reviewed": false,
+      "gdriveViewUrl": "https://drive.google.com/file/d/1VhUCvV9Z7vW4ZLpvaRTY1JiBNCpbCgCJ/view?usp=sharing",
+      "gdriveUploadedAt": "2026-10-28T06:55:00.131Z"
     }
   ],
   "sosAlerts": [
@@ -1424,13 +1461,13 @@
     "scriptUrl": "https://script.google.com/macros/s/AKfycby3O-1dfJeGE5DJ8dDrhBHtkdgnk-IKSXFRtUswiTblka1M3GoC8uxGHfOM2kvyOVmq/exec",
     "enabled": true,
     "folderName": "SAFE_BD_VAULT",
-    "lastSyncedAt": "2026-10-18T14:19:49.269Z",
+    "lastSyncedAt": "2026-10-28T06:55:00.131Z",
     "stateFileId": null
   },
   "stats": {
     "totalLogins": 72,
     "totalRegistrations": 11,
-    "lastSaved": "2026-10-28T03:30:35.964Z",
+    "lastSaved": "2026-10-28T07:03:42.664Z",
     "totalPosts": 9
   }
 }
