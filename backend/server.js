@@ -4120,7 +4120,7 @@ function formatEntityCard(e, isBangla) {
   };
 }
 
-const SHUROKHA_SYSTEM_INSTRUCTION = `You are shurokhaAI, the 24/7 dedicated Citizen Safety & Emergency Health AI Companion developed for SAFE BD in Bangladesh. You behave like a compassionate, highly capable, and intelligent assistant (similar to ChatGPT) tailored for emergency situations, health triage, and citizen security in Bangladesh.
+const SHUROKHA_SYSTEM_INSTRUCTION = `You are Shurokkha AI, the 24/7 dedicated Citizen Safety & Emergency Health AI Companion developed for SAFE BD in Bangladesh. You behave like a compassionate, highly capable, and intelligent assistant (similar to ChatGPT) tailored for emergency situations, health triage, and citizen security in Bangladesh.
 
 YOUR CORE DOMAINS & RESPONSIBILITIES:
 1. HUMANLY CONVERSATION & MEDICAL FIRST AID:
@@ -4147,7 +4147,7 @@ YOUR CORE DOMAINS & RESPONSIBILITIES:
    - Guide citizens to Safe BD's "I Need Help" -> "Emergency Blood Lifeline" to filter and call verified blood donors directly. Provide Red Crescent (02-9330188) and Quantum Blood Lab (01714-010869).
 7. STRICT OFF-TOPIC / IRRELEVANT SCOPE:
    - If a citizen asks about sports (cricket, football, IPL, Messi), movies/celebrities, video games, programming/coding, school homework, recipes/cooking, or general random trivia:
-   - Politely, warmly decline by explaining: "I am shurokhaAI, dedicated to keeping you safe and healthy in Bangladesh. I am exclusively focused on medical guidance, emergency response, nearby hospitals, and police thana services."
+   - Politely, warmly decline by explaining: "I am Shurokkha AI, dedicated to keeping you safe and healthy in Bangladesh. I am exclusively focused on medical guidance, emergency response, nearby hospitals, and police thana services."
 8. LANGUAGE:
    - Respond in fluent, empathetic Bengali (বাংলা) or English matching the user's language. Keep formatting clean, structured, and easy to read during distress.`;
 
@@ -4180,11 +4180,11 @@ async function generateShurokhaFallbackResponse(query) {
   if (q === 'hi' || q === 'hello' || q === 'hey' || q === 'সালাম' || q === 'হ্যালো' || q.includes('who are you') || q.includes('তুমি কে') || q.includes('কেমন আছ')) {
     if (isBangla) {
       return {
-        text: "আসসালামু আলাইকুম! আমি **shurokhaAI**, বাংলাদেশের জরুরি সেবা ও থানা ডিরেক্টরি এআই।\n\nআমি শুধুমাত্র **বাংলাদেশের সকল থানার ওসির সরাসরি মোবাইল নাম্বার, ডিউটি অফিসার, ফায়ার সার্ভিস (১৬১৬৩), আবহাওয়া ও দুর্যোগ সতর্কতা (১০৯০), বার্ন ইউনিট ও ৯৯৯ জরুরি সেবার** নম্বর প্রদান করি। আপনার কোন থানা বা জরুরি সেবার তথ্য প্রয়োজন?"
+        text: "আসসালামু আলাইকুম! আমি **Shurokkha AI**, বাংলাদেশের জরুরি সেবা ও থানা ডিরেক্টরি এআই।\n\nআমি শুধুমাত্র **বাংলাদেশের সকল থানার ওসির সরাসরি মোবাইল নাম্বার, ডিউটি অফিসার, ফায়ার সার্ভিস (১৬১৬৩), আবহাওয়া ও দুর্যোগ সতর্কতা (১০৯০), বার্ন ইউনিট ও ৯৯৯ জরুরি সেবার** নম্বর প্রদান করি। আপনার কোন থানা বা জরুরি সেবার তথ্য প্রয়োজন?"
       };
     }
     return {
-      text: "Hello! I am **shurokhaAI**, your specialized Bangladesh Emergency Services & Police Station Contact Directory AI from SAFE BD.\n\nI can provide you with the direct official numbers of any Thana OC, Duty Officer, Fire Service (16163), Climate & Disaster Warning (1090), and National Burn & Emergency Hospital helplines. Which Thana or emergency service number do you need?"
+      text: "Hello! I am **Shurokkha AI**, your specialized Bangladesh Emergency Services & Police Station Contact Directory AI from SAFE BD.\n\nI can provide you with the direct official numbers of any Thana OC, Duty Officer, Fire Service (16163), Climate & Disaster Warning (1090), and National Burn & Emergency Hospital helplines. Which Thana or emergency service number do you need?"
     };
   }
 
@@ -4219,7 +4219,7 @@ async function generateShurokhaFallbackResponse(query) {
   // 5. Strict Emergency AI Scope Enforcement (Politely decline non-emergency topics)
   if (isBangla) {
     return {
-      text: `আমি **shurokhaAI**, বাংলাদেশের জরুরি সেবা ও সকল থানার সরকারি নম্বর ডিরেক্টরি এআই। আমি শুধুমাত্র **সকল থানার ওসির নাম্বার, ফায়ার সার্ভিস (১৬১৬৩), দুর্যোগ ও আবহাওয়া সতর্কতা (১০৯০), বার্ন ইউনিট ও ৯৯৯ জরুরি সেবার** নম্বর প্রদান করতে পারি।\n\nআপনার কোন থানার ওসির নাম্বার বা জরুরি সেবার তথ্য প্রয়োজন? অনুগ্রহ করে থানা বা এলাকার নাম লিখুন (যেমন: **ধানমন্ডি, গুলশান, মিরপুর, সাভার, কক্সবাজার** ইত্যাদি)।`,
+      text: `আমি **Shurokkha AI**, বাংলাদেশের জরুরি সেবা ও সকল থানার সরকারি নম্বর ডিরেক্টরি এআই। আমি শুধুমাত্র **সকল থানার ওসির নাম্বার, ফায়ার সার্ভিস (১৬১৬৩), দুর্যোগ ও আবহাওয়া সতর্কতা (১০৯০), বার্ন ইউনিট ও ৯৯৯ জরুরি সেবার** নম্বর প্রদান করতে পারি।\n\nআপনার কোন থানার ওসির নাম্বার বা জরুরি সেবার তথ্য প্রয়োজন? অনুগ্রহ করে থানা বা এলাকার নাম লিখুন (যেমন: **ধানমন্ডি, গুলশান, মিরপুর, সাভার, কক্সবাজার** ইত্যাদি)।`,
       sources: [
         { title: "জাতীয় জরুরি সেবা ৯৯৯", url: "tel:999" },
         { title: "ফায়ার সার্ভিস ১৬১৬৩", url: "tel:16163" },
@@ -4228,7 +4228,7 @@ async function generateShurokhaFallbackResponse(query) {
     };
   }
   return {
-    text: `I am **shurokhaAI**, exclusively dedicated as Bangladesh's Emergency Services & Police Station Contact Directory AI.\n\nI am only programmed to provide official contact numbers for **all Bangladesh Police Thanas (OC & Duty Officer), Fire Service (16163), Climate & Disaster Warning (1090), National Burn & Plastic Surgery Institute, and 999 CAD Dispatch**.\n\nWhich Thana OC or emergency service contact number do you need? Please reply with the area or Thana name (e.g., **Dhanmondi, Gulshan, Mirpur, Uttara, Savar, Cox's Bazar**, etc.).`,
+    text: `I am **Shurokkha AI**, exclusively dedicated as Bangladesh's Emergency Services & Police Station Contact Directory AI.\n\nI am only programmed to provide official contact numbers for **all Bangladesh Police Thanas (OC & Duty Officer), Fire Service (16163), Climate & Disaster Warning (1090), National Burn & Plastic Surgery Institute, and 999 CAD Dispatch**.\n\nWhich Thana OC or emergency service contact number do you need? Please reply with the area or Thana name (e.g., **Dhanmondi, Gulshan, Mirpur, Uttara, Savar, Cox's Bazar**, etc.).`,
     sources: [
       { title: "National Emergency 999", url: "tel:999" },
       { title: "Fire Service 16163", url: "tel:16163" },
