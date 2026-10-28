@@ -1,0 +1,2042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SAFE bd // National Tactical AI Command Center & Crime Heatmap</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/app-icon.svg">
+  
+  <!-- Futuristic Typography & Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Leaflet GIS Engine -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Embedded Leaflet.heat library for ultra-resilient zero-dependency heatmap rendering -->
+  <script>
+    /* simpleheat & leaflet-heat embedded */
+    !function(){function t(i){return this instanceof t?(this._canvas=i="string"==typeof i?document.getElementById(i):i,this._ctx=i.getContext("2d"),this._width=i.width,this._height=i.height,this._max=1,void this.clear()):new t(i)}t.prototype={defaultRadius:25,defaultGradient:{.4:"blue",.6:"cyan",.7:"lime",.8:"yellow",1:"red"},data:function(t,i){return this._data=t,this},max:function(t){return this._max=t,this},add:function(t){return this._data.push(t),this},clear:function(){return this._data=[],this},radius:function(t,i){i=i||15;var a=this._circle=document.createElement("canvas"),s=a.getContext("2d"),e=this._r=t+i;return a.width=a.height=2*e,s.shadowOffsetX=s.shadowOffsetY=200,s.shadowBlur=i,s.shadowColor="black",s.beginPath(),s.arc(e-200,e-200,t,0,2*Math.PI,!0),s.closePath(),s.fill(),this},gradient:function(t){var i=document.createElement("canvas"),a=i.getContext("2d"),s=a.createImageData(1,256),e=s.data,n=a.createLinearGradient(0,0,0,256);for(var h in t)n.addColorStop(h,t[h]);a.fillStyle=n,a.fillRect(0,0,1,256);for(var r=a.getImageData(0,0,1,256).data,o=0;256>o;o++)e[4*o]=r[4*o],e[4*o+1]=r[4*o+1],e[4*o+2]=r[4*o+2],e[4*o+3]=r[4*o+3];return this._grad=e,this},draw:function(t){this._circle||this.radius(this.defaultRadius),this._grad||this.gradient(this.defaultGradient);var i=this._ctx;i.clearRect(0,0,this._width,this._height);for(var a,s=0,e=this._data.length;e>s;s++)a=this._data[s],i.globalAlpha=Math.max(a[2]/this._max,t||.05),i.drawImage(this._circle,a[0]-this._r,a[1]-this._r);var n=i.getImageData(0,0,this._width,this._height);return this._colorize(n.data,this._grad),i.putImageData(n,0,0),this},_colorize:function(t,i){for(var a,s=3,e=t.length;e>s;s+=4)if(a=t[s]){var n=4*a;n&&(t[s-3]=i[n],t[s-2]=i[n+1],t[s-1]=i[n+2])}}},window.simpleheat=t}(),L.HeatLayer=(L.Layer?L.Layer:L.Class).extend({initialize:function(t,i){this._latlngs=t,L.setOptions(this,i)},setLatLngs:function(t){return this._latlngs=t,this.redraw()},addLatLng:function(t){return this._latlngs.push(t),this.redraw()},setOptions:function(t){return L.setOptions(this,t),this._heat&&this._updateOptions(),this.redraw()},redraw:function(){return!this._heat||this._frame||this._map._animating||(this._frame=L.Util.requestAnimFrame(this._redraw,this)),this},onAdd:function(t){this._map=t,this._canvas||this._initCanvas(),t._panes.overlayPane.appendChild(this._canvas),t.on("moveend",this._reset,this),t.options.zoomAnimation&&L.Browser.any3d&&t.on("zoomanim",this._animateZoom,this),this._reset()},onRemove:function(t){t.getPanes().overlayPane.removeChild(this._canvas),t.off("moveend",this._reset,this),t.options.zoomAnimation&&L.Browser.any3d&&t.off("zoomanim",this._animateZoom,this)},addTo:function(t){return t.addLayer(this),this},_initCanvas:function(){var t=this._canvas=L.DomUtil.create("canvas","leaflet-heatmap-layer leaflet-layer"),i=L.DomUtil.testProp(["transformOrigin","WebkitTransformOrigin","msTransformOrigin"]);t.style[i]="50% 50%";var a=this._map.getSize();t.width=a.x,t.height=a.y;var s=this._map.options.zoomAnimation&&L.Browser.any3d;L.DomUtil.addClass(t,"leaflet-zoom-"+(s?"animated":"hide")),this._heat=simpleheat(t),this._updateOptions()},_updateOptions:function(){this._heat.radius(this.options.radius||this._heat.defaultRadius,this.options.blur),this.options.gradient&&this._heat.gradient(this.options.gradient),this.options.max&&this._heat.max(this.options.max)},_reset:function(){var t=this._map.containerPointToLayerPoint([0,0]);L.DomUtil.setPosition(this._canvas,t);var i=this._map.getSize();this._heat._width!==i.x&&(this._canvas.width=this._heat._width=i.x),this._heat._height!==i.y&&(this._canvas.height=this._heat._height=i.y),this._redraw()},_redraw:function(){if(this._map){var t,i,a,s,e,n,h,r,o=[],d=this._heat._r,l=this._map.getSize(),m=new L.Bounds(L.point([-d,-d]),l.add([d,d])),_=+this.options.max||1,u=void 0===this.options.maxZoom?this._map.getMaxZoom():this.options.maxZoom,p=1/Math.pow(2,Math.max(0,Math.min(u-this._map.getZoom(),12))),c=d/2,f=[],g=this._map._getMapPanePos(),v=g.x%c,y=g.y%c;for(t=0,i=this._latlngs.length;i>t;t++)if(a=this._map.latLngToContainerPoint(this._latlngs[t]),m.contains(a)){e=Math.floor((a.x-v)/c)+2,n=Math.floor((a.y-y)/c)+2;var w=void 0!==this._latlngs[t].alt?this._latlngs[t].alt:void 0!==this._latlngs[t][2]?+this._latlngs[t][2]:1;r=w*p,f[n]=f[n]||[],s=f[n][e],s?(s[0]=(s[0]*s[2]+a.x*r)/(s[2]+r),s[1]=(s[1]*s[2]+a.y*r)/(s[2]+r),s[2]+=r):f[n][e]=[a.x,a.y,r]}for(t=0,i=f.length;i>t;t++)if(f[t])for(h=0,e=f[t].length;e>h;h++)s=f[t][h],s&&o.push([Math.round(s[0]),Math.round(s[1]),Math.min(s[2],_)]);this._heat.data(o).draw(this.options.minOpacity),this._frame=null}},_animateZoom:function(t){var i=this._map.getZoomScale(t.zoom),a=this._map._getCenterOffset(t.center)._multiplyBy(-i).subtract(this._map._getMapPanePos());L.DomUtil.setTransform?L.DomUtil.setTransform(this._canvas,a,i):this._canvas.style[L.DomUtil.TRANSFORM]=L.DomUtil.getTranslateString(a)+" scale("+i+")"}}),L.heatLayer=function(t,i){return new L.HeatLayer(t,i)};
+  </script>
+
+  <style>
+    /* ========================================================
+       ULTRA-FUTURISTIC POSH DESIGN SYSTEM (PC HUD FIRST)
+    ======================================================== */
+    :root {
+      --bg-void: #050811;
+      --bg-panel: rgba(10, 16, 28, 0.78);
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-card-hover: rgba(30, 41, 59, 0.75);
+      
+      --cyan-neon: #00f0ff;
+      --cyan-glow: rgba(0, 240, 255, 0.35);
+      --crimson-neon: #ff2a5f;
+      --crimson-glow: rgba(255, 42, 95, 0.45);
+      --amber-neon: #ffb703;
+      --emerald-neon: #00f59b;
+      --purple-neon: #a855f7;
+      
+      --text-pure: #ffffff;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-border-cyan: rgba(0, 240, 255, 0.22);
+      --glass-border-crimson: rgba(255, 42, 95, 0.35);
+      
+      --font-display: 'Space Grotesk', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-body: 'Inter', -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-pure);
+      font-family: var(--font-body);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(ellipse at 15% 15%, rgba(0, 240, 255, 0.06) 0%, transparent 45%),
+        radial-gradient(ellipse at 85% 85%, rgba(255, 42, 95, 0.07) 0%, transparent 45%),
+        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.3);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 240, 255, 0.25);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--cyan-neon);
+    }
+
+    /* TOP COMMAND BAR */
+    .command-header {
+      height: 64px;
+      background: rgba(6, 10, 18, 0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--glass-border-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 1000;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-shield {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(255, 42, 95, 0.2) 100%);
+      border: 1px solid var(--cyan-neon);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cyan-neon);
+      font-size: 19px;
+      position: relative;
+      box-shadow: 0 0 20px var(--cyan-glow);
+    }
+
+    .brand-shield::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 14px;
+      border: 1px dashed rgba(0, 240, 255, 0.4);
+      animation: rotateRing 20s linear infinite;
+    }
+
+    @keyframes rotateRing {
+      to { transform: rotate(360deg); }
+    }
+
+    .brand-text h1 {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #ffffff 0%, var(--cyan-neon) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-text .subtext {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 1px;
+    }
+
+    /* TELEMETRY STRIP */
+    .telemetry-strip {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .telemetry-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4px 14px;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+    }
+
+    .telemetry-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--text-dim);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+
+    .telemetry-val {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      margin-top: 2px;
+    }
+
+    .telemetry-val.clock {
+      color: var(--cyan-neon);
+      letter-spacing: 1px;
+    }
+
+    .defcon-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 9px;
+      background: rgba(255, 42, 95, 0.15);
+      border: 1.5px solid var(--crimson-neon);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--crimson-neon);
+      box-shadow: 0 0 15px var(--crimson-glow);
+    }
+
+    .defcon-pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--crimson-neon);
+      box-shadow: 0 0 10px var(--crimson-neon);
+      animation: pulseAlert 1.2s infinite ease-in-out;
+    }
+
+    @keyframes pulseAlert {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(1.3); }
+    }
+
+    /* ACTION CONTROLS */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-hud-action {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      padding: 7px 13px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-hud-action:hover {
+      background: rgba(0, 240, 255, 0.12);
+      border-color: var(--cyan-neon);
+      color: #fff;
+      box-shadow: 0 0 12px var(--cyan-glow);
+    }
+
+    .btn-hud-action.active {
+      background: rgba(0, 240, 255, 0.18);
+      border-color: var(--cyan-neon);
+      color: var(--cyan-neon);
+    }
+
+    .btn-hud-primary {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(37, 99, 235, 0.4) 100%);
+      border: 1px solid var(--cyan-neon);
+      color: #fff;
+      font-weight: 700;
+      padding: 7px 15px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      box-shadow: 0 0 15px var(--cyan-glow);
+      transition: all 0.2s ease;
+    }
+
+    .btn-hud-primary:hover {
+      background: linear-gradient(135deg, var(--cyan-neon) 0%, #2563eb 100%);
+      color: #000;
+      box-shadow: 0 0 25px var(--cyan-glow);
+    }
+
+    /* SUB-BAR FILTER STRIP */
+    .filter-subbar {
+      height: 48px;
+      background: rgba(8, 12, 22, 0.7);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 900;
+    }
+
+    .category-pills {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+    }
+
+    .pill-filter {
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--glass-border);
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .pill-filter:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+
+    .pill-filter.active {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--cyan-neon);
+      color: var(--cyan-neon);
+      box-shadow: 0 0 10px var(--cyan-glow);
+    }
+
+    .pill-badge {
+      font-size: 9px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    .map-controls-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .map-toggle-btn {
+      padding: 5px 11px;
+      border-radius: 6px;
+      background: transparent;
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      font-size: 10.5px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .map-toggle-btn.active {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--cyan-neon);
+      color: var(--cyan-neon);
+    }
+
+    /* MAIN HUD GRID */
+    .hud-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 360px 1fr 430px;
+      height: calc(100vh - 112px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* LEFT SIDEBAR: LIVE SOS FEED */
+    .panel-feed {
+      background: var(--bg-panel);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--glass-border-cyan);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(10, 16, 28, 0.9);
+    }
+
+    .panel-title {
+      font-family: var(--font-display);
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(255, 42, 95, 0.2);
+      border: 1px solid var(--crimson-neon);
+      color: #fca5a5;
+      font-weight: 700;
+    }
+
+    .sos-search-bar {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--glass-border);
+      background: rgba(6, 10, 18, 0.5);
+    }
+
+    .sos-search-input {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      color: #fff;
+      padding: 8px 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .sos-search-input:focus {
+      border-color: var(--cyan-neon);
+      box-shadow: 0 0 10px var(--cyan-glow);
+    }
+
+    .sos-stream-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* SOS INCIDENT CARD */
+    .sos-card {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .sos-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--cyan-neon);
+      box-shadow: 0 4px 20px rgba(0, 240, 255, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .sos-card.distress {
+      border-color: var(--crimson-neon);
+      background: rgba(255, 42, 95, 0.08);
+      box-shadow: 0 0 15px rgba(255, 42, 95, 0.2);
+      animation: alertBorderPulse 2s infinite ease-in-out;
+    }
+
+    @keyframes alertBorderPulse {
+      0%, 100% { border-color: var(--crimson-neon); }
+      50% { border-color: rgba(255, 42, 95, 0.4); }
+    }
+
+    .sos-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .sos-id {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--cyan-neon);
+      letter-spacing: 0.5px;
+      font-weight: 700;
+    }
+
+    .sos-time {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      color: var(--text-dim);
+    }
+
+    .sos-citizen {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sos-phone {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .sos-reason-badge {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      background: rgba(255, 183, 3, 0.15);
+      border: 1px solid var(--amber-neon);
+      color: #fde047;
+    }
+
+    .sos-reason-badge.snatching {
+      background: rgba(255, 42, 95, 0.18);
+      border-color: var(--crimson-neon);
+      color: #fca5a5;
+    }
+
+    .sos-reason-badge.harassment {
+      background: rgba(168, 85, 247, 0.18);
+      border-color: var(--purple-neon);
+      color: #e9d5ff;
+    }
+
+    .sos-reason-badge.assault {
+      background: rgba(239, 68, 68, 0.22);
+      border-color: #ef4444;
+      color: #fecaca;
+    }
+
+    .sos-reason-badge.stalking {
+      background: rgba(14, 165, 233, 0.18);
+      border-color: #38bdf8;
+      color: #bae6fd;
+    }
+
+    .sos-address {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      line-height: 1.4;
+    }
+
+    .sos-card-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-card-action {
+      flex: 1;
+      padding: 5px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      font-size: 10px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+
+    .btn-card-action:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--cyan-neon);
+      color: #fff;
+    }
+
+    /* CENTER VIEWPORT: THE TACTICAL MAP */
+    .panel-map {
+      position: relative;
+      background: #000;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    #tactical-map {
+      height: 100%;
+      width: 100%;
+      background: #060a12;
+    }
+
+    /* Custom Leaflet Map Styling */
+    .leaflet-container {
+      background: #060a12 !important;
+      font-family: var(--font-body) !important;
+    }
+
+    .leaflet-tile {
+      filter: brightness(80%) contrast(115%) saturate(85%);
+    }
+
+    .leaflet-bar {
+      border: 1px solid var(--glass-border-cyan) !important;
+      background: rgba(6, 10, 18, 0.85) !important;
+      backdrop-filter: blur(12px) !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+      border-radius: 8px !important;
+      overflow: hidden;
+    }
+
+    .leaflet-bar a {
+      background: transparent !important;
+      color: var(--cyan-neon) !important;
+      border-bottom: 1px solid var(--glass-border) !important;
+    }
+
+    .leaflet-bar a:hover {
+      background: rgba(0, 240, 255, 0.2) !important;
+      color: #fff !important;
+    }
+
+    /* MAP HUD OVERLAYS */
+    .map-overlay-reticle {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(6, 10, 18, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border-cyan);
+      border-radius: 10px;
+      padding: 8px 14px;
+      z-index: 500;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .map-telemetry-row {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      color: var(--cyan-neon);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .map-telemetry-row span {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .map-quick-stats {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 500;
+      display: flex;
+      gap: 8px;
+    }
+
+    .map-stat-card {
+      background: rgba(6, 10, 18, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 8px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .map-stat-card.alert {
+      border-color: var(--crimson-neon);
+      background: rgba(255, 42, 95, 0.12);
+    }
+
+    .map-stat-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .map-stat-value {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      margin-top: 1px;
+    }
+
+    .map-stat-value.up {
+      color: var(--crimson-neon);
+    }
+
+    .map-stat-value.down {
+      color: var(--emerald-neon);
+    }
+
+    /* Radar sweep animation overlay (optional) */
+    .radar-sweep-canvas {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 400;
+      opacity: 0.25;
+    }
+
+    /* Holographic Marker Popups */
+    .leaflet-popup-content-wrapper {
+      background: rgba(8, 12, 22, 0.92) !important;
+      backdrop-filter: blur(20px) !important;
+      border: 1px solid var(--cyan-neon) !important;
+      border-radius: 14px !important;
+      box-shadow: 0 8px 32px rgba(0, 240, 255, 0.3) !important;
+      color: #fff !important;
+      padding: 0 !important;
+    }
+
+    .leaflet-popup-tip {
+      background: rgba(8, 12, 22, 0.92) !important;
+      border: 1px solid var(--cyan-neon) !important;
+    }
+
+    .popup-cad-dossier {
+      padding: 16px 18px;
+      min-width: 260px;
+      font-family: var(--font-body);
+    }
+
+    .popup-incident-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+    }
+
+    .popup-incident-id {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--cyan-neon);
+      font-weight: 800;
+    }
+
+    .popup-status-pill {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(255, 42, 95, 0.2);
+      border: 1px solid var(--crimson-neon);
+      color: #fca5a5;
+    }
+
+    .popup-status-pill.resolved {
+      background: rgba(0, 245, 155, 0.15);
+      border-color: var(--emerald-neon);
+      color: #a7f3d0;
+    }
+
+    .popup-citizen-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .popup-citizen-phone {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .popup-reason-box {
+      margin: 10px 0;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      font-size: 11.5px;
+      color: #e2e8f0;
+      line-height: 1.4;
+    }
+
+    .popup-location-row {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .popup-action-btn-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-popup-call {
+      flex: 1;
+      padding: 7px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .btn-popup-resolve {
+      flex: 1;
+      padding: 7px;
+      border-radius: 8px;
+      background: rgba(0, 245, 155, 0.15);
+      border: 1px solid var(--emerald-neon);
+      color: var(--emerald-neon);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    /* RIGHT SIDEBAR: SHUROKHA AI CRIME AUDIT */
+    .panel-audit {
+      background: var(--bg-panel);
+      backdrop-filter: blur(20px);
+      border-left: 1px solid var(--glass-border-cyan);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .audit-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* AI CARD */
+    .ai-card {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ai-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--cyan-neon);
+    }
+
+    .ai-card.alert::before {
+      background: var(--crimson-neon);
+    }
+
+    .ai-card-title {
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    /* HOTSPOT RANKING TABLE */
+    .hotspot-rank-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .hotspot-row {
+      background: rgba(10, 16, 28, 0.6);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .hotspot-row:hover {
+      background: rgba(0, 240, 255, 0.1);
+      border-color: var(--cyan-neon);
+      transform: translateX(3px);
+    }
+
+    .hotspot-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .rank-number {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .rank-number.top1 {
+      background: var(--crimson-neon);
+      color: #fff;
+      box-shadow: 0 0 10px var(--crimson-glow);
+    }
+
+    .rank-number.top2 {
+      background: var(--amber-neon);
+      color: #000;
+    }
+
+    .hotspot-info-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .hotspot-info-sub {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 1px;
+    }
+
+    .hotspot-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .trend-pill {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .trend-pill.up {
+      background: rgba(255, 42, 95, 0.18);
+      border: 1px solid var(--crimson-neon);
+      color: #fca5a5;
+    }
+
+    .trend-pill.down {
+      background: rgba(0, 245, 155, 0.15);
+      border: 1px solid var(--emerald-neon);
+      color: #a7f3d0;
+    }
+
+    .hotspot-score {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    /* DIRECTIVES LIST */
+    .directive-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 9px 10px;
+      background: rgba(10, 16, 28, 0.6);
+      border: 1px solid var(--glass-border);
+      border-radius: 9px;
+      font-size: 11px;
+      color: #cbd5e1;
+      line-height: 1.45;
+      margin-bottom: 8px;
+    }
+
+    .directive-num {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(0, 240, 255, 0.2);
+      border: 1px solid var(--cyan-neon);
+      color: var(--cyan-neon);
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* BOTTOM FOOTER TICKER */
+    .command-footer {
+      height: 32px;
+      background: rgba(4, 7, 14, 0.95);
+      border-top: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-dim);
+      z-index: 1000;
+    }
+
+    .footer-ticker {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--cyan-neon);
+    }
+
+    /* LOGIN MODAL (OVERLAY) */
+    .hud-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 8, 17, 0.88);
+      backdrop-filter: blur(24px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hud-login-card {
+      width: 420px;
+      background: rgba(10, 16, 28, 0.95);
+      border: 1px solid var(--cyan-neon);
+      box-shadow: 0 10px 40px var(--cyan-glow);
+      border-radius: 18px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: relative;
+    }
+
+    .login-input {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      outline: none;
+    }
+
+    .login-input:focus {
+      border-color: var(--cyan-neon);
+      box-shadow: 0 0 12px var(--cyan-glow);
+    }
+
+    .btn-login-submit {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--cyan-neon) 0%, #2563eb 100%);
+      border: none;
+      color: #000;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 4px 20px var(--cyan-glow);
+      transition: all 0.2s;
+    }
+
+    .btn-login-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 25px var(--cyan-glow);
+    }
+
+    /* Pulsing Leaflet Marker Rings */
+    .pulsing-marker-pin {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--crimson-neon);
+      border: 2.5px solid #ffffff;
+      box-shadow: 0 0 15px var(--crimson-neon);
+      position: relative;
+    }
+
+    .pulsing-marker-pin::after {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--crimson-neon);
+      animation: rippleMarker 1.8s infinite ease-out;
+    }
+
+    @keyframes rippleMarker {
+      0% { transform: scale(0.5); opacity: 1; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+
+    .pulsing-marker-pin.resolved {
+      background: var(--emerald-neon);
+      border-color: #ffffff;
+      box-shadow: 0 0 15px var(--emerald-neon);
+    }
+    .pulsing-marker-pin.resolved::after {
+      border-color: var(--emerald-neon);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================
+       TOP COMMAND HEADER HUD
+  ======================================================== -->
+  <header class="command-header">
+    <div class="brand-section">
+      <div class="brand-shield">
+        <i class="fas fa-shield-halved"></i>
+      </div>
+      <div class="brand-text">
+        <h1>SAFE bd // TACTICAL COMMAND CENTER</h1>
+        <div class="subtext">AI Spatial Telemetry • Live SOS Heatmap • v3.4 HUD</div>
+      </div>
+    </div>
+
+    <!-- Live Telemetry Strip -->
+    <div class="telemetry-strip">
+      <div class="telemetry-item">
+        <span class="telemetry-label">DHAKA BST</span>
+        <span class="telemetry-val clock" id="hud-clock-bst">12:00:00 AM</span>
+      </div>
+      <div class="telemetry-item">
+        <span class="telemetry-label">UTC TIME</span>
+        <span class="telemetry-val" id="hud-clock-utc">06:00:00 PM</span>
+      </div>
+      <div class="defcon-badge" id="hud-defcon-badge">
+        <span class="defcon-pulse-dot"></span>
+        <span id="hud-defcon-text">DEFCON 2 : ELEVATED</span>
+      </div>
+      <div class="telemetry-item">
+        <span class="telemetry-label">ACTIVE DISTRESS</span>
+        <span class="telemetry-val" style="color: var(--crimson-neon);" id="hud-stat-active-distress">0</span>
+      </div>
+      <div class="telemetry-item">
+        <span class="telemetry-label">TOTAL PINGS</span>
+        <span class="telemetry-val" style="color: var(--cyan-neon);" id="hud-stat-total-pings">28</span>
+      </div>
+    </div>
+
+    <!-- Actions & Controls -->
+    <div class="header-actions">
+      <button class="btn-hud-action" id="btn-sound-toggle" onclick="toggleRadarSound()" title="Toggle Tactical Audio Chirp">
+        <i class="fas fa-volume-high"></i> <span id="sound-status-label">AUDIO ON</span>
+      </button>
+      <button class="btn-hud-action" onclick="toggleFullscreen()" title="Toggle Fullscreen Mode">
+        <i class="fas fa-expand"></i> FULLSCREEN
+      </button>
+      <button class="btn-hud-primary" onclick="triggerManualRefresh()" title="Fetch Fresh Live Telemetry">
+        <i class="fas fa-arrows-rotate"></i> SYNC HUD
+      </button>
+      <a href="/" class="btn-hud-action" title="Return to Mobile Web App">
+        <i class="fas fa-mobile-screen"></i> APP
+      </a>
+      <button class="btn-hud-action" onclick="performAdminSignOut()" title="Sign Out Administrator">
+        <i class="fas fa-arrow-right-from-bracket"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================
+       SUB-BAR FILTER & CONTROLS
+  ======================================================== -->
+  <div class="filter-subbar">
+    <div class="category-pills">
+      <div class="pill-filter active" data-category="all" onclick="filterByCategory('all')">
+        <i class="fas fa-border-all"></i> All Distress Pings <span class="pill-badge" id="badge-count-all">28</span>
+      </div>
+      <div class="pill-filter" data-category="snatching" onclick="filterByCategory('snatching')">
+        <i class="fas fa-mask"></i> Snatching / Mugging <span class="pill-badge" id="badge-count-snatching">8</span>
+      </div>
+      <div class="pill-filter" data-category="harassment" onclick="filterByCategory('harassment')">
+        <i class="fas fa-hand-fist"></i> Harassment / Eve-Teasing <span class="pill-badge" id="badge-count-harassment">7</span>
+      </div>
+      <div class="pill-filter" data-category="assault" onclick="filterByCategory('assault')">
+        <i class="fas fa-shield-virus"></i> Physical Threat <span class="pill-badge" id="badge-count-assault">4</span>
+      </div>
+      <div class="pill-filter" data-category="stalking" onclick="filterByCategory('stalking')">
+        <i class="fas fa-person-walking-dashed-line-arrow-right"></i> Stalking <span class="pill-badge" id="badge-count-stalking">5</span>
+      </div>
+      <div class="pill-filter" data-category="direct999" onclick="filterByCategory('direct999')">
+        <i class="fas fa-phone-volume"></i> 999 Direct <span class="pill-badge" id="badge-count-999">3</span>
+      </div>
+    </div>
+
+    <div class="map-controls-group">
+      <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-dim);">MAP MODE:</span>
+      <button class="map-toggle-btn active" id="btn-mode-heat" onclick="setMapMode('heat')">
+        <i class="fas fa-fire"></i> Heatmap
+      </button>
+      <button class="map-toggle-btn active" id="btn-mode-pins" onclick="setMapMode('pins')">
+        <i class="fas fa-location-dot"></i> Markers
+      </button>
+      <button class="map-toggle-btn" onclick="flyToCity('dhaka')">
+        <i class="fas fa-crosshairs"></i> Dhaka Central
+      </button>
+      <button class="map-toggle-btn" onclick="flyToCity('chittagong')">
+        <i class="fas fa-crosshairs"></i> Chittagong
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MAIN 3-COLUMN HUD GRID
+  ======================================================== -->
+  <main class="hud-grid">
+
+    <!-- LEFT PANEL: LIVE SOS TELEMETRY STREAM -->
+    <aside class="panel-feed">
+      <div class="panel-header">
+        <div class="panel-title">
+          <i class="fas fa-tower-broadcast" style="color: var(--crimson-neon);"></i> Live SOS Stream
+        </div>
+        <span class="panel-badge" id="live-distress-counter">REAL-TIME ACTIVE</span>
+      </div>
+
+      <div class="sos-search-bar">
+        <input type="text" class="sos-search-input" id="sos-filter-search" placeholder="Search by citizen, phone, or location..." oninput="handleSosSearch()">
+      </div>
+
+      <div class="sos-stream-container" id="sos-incident-list">
+        <!-- Rendered dynamically -->
+        <div style="text-align: center; padding: 40px 20px; color: var(--text-dim); font-size: 12px;">
+          <i class="fas fa-circle-notch fa-spin" style="font-size: 24px; color: var(--cyan-neon); margin-bottom: 10px; display: block;"></i>
+          Initializing Live Satellite Link...
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER PANEL: LARGE TACTICAL MAP VIEWPORT -->
+    <section class="panel-map">
+      <div id="tactical-map"></div>
+
+      <!-- Telemetry Reticle Overlay -->
+      <div class="map-overlay-reticle">
+        <div class="map-telemetry-row">
+          <i class="fas fa-crosshairs"></i> TARGET COORDS: <span id="reticle-coords">23.8103° N, 90.4125° E</span>
+        </div>
+        <div class="map-telemetry-row">
+          <i class="fas fa-layer-group"></i> SATELLITE ZOOM: <span id="reticle-zoom">12.5x</span>
+        </div>
+        <div class="map-telemetry-row">
+          <i class="fas fa-satellite"></i> GIS ENGINE: <span>CARTO DARK MATTER + LEAFLET.HEAT</span>
+        </div>
+      </div>
+
+      <!-- Floating Stat Badges Over Map -->
+      <div class="map-quick-stats">
+        <div class="map-stat-card alert">
+          <span class="map-stat-label">EPICENTRE CRIME SURGE</span>
+          <span class="map-stat-value up" id="map-stat-surge-val">▲ +50.0% (Mirpur-10)</span>
+        </div>
+        <div class="map-stat-card">
+          <span class="map-stat-label">STABILIZED CORRIDOR</span>
+          <span class="map-stat-value down" id="map-stat-down-val">▼ -22.2% (Dhanmondi)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: SHUROKHA AI CRIME AUDIT & HOTSPOT RANKING -->
+    <aside class="panel-audit">
+      <div class="panel-header">
+        <div class="panel-title">
+          <i class="fas fa-brain" style="color: var(--cyan-neon);"></i> shurokhaAI Crime Audit
+        </div>
+        <button class="btn-hud-action" style="padding: 4px 8px; font-size: 10px;" onclick="runAiReAudit()">
+          <i class="fas fa-bolt"></i> RE-AUDIT
+        </button>
+      </div>
+
+      <div class="audit-body">
+        
+        <!-- AI Threat Status Summary Card -->
+        <div class="ai-card alert">
+          <div class="ai-card-title">
+            <span>Executive Neural Assessment</span>
+            <span style="font-family: var(--font-mono); font-size: 9px; color: var(--crimson-neon);"><i class="fas fa-circle-dot fa-fade"></i> ACTIVE SYNTHESIS</span>
+          </div>
+          <p style="font-size: 11.5px; color: #e2e8f0; line-height: 1.5; font-weight: 400;" id="ai-executive-summary">
+            Spatial-temporal neural analysis across 28 verified SOS triggers identifies Mirpur-10 Roundabout as the highest-density distress epicentre (Threat Index: 95/100, Crime Surge: +50.0%). Secondary critical surge active at Farmgate Footbridge (+40.0%).
+          </p>
+          <div style="margin-top: 10px; display: flex; gap: 8px;">
+            <div style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 8px; padding: 6px 8px;">
+              <div style="font-size: 9px; color: var(--text-dim); text-transform: uppercase;">Primary Threat Vector</div>
+              <div style="font-size: 11px; font-weight: 700; color: #fff; margin-top: 2px;" id="ai-primary-threat">Armed Snatching (73%)</div>
+            </div>
+            <div style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 8px; padding: 6px 8px;">
+              <div style="font-size: 9px; color: var(--text-dim); text-transform: uppercase;">Peak Danger Window</div>
+              <div style="font-size: 11px; font-weight: 700; color: var(--amber-neon); margin-top: 2px;" id="ai-peak-window">20:30 — 23:45 BST</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Danger Zone Hotspot Ranking Card -->
+        <div class="ai-card">
+          <div class="ai-card-title">
+            <span>Top Danger Hotspots (#1 to #5)</span>
+            <span style="font-family: var(--font-mono); font-size: 10px; color: var(--cyan-neon);">CLICK TO LOCK-ON</span>
+          </div>
+          <div class="hotspot-rank-list" id="hotspot-ranking-container">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- AI Tactical Police Directives -->
+        <div class="ai-card">
+          <div class="ai-card-title">
+            <span>Tactical Police Directives</span>
+            <span style="font-family: var(--font-mono); font-size: 9.5px; color: var(--emerald-neon);">POLICE CAD READY</span>
+          </div>
+          <div id="ai-directives-container">
+            <!-- Directives rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Export Actions -->
+        <div style="display: flex; gap: 10px; margin-top: 4px;">
+          <button class="btn-hud-primary" style="flex: 1; justify-content: center;" onclick="window.print()">
+            <i class="fas fa-file-pdf"></i> Export Brief (PDF)
+          </button>
+          <button class="btn-hud-action" style="flex: 1; justify-content: center;" onclick="broadcastAdminWarning()">
+            <i class="fas fa-bullhorn"></i> Broadcast Advisory
+          </button>
+        </div>
+
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ========================================================
+       BOTTOM STATUS TICKER
+  ======================================================== -->
+  <footer class="command-footer">
+    <div class="footer-ticker">
+      <i class="fas fa-satellite-dish fa-fade"></i>
+      <span id="footer-ticker-text">SECURE TELEMETRY LINK: Connected to Supabase Cloud PostgreSQL & Google Drive Vault 5TB. Real-time CAD Relaying Online.</span>
+    </div>
+    <div style="display: flex; gap: 16px;">
+      <span>LATENCY: <strong style="color: var(--emerald-neon);">18ms</strong></span>
+      <span>ENCRYPTION: <strong style="color: var(--cyan-neon);">AES-256-GCM</strong></span>
+      <span>DEFENSE STATUS: <strong style="color: var(--cyan-neon);">SHUROKHA AI ONLINE</strong></span>
+    </div>
+  </footer>
+
+  <!-- ========================================================
+       ADMIN KEYCARD LOGIN MODAL (OVERLAY)
+  ======================================================== -->
+  <div class="hud-modal-overlay" id="admin-login-modal">
+    <div class="hud-login-card">
+      <div style="text-align: center;">
+        <div style="width: 50px; height: 50px; border-radius: 14px; background: rgba(0, 240, 255, 0.15); border: 1.5px solid var(--cyan-neon); margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; color: var(--cyan-neon); font-size: 22px; box-shadow: 0 0 20px var(--cyan-glow);">
+          <i class="fas fa-shield-halved"></i>
+        </div>
+        <h2 style="font-family: var(--font-display); font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 1px;">SAFE bd // COMMAND ACCESS</h2>
+        <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px; font-family: var(--font-mono);">Authorized Administrator Authentication Required</p>
+      </div>
+
+      <div>
+        <label style="font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase;">Admin Mobile Phone</label>
+        <input type="text" class="login-input" id="login-phone" placeholder="e.g. 01887431264" value="01887431264" style="margin-top: 4px;">
+      </div>
+
+      <div>
+        <label style="font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase;">Security Passcode</label>
+        <input type="password" class="login-input" id="login-password" placeholder="Enter admin password" style="margin-top: 4px;">
+      </div>
+
+      <button class="btn-login-submit" onclick="performAdminLogin()">
+        <i class="fas fa-key"></i> Authenticate &amp; Launch HUD
+      </button>
+
+      <div style="text-align: center; font-size: 10.5px; color: var(--text-dim);">
+        Protected by SAFE bd Cryptographic Session Tokens.
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       JAVASCRIPT COMMAND LOGIC ENGINE
+  ======================================================== -->
+  <script>
+    // State Variables
+    let map = null;
+    let heatLayer = null;
+    let markersLayerGroup = null;
+    let currentData = null;
+    let activeCategoryFilter = 'all';
+    let isSoundEnabled = true;
+    let showHeatmap = true;
+    let showMarkers = true;
+    let pollIntervalTimer = null;
+    let knownSosIds = new Set();
+    let audioCtx = null;
+
+    // Web Audio Synthesizer for Tactical Radar Chirp
+    function playRadarChirp(freq = 880, duration = 0.12) {
+      if (!isSoundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.5, audioCtx.currentTime + duration);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function toggleRadarSound() {
+      isSoundEnabled = !isSoundEnabled;
+      const label = document.getElementById('sound-status-label');
+      const btn = document.getElementById('btn-sound-toggle');
+      if (isSoundEnabled) {
+        label.innerText = 'AUDIO ON';
+        btn.classList.add('active');
+        playRadarChirp(1046, 0.1);
+      } else {
+        label.innerText = 'AUDIO MUTED';
+        btn.classList.remove('active');
+      }
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    // Live BST & UTC Clocks
+    function updateLiveClocks() {
+      const now = new Date();
+      // Dhaka Standard Time is UTC+6
+      const bstTime = new Date(now.getTime() + (now.getTimezoneOffset() + 360) * 60000);
+      document.getElementById('hud-clock-bst').innerText = bstTime.toLocaleTimeString('en-US', { hour12: true });
+      document.getElementById('hud-clock-utc').innerText = now.toUTCString().slice(17, 25) + ' UTC';
+    }
+    setInterval(updateLiveClocks, 1000);
+    updateLiveClocks();
+
+    // Authentication Guard
+    function checkAdminAuth() {
+      const token = localStorage.getItem('safe_bd_token');
+      const userStr = localStorage.getItem('safe_bd_user');
+      let user = null;
+      try { user = userStr ? JSON.parse(userStr) : null; } catch (e) {}
+
+      // If no token or user not admin, show login modal
+      if (!token || !user || !user.isAdmin) {
+        document.getElementById('admin-login-modal').style.display = 'flex';
+        return false;
+      }
+      document.getElementById('admin-login-modal').style.display = 'none';
+      return true;
+    }
+
+    async function performAdminLogin() {
+      const phone = document.getElementById('login-phone').value.trim();
+      const password = document.getElementById('login-password').value;
+      if (!phone || !password) {
+        alert("Please enter both phone and password.");
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, password })
+        });
+        const data = await res.json();
+        if (data && data.success && data.user && data.user.isAdmin) {
+          localStorage.setItem('safe_bd_token', data.token);
+          localStorage.setItem('safe_bd_user', JSON.stringify(data.user));
+          document.getElementById('admin-login-modal').style.display = 'none';
+          initTacticalDashboard();
+          playRadarChirp(1200, 0.2);
+        } else {
+          alert(data.message || "Invalid admin credentials.");
+        }
+      } catch (err) {
+        alert("Authentication failed: " + err.message);
+      }
+    }
+
+    function performAdminSignOut() {
+      if (confirm("Sign out of SAFE bd Tactical Command Center?")) {
+        localStorage.removeItem('safe_bd_token');
+        localStorage.removeItem('safe_bd_user');
+        window.location.href = '/';
+      }
+    }
+
+    // Initialize Leaflet Tactical Map
+    function initTacticalMap() {
+      if (map) return;
+
+      map = L.map('tactical-map', {
+        center: [23.8103, 90.4125], // Dhaka Central
+        zoom: 12,
+        minZoom: 7,
+        maxZoom: 18,
+        zoomControl: true,
+        attributionControl: false
+      });
+
+      // CartoDB Dark Matter luxury tactical base tiles
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd',
+        maxZoom: 19
+      }).addTo(map);
+
+      // Layer groups for markers
+      markersLayerGroup = L.layerGroup().addTo(map);
+
+      // Update cursor coordinates
+      map.on('mousemove', (e) => {
+        document.getElementById('reticle-coords').innerText = `${e.latlng.lat.toFixed(4)}° N, ${e.latlng.lng.toFixed(4)}° E`;
+      });
+      map.on('zoomend', () => {
+        document.getElementById('reticle-zoom').innerText = `${map.getZoom()}x`;
+      });
+    }
+
+    // Fetch Heatmap & Telemetry Data
+    async function fetchTelemetryData(isManual = false) {
+      try {
+        const res = await fetch('/api/admin/heatmap-data');
+        const data = await res.json();
+        if (!data || !data.success) return;
+
+        // Detect new SOS alert for audio chirp
+        if (data.alerts && data.alerts.length > 0) {
+          let hasNewAlert = false;
+          data.alerts.forEach(a => {
+            if (!knownSosIds.has(a.id)) {
+              knownSosIds.add(a.id);
+              if (knownSosIds.size > 28) hasNewAlert = true; // after initial load
+            }
+          });
+          if (hasNewAlert) {
+            playRadarChirp(987, 0.25);
+            showUrgentSosFlash();
+          }
+        }
+
+        currentData = data;
+        renderAllDashboardComponents(data);
+      } catch (err) {
+        console.warn("Telemetry fetch error:", err);
+      }
+    }
+
+    function showUrgentSosFlash() {
+      const banner = document.getElementById('footer-ticker-text');
+      banner.innerHTML = `<span style="color: var(--crimson-neon); font-weight: 800;">🚨 [CRITICAL ALERT] NEW SOS DISTRESS TRIGGER DETECTED! SATELLITE HUD UPDATED.</span>`;
+      setTimeout(() => {
+        banner.innerHTML = "SECURE TELEMETRY LINK: Connected to Supabase Cloud PostgreSQL & Google Drive Vault 5TB. Real-time CAD Relaying Online.";
+      }, 7000);
+    }
+
+    // Render Dashboard Elements
+    function renderAllDashboardComponents(data) {
+      if (!data) return;
+
+      // 1. Stats and Defcon Header
+      const stats = data.stats || {};
+      document.getElementById('hud-stat-active-distress').innerText = stats.activeDistress || 0;
+      document.getElementById('hud-stat-total-pings').innerText = stats.totalPings || 0;
+      document.getElementById('hud-defcon-text').innerText = stats.defconLevel || 'DEFCON 2 : ELEVATED';
+
+      const defconBadge = document.getElementById('hud-defcon-badge');
+      if (stats.activeDistress > 0) {
+        defconBadge.style.borderColor = 'var(--crimson-neon)';
+        defconBadge.style.background = 'rgba(255, 42, 95, 0.25)';
+      } else {
+        defconBadge.style.borderColor = 'var(--amber-neon)';
+        defconBadge.style.background = 'rgba(255, 183, 3, 0.15)';
+        document.getElementById('hud-defcon-text').style.color = 'var(--amber-neon)';
+      }
+
+      // 2. Render Left Stream Feed
+      renderSosStreamFeed(data.alerts || []);
+
+      // 3. Render Map Layers (Heatmap + Markers)
+      renderMapLayers(data.alerts || []);
+
+      // 4. Render Right AI Audit & Hotspots
+      renderAiAuditPanel(data.aiAudit, data.hotspots);
+
+      // 5. Update Category Counts
+      updateCategoryBadgeCounts(data.alerts || []);
+    }
+
+    function updateCategoryBadgeCounts(alerts) {
+      const counts = { all: alerts.length, snatching: 0, harassment: 0, assault: 0, stalking: 0, direct999: 0 };
+      alerts.forEach(a => {
+        const cat = a.category;
+        if (counts[cat] !== undefined) counts[cat]++;
+      });
+      document.getElementById('badge-count-all').innerText = counts.all;
+      document.getElementById('badge-count-snatching').innerText = counts.snatching;
+      document.getElementById('badge-count-harassment').innerText = counts.harassment;
+      document.getElementById('badge-count-assault').innerText = counts.assault;
+      document.getElementById('badge-count-stalking').innerText = counts.stalking;
+      document.getElementById('badge-count-999').innerText = counts.direct999;
+    }
+
+    // Render Left SOS Stream
+    function renderSosStreamFeed(alerts) {
+      const container = document.getElementById('sos-incident-list');
+      const searchVal = (document.getElementById('sos-filter-search').value || '').toLowerCase();
+
+      // Filter by category and search
+      const filtered = alerts.filter(a => {
+        const matchCategory = activeCategoryFilter === 'all' || a.category === activeCategoryFilter;
+        const matchSearch = !searchVal || 
+          (a.userName && a.userName.toLowerCase().includes(searchVal)) ||
+          (a.userPhone && a.userPhone.includes(searchVal)) ||
+          (a.reason && a.reason.toLowerCase().includes(searchVal)) ||
+          (a.location && a.location.address && a.location.address.toLowerCase().includes(searchVal));
+        return matchCategory && matchSearch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px 10px; color: var(--text-dim); font-size: 11.5px;">
+            <i class="fas fa-filter" style="font-size: 20px; margin-bottom: 8px; display: block; opacity: 0.5;"></i>
+            No SOS distress pings matching current filter.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(alert => {
+        const isDistress = alert.status === 'ACTIVE_DISTRESS';
+        const cardClass = isDistress ? 'sos-card distress' : 'sos-card';
+        const reasonClass = alert.category || 'general';
+
+        return `
+          <div class="${cardClass}" onclick="focusMapOnAlert(${alert.location.lat}, ${alert.location.lon}, '${alert.id}')">
+            <div class="sos-card-header">
+              <span class="sos-id"><i class="fas fa-fingerprint"></i> ${alert.incidentId}</span>
+              <span class="sos-time">${alert.timeAgo || 'Recent'}</span>
+            </div>
+            <div class="sos-citizen">
+              <i class="fas fa-circle-user" style="color: ${isDistress ? 'var(--crimson-neon)' : 'var(--cyan-neon)'};"></i>
+              <span>${escapeHtml(alert.userName)}</span>
+            </div>
+            <div class="sos-phone">${alert.displayPhone}</div>
+            <div>
+              <span class="sos-reason-badge ${reasonClass}">
+                ${escapeHtml(alert.reason)}
+              </span>
+            </div>
+            <div class="sos-address">
+              <i class="fas fa-location-dot" style="color: var(--cyan-neon); margin-top: 2px;"></i>
+              <span>${escapeHtml(alert.location.address)}</span>
+            </div>
+            <div class="sos-card-actions" onclick="event.stopPropagation()">
+              <button class="btn-card-action" onclick="focusMapOnAlert(${alert.location.lat}, ${alert.location.lon}, '${alert.id}')">
+                <i class="fas fa-crosshairs"></i> Locate
+              </button>
+              <a href="tel:${alert.userPhone}" class="btn-card-action" style="text-decoration: none;">
+                <i class="fas fa-phone"></i> Call
+              </a>
+              ${isDistress ? `
+                <button class="btn-card-action" style="color: var(--emerald-neon);" onclick="resolveAlert('${alert.id}')">
+                  <i class="fas fa-check"></i> Resolve
+                </button>
+              ` : `
+                <span class="btn-card-action" style="color: var(--emerald-neon); cursor: default;">
+                  <i class="fas fa-shield"></i> Safe
+                </span>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Render Map Layers
+    function renderMapLayers(alerts) {
+      if (!map) return;
+
+      // Filter alerts based on active category
+      const filtered = activeCategoryFilter === 'all' 
+        ? alerts 
+        : alerts.filter(a => a.category === activeCategoryFilter);
+
+      // 1. Update Heatmap Layer
+      if (heatLayer) map.removeLayer(heatLayer);
+
+      if (showHeatmap) {
+        const heatPoints = filtered.map(a => [
+          a.location.lat,
+          a.location.lon,
+          a.intensity || (a.status === 'ACTIVE_DISTRESS' ? 1.0 : 0.8)
+        ]);
+
+        heatLayer = L.heatLayer(heatPoints, {
+          radius: 35,
+          blur: 24,
+          maxZoom: 16,
+          max: 1.0,
+          gradient: {
+            0.15: '#00f0ff', // Cyber cyan
+            0.40: '#00ff88', // Emerald
+            0.65: '#ffb703', // Amber warning
+            0.85: '#ff5400', // Crimson orange
+            1.00: '#ff0055'  // Neon crimson critical core
+          }
+        }).addTo(map);
+      }
+
+      // 2. Update Glowing Marker Layer
+      markersLayerGroup.clearLayers();
+
+      if (showMarkers) {
+        filtered.forEach(alert => {
+          const isDistress = alert.status === 'ACTIVE_DISTRESS';
+          const pinClass = isDistress ? 'pulsing-marker-pin' : 'pulsing-marker-pin resolved';
+
+          const customIcon = L.divIcon({
+            className: 'custom-hud-marker',
+            html: `<div class="${pinClass}" id="marker-${alert.id}"></div>`,
+            iconSize: [22, 22],
+            iconAnchor: [11, 11]
+          });
+
+          const marker = L.marker([alert.location.lat, alert.location.lon], { icon: customIcon });
+
+          // Popup Dossier
+          const popupHtml = `
+            <div class="popup-cad-dossier">
+              <div class="popup-incident-header">
+                <span class="popup-incident-id"><i class="fas fa-satellite"></i> ${alert.incidentId}</span>
+                <span class="popup-status-pill ${isDistress ? '' : 'resolved'}">
+                  ${isDistress ? 'ACTIVE DISTRESS' : 'RESOLVED'}
+                </span>
+              </div>
+              <div class="popup-citizen-name">${escapeHtml(alert.userName)}</div>
+              <div class="popup-citizen-phone">${alert.displayPhone}</div>
+              <div class="popup-reason-box">
+                <strong style="color: var(--cyan-neon);">Reason:</strong> ${escapeHtml(alert.reason)}
+              </div>
+              <div class="popup-location-row">
+                <i class="fas fa-location-arrow" style="color: var(--cyan-neon);"></i>
+                <span>${escapeHtml(alert.location.address)}</span>
+              </div>
+              <div class="popup-action-btn-row">
+                <a href="tel:${alert.userPhone}" class="btn-popup-call">
+                  <i class="fas fa-phone-volume"></i> Direct Call
+                </a>
+                ${isDistress ? `
+                  <button class="btn-popup-resolve" onclick="resolveAlert('${alert.id}')">
+                    <i class="fas fa-check-double"></i> Mark Safe
+                  </button>
+                ` : `
+                  <span class="btn-popup-resolve" style="cursor: default;">
+                    <i class="fas fa-shield"></i> Neutralized
+                  </span>
+                `}
+              </div>
+            </div>
+          `;
+
+          marker.bindPopup(popupHtml);
+          markersLayerGroup.addLayer(marker);
+        });
+      }
+    }
+
+    // Render AI Crime Audit & Hotspot Ranking
+    function renderAiAuditPanel(aiAudit, hotspots) {
+      if (!aiAudit || !hotspots) return;
+
+      document.getElementById('ai-executive-summary').innerText = aiAudit.executiveSummary || '';
+      document.getElementById('ai-primary-threat').innerText = aiAudit.primaryThreatVector || 'Armed Snatching';
+      document.getElementById('ai-peak-window').innerText = aiAudit.peakVulnerabilityWindow || '20:30 — 23:45 BST';
+
+      // Top Hotspot cards
+      const container = document.getElementById('hotspot-ranking-container');
+      container.innerHTML = hotspots.slice(0, 5).map((zone, idx) => {
+        const isUp = zone.trend === 'up';
+        const rankClass = idx === 0 ? 'rank-number top1' : (idx === 1 ? 'rank-number top2' : 'rank-number');
+        const trendClass = isUp ? 'trend-pill up' : 'trend-pill down';
+        const trendIcon = isUp ? '▲' : '▼';
+
+        return `
+          <div class="hotspot-row" onclick="focusMapOnZone(${zone.lat}, ${zone.lon}, 15)">
+            <div class="hotspot-left">
+              <div class="${rankClass}">#${idx + 1}</div>
+              <div>
+                <div class="hotspot-info-name">${escapeHtml(zone.name)}</div>
+                <div class="hotspot-info-sub">${zone.alertCount} Pings • ${escapeHtml(zone.primaryReason)}</div>
+              </div>
+            </div>
+            <div class="hotspot-right">
+              <span class="${trendClass}">${trendIcon} ${zone.crimeDelta}</span>
+              <span class="hotspot-score">Threat: ${zone.threatScore}/100</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Top Map Quick Stats
+      if (hotspots[0]) {
+        document.getElementById('map-stat-surge-val').innerText = `▲ ${hotspots[0].crimeDelta} (${hotspots[0].name.split(' ')[0]})`;
+      }
+      const downZone = hotspots.find(h => h.trend === 'down') || hotspots[2];
+      if (downZone) {
+        document.getElementById('map-stat-down-val').innerText = `▼ ${downZone.crimeDelta} (${downZone.name.split(' ')[0]})`;
+      }
+
+      // Tactical Directives
+      const directivesContainer = document.getElementById('ai-directives-container');
+      const directives = aiAudit.tacticalDirectives || [];
+      directivesContainer.innerHTML = directives.map((d, i) => `
+        <div class="directive-item">
+          <span class="directive-num">${i + 1}</span>
+          <span>${escapeHtml(d)}</span>
+        </div>
+      `).join('');
+    }
+
+    // Map Navigation Helpers
+    function focusMapOnAlert(lat, lon, alertId) {
+      if (!map) return;
+      map.flyTo([lat, lon], 16, { animate: true, duration: 1.2 });
+      playRadarChirp(1174, 0.1);
+    }
+
+    function focusMapOnZone(lat, lon, zoom = 15) {
+      if (!map) return;
+      map.flyTo([lat, lon], zoom, { animate: true, duration: 1.2 });
+      playRadarChirp(987, 0.1);
+    }
+
+    function flyToCity(city) {
+      if (!map) return;
+      if (city === 'dhaka') map.flyTo([23.8103, 90.4125], 12.5, { animate: true, duration: 1.0 });
+      if (city === 'chittagong') map.flyTo([22.3569, 91.8214], 13.5, { animate: true, duration: 1.0 });
+    }
+
+    function setMapMode(mode) {
+      if (mode === 'heat') {
+        showHeatmap = !showHeatmap;
+        document.getElementById('btn-mode-heat').classList.toggle('active', showHeatmap);
+      } else if (mode === 'pins') {
+        showMarkers = !showMarkers;
+        document.getElementById('btn-mode-pins').classList.toggle('active', showMarkers);
+      }
+      if (currentData) renderMapLayers(currentData.alerts || []);
+    }
+
+    function filterByCategory(category) {
+      activeCategoryFilter = category;
+      document.querySelectorAll('.pill-filter').forEach(p => {
+        p.classList.toggle('active', p.getAttribute('data-category') === category);
+      });
+      if (currentData) {
+        renderSosStreamFeed(currentData.alerts || []);
+        renderMapLayers(currentData.alerts || []);
+      }
+      playRadarChirp(880, 0.08);
+    }
+
+    function handleSosSearch() {
+      if (currentData) {
+        renderSosStreamFeed(currentData.alerts || []);
+      }
+    }
+
+    async function resolveAlert(alertId) {
+      try {
+        const res = await fetch(`/api/admin/sos-alerts/${alertId}/resolve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ adminName: 'Chief Administrator' })
+        });
+        const data = await res.json();
+        if (data && data.success) {
+          playRadarChirp(1318, 0.15);
+          fetchTelemetryData();
+        }
+      } catch (e) {
+        alert("Failed to resolve alert: " + e.message);
+      }
+    }
+
+    async function runAiReAudit() {
+      try {
+        const res = await fetch('/api/admin/ai-heatmap-audit', { method: 'POST' });
+        const data = await res.json();
+        if (data && data.success) {
+          playRadarChirp(1200, 0.18);
+          renderAiAuditPanel(data.audit, data.hotspots);
+        }
+      } catch (e) {
+        alert("AI re-audit error: " + e.message);
+      }
+    }
+
+    function broadcastAdminWarning() {
+      const msg = prompt("Enter emergency tactical warning message to broadcast across SAFE BD mobile app:");
+      if (msg) {
+        alert("Broadcast dispatched to active citizen nodes.");
+        playRadarChirp(1500, 0.2);
+      }
+    }
+
+    function triggerManualRefresh() {
+      playRadarChirp(800, 0.1);
+      fetchTelemetryData(true);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // Startup Initialization
+    function initTacticalDashboard() {
+      initTacticalMap();
+      fetchTelemetryData();
+
+      // Poll real-time updates every 4 seconds
+      if (pollIntervalTimer) clearInterval(pollIntervalTimer);
+      pollIntervalTimer = setInterval(() => {
+        fetchTelemetryData();
+      }, 4000);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (checkAdminAuth()) {
+        initTacticalDashboard();
+      }
+    });
+  </script>
+</body>
+</html>
