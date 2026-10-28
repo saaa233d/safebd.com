@@ -3313,17 +3313,23 @@
     }
     .shurokha-fab-icon-wrap {
       position: relative;
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      overflow: hidden;
+      background: #061125;
+      border: 1.5px solid rgba(212, 175, 55, 0.6);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #ffffff;
-      font-size: 14px;
-      box-shadow: 0 2px 12px rgba(2, 132, 199, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      box-shadow: 0 2px 14px rgba(212, 175, 55, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.4);
       flex-shrink: 0;
+    }
+    .shurokha-fab-icon-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
     .shurokha-fab-pulse {
       position: absolute;
@@ -3332,7 +3338,7 @@
       right: -2px;
       bottom: -2px;
       border-radius: 50%;
-      border: 2px solid #38bdf8;
+      border: 2px solid rgba(212, 175, 55, 0.65);
       animation: shurokhaPulse 2.2s infinite ease-out;
       opacity: 0.8;
       pointer-events: none;
@@ -3454,17 +3460,23 @@
     }
     .shurokha-avatar {
       position: relative;
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       border-radius: 12px;
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      overflow: hidden;
+      background: #061125;
+      border: 1.5px solid rgba(212, 175, 55, 0.6);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #ffffff;
-      font-size: 18px;
-      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      box-shadow: 0 4px 16px rgba(212, 175, 55, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3);
       flex-shrink: 0;
+    }
+    .shurokha-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
     .shurokha-avatar-status {
       position: absolute;
@@ -3624,15 +3636,23 @@
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      overflow: hidden;
+      background: #061125;
+      border: 1px solid rgba(212, 175, 55, 0.5);
       display: flex;
       align-items: center;
       justify-content: center;
       color: #ffffff;
       font-size: 12px;
-      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
       flex-shrink: 0;
       margin-top: 2px;
+    }
+    .shurokha-msg-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
     .shurokha-msg-avatar.user {
       background: linear-gradient(135deg, #64748b 0%, #475569 100%);
@@ -4969,14 +4989,14 @@
 
     <div id="screen-admin" class="screen screen-padded" style="display: none;"></div>
 
-    <!-- Floating shurokhaAI Assistant Trigger (Universal Cross-Screen Assistant) -->
-    <div id="shurokha-ai-trigger" class="shurokha-fab" onclick="openShurokhaChat()" title="Talk to shurokhaAI (Live AI & Google Search)">
+    <!-- Floating Shurokkha AI Assistant Trigger (Universal Cross-Screen Assistant) -->
+    <div id="shurokha-ai-trigger" class="shurokha-fab" onclick="openShurokhaChat()" title="Talk to Shurokkha AI (Live AI & Google Search)">
       <div class="shurokha-fab-icon-wrap">
-        <i class="fas fa-robot"></i>
+        <img src="shurokkha-ai-logo.jpg" alt="Shurokkha AI Logo">
         <span class="shurokha-fab-pulse"></span>
       </div>
       <div class="shurokha-fab-label">
-        <span class="shurokha-fab-title">shurokhaAI</span>
+        <span class="shurokha-fab-title">Shurokkha AI</span>
         <span class="shurokha-fab-status"><span class="shurokha-dot"></span> Online</span>
       </div>
     </div>
@@ -5651,12 +5671,12 @@
         <div class="shurokha-chat-header">
           <div class="shurokha-header-info">
             <div class="shurokha-avatar">
-              <i class="fas fa-robot"></i>
+              <img src="shurokkha-ai-logo.jpg" alt="Shurokkha AI Logo">
               <span class="shurokha-avatar-status"></span>
             </div>
             <div>
               <div class="shurokha-title-row">
-                <span class="shurokha-title">shurokhaAI</span>
+                <span class="shurokha-title">Shurokkha AI</span>
                 <span class="shurokha-live-tag"><i class="fas fa-globe"></i> Web Search</span>
               </div>
               <div class="shurokha-sub" data-i18n="shurokha_sub">24/7 Personal Safety & Universal Companion</div>
@@ -5697,10 +5717,10 @@
         <!-- Messages Stream -->
         <div class="shurokha-messages" id="shurokha-messages-container">
           <div class="shurokha-msg-row ai">
-            <div class="shurokha-msg-avatar"><i class="fas fa-robot"></i></div>
+            <div class="shurokha-msg-avatar"><img src="shurokkha-ai-logo.jpg" alt="Shurokkha AI Logo"></div>
             <div class="shurokha-msg-bubble">
               <div class="shurokha-msg-text">
-                Hello! I am <strong>shurokhaAI</strong>, your 24/7 dedicated Citizen Safety & Emergency Health Companion from SAFE BD. 🛡️<br><br>
+                Hello! I am <strong>Shurokkha AI</strong>, your 24/7 dedicated Citizen Safety & Emergency Health Companion from SAFE BD. 🛡️<br><br>
                 I am here to assist you like a human companion with:<br>
                 • 🩺 <strong>Medical Advice & Fevers:</strong> First-aid, dengue precautions, free doctor tele-consultation (<a href="tel:16263">16263</a>), and ambulance triage.<br>
                 • 🏥 <strong>Nearby Hospitals:</strong> Name your neighborhood or district for verified 24/7 emergency hospitals & direct ambulances.<br>
@@ -5717,11 +5737,11 @@
 
         <!-- Typing Indicator -->
         <div class="shurokha-typing-indicator" id="shurokha-typing" style="display: none;">
-          <div class="shurokha-msg-avatar"><i class="fas fa-robot"></i></div>
+          <div class="shurokha-msg-avatar"><img src="shurokkha-ai-logo.jpg" alt="Shurokkha AI Logo"></div>
           <div class="shurokha-typing-dots">
             <span></span><span></span><span></span>
           </div>
-          <span style="font-size: 11px; color: var(--text-muted); margin-left: 6px;">shurokhaAI is thinking...</span>
+          <span style="font-size: 11px; color: var(--text-muted); margin-left: 6px;">Shurokkha AI is thinking...</span>
         </div>
 
         <!-- Input Bar -->
@@ -15135,16 +15155,16 @@
     }
 
     function clearShurokhaChat() {
-      if (confirm("Reset conversation with shurokhaAI?")) {
+      if (confirm("Reset conversation with Shurokkha AI?")) {
         shurokhaChatHistory = [];
         const container = document.getElementById('shurokha-messages-container');
         if (container) {
           container.innerHTML = `
             <div class="shurokha-msg-row ai">
-              <div class="shurokha-msg-avatar"><i class="fas fa-robot"></i></div>
+              <div class="shurokha-msg-avatar"><img src="shurokkha-ai-logo.jpg" alt="Shurokkha AI Logo"></div>
               <div class="shurokha-msg-bubble">
                 <div class="shurokha-msg-text">
-                  Hello! I am <strong>shurokhaAI</strong>, your 24/7 dedicated Citizen Safety & Emergency Health Companion from SAFE BD. 🛡️<br><br>
+                  Hello! I am <strong>Shurokkha AI</strong>, your 24/7 dedicated Citizen Safety & Emergency Health Companion from SAFE BD. 🛡️<br><br>
                   I am here to assist you like a human companion with:<br>
                   • 🩺 <strong>Medical Advice & Fevers:</strong> First-aid, dengue precautions, free doctor tele-consultation (<a href="tel:16263">16263</a>), and ambulance triage.<br>
                   • 🏥 <strong>Nearby Hospitals:</strong> Name your neighborhood or district for verified 24/7 emergency hospitals & direct ambulances.<br>
@@ -15198,7 +15218,7 @@
       const row = document.createElement('div');
       row.className = `shurokha-msg-row ${isUser ? 'user' : 'ai'}`;
       row.innerHTML = `
-        ${!isUser ? `<div class="shurokha-msg-avatar"><i class="fas fa-robot"></i></div>` : ''}
+        ${!isUser ? `<div class="shurokha-msg-avatar"><img src="shurokkha-ai-logo.jpg" alt="Shurokkha AI Logo"></div>` : ''}
         <div class="shurokha-msg-bubble">
           <div class="shurokha-msg-text">${formatShurokhaMarkdown(text)}</div>
           ${sourcesHtml}
