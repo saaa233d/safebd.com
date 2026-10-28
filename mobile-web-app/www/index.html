@@ -3954,6 +3954,9 @@
               <button class="btn-gps-refresh" onclick="acquireRealLocation(true);" title="Re-sync Google Maps GPS">
                 <i class="fas fa-crosshairs"></i> GPS
               </button>
+              <button type="button" class="btn-gps-refresh" onclick="toggleMainScreenMapEngine()" style="padding: 0 8px;" title="Switch to Direct Google Maps Frame">
+                <i class="fab fa-google"></i> Maps
+              </button>
             </div>
             
             <!-- Transportation Mode Selector (Walk, Car/CNG, Bike) -->
@@ -6873,7 +6876,7 @@
           ? 'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&scale=2'
           : 'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}';
 
-        L.tileLayer(googleTileUrl, {
+        const googleLayer = L.tileLayer(googleTileUrl, {
           maxZoom: 20,
           maxNativeZoom: 20,
           subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
@@ -6882,6 +6885,11 @@
           updateWhenIdle: false,
           updateWhenZooming: true
         }).addTo(navMap);
+
+        googleLayer.on('tileerror', function() {
+          const gFrame = document.getElementById('gmaps-frame');
+          if (gFrame) gFrame.style.display = 'block';
+        });
 
         // Custom Live Green Navigation Puck Icon with Radar Ripple and Live Tag
         const greenPuckHtml = `
@@ -6922,6 +6930,21 @@
         console.log("📍 [LIVE NAVIGATION ENGINE] Google-style retina map & green navigation puck activated.");
       } catch (e) {
         console.warn("Leaflet map initialization skipped, using fallback iframe:", e);
+        const gFrame = document.getElementById('gmaps-frame');
+        if (gFrame) gFrame.style.display = 'block';
+      }
+    }
+
+    function toggleMainScreenMapEngine() {
+      const gFrame = document.getElementById('gmaps-frame');
+      const leafletDiv = document.getElementById('interactive-nav-map');
+      if (gFrame && leafletDiv) {
+        const isFrameHidden = gFrame.style.display === 'none';
+        gFrame.style.display = isFrameHidden ? 'block' : 'none';
+        leafletDiv.style.display = isFrameHidden ? 'none' : 'block';
+        if (isFrameHidden && currentCoords && currentCoords.lat) {
+          gFrame.src = `https://maps.google.com/maps?q=${currentCoords.lat},${currentCoords.lon}&t=&z=15&ie=UTF8&iwloc=B&output=embed`;
+        }
       }
     }
 
@@ -12786,6 +12809,27 @@
             </a>
           </div>
 
+          <!-- Live Interactive Google Maps Segment in Admin -->
+          <div style="background: rgba(10, 16, 28, 0.7); border: 1.5px solid rgba(6, 182, 212, 0.4); border-radius: 14px; overflow: hidden; margin-bottom: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+            <div style="padding: 10px 14px; background: rgba(6, 182, 212, 0.12); border-bottom: 1px solid rgba(6, 182, 212, 0.25); display: flex; justify-content: space-between; align-items: center;">
+              <div style="font-size: 12px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                <i class="fab fa-google" style="color: #38bdf8;"></i> Google Maps Live Distress Heatmap
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" onclick="setAdminEmbeddedMapMode('roadmap')" class="auth-toggle-tab active" id="btn-admin-map-road" style="padding: 3px 8px; font-size: 10px;">Roadmap</button>
+                <button type="button" onclick="setAdminEmbeddedMapMode('satellite')" class="auth-toggle-tab" id="btn-admin-map-sat" style="padding: 3px 8px; font-size: 10px;">Satellite</button>
+                <a href="https://maps.google.com/maps?q=Dhaka,Bangladesh" target="_blank" style="padding: 3px 8px; font-size: 10px; background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.5); color: #38bdf8; border-radius: 6px; text-decoration: none; font-weight: 700;">
+                  Open App ↗
+                </a>
+              </div>
+            </div>
+            
+            <div style="position: relative; width: 100%; height: 280px; background: #e5e3df;">
+              <div id="admin-embedded-gmap" style="width: 100%; height: 100%; position: absolute; inset: 0; z-index: 1;"></div>
+              <iframe id="admin-gmaps-iframe" style="width: 100%; height: 100%; position: absolute; inset: 0; z-index: 0; border: none; display: none;" src="https://maps.google.com/maps?q=Dhaka%2C%20Bangladesh&t=&z=13&ie=UTF8&iwloc=&output=embed"></iframe>
+            </div>
+          </div>
+
           <!-- Hotspot Danger Ranking Table -->
           <div style="background: var(--black-subtle); border: 1px solid var(--border-quiet); border-radius: 14px; padding: 14px; margin-bottom: 14px;">
             <div style="font-size: 12px; font-weight: 800; color: #fff; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
@@ -12833,8 +12877,119 @@
             </div>
           </div>
         `;
+
+        // Initialize Google Maps in the Admin Heatmap Segment
+        setTimeout(() => {
+          initAdminEmbeddedGoogleMap(hotspots, data.alerts || []);
+        }, 300);
       } catch (err) {
         container.innerHTML = '<div style="padding: 20px; text-align: center; color: #ef4444;">Error connecting to Heatmap Telemetry API.</div>';
+      }
+    }
+
+    let adminEmbeddedMap = null;
+    let adminEmbeddedTileLayer = null;
+
+    function setAdminEmbeddedMapMode(mode) {
+      if (!adminEmbeddedMap) return;
+      if (adminEmbeddedTileLayer) {
+        adminEmbeddedMap.removeLayer(adminEmbeddedTileLayer);
+      }
+      const roadBtn = document.getElementById('btn-admin-map-road');
+      const satBtn = document.getElementById('btn-admin-map-sat');
+      if (mode === 'satellite') {
+        adminEmbeddedTileLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+          subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+          maxZoom: 20
+        }).addTo(adminEmbeddedMap);
+        if (satBtn) satBtn.classList.add('active');
+        if (roadBtn) roadBtn.classList.remove('active');
+      } else {
+        adminEmbeddedTileLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+          subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+          maxZoom: 20
+        }).addTo(adminEmbeddedMap);
+        if (roadBtn) roadBtn.classList.add('active');
+        if (satBtn) satBtn.classList.remove('active');
+      }
+    }
+
+    function initAdminEmbeddedGoogleMap(hotspots = [], alerts = []) {
+      const mapDiv = document.getElementById('admin-embedded-gmap');
+      if (!mapDiv) return;
+
+      if (adminEmbeddedMap) {
+        try { adminEmbeddedMap.remove(); } catch (e) {}
+        adminEmbeddedMap = null;
+      }
+
+      try {
+        if (typeof L === 'undefined') {
+          throw new Error("Leaflet not available");
+        }
+
+        adminEmbeddedMap = L.map('admin-embedded-gmap', {
+          center: [23.8103, 90.4125],
+          zoom: 12,
+          zoomControl: true,
+          attributionControl: false
+        });
+
+        // Google Maps Retina Tiles
+        adminEmbeddedTileLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+          subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+          maxZoom: 20,
+          tileSize: 256
+        }).addTo(adminEmbeddedMap);
+
+        // Heatmap layer
+        if (typeof L.heatLayer === 'function' && alerts.length > 0) {
+          const heatPts = alerts.map(a => [
+            a.location ? a.location.lat : 23.8103,
+            a.location ? a.location.lon : 90.4125,
+            a.intensity || 0.85
+          ]);
+          L.heatLayer(heatPts, {
+            radius: 30,
+            blur: 20,
+            maxZoom: 16,
+            gradient: { 0.2: '#00f0ff', 0.5: '#00ff88', 0.7: '#ffb703', 1.0: '#ff0055' }
+          }).addTo(adminEmbeddedMap);
+        }
+
+        // Plot Hotspot circular zones
+        hotspots.forEach(h => {
+          const isUp = h.trend === 'up';
+          const circleColor = isUp ? '#ef4444' : '#10b981';
+          const circle = L.circle([h.lat, h.lon], {
+            radius: h.radius || 600,
+            color: circleColor,
+            fillColor: circleColor,
+            fillOpacity: 0.22,
+            weight: 2
+          }).addTo(adminEmbeddedMap);
+
+          circle.bindPopup(`
+            <div style="font-family: sans-serif; font-size: 11.5px; color: #000; padding: 4px;">
+              <strong>${escapeHtml(h.name)}</strong><br>
+              <span style="color: ${circleColor}; font-weight: 700;">${isUp ? '▲' : '▼'} ${h.crimeDelta} (${h.riskLevel})</span><br>
+              <span style="font-size: 10px; color: #475569;">${h.alertCount} Pings • ${escapeHtml(h.primaryReason)}</span>
+            </div>
+          `);
+        });
+
+        adminEmbeddedTileLayer.on('tileerror', () => {
+          const iframe = document.getElementById('admin-gmaps-iframe');
+          if (iframe) iframe.style.display = 'block';
+        });
+
+        setTimeout(() => {
+          if (adminEmbeddedMap) adminEmbeddedMap.invalidateSize();
+        }, 200);
+      } catch (err) {
+        console.warn("Embedded map init error, falling back to Google Maps iframe:", err);
+        const iframe = document.getElementById('admin-gmaps-iframe');
+        if (iframe) iframe.style.display = 'block';
       }
     }
 
