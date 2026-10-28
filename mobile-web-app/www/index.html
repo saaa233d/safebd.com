@@ -12804,9 +12804,9 @@
             <p style="font-size: 11px; color: #cbd5e1; line-height: 1.45; margin-bottom: 12px;">
               Designed specifically for PC &amp; laptop screens to monitor real-time SOS distress clicks, interactive GIS heatmaps, and spatial AI crime audits.
             </p>
-            <a href="/admin-command-center.html" target="_blank" style="display: block; text-align: center; background: linear-gradient(135deg, #06b6d4 0%, #2563eb 100%); color: #fff; font-size: 12px; font-weight: 800; padding: 10px; border-radius: 10px; text-decoration: none; box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);">
-              <i class="fas fa-up-right-from-square"></i> Open Large Screen PC Portal ↗
-            </a>
+            <div onclick="alert('🖥️ The PC Command Center is currently Turned Off in Standby Mode per Founder/Admin instruction.\n\nAll mobile app and in-app administrative features remain 100% active.')" style="display: block; text-align: center; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.15); color: #94a3b8; font-size: 11.5px; font-weight: 700; padding: 10px; border-radius: 10px; cursor: pointer;">
+              <i class="fas fa-power-off" style="color: #ef4444;"></i> PC Big-Screen Portal (Turned Off)
+            </div>
           </div>
 
           <!-- Live Interactive Google Maps Segment in Admin -->
@@ -13940,6 +13940,9 @@
           userPhone: e.userPhone,
           location: e.location,
           videoUrl: e.videoUrl,
+          gdriveFileId: e.gdriveFileId,
+          gdriveViewUrl: e.gdriveViewUrl,
+          gdriveStatus: e.gdriveStatus,
           fileName: e.fileName,
           fileSizeKb: e.fileSizeKb,
           mimeType: e.mimeType,
@@ -14251,9 +14254,15 @@
                   <div style="font-size: 12px; color: #fff; font-weight: 700;">
                     <i class="fas fa-video" style="color: #ef4444; margin-right: 4px;"></i> Clip #${idx + 1}: <strong>${item.userName}</strong> (${item.userPhone})
                   </div>
-                  <span style="font-size: 10px; color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 2px 6px; border-radius: 6px; font-weight: 700;">
-                    <i class="fas fa-check-double"></i> STORED IN VAULT (MP4)
-                  </span>
+                  ${item.gdriveFileId ? `
+                    <a href="${item.gdriveViewUrl || ('https://drive.google.com/file/d/' + item.gdriveFileId + '/view?usp=sharing')}" target="_blank" style="font-size: 10px; color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); padding: 2px 7px; border-radius: 6px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="Open in Google Drive">
+                      <i class="fab fa-google-drive"></i> IN GOOGLE DRIVE (5TB) ↗
+                    </a>
+                  ` : `
+                    <span style="font-size: 10px; color: #f59e0b; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); padding: 2px 6px; border-radius: 6px; font-weight: 700;">
+                      <i class="fas fa-hard-drive"></i> STORED LOCALLY
+                    </span>
+                  `}
                 </div>
                 <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">
                   Captured: <span style="color:#fff;">${formatEvidenceTime(item.recordedAt)}</span> • Clip: <span style="color:#ef4444;">${item.durationSeconds || 15}s</span> • Size: ${item.fileSizeKb || '--'} KB • Format: <span style="color:#38bdf8;">MP4</span>
@@ -14280,6 +14289,15 @@
                   <button type="button" onclick="saveEmergencyEvidenceById('${item.id}')" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245,158,11,0.5); color: #f59e0b; padding: 7px 11px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
                     <i class="fas fa-download"></i> Save Recording (MP4)
                   </button>
+                  ${item.gdriveFileId ? `
+                    <a href="${item.gdriveViewUrl || ('https://drive.google.com/file/d/' + item.gdriveFileId + '/view?usp=sharing')}" target="_blank" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.5); color: #10b981; padding: 7px 11px; border-radius: 8px; font-size: 11px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+                      <i class="fab fa-google-drive"></i> Drive (5TB) ↗
+                    </a>
+                  ` : `
+                    <button type="button" onclick="syncEvidenceToDriveNow('${item.id}', this)" style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); color: #60a5fa; padding: 7px 11px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                      <i class="fas fa-cloud-arrow-up"></i> Sync to Drive
+                    </button>
+                  `}
                   <button type="button" onclick="openEvidenceStandaloneWindow('${item.id}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-quiet); color: #fff; padding: 7px 9px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;">
                     <i class="fas fa-arrow-up-right-from-square"></i> Open Tab
                   </button>
@@ -14355,9 +14373,15 @@
                 <div style="font-size:10px; color:var(--text-muted);">Captured: <span style="color:#fff;">${formatEvidenceTime(item.recordedAt)}</span> • Clip: <span style="color:#ef4444;">${item.durationSeconds || 15}s</span> • ${item.fileSizeKb || '--'} KB • Format: <span style="color:#38bdf8;">MP4</span></div>
               </div>
             </div>
-            <span class="mod-pending-badge" style="color:#10b981; border-color:rgba(16,185,129,0.5); background:rgba(16,185,129,0.18); font-weight:700;">
-              <i class="fas fa-database"></i> PERMANENT VAULT (MP4)
-            </span>
+            ${item.gdriveFileId ? `
+              <a href="${item.gdriveViewUrl || ('https://drive.google.com/file/d/' + item.gdriveFileId + '/view?usp=sharing')}" target="_blank" style="color:#10b981; border:1.5px solid rgba(16,185,129,0.5); background:rgba(16,185,129,0.18); font-weight:700; padding:4px 10px; border-radius:8px; font-size:11px; text-decoration:none; display:inline-flex; align-items:center; gap:5px;" title="Open in Google Drive">
+                <i class="fab fa-google-drive"></i> IN GOOGLE DRIVE (5TB) ↗
+              </a>
+            ` : `
+              <span class="mod-pending-badge" style="color:#f59e0b; border-color:rgba(245,158,11,0.5); background:rgba(245,158,11,0.18); font-weight:700;">
+                <i class="fas fa-hard-drive"></i> STORED LOCALLY
+              </span>
+            `}
           </div>
 
           <div style="margin: 10px 0; font-size: 12px; line-height: 1.5; background: rgba(0,0,0,0.4); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(239,68,68,0.3);">
@@ -14382,6 +14406,15 @@
             <button type="button" onclick="saveEmergencyEvidenceById('${item.id}')" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245,158,11,0.45); color: #f59e0b; padding: 9px 13px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
               <i class="fas fa-download"></i> Save Recording (MP4)
             </button>
+            ${item.gdriveFileId ? `
+              <a href="${item.gdriveViewUrl || ('https://drive.google.com/file/d/' + item.gdriveFileId + '/view?usp=sharing')}" target="_blank" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.5); color: #10b981; padding: 9px 13px; border-radius: 10px; font-size: 11px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 5px; box-shadow: 0 0 10px rgba(16,185,129,0.25);">
+                <i class="fab fa-google-drive"></i> Drive (5TB) ↗
+              </a>
+            ` : `
+              <button type="button" onclick="syncEvidenceToDriveNow('${item.id}', this)" style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); color: #60a5fa; padding: 9px 13px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <i class="fas fa-cloud-arrow-up"></i> Upload to Drive Now
+              </button>
+            `}
             <button type="button" onclick="openEvidenceStandaloneWindow('${item.id}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-quiet); color: #fff; padding: 9px 12px; border-radius: 10px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px;">
               <i class="fas fa-arrow-up-right-from-square"></i> Open Tab
             </button>
@@ -14398,6 +14431,37 @@
         `;
         fullContainer.appendChild(card);
       });
+    }
+
+    async function syncEvidenceToDriveNow(id, btn) {
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading to Drive...';
+      }
+      const token = localStorage.getItem('safe_bd_token') || '';
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/emergency-evidence/${encodeURIComponent(id)}/sync-drive`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await res.json();
+        if (data && data.success) {
+          alert("✅ SOS Video Successfully Uploaded to Google Drive!\n\nFolder: SAFE_BD_VAULT\nFile ID: " + data.fileId + "\n\nDirect Link:\n" + data.viewUrl);
+          fetchAdminEmergencyEvidence();
+        } else {
+          alert("⚠️ Google Drive Upload: " + (data && data.error ? data.error : "Unable to complete cloud upload."));
+        }
+      } catch (err) {
+        alert("Upload error: " + err.message);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-cloud-arrow-up"></i> Upload to Drive Now';
+        }
+      }
     }
 
     function verifyGoogleDriveVaultConnection() {
