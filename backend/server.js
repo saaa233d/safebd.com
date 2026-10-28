@@ -18,6 +18,25 @@ app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 const path = require('path');
 const fs = require('fs');
+
+// Auto-load local .env if present
+try {
+  const envPath = path.join(__dirname, '.env');
+  if (fs.existsSync(envPath)) {
+    const envLines = fs.readFileSync(envPath, 'utf8').split('\n');
+    envLines.forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith('#')) {
+        const eqIdx = trimmed.indexOf('=');
+        if (eqIdx !== -1) {
+          const k = trimmed.slice(0, eqIdx).trim();
+          const v = trimmed.slice(eqIdx + 1).trim();
+          if (!process.env[k]) process.env[k] = v;
+        }
+      }
+    });
+  }
+} catch (e) {}
 const crypto = require('crypto');
 const policeDirectory = require('./policeDirectoryService');
 const hospitalDirectory = require('./hospitalDirectoryService');
