@@ -41,6 +41,7 @@ const crypto = require('crypto');
 const policeDirectory = require('./policeDirectoryService');
 const hospitalDirectory = require('./hospitalDirectoryService');
 const shurokhaIntelligence = require('./shurokhaIntelligenceEngine');
+const tacticalHeatmapService = require('./tacticalHeatmapService');
 
 // Process Crash Resilience: Prevent uncaught network/socket exceptions from killing the server
 process.on('uncaughtException', (err) => {
@@ -1263,6 +1264,39 @@ app.post('/api/admin/sos-alerts/:id/resolve', (req, res) => {
   return res.status(404).json({ error: "NOT_FOUND", message: "SOS alert not found." });
 });
 
+// 2.5B Ultra-Futuristic AI Tactical Heatmap & Crime Telemetry API
+app.get('/api/admin/heatmap-data', (req, res) => {
+  try {
+    const rawAlerts = db.getAllSosAlerts() || [];
+    const heatmapPayload = tacticalHeatmapService.getTacticalHeatmapData(rawAlerts);
+    return res.json(heatmapPayload);
+  } catch (err) {
+    console.error('[HEATMAP ENGINE ERROR]', err);
+    return res.status(500).json({ success: false, error: "Failed to generate heatmap telemetry." });
+  }
+});
+
+app.post('/api/admin/ai-heatmap-audit', async (req, res) => {
+  try {
+    const rawAlerts = db.getAllSosAlerts() || [];
+    const heatmapPayload = tacticalHeatmapService.getTacticalHeatmapData(rawAlerts);
+    return res.json({
+      success: true,
+      audit: heatmapPayload.aiAudit,
+      stats: heatmapPayload.stats,
+      hotspots: heatmapPayload.hotspots
+    });
+  } catch (err) {
+    console.error('[AI HEATMAP AUDIT ERROR]', err);
+    return res.status(500).json({ success: false, error: "Failed to execute AI crime audit." });
+  }
+});
+
+// Direct route aliases for the Desktop Tactical Command Center Portal
+app.get(['/admin/heatmap', '/admin/command-center', '/admin-command-center'], (req, res) => {
+  res.sendFile(path.join(__dirname, '../mobile-web-app/www/admin-command-center.html'));
+});
+
 /* ==========================================================
    2.6 EMERGENCY BLOOD DONATION LIFELINE (রক্তবন্ধু)
    Peer-to-peer life-saving blood donor search and opt-in registry
@@ -2149,6 +2183,25 @@ app.get('/api/admin/portal-template', requireAdminAuth, (req, res) => {
         </button>
       </div>
 
+      <!-- ULTRA-FUTURISTIC PC / LAPTOP COMMAND CENTER PORTAL BANNER -->
+      <div style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.14) 0%, rgba(99, 102, 241, 0.2) 100%); border: 1.5px solid rgba(6, 182, 212, 0.45); border-radius: 14px; padding: 12px 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.4);">
+        <div style="display: flex; align-items: center; gap: 11px;">
+          <div style="width: 38px; height: 38px; border-radius: 11px; background: rgba(6, 182, 212, 0.2); border: 1px solid rgba(6, 182, 212, 0.6); display: flex; align-items: center; justify-content: center; color: #22d3ee; font-size: 17px; box-shadow: 0 0 15px rgba(6, 182, 212, 0.35);">
+            <i class="fas fa-desktop"></i>
+          </div>
+          <div>
+            <div style="font-size: 13.5px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 6px;">
+              Tactical AI Heatmap HUD
+              <span style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; font-size: 9px; padding: 1px 6px; border-radius: 6px; font-weight: 800;">PC LARGE SCREEN</span>
+            </div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Launch full-screen desktop portal with live SOS telemetry, crime trends &amp; AI audits</div>
+          </div>
+        </div>
+        <a href="/admin-command-center.html" target="_blank" style="background: linear-gradient(135deg, #0891b2 0%, #2563eb 100%); color: #fff; padding: 8px 14px; border-radius: 9px; font-size: 11.5px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 12px rgba(8, 145, 178, 0.4); white-space: nowrap;">
+          <i class="fas fa-up-right-from-square"></i> Open PC Portal
+        </a>
+      </div>
+
       <!-- Quick Metrics Strip -->
       <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 16px;">
         <div style="background: rgba(239, 68, 68, 0.15); border: 1.5px solid #ef4444; border-radius: 12px; padding: 8px 10px; cursor: pointer;" onclick="switchAdminSection('sos')" title="View Live SOS Emergency Locations">
@@ -2196,10 +2249,31 @@ app.get('/api/admin/portal-template', requireAdminAuth, (req, res) => {
         <button type="button" class="auth-toggle-tab" id="admin-tab-journeys" style="padding: 7px 11px; font-size: 11px; border-color: rgba(245, 158, 11, 0.4); color: #f59e0b; white-space: nowrap;" onclick="switchAdminSection('journeys')">
           <i class="fas fa-satellite-dish"></i> Live Routes <span id="admin-overdue-count-badge" style="background: #ef4444; color: #fff; padding: 1px 6px; border-radius: 10px; font-size: 9.5px; font-weight: 700; margin-left: 2px;">0</span>
         </button>
+        <button type="button" class="auth-toggle-tab" id="admin-tab-heatmap" style="padding: 7px 11px; font-size: 11px; border-color: rgba(6, 182, 212, 0.6); color: #22d3ee; font-weight: 700; white-space: nowrap;" onclick="switchAdminSection('heatmap')">
+          <i class="fas fa-fire-flame-curved"></i> AI Heatmap &amp; HUD
+        </button>
       </div>
 
       <!-- URGENT LIVE SOS EMERGENCY BANNER (Pops up automatically across Admin Portal when distress signal is active) -->
       <div id="admin-urgent-sos-container" style="display: none; margin-bottom: 16px;"></div>
+
+      <!-- SECTION H: AI TACTICAL CRIME HEATMAP & REAL-TIME AUDIT -->
+      <div id="admin-section-heatmap" style="display: none;">
+        <div class="module-header" style="margin-bottom: 12px;">
+          <span style="color: #22d3ee; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-fire-flame-curved"></i> AI Tactical Crime Heatmap &amp; Real-Time Telemetry
+          </span>
+          <a href="/admin-command-center.html" target="_blank" style="font-size: 11px; background: rgba(6, 182, 212, 0.2); border: 1.5px solid #22d3ee; color: #fff; padding: 5px 12px; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 6px; font-weight: 800; box-shadow: 0 0 15px rgba(6, 182, 212, 0.35);">
+            <i class="fas fa-desktop"></i> Launch Large-Screen PC Portal ↗
+          </a>
+        </div>
+        <div id="admin-heatmap-overview-container">
+          <div style="text-align: center; padding: 30px 20px; color: var(--text-muted); font-size: 12px;">
+            <i class="fas fa-circle-notch fa-spin" style="font-size: 24px; color: #22d3ee; display: block; margin-bottom: 8px;"></i>
+            Loading AI Spatial Crime Heatmap &amp; Danger Zones...
+          </div>
+        </div>
+      </div>
 
       <!-- SECTION S: LIVE SOS DISTRESS SIGNALS & EXACT USER COORDINATES -->
       <div id="admin-section-sos" style="display: none;">
