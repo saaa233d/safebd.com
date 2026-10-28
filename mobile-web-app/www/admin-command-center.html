@@ -620,17 +620,31 @@
     #tactical-map {
       height: 100%;
       width: 100%;
-      background: #060a12;
+      background: #e5e3df;
     }
 
     /* Custom Leaflet Map Styling */
     .leaflet-container {
-      background: #060a12 !important;
+      background: #e5e3df !important;
       font-family: var(--font-body) !important;
     }
 
     .leaflet-tile {
-      filter: brightness(80%) contrast(115%) saturate(85%);
+      filter: none;
+    }
+
+    #tactical-map.google-dark-mode {
+      background: #060a12;
+    }
+    #tactical-map.google-dark-mode .leaflet-container {
+      background: #060a12 !important;
+    }
+    #tactical-map.google-dark-mode .leaflet-tile {
+      filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+    }
+
+    #tactical-map.google-satellite-mode .leaflet-tile {
+      filter: brightness(95%) contrast(110%);
     }
 
     .leaflet-bar {
@@ -1271,7 +1285,19 @@
     </div>
 
     <div class="map-controls-group">
-      <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-dim);">MAP MODE:</span>
+      <span style="font-family: var(--font-mono); font-size: 10px; color: var(--cyan-neon);"><i class="fab fa-google"></i> GOOGLE MAPS:</span>
+      <button class="map-toggle-btn active" id="btn-layer-google-roadmap" onclick="setGoogleMapType('roadmap')" title="Google Maps Standard Roadmap">
+        <i class="fas fa-map"></i> Roadmap
+      </button>
+      <button class="map-toggle-btn" id="btn-layer-google-satellite" onclick="setGoogleMapType('satellite')" title="Google Maps Satellite Hybrid">
+        <i class="fas fa-satellite"></i> Satellite
+      </button>
+      <button class="map-toggle-btn" id="btn-layer-google-dark" onclick="setGoogleMapType('dark')" title="Google Maps Luxury Night HUD">
+        <i class="fas fa-moon"></i> Dark HUD
+      </button>
+      <button class="map-toggle-btn" id="btn-toggle-direct-gmaps" onclick="toggleDirectGoogleMapsEmbed()" title="Direct Google Maps Iframe">
+        <i class="fab fa-google"></i> Live Embed
+      </button>
       <button class="map-toggle-btn active" id="btn-mode-heat" onclick="setMapMode('heat')">
         <i class="fas fa-fire"></i> Heatmap
       </button>
@@ -1279,10 +1305,7 @@
         <i class="fas fa-location-dot"></i> Markers
       </button>
       <button class="map-toggle-btn" onclick="flyToCity('dhaka')">
-        <i class="fas fa-crosshairs"></i> Dhaka Central
-      </button>
-      <button class="map-toggle-btn" onclick="flyToCity('chittagong')">
-        <i class="fas fa-crosshairs"></i> Chittagong
+        <i class="fas fa-crosshairs"></i> Dhaka
       </button>
     </div>
   </div>
@@ -1318,6 +1341,16 @@
     <section class="panel-map">
       <div id="tactical-map"></div>
 
+      <!-- Direct Official Google Maps Live Embed Frame (Togglable) -->
+      <iframe 
+        id="direct-gmaps-iframe" 
+        class="google-map-iframe" 
+        loading="lazy" 
+        allowfullscreen 
+        style="position: absolute; inset: 0; width: 100%; height: 100%; border: none; z-index: 450; display: none;" 
+        src="https://maps.google.com/maps?q=Dhaka%2C%20Bangladesh&t=&z=13&ie=UTF8&iwloc=&output=embed">
+      </iframe>
+
       <!-- Telemetry Reticle Overlay -->
       <div class="map-overlay-reticle">
         <div class="map-telemetry-row">
@@ -1327,7 +1360,7 @@
           <i class="fas fa-layer-group"></i> SATELLITE ZOOM: <span id="reticle-zoom">12.5x</span>
         </div>
         <div class="map-telemetry-row">
-          <i class="fas fa-satellite"></i> GIS ENGINE: <span>CARTO DARK MATTER + LEAFLET.HEAT</span>
+          <i class="fab fa-google" style="color: #38bdf8;"></i> GIS ENGINE: <span id="reticle-engine-label">GOOGLE MAPS RETINA + HEATMAP</span>
         </div>
       </div>
 
@@ -1586,7 +1619,110 @@
       }
     }
 
-    // Initialize Leaflet Tactical Map
+    let currentMapTileLayer = null;
+    let isDirectGmapsEmbedActive = false;
+
+    // High-Precision Google Maps Tile Engine & Fallbacks
+    const GOOGLE_TILE_SERVERS = {
+      roadmap: {
+        url: 'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        maxZoom: 20
+      },
+      satellite: {
+        url: 'https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        maxZoom: 20
+      },
+      dark: {
+        url: 'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        maxZoom: 20
+      },
+      osm: {
+        url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        subdomains: ['a', 'b', 'c'],
+        maxZoom: 19
+      }
+    };
+
+    function setGoogleMapType(type) {
+      if (!map) return;
+      if (currentMapTileLayer) {
+        map.removeLayer(currentMapTileLayer);
+      }
+
+      const mapContainer = document.getElementById('tactical-map');
+      if (type === 'dark') {
+        mapContainer.classList.add('google-dark-mode');
+        mapContainer.classList.remove('google-satellite-mode');
+        const cfg = GOOGLE_TILE_SERVERS.dark;
+        currentMapTileLayer = L.tileLayer(cfg.url, {
+          subdomains: cfg.subdomains,
+          maxZoom: cfg.maxZoom,
+          tileSize: 256
+        }).addTo(map);
+        const engineLabel = document.getElementById('reticle-engine-label');
+        if (engineLabel) engineLabel.innerText = 'GOOGLE MAPS (DARK HUD)';
+      } else if (type === 'satellite') {
+        mapContainer.classList.remove('google-dark-mode');
+        mapContainer.classList.add('google-satellite-mode');
+        const cfg = GOOGLE_TILE_SERVERS.satellite;
+        currentMapTileLayer = L.tileLayer(cfg.url, {
+          subdomains: cfg.subdomains,
+          maxZoom: cfg.maxZoom,
+          tileSize: 256
+        }).addTo(map);
+        const engineLabel = document.getElementById('reticle-engine-label');
+        if (engineLabel) engineLabel.innerText = 'GOOGLE MAPS (SATELLITE HYBRID)';
+      } else {
+        // Standard Google Maps Roadmap
+        mapContainer.classList.remove('google-dark-mode');
+        mapContainer.classList.remove('google-satellite-mode');
+        const cfg = GOOGLE_TILE_SERVERS.roadmap;
+        currentMapTileLayer = L.tileLayer(cfg.url, {
+          subdomains: cfg.subdomains,
+          maxZoom: cfg.maxZoom,
+          tileSize: 256
+        }).addTo(map);
+        const engineLabel = document.getElementById('reticle-engine-label');
+        if (engineLabel) engineLabel.innerText = 'GOOGLE MAPS (ROADMAP)';
+      }
+
+      // If Google tiles ever fail in strict environments, auto-switch to OSM fallback
+      currentMapTileLayer.on('tileerror', function() {
+        if (!map._hasOsmFallback) {
+          map._hasOsmFallback = true;
+          console.warn("Google tile fallback active, loading OpenStreetMap layer.");
+          L.tileLayer(GOOGLE_TILE_SERVERS.osm.url, {
+            subdomains: GOOGLE_TILE_SERVERS.osm.subdomains,
+            maxZoom: 19
+          }).addTo(map);
+        }
+      });
+
+      // Update button active state
+      ['roadmap', 'satellite', 'dark'].forEach(t => {
+        const btn = document.getElementById(`btn-layer-google-${t}`);
+        if (btn) btn.classList.toggle('active', t === type);
+      });
+      playRadarChirp(900, 0.08);
+    }
+
+    function toggleDirectGoogleMapsEmbed() {
+      isDirectGmapsEmbedActive = !isDirectGmapsEmbedActive;
+      const iframe = document.getElementById('direct-gmaps-iframe');
+      const btn = document.getElementById('btn-toggle-direct-gmaps');
+      if (iframe) {
+        iframe.style.display = isDirectGmapsEmbedActive ? 'block' : 'none';
+      }
+      if (btn) {
+        btn.classList.toggle('active', isDirectGmapsEmbedActive);
+      }
+      playRadarChirp(1000, 0.1);
+    }
+
+    // Initialize Leaflet Tactical Map with Google Maps Engine
     function initTacticalMap() {
       if (map) return;
 
@@ -1594,16 +1730,13 @@
         center: [23.8103, 90.4125], // Dhaka Central
         zoom: 12,
         minZoom: 7,
-        maxZoom: 18,
+        maxZoom: 19,
         zoomControl: true,
         attributionControl: false
       });
 
-      // CartoDB Dark Matter luxury tactical base tiles
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd',
-        maxZoom: 19
-      }).addTo(map);
+      // Default to Google Maps Roadmap
+      setGoogleMapType('roadmap');
 
       // Layer groups for markers
       markersLayerGroup = L.layerGroup().addTo(map);
@@ -1615,6 +1748,8 @@
       map.on('zoomend', () => {
         document.getElementById('reticle-zoom').innerText = `${map.getZoom()}x`;
       });
+
+      setTimeout(() => { map.invalidateSize(); }, 300);
     }
 
     function getAuthHeaders(extra = {}) {
@@ -1933,12 +2068,22 @@
     function focusMapOnAlert(lat, lon, alertId) {
       if (!map) return;
       map.flyTo([lat, lon], 16, { animate: true, duration: 1.2 });
+      
+      const iframe = document.getElementById('direct-gmaps-iframe');
+      if (iframe) {
+        iframe.src = `https://maps.google.com/maps?q=${lat},${lon}&t=&z=16&ie=UTF8&iwloc=B&output=embed`;
+      }
       playRadarChirp(1174, 0.1);
     }
 
     function focusMapOnZone(lat, lon, zoom = 15) {
       if (!map) return;
       map.flyTo([lat, lon], zoom, { animate: true, duration: 1.2 });
+      
+      const iframe = document.getElementById('direct-gmaps-iframe');
+      if (iframe) {
+        iframe.src = `https://maps.google.com/maps?q=${lat},${lon}&t=&z=${zoom}&ie=UTF8&iwloc=B&output=embed`;
+      }
       playRadarChirp(987, 0.1);
     }
 
