@@ -292,21 +292,21 @@ async function processShurokhaChat(userMessage, history = []) {
   if (isOffTopicQuery(qLower)) {
     if (isBangla) {
       return {
-        text: `আমি **shurokhaAI**, SAFE BD-এর নাগরিক নিরাপত্তা ও জরুরি স্বাস্থ্য সেবা এআই। 🛡️\n\nআমি আনন্দের সাথে আপনার সাথে কথা বলতে চাই, তবে আমি শুধুমাত্র **জরুরি নাগরিক সুরক্ষা, ডাক্তার ও প্রাথমিক চিকিৎসা পরামর্শ (জ্বর, দুর্ঘটনা), নিকটবর্তী হাসপাতাল ও অ্যাম্বুলেন্স তালিকা, এবং বাংলাদেশের যেকোনো থানার পুলিশের সাথে তাৎক্ষণিক যোগাযোগ** করিয়ে দেওয়ার জন্য বিশেষভাবে প্রস্তুত।\n\nআপনার কি কোনো স্বাস্থ্য পরামর্শ, নিকটবর্তী হাসপাতাল, বা কোনো এলাকার থানার ওসির জরুরি নাম্বার প্রয়োজন? অনুগ্রহ করে লিখুন!`,
+        text: `আমি **Shurokkha AI**, SAFE BD-এর নাগরিক নিরাপত্তা ও জরুরি স্বাস্থ্য সেবা এআই। 🛡️\n\nআমি আনন্দের সাথে আপনার সাথে কথা বলতে চাই, তবে আমি শুধুমাত্র **জরুরি নাগরিক সুরক্ষা, ডাক্তার ও প্রাথমিক চিকিৎসা পরামর্শ (জ্বর, দুর্ঘটনা), নিকটবর্তী হাসপাতাল ও অ্যাম্বুলেন্স তালিকা, এবং বাংলাদেশের যেকোনো থানার পুলিশের সাথে তাৎক্ষণিক যোগাযোগ** করিয়ে দেওয়ার জন্য বিশেষভাবে প্রস্তুত।\n\nআপনার কি কোনো স্বাস্থ্য পরামর্শ, নিকটবর্তী হাসপাতাল, বা কোনো এলাকার থানার ওসির জরুরি নাম্বার প্রয়োজন? অনুগ্রহ করে লিখুন!`,
         sources: [
           { title: "জাতীয় জরুরি সেবা ৯৯৯", url: "tel:999" },
           { title: "স্বাস্থ্য বাতায়ন ১৬২৬৩", url: "tel:16263" }
         ],
-        poweredBy: "shurokhaAI Safety Guardrail"
+        poweredBy: "Shurokkha AI Safety Guardrail"
       };
     } else {
       return {
-        text: `Hello! I am **shurokhaAI**, SAFE BD's dedicated 24/7 Citizen Safety & Emergency Health Companion. 🛡️\n\nWhile I would love to chat, I am exclusively dedicated to keeping you safe and healthy in Bangladesh — providing **immediate medical first-aid guidance (fevers, accidents, acute illnesses), finding nearby hospitals & 24/7 ambulances, and connecting you with the exact Police Thana & Officer-in-Charge (OC)** across all 64 districts.\n\nDo you need medical advice, a list of nearby hospitals, or police station contacts for your area? Please let me know how I can help!`,
+        text: `Hello! I am **Shurokkha AI**, SAFE BD's dedicated 24/7 Citizen Safety & Emergency Health Companion. 🛡️\n\nWhile I would love to chat, I am exclusively dedicated to keeping you safe and healthy in Bangladesh — providing **immediate medical first-aid guidance (fevers, accidents, acute illnesses), finding nearby hospitals & 24/7 ambulances, and connecting you with the exact Police Thana & Officer-in-Charge (OC)** across all 64 districts.\n\nDo you need medical advice, a list of nearby hospitals, or police station contacts for your area? Please let me know how I can help!`,
         sources: [
           { title: "National Emergency Helpline 999", url: "tel:999" },
           { title: "24/7 Doctor Consultation 16263", url: "tel:16263" }
         ],
-        poweredBy: "shurokhaAI Safety Guardrail"
+        poweredBy: "Shurokkha AI Safety Guardrail"
       };
     }
   }
