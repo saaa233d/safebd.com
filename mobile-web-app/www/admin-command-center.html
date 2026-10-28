@@ -1617,10 +1617,20 @@
       });
     }
 
+    function getAuthHeaders(extra = {}) {
+      const token = localStorage.getItem('safe_bd_token') || '';
+      const h = { ...extra };
+      if (token) h['Authorization'] = `Bearer ${token}`;
+      return h;
+    }
+
     // Fetch Heatmap & Telemetry Data
     async function fetchTelemetryData(isManual = false) {
       try {
-        const res = await fetch('/api/admin/heatmap-data');
+        let res = await fetch('/api/tactical/heatmap-data', { headers: getAuthHeaders() });
+        if (!res.ok) {
+          res = await fetch('/api/admin/heatmap-data', { headers: getAuthHeaders() });
+        }
         const data = await res.json();
         if (!data || !data.success) return;
 
@@ -1971,7 +1981,7 @@
       try {
         const res = await fetch(`/api/admin/sos-alerts/${alertId}/resolve`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({ adminName: 'Chief Administrator' })
         });
         const data = await res.json();
@@ -1986,7 +1996,10 @@
 
     async function runAiReAudit() {
       try {
-        const res = await fetch('/api/admin/ai-heatmap-audit', { method: 'POST' });
+        let res = await fetch('/api/tactical/ai-heatmap-audit', { method: 'POST', headers: getAuthHeaders() });
+        if (!res.ok) {
+          res = await fetch('/api/admin/ai-heatmap-audit', { method: 'POST', headers: getAuthHeaders() });
+        }
         const data = await res.json();
         if (data && data.success) {
           playRadarChirp(1200, 0.18);
