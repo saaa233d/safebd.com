@@ -3254,36 +3254,30 @@
     }
 
     /* ========================================================
-       shurokhaAI — Ultra-Luxury Apple VisionOS & Apple Intelligence Theme
+       Shurokkha AI — Ultra-Luxury Apple VisionOS & Golden Shield Theme
     ======================================================== */
     .shurokha-fab {
-      position: fixed;
-      bottom: 78px;
+      position: absolute;
+      bottom: 80px;
       left: 16px;
-      z-index: 25;
+      z-index: 100;
       display: flex;
       align-items: center;
       gap: 10px;
-      background: linear-gradient(135deg, rgba(28, 30, 44, 0.84) 0%, rgba(14, 16, 26, 0.94) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-top: 1.5px solid rgba(255, 255, 255, 0.45);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.55),
-                  0 0 0 1px rgba(255, 255, 255, 0.06) inset,
-                  0 4px 22px rgba(120, 119, 198, 0.22);
+      background: linear-gradient(135deg, rgba(16, 24, 42, 0.94) 0%, rgba(8, 12, 24, 0.98) 100%);
+      border: 1px solid rgba(212, 175, 55, 0.38);
+      border-top: 1.5px solid rgba(212, 175, 55, 0.75);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.75),
+                  0 0 22px rgba(212, 175, 55, 0.22),
+                  0 0 0 1px rgba(255, 255, 255, 0.08) inset;
       backdrop-filter: blur(28px) saturate(220%) brightness(1.08);
       -webkit-backdrop-filter: blur(28px) saturate(220%) brightness(1.08);
-      padding: 7px 15px 7px 8px;
+      padding: 6px 14px 6px 7px;
       border-radius: 999px;
       cursor: pointer;
       transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
       user-select: none;
-    }
-    @media (min-width: 600px) {
-      .shurokha-fab {
-        left: calc(50% - 220px + 16px);
-        bottom: calc(50% - 430px + 78px);
-      }
     }
     /* Strictly suppress shurokhaAI FAB whenever any modal, sheet, or overlay is open */
     body:has(.contact-modal-backdrop.open) .shurokha-fab,
@@ -4992,7 +4986,7 @@
     <!-- Floating Shurokkha AI Assistant Trigger (Universal Cross-Screen Assistant) -->
     <div id="shurokha-ai-trigger" class="shurokha-fab" onclick="openShurokhaChat()" title="Talk to Shurokkha AI (Live AI & Google Search)">
       <div class="shurokha-fab-icon-wrap">
-        <img src="shurokkha-ai-logo.jpg" alt="Shurokkha AI Logo">
+        <img src="shurokkha-ai-emblem.jpg?v=2" alt="Shurokkha AI Logo">
         <span class="shurokha-fab-pulse"></span>
       </div>
       <div class="shurokha-fab-label">
@@ -5671,7 +5665,7 @@
         <div class="shurokha-chat-header">
           <div class="shurokha-header-info">
             <div class="shurokha-avatar">
-              <img src="shurokkha-ai-logo.jpg" alt="Shurokkha AI Logo">
+              <img src="shurokkha-ai-emblem.jpg?v=2" alt="Shurokkha AI Logo">
               <span class="shurokha-avatar-status"></span>
             </div>
             <div>
@@ -5716,8 +5710,16 @@
 
         <!-- Messages Stream -->
         <div class="shurokha-messages" id="shurokha-messages-container">
+          <!-- Official Shurokkha AI Brand Hero Card -->
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 18px 14px 12px; margin-bottom: 14px; background: radial-gradient(circle at 50% 25%, rgba(212, 175, 55, 0.16) 0%, rgba(10, 18, 36, 0.7) 65%, transparent 100%); border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.32); box-shadow: 0 10px 30px rgba(0,0,0,0.45); text-align: center;">
+            <img src="shurokkha-ai-logo.jpg?v=2" alt="Shurokkha AI Logo" style="width: 130px; height: 130px; border-radius: 20px; object-fit: cover; box-shadow: 0 8px 24px rgba(0,0,0,0.7), 0 0 20px rgba(212, 175, 55, 0.4); border: 2px solid rgba(212, 175, 55, 0.55); display: block; margin: 0 auto 10px auto;">
+            <div style="font-size: 17px; font-weight: 800; color: #ffffff; letter-spacing: -0.2px;">Shurokkha AI</div>
+            <div style="font-size: 10px; font-weight: 800; color: #d4af37; letter-spacing: 1.8px; text-transform: uppercase; margin-top: 3px;">SAFETY PARTNER</div>
+            <div style="font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 5px;">24/7 Dedicated Citizen Safety &amp; Emergency Health Companion</div>
+          </div>
+
           <div class="shurokha-msg-row ai">
-            <div class="shurokha-msg-avatar"><img src="shurokkha-ai-logo.jpg" alt="Shurokkha AI Logo"></div>
+            <div class="shurokha-msg-avatar"><img src="shurokkha-ai-emblem.jpg?v=2" alt="Shurokkha AI Logo"></div>
             <div class="shurokha-msg-bubble">
               <div class="shurokha-msg-text">
                 Hello! I am <strong>Shurokkha AI</strong>, your 24/7 dedicated Citizen Safety & Emergency Health Companion from SAFE BD. 🛡️<br><br>
@@ -5737,7 +5739,7 @@
 
         <!-- Typing Indicator -->
         <div class="shurokha-typing-indicator" id="shurokha-typing" style="display: none;">
-          <div class="shurokha-msg-avatar"><img src="shurokkha-ai-logo.jpg" alt="Shurokkha AI Logo"></div>
+          <div class="shurokha-msg-avatar"><img src="shurokkha-ai-emblem.jpg?v=2" alt="Shurokkha AI Logo"></div>
           <div class="shurokha-typing-dots">
             <span></span><span></span><span></span>
           </div>
@@ -15160,8 +15162,14 @@
         const container = document.getElementById('shurokha-messages-container');
         if (container) {
           container.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 18px 14px 12px; margin-bottom: 14px; background: radial-gradient(circle at 50% 25%, rgba(212, 175, 55, 0.16) 0%, rgba(10, 18, 36, 0.7) 65%, transparent 100%); border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.32); box-shadow: 0 10px 30px rgba(0,0,0,0.45); text-align: center;">
+              <img src="shurokkha-ai-logo.jpg?v=2" alt="Shurokkha AI Logo" style="width: 130px; height: 130px; border-radius: 20px; object-fit: cover; box-shadow: 0 8px 24px rgba(0,0,0,0.7), 0 0 20px rgba(212, 175, 55, 0.4); border: 2px solid rgba(212, 175, 55, 0.55); display: block; margin: 0 auto 10px auto;">
+              <div style="font-size: 17px; font-weight: 800; color: #ffffff; letter-spacing: -0.2px;">Shurokkha AI</div>
+              <div style="font-size: 10px; font-weight: 800; color: #d4af37; letter-spacing: 1.8px; text-transform: uppercase; margin-top: 3px;">SAFETY PARTNER</div>
+              <div style="font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 5px;">24/7 Dedicated Citizen Safety &amp; Emergency Health Companion</div>
+            </div>
             <div class="shurokha-msg-row ai">
-              <div class="shurokha-msg-avatar"><img src="shurokkha-ai-logo.jpg" alt="Shurokkha AI Logo"></div>
+              <div class="shurokha-msg-avatar"><img src="shurokkha-ai-emblem.jpg?v=2" alt="Shurokkha AI Logo"></div>
               <div class="shurokha-msg-bubble">
                 <div class="shurokha-msg-text">
                   Hello! I am <strong>Shurokkha AI</strong>, your 24/7 dedicated Citizen Safety & Emergency Health Companion from SAFE BD. 🛡️<br><br>
@@ -15218,7 +15226,7 @@
       const row = document.createElement('div');
       row.className = `shurokha-msg-row ${isUser ? 'user' : 'ai'}`;
       row.innerHTML = `
-        ${!isUser ? `<div class="shurokha-msg-avatar"><img src="shurokkha-ai-logo.jpg" alt="Shurokkha AI Logo"></div>` : ''}
+        ${!isUser ? `<div class="shurokha-msg-avatar"><img src="shurokkha-ai-emblem.jpg?v=2" alt="Shurokkha AI Logo"></div>` : ''}
         <div class="shurokha-msg-bubble">
           <div class="shurokha-msg-text">${formatShurokhaMarkdown(text)}</div>
           ${sourcesHtml}
