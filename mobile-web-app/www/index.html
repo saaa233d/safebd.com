@@ -7691,10 +7691,10 @@
       });
     }
 
-    // Scalable Live Public Feed Fetcher (Only Admin-Approved Posts, supports millions)
+    // Scalable Live Public Feed Fetcher (Facebook-style permanent union merge: never loses posts)
     function fetchLiveFeedPosts(page = 1, append = false) {
       const catParam = (activeFeedFilter === 'all' || activeFeedFilter === 'community') ? 'all' : activeFeedFilter;
-      const endpoint = `/api/feed/posts?page=${page}&limit=20&category=${encodeURIComponent(catParam)}`;
+      const endpoint = `/api/feed/posts?page=${page}&limit=50&category=${encodeURIComponent(catParam)}`;
 
       apiFetch(endpoint)
         .then(r => {
@@ -7706,12 +7706,27 @@
           const serverPosts = (data && data.posts && Array.isArray(data.posts)) ? data.posts : [];
           
           if (serverPosts.length > 0) {
-            if (append) {
-              const existingIds = new Set(liveApprovedPosts.map(p => p.id));
-              serverPosts.forEach(p => { if (!existingIds.has(p.id)) liveApprovedPosts.push(p); });
-            } else {
-              liveApprovedPosts = serverPosts;
+            // Facebook-style resilient post preservation
+            const postMap = new Map();
+            // 1. Seed posts are preserved as permanent foundation
+            if (typeof INITIAL_OFFICIAL_POSTS !== 'undefined' && Array.isArray(INITIAL_OFFICIAL_POSTS)) {
+              INITIAL_OFFICIAL_POSTS.forEach(p => { if (p && p.id) postMap.set(p.id, p); });
             }
+            // 2. Keep all local approved/published posts
+            (liveApprovedPosts || []).forEach(p => { if (p && p.id) postMap.set(p.id, p); });
+            // 3. Merge in server posts (updating newer likes, comments, verified badges)
+            serverPosts.forEach(p => {
+              if (p && p.id) {
+                const local = postMap.get(p.id);
+                if (local) {
+                  postMap.set(p.id, { ...local, ...p });
+                } else {
+                  postMap.set(p.id, p);
+                }
+              }
+            });
+
+            liveApprovedPosts = Array.from(postMap.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
             feedPage = page;
             hasMoreFeedPosts = !!(data && data.hasMore);
@@ -7719,11 +7734,7 @@
             saveFeedToLocalStorage();
             renderCommunityPosts();
           } else if (liveApprovedPosts.length === 0) {
-            if (typeof INITIAL_OFFICIAL_POSTS !== 'undefined') {
-              liveApprovedPosts = [...INITIAL_OFFICIAL_POSTS];
-              saveFeedToLocalStorage();
-            }
-            renderCommunityPosts();
+            loadFeedFromLocalStorage();
           } else {
             renderCommunityPosts();
           }
@@ -7731,10 +7742,11 @@
         .catch(err => {
           isLoadingFeed = false;
           console.warn("Live feed fetch error, rendering cached:", err);
-          if (liveApprovedPosts.length === 0 && typeof INITIAL_OFFICIAL_POSTS !== 'undefined') {
-            liveApprovedPosts = [...INITIAL_OFFICIAL_POSTS];
+          if (liveApprovedPosts.length === 0) {
+            loadFeedFromLocalStorage();
+          } else {
+            renderCommunityPosts();
           }
-          renderCommunityPosts();
         });
     }
 
@@ -8550,13 +8562,27 @@
     function loadFeedFromLocalStorage() {
       try {
         const raw = localStorage.getItem('safe_bd_community_feed');
+        const postMap = new Map();
+        // 1. Preload verified initial official posts so feed is never blank
+        if (typeof INITIAL_OFFICIAL_POSTS !== 'undefined' && Array.isArray(INITIAL_OFFICIAL_POSTS)) {
+          INITIAL_OFFICIAL_POSTS.forEach(p => { if (p && p.id) postMap.set(p.id, p); });
+        }
+        // 2. Merge local community feed cache
         if (raw) {
           const parsed = JSON.parse(raw);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            liveApprovedPosts = parsed;
-            renderCommunityPosts();
-            return;
+            parsed.forEach(p => {
+              if (p && p.id) {
+                const existing = postMap.get(p.id);
+                postMap.set(p.id, existing ? { ...existing, ...p } : p);
+              }
+            });
           }
+        }
+        if (postMap.size > 0) {
+          liveApprovedPosts = Array.from(postMap.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+          renderCommunityPosts();
+          return;
         }
       } catch (e) {}
 
