@@ -44,7 +44,8 @@ const BLOOD_DONORS_FILE = path.join(DATA_DIR, 'safe_bd_blood_donors.json');
 
 // Global Cloud Infrastructure Configuration (Production Cloud PostgreSQL & 5TB Drive Vault)
 const DEFAULT_GDRIVE_URL = process.env.GDRIVE_VAULT_URL || 'https://script.google.com/macros/s/AKfycby3O-1dfJeGE5DJ8dDrhBHtkdgnk-IKSXFRtUswiTblka1M3GoC8uxGHfOM2kvyOVmq/exec';
-let vaultRuntimeSecret = process.env.GDRIVE_SECRET_KEY || 'SAFEBD_PRIVATE_VAULT_2026';
+const DEFAULT_GDRIVE_KEY = process.env.GDRIVE_SECRET_KEY || 'SAFEBD_PRIVATE_VAULT_2026';
+let vaultRuntimeSecret = DEFAULT_GDRIVE_KEY;
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://sdpewbutexztzspagjqu.supabase.co';
 const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY || Buffer.from('c2Jfc2VjcmV0X21aRldPalRvTi04Uy1fZG5WZVVGUWdfV1VsTEdVSGs=', 'base64').toString('utf8');
 const SUPABASE_PUB_KEY = process.env.SUPABASE_PUB_KEY || Buffer.from('c2JfcHVibGlzaGFibGVfU2c5X2RWeDZMUGYzN1ZUZFdiNEZrZ19lVkVZNERidQ==', 'base64').toString('utf8');
@@ -1228,6 +1229,66 @@ function markEmergencyEvidenceReviewed(id, notes = "") {
   return null;
 }
 
+async function syncEmergencyEvidenceToDrive(id) {
+  if (!dbState.emergencyEvidence) return { success: false, error: "Evidence list empty" };
+  const item = dbState.emergencyEvidence.find(e => e.id === id);
+  if (!item) return { success: false, error: "Evidence record not found" };
+
+  const fileName = item.fileName;
+  const EVIDENCE_DIR = process.env.SAFEBD_DATA_DIR ? path.join(path.resolve(process.env.SAFEBD_DATA_DIR), 'evidence') : path.join(__dirname, 'data', 'evidence');
+  const filePath = path.join(EVIDENCE_DIR, fileName);
+
+  if (!fs.existsSync(filePath)) {
+    return { success: false, error: "Physical video file not found on server disk" };
+  }
+
+  const base64 = fs.readFileSync(filePath).toString('base64');
+  const uploadRes = await uploadToGoogleDriveVault({
+    fileName: fileName,
+    mimeType: item.mimeType || 'video/mp4',
+    base64: base64
+  });
+
+  if (uploadRes && uploadRes.success && uploadRes.fileId) {
+    item.gdriveFileId = uploadRes.fileId;
+    item.gdriveViewUrl = uploadRes.viewUrl || `https://drive.google.com/file/d/${uploadRes.fileId}/view?usp=sharing`;
+    item.gdriveUploadedAt = new Date().toISOString();
+    item.status = "STORED_IN_GOOGLE_DRIVE";
+
+    try {
+      const evPayload = JSON.stringify(dbState.emergencyEvidence, null, 2);
+      fs.writeFileSync(EVIDENCE_FILE, evPayload, 'utf8');
+    } catch (e) {}
+    persistToDisk();
+
+    return {
+      success: true,
+      fileId: uploadRes.fileId,
+      viewUrl: item.gdriveViewUrl,
+      fileName: fileName
+    };
+  }
+
+  return { success: false, error: uploadRes?.error || "Google Drive upload failed" };
+}
+
+function updateEmergencyEvidenceGdrive(id, fileId, viewUrl) {
+  if (!dbState.emergencyEvidence) return null;
+  const item = dbState.emergencyEvidence.find(e => e.id === id);
+  if (item) {
+    item.gdriveFileId = fileId;
+    item.gdriveViewUrl = viewUrl || `https://drive.google.com/file/d/${fileId}/view?usp=sharing`;
+    item.gdriveUploadedAt = new Date().toISOString();
+    try {
+      const evPayload = JSON.stringify(dbState.emergencyEvidence, null, 2);
+      fs.writeFileSync(EVIDENCE_FILE, evPayload, 'utf8');
+    } catch (e) {}
+    persistToDisk();
+    return item;
+  }
+  return null;
+}
+
 /* =========================================================================
    LIVE SOS EMERGENCY INCIDENT DISPATCH ENGINE
    Captures exact GPS coordinates, timestamps, and citizen profile metadata
@@ -2210,7 +2271,7 @@ function setCloudVaultConfig({ scriptUrl, secretKey, enabled }) {
 async function uploadToGoogleDriveVault({ fileName, mimeType = 'video/mp4', base64, overwrite = false }) {
   const vault = dbState.cloudVault || {};
   const scriptUrl = vault.scriptUrl || DEFAULT_GDRIVE_URL;
-  const secretKey = vault.secretKey || DEFAULT_GDRIVE_KEY;
+  const secretKey = vault.secretKey || vaultRuntimeSecret || DEFAULT_GDRIVE_KEY;
   if (!scriptUrl || !base64) {
     return { success: false, skipped: true };
   }
@@ -2248,12 +2309,14 @@ async function uploadToGoogleDriveVault({ fileName, mimeType = 'video/mp4', base
 
     if (data && data.success) {
       dbState.cloudVault.lastSyncedAt = new Date().toISOString();
-      console.log(`[☁️ 5TB GOOGLE DRIVE VAULT] Uploaded ${fileName} -> File ID: ${data.fileId}`);
+      const fileId = data.fileId;
+      const viewUrl = data.viewUrl || (fileId ? `https://drive.google.com/file/d/${fileId}/view?usp=sharing` : null);
+      console.log(`[☁️ 5TB GOOGLE DRIVE VAULT] Uploaded ${fileName} -> File ID: ${fileId} (${viewUrl})`);
       return {
         success: true,
-        fileId: data.fileId,
+        fileId: fileId,
         fileName: data.fileName || fileName,
-        viewUrl: data.viewUrl || null
+        viewUrl: viewUrl
       };
     }
     return { success: false, error: (data && data.error) || 'Upload failed' };
@@ -2266,7 +2329,7 @@ async function uploadToGoogleDriveVault({ fileName, mimeType = 'video/mp4', base
 async function fetchFromGoogleDriveVault({ fileId, fileName }) {
   const vault = dbState.cloudVault || {};
   const scriptUrl = vault.scriptUrl || DEFAULT_GDRIVE_URL;
-  const secretKey = vault.secretKey || DEFAULT_GDRIVE_KEY;
+  const secretKey = vault.secretKey || vaultRuntimeSecret || DEFAULT_GDRIVE_KEY;
   if (!scriptUrl) {
     return null;
   }
@@ -2312,7 +2375,7 @@ async function fetchFromGoogleDriveVault({ fileId, fileName }) {
 async function deleteFromGoogleDriveVault({ fileId, fileName }) {
   const vault = dbState.cloudVault || {};
   const scriptUrl = vault.scriptUrl || DEFAULT_GDRIVE_URL;
-  const secretKey = vault.secretKey || DEFAULT_GDRIVE_KEY;
+  const secretKey = vault.secretKey || vaultRuntimeSecret || DEFAULT_GDRIVE_KEY;
   if (!scriptUrl) return false;
 
   try {
@@ -2650,6 +2713,8 @@ module.exports = {
   getEmergencyEvidenceById,
   getEmergencyEvidenceByFilename,
   markEmergencyEvidenceReviewed,
+  syncEmergencyEvidenceToDrive,
+  updateEmergencyEvidenceGdrive,
   deleteEmergencyEvidence,
   createPost,
   getApprovedPosts,
