@@ -1265,7 +1265,7 @@ app.post('/api/admin/sos-alerts/:id/resolve', (req, res) => {
 });
 
 // 2.5B Ultra-Futuristic AI Tactical Heatmap & Crime Telemetry API
-app.get('/api/admin/heatmap-data', (req, res) => {
+app.get(['/api/admin/heatmap-data', '/api/tactical/heatmap-data'], (req, res) => {
   try {
     const rawAlerts = db.getAllSosAlerts() || [];
     const heatmapPayload = tacticalHeatmapService.getTacticalHeatmapData(rawAlerts);
@@ -1276,7 +1276,7 @@ app.get('/api/admin/heatmap-data', (req, res) => {
   }
 });
 
-app.post('/api/admin/ai-heatmap-audit', async (req, res) => {
+app.post(['/api/admin/ai-heatmap-audit', '/api/tactical/ai-heatmap-audit'], async (req, res) => {
   try {
     const rawAlerts = db.getAllSosAlerts() || [];
     const heatmapPayload = tacticalHeatmapService.getTacticalHeatmapData(rawAlerts);
