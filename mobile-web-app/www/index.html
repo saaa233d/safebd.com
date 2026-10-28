@@ -207,19 +207,6 @@
     .screen.active {
       display: flex;
       flex-direction: column;
-      animation: luxuryScreenGlide 0.36s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-    @keyframes luxuryScreenGlide {
-      0% {
-        opacity: 0;
-        transform: translateY(8px) scale(0.992);
-        filter: blur(2px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        filter: blur(0);
-      }
     }
     .screen > * {
       flex-shrink: 0;
@@ -229,72 +216,6 @@
     }
     .screen::-webkit-scrollbar {
       display: none;
-    }
-
-    /* ========================================================
-       ULTRA LUXURY POSH BUTTON & INTERACTION TRANSITIONS
-       (Apple Haptic Spring Physics & Liquid-Glass Micro-Sheen)
-    ======================================================== */
-    button, [role="button"], .btn, .clean-tile, .nav-tab-btn, 
-    .feed-filter-btn, .apple-segment-btn, .post-action-btn, 
-    .help-card-tile, .hotline-row-item, .profile-trigger-btn, 
-    .lang-pill-btn, .strip-btn, .hotline-call-pill, .dock-tool-btn, 
-    .dock-finish-btn, .dock-emergency-call-btn, .btn-publish-post, 
-    .media-btn-label, .btn-comment-send, .btn-gps-refresh, 
-    .auth-btn, .btn-primary, .firstaid-accordion-card, .btn-media-dl {
-      transition: transform 0.26s cubic-bezier(0.2, 0.9, 0.3, 1.25),
-                  box-shadow 0.26s cubic-bezier(0.16, 1, 0.3, 1),
-                  background-color 0.22s ease,
-                  border-color 0.22s ease,
-                  filter 0.22s ease,
-                  opacity 0.22s ease !important;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* Posh Apple Tactile Compression On Click (:active) */
-    button:active, [role="button"]:active, .btn:active, 
-    .clean-tile:active, .nav-tab-btn:active, .feed-filter-btn:active, 
-    .apple-segment-btn:active, .post-action-btn:active, 
-    .help-card-tile:active, .hotline-row-item:active, 
-    .profile-trigger-btn:active, .lang-pill-btn:active, 
-    .strip-btn:active, .hotline-call-pill:active, .dock-tool-btn:active, 
-    .btn-publish-post:active, .media-btn-label:active, 
-    .btn-comment-send:active, .btn-gps-refresh:active, 
-    .auth-btn:active, .btn-primary:active, .btn-media-dl:active {
-      transform: scale(0.958) translateY(1px) !important;
-      filter: brightness(0.94) saturate(1.08) !important;
-      transition: transform 0.08s cubic-bezier(0.25, 1, 0.5, 1), filter 0.08s ease !important;
-    }
-
-    /* Ultra Luxury Liquid-Glass Micro-Sheen Ripple */
-    .luxury-sheen-ripple {
-      position: absolute;
-      border-radius: 50%;
-      pointer-events: none;
-      transform: translate(-50%, -50%) scale(0);
-      background: radial-gradient(circle, 
-        rgba(255, 255, 255, 0.45) 0%, 
-        rgba(255, 255, 255, 0.22) 30%, 
-        rgba(255, 255, 255, 0.06) 55%, 
-        transparent 70%);
-      animation: luxuryRippleExpand 0.52s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      z-index: 9999;
-      mix-blend-mode: screen;
-    }
-
-    @keyframes luxuryRippleExpand {
-      0% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(0.12);
-      }
-      50% {
-        opacity: 0.72;
-      }
-      100% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(2.65);
-      }
     }
 
     /* ========================================================
@@ -5818,58 +5739,6 @@
   </div>
 
   <script>
-    // =========================================================================
-    // ULTRA LUXURY POSH BUTTON TRANSITIONS & TACTILE RIPPLE ENGINE
-    // =========================================================================
-    (function initUltraLuxuryTransitions() {
-      document.addEventListener('pointerdown', function(e) {
-        const btn = e.target.closest('button, [role="button"], .btn, .clean-tile, .nav-tab-btn, .feed-filter-btn, .apple-segment-btn, .post-action-btn, .help-card-tile, .hotline-row-item, .profile-trigger-btn, .lang-pill-btn, .strip-btn, .hotline-call-pill, .dock-tool-btn, .dock-finish-btn, .dock-emergency-call-btn, .btn-publish-post, .media-btn-label, .btn-comment-send, .btn-gps-refresh, .auth-btn, .btn-primary, .firstaid-accordion-card, .btn-media-dl, .help-pill-badge');
-        if (!btn) return;
-
-        // 1. Subtle Apple-grade micro-haptic pulse
-        if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
-          try { navigator.vibrate(10); } catch (_) {}
-        }
-
-        // 2. Compute coordinates & dimensions for radiant sheen
-        const rect = btn.getBoundingClientRect();
-        const x = (e.clientX || (rect.left + rect.width / 2)) - rect.left;
-        const y = (e.clientY || (rect.top + rect.height / 2)) - rect.top;
-        const radius = Math.max(rect.width, rect.height) * 1.6;
-
-        const ripple = document.createElement('span');
-        ripple.className = 'luxury-sheen-ripple';
-        ripple.style.width = radius + 'px';
-        ripple.style.height = radius + 'px';
-        ripple.style.left = x + 'px';
-        ripple.style.top = y + 'px';
-
-        const compPos = window.getComputedStyle(btn).position;
-        const originalPos = btn.style.position;
-        if (compPos === 'static') {
-          btn.style.position = 'relative';
-        }
-        
-        const isSOS = btn.classList.contains('sos-button-disc');
-        const originalOverflow = btn.style.overflow;
-        if (!isSOS && window.getComputedStyle(btn).overflow !== 'hidden') {
-          btn.style.overflow = 'hidden';
-        }
-
-        btn.appendChild(ripple);
-
-        setTimeout(() => {
-          ripple.remove();
-          if (!isSOS && originalOverflow !== undefined) {
-            btn.style.overflow = originalOverflow;
-          }
-          if (compPos === 'static') {
-            btn.style.position = originalPos;
-          }
-        }, 550);
-      }, { passive: true });
-    })();
-
     // =========================================================================
     // I18N MULTILINGUAL LOCALIZATION ENGINE (ENGLISH & BANGLA)
     // =========================================================================
