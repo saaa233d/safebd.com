@@ -1201,6 +1201,49 @@
 </head>
 <body>
 
+  <!-- PC Portal Standby Gate: Turned off per Founder / Admin instruction -->
+  <script>
+    const PC_COMMAND_CENTER_ACTIVE = false;
+    if (!PC_COMMAND_CENTER_ACTIVE) {
+      document.write(`
+        <div style="position:fixed;inset:0;z-index:999999;background:radial-gradient(circle at 50% 20%, #0f172a 0%, #030712 100%);color:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px;">
+          <div style="background:rgba(15,23,42,0.92);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.12);border-radius:24px;max-width:580px;width:100%;padding:40px 32px;text-align:center;box-shadow:0 25px 60px -15px rgba(0,0,0,0.9);">
+            <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.45);color:#f87171;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:20px;">
+              <span style="width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 10px #ef4444;"></span> PC Portal Standby • Turned Off
+            </div>
+            <div style="width:76px;height:76px;border-radius:20px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:32px;color:#94a3b8;">
+              <i class="fas fa-power-off"></i>
+            </div>
+            <h1 style="font-size:22px;font-weight:800;letter-spacing:-0.02em;margin-bottom:10px;color:#fff;">PC Admin Command Center is Turned Off</h1>
+            <p style="color:#94a3b8;font-size:13.5px;line-height:1.6;margin-bottom:22px;">The large-screen PC Command Center has been placed into offline standby mode per Founder / Admin instruction. This screen is inactive until you instruct to turn it back on.</p>
+            <div style="background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:14px 18px;text-align:left;margin-bottom:24px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                <span style="color:#94a3b8;">🖥️ PC Big-Screen Portal</span>
+                <span style="font-weight:700;color:#f87171;font-size:11.5px;">STANDBY (TURNED OFF)</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                <span style="color:#94a3b8;">📱 Mobile & Web App</span>
+                <span style="font-weight:700;color:#34d399;font-size:11.5px;">100% OPERATIONAL</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                <span style="color:#94a3b8;">🚨 999 Police SOS Dispatch</span>
+                <span style="font-weight:700;color:#34d399;font-size:11.5px;">ACTIVE</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:7px 0;">
+                <span style="color:#94a3b8;">🛡️ Mobile In-App Admin</span>
+                <span style="font-weight:700;color:#34d399;font-size:11.5px;">ONLINE</span>
+              </div>
+            </div>
+            <a href="/" style="background:#ffffff;color:#000;padding:12px 24px;border-radius:12px;font-size:13px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
+              <i class="fas fa-arrow-left"></i> Return to SAFE BD App
+            </a>
+          </div>
+        </div>
+      `);
+      try { window.stop(); } catch(e) {}
+    }
+  </script>
+
   <!-- ========================================================
        TOP COMMAND HEADER HUD
   ======================================================== -->
