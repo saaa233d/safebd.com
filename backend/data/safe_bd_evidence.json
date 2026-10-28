@@ -10,13 +10,15 @@
       "address": "Shantinagar, Dhaka"
     },
     "videoUrl": "/api/emergency/evidence/01316750712_SOS_1791873285383.mp4",
-    "gdriveFileId": "148oA689tvNA6a_k4vklbCa4k65xrcki0",
+    "gdriveFileId": "1VhUCvV9Z7vW4ZLpvaRTY1JiBNCpbCgCJ",
     "fileName": "01316750712_SOS_1791873285383.mp4",
     "fileSizeKb": 4883,
     "mimeType": "video/mp4",
     "durationSeconds": 15,
     "recordedAt": "2026-10-13T06:34:54.922Z",
-    "status": "PENDING_ADMIN_DISPATCH",
-    "reviewed": false
+    "status": "STORED_IN_GOOGLE_DRIVE",
+    "reviewed": false,
+    "gdriveViewUrl": "https://drive.google.com/file/d/1VhUCvV9Z7vW4ZLpvaRTY1JiBNCpbCgCJ/view?usp=sharing",
+    "gdriveUploadedAt": "2026-10-28T06:55:00.131Z"
   }
 ]
