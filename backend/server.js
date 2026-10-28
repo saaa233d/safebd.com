@@ -340,6 +340,184 @@ app.use((req, res, next) => {
   next();
 });
 
+// PC Command Center Master Operational State
+// Founder Instruction: "turn off the admin portal just the pc screen only if i tell u to turn on turn on again."
+// Set to false to keep the large-screen PC Command Center turned OFF until requested to turn back on.
+let PC_COMMAND_CENTER_ACTIVE = false;
+
+function renderPcCommandCenterStandbyHtml() {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAFE BD — PC Command Center (Offline / Standby)</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at 50% 20%, #0f172a 0%, #030712 100%);
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .standby-card {
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      max-width: 600px;
+      width: 100%;
+      padding: 40px 36px;
+      text-align: center;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 40px rgba(239, 68, 68, 0.08);
+    }
+    .badge-offline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      color: #f87171;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 10px #ef4444;
+    }
+    .icon-box {
+      width: 80px;
+      height: 80px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 32px;
+      color: #94a3b8;
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+    p {
+      color: #94a3b8;
+      font-size: 13.5px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .status-panel {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 14px 18px;
+      text-align: left;
+      margin-bottom: 24px;
+    }
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12.5px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .status-row:last-child { border-bottom: none; }
+    .status-label { color: #94a3b8; }
+    .status-val { font-weight: 700; font-size: 11.5px; }
+    .status-val.green { color: #34d399; }
+    .status-val.red { color: #f87171; }
+    .btn-primary {
+      background: #ffffff;
+      color: #000;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <div class="standby-card">
+    <div class="badge-offline">
+      <span class="status-dot"></span> PC Portal Standby • Turned Off
+    </div>
+    <div class="icon-box">
+      <i class="fas fa-power-off"></i>
+    </div>
+    <h1>PC Admin Command Center is Turned Off</h1>
+    <p>The large-screen PC Command Center has been placed into offline standby mode per Founder / Admin instruction. This screen is inactive until you instruct to turn it back on.</p>
+
+    <div class="status-panel">
+      <div class="status-row">
+        <span class="status-label">🖥️ PC Big-Screen Portal</span>
+        <span class="status-val red">STANDBY (TURNED OFF)</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">📱 Mobile &amp; Web App</span>
+        <span class="status-val green">100% OPERATIONAL</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">🚨 999 Police SOS Dispatch</span>
+        <span class="status-val green">ACTIVE</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">🛡️ Mobile In-App Admin</span>
+        <span class="status-val green">ONLINE</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">☁️ 5TB Google Drive Vault</span>
+        <span class="status-val green">CONNECTED</span>
+      </div>
+    </div>
+
+    <div>
+      <a href="/" class="btn-primary">
+        <i class="fas fa-arrow-left"></i> Return to SAFE BD App
+      </a>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+// Intercept all PC Command Center routes before static serving
+app.get(['/admin/command-center', '/admin/heatmap', '/admin-command-center', '/admin-command-center.html'], (req, res) => {
+  if (!PC_COMMAND_CENTER_ACTIVE) {
+    return res.status(200).send(renderPcCommandCenterStandbyHtml());
+  }
+  return res.sendFile(path.join(__dirname, '../mobile-web-app/www/admin-command-center.html'));
+});
+
+// PC Command Center Status endpoint
+app.get('/api/admin/pc-portal/status', (req, res) => {
+  return res.json({ active: PC_COMMAND_CENTER_ACTIVE, status: PC_COMMAND_CENTER_ACTIVE ? "ONLINE" : "STANDBY_OFFLINE" });
+});
+
 // Serve the Cross-Platform Web & Mobile App to any connected phone, iPad, or desktop
 app.use(express.static(path.join(__dirname, '../mobile-web-app/www'), {
   setHeaders: (res, filePath) => {
@@ -1043,17 +1221,24 @@ app.post('/api/emergency/covert-recording', express.json({ limit: '25mb' }), asy
 
     const evidenceId = id || ("EVID-" + Date.now());
     let gdriveFileId = null;
+    let gdriveViewUrl = null;
 
     // Upload MP4 directly to Private 5TB Google Drive Vault (Zero Render RAM pressure & permanent across redeploys)
     try {
-      const mp4Base64 = fs.readFileSync(finalFilePath).toString('base64');
-      const gdriveRes = await db.uploadToGoogleDriveVault({
-        fileName: finalFileName,
-        mimeType: finalMimeType,
-        base64: mp4Base64
-      });
-      if (gdriveRes && gdriveRes.success && gdriveRes.fileId) {
-        gdriveFileId = gdriveRes.fileId;
+      if (fs.existsSync(finalFilePath)) {
+        const mp4Base64 = fs.readFileSync(finalFilePath).toString('base64');
+        const gdriveRes = await db.uploadToGoogleDriveVault({
+          fileName: finalFileName,
+          mimeType: finalMimeType,
+          base64: mp4Base64
+        });
+        if (gdriveRes && gdriveRes.success && gdriveRes.fileId) {
+          gdriveFileId = gdriveRes.fileId;
+          gdriveViewUrl = gdriveRes.viewUrl || `https://drive.google.com/file/d/${gdriveFileId}/view?usp=sharing`;
+          console.log(`[☁️ GDRIVE EVIDENCE UPLOAD SUCCESS] File ID: ${gdriveFileId} | View: ${gdriveViewUrl}`);
+        } else {
+          console.warn('[⚠️ GDRIVE EVIDENCE UPLOAD WARNING]:', gdriveRes?.error);
+        }
       }
     } catch (gdErr) {
       console.warn('[⚠️ GDRIVE EVIDENCE UPLOAD FALLBACK]:', gdErr.message);
@@ -1067,6 +1252,8 @@ app.post('/api/emergency/covert-recording', express.json({ limit: '25mb' }), asy
       location: location || { lat: 23.8103, lon: 90.4125, address: "Dhaka, Bangladesh" },
       videoUrl: `/api/emergency/evidence/${finalFileName}`,
       gdriveFileId: gdriveFileId,
+      gdriveViewUrl: gdriveViewUrl || (gdriveFileId ? `https://drive.google.com/file/d/${gdriveFileId}/view?usp=sharing` : null),
+      gdriveStatus: gdriveFileId ? "STORED_IN_GOOGLE_DRIVE" : "STORED_LOCALLY",
       // Stored on disk at EVIDENCE_DIR + Private 5TB Google Drive Vault
       fileName: finalFileName,
       fileSizeKb: finalFileSizeKb,
@@ -1249,6 +1436,25 @@ app.post('/api/admin/emergency-evidence/:id/review', (req, res) => {
   return res.status(404).json({ error: "NOT_FOUND", message: "Evidence record not found." });
 });
 
+// 2.4B Explicit Google Drive Cloud Sync Endpoint for any evidence clip
+app.post('/api/admin/emergency-evidence/:id/sync-drive', async (req, res) => {
+  try {
+    const syncRes = await db.syncEmergencyEvidenceToDrive(req.params.id);
+    if (syncRes.success) {
+      return res.json({
+        success: true,
+        message: "SOS video evidence successfully archived to 5TB Google Drive (SAFE_BD_VAULT)!",
+        fileId: syncRes.fileId,
+        viewUrl: syncRes.viewUrl
+      });
+    }
+    return res.status(400).json({ success: false, error: syncRes.error || "Failed to upload to Google Drive" });
+  } catch (err) {
+    console.error("[GDRIVE MANUAL SYNC ERROR]:", err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // 2.5 Admin Live SOS Distress Locations Engine (Direct Exact Coordinates Feed)
 app.get('/api/admin/sos-alerts', (req, res) => {
   const alerts = db.getAllSosAlerts();
@@ -1292,8 +1498,11 @@ app.post(['/api/admin/ai-heatmap-audit', '/api/tactical/ai-heatmap-audit'], asyn
   }
 });
 
-// Direct route aliases for the Desktop Tactical Command Center Portal
+// Direct route aliases for the Desktop Tactical Command Center Portal (Honors PC_COMMAND_CENTER_ACTIVE switch)
 app.get(['/admin/heatmap', '/admin/command-center', '/admin-command-center'], (req, res) => {
+  if (!PC_COMMAND_CENTER_ACTIVE) {
+    return res.status(200).send(renderPcCommandCenterStandbyHtml());
+  }
   res.sendFile(path.join(__dirname, '../mobile-web-app/www/admin-command-center.html'));
 });
 
@@ -2197,9 +2406,9 @@ app.get('/api/admin/portal-template', requireAdminAuth, (req, res) => {
             <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Launch full-screen desktop portal with live SOS telemetry, crime trends &amp; AI audits</div>
           </div>
         </div>
-        <a href="/admin-command-center.html" target="_blank" style="background: linear-gradient(135deg, #0891b2 0%, #2563eb 100%); color: #fff; padding: 8px 14px; border-radius: 9px; font-size: 11.5px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 12px rgba(8, 145, 178, 0.4); white-space: nowrap;">
-          <i class="fas fa-up-right-from-square"></i> Open PC Portal
-        </a>
+        <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); color: #94a3b8; padding: 8px 14px; border-radius: 9px; font-size: 11.5px; font-weight: 700; display: flex; align-items: center; gap: 6px; white-space: nowrap; cursor: pointer;" onclick="alert('🖥️ PC Command Center is currently Turned Off per Founder/Admin instruction.\\n\\nAll mobile app and in-app administrative features remain 100% active.')" title="Turned off per Admin instruction">
+          <i class="fas fa-power-off" style="color: #ef4444;"></i> PC Portal (Turned Off)
+        </div>
       </div>
 
       <!-- Quick Metrics Strip -->
@@ -2263,9 +2472,9 @@ app.get('/api/admin/portal-template', requireAdminAuth, (req, res) => {
           <span style="color: #22d3ee; display: flex; align-items: center; gap: 8px;">
             <i class="fas fa-fire-flame-curved"></i> AI Tactical Crime Heatmap &amp; Real-Time Telemetry
           </span>
-          <a href="/admin-command-center.html" target="_blank" style="font-size: 11px; background: rgba(6, 182, 212, 0.2); border: 1.5px solid #22d3ee; color: #fff; padding: 5px 12px; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 6px; font-weight: 800; box-shadow: 0 0 15px rgba(6, 182, 212, 0.35);">
-            <i class="fas fa-desktop"></i> Launch Large-Screen PC Portal ↗
-          </a>
+          <div style="font-size: 10.5px; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 5px 11px; border-radius: 8px; display: flex; align-items: center; gap: 6px; font-weight: 700; cursor: pointer;" onclick="alert('🖥️ PC Command Center is currently Turned Off per Founder/Admin instruction.')">
+            <i class="fas fa-power-off"></i> PC Portal Standby (Turned Off)
+          </div>
         </div>
         <div id="admin-heatmap-overview-container">
           <div style="text-align: center; padding: 30px 20px; color: var(--text-muted); font-size: 12px;">
