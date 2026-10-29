@@ -2480,22 +2480,216 @@
     /* ========================================================
        EMERGENCY TACTICAL HELP & HOTLINES (ULTRA-LUXURY APPLE VISIONOS & iOS 18 THEME)
     ======================================================== */
+    /* ========================================================
+       APPLE-INSPIRED EMERGENCY HELP & LIFE-SAVING PROTOCOLS
+       Clean typography, generous whitespace, refined frosted glass materials,
+       fluid tactile micro-interactions, responsive 1/2/4-column layout.
+    ======================================================== */
     #screen-help {
-      animation: appleHelpGlide 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: appleHelpGlide 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
     @keyframes appleHelpGlide {
-      from { opacity: 0; transform: translateY(12px) scale(0.99); }
+      from { opacity: 0; transform: translateY(14px) scale(0.99); }
       to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Apple Editorial Hero Container */
+    .apple-help-hero {
+      position: relative;
+      margin-bottom: 24px;
+      padding-top: 6px;
+    }
+    .apple-hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 12px 5px 9px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-top: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 9999px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      margin-bottom: 12px;
+    }
+    .apple-beacon-live {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #30d158;
+      box-shadow: 0 0 10px #30d158, 0 0 18px rgba(48, 209, 88, 0.6);
+      animation: appleBeaconPulse 2s infinite ease-in-out;
+    }
+    @keyframes appleBeaconPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.85); opacity: 0.6; }
+    }
+    .apple-hero-eyebrow-text {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.88);
+    }
+    .apple-help-hero-title {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin: 0 0 6px 0;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+    @media (min-width: 768px) {
+      .apple-help-hero-title {
+        font-size: 32px;
+      }
+    }
+    .apple-help-hero-subtitle {
+      font-size: 13.5px;
+      color: rgba(255, 255, 255, 0.68);
+      line-height: 1.5;
+      margin: 0 0 18px 0;
+      letter-spacing: -0.01em;
+      max-width: 580px;
+    }
+
+    /* Live Stats Strip */
+    .apple-help-stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    @media (max-width: 380px) {
+      .apple-help-stats-strip {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .apple-help-stat-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 10px 10px 8px 10px;
+      text-align: center;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      transition: all 0.22s ease;
+    }
+    .apple-help-stat-chip:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.22);
+      transform: translateY(-2px);
+    }
+    .apple-stat-val {
+      display: block;
+      font-size: 16px;
+      font-weight: 800;
+      color: #38bdf8;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    .apple-stat-lbl {
+      display: block;
+      font-size: 9.5px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 3px;
+    }
+
+    /* Control Deck (Search + Segmented Capsule) */
+    .apple-help-control-deck {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 6px;
+    }
+    @media (min-width: 600px) {
+      .apple-help-control-deck {
+        flex-direction: row;
+        align-items: center;
+      }
+      .apple-help-search-wrap {
+        flex: 1;
+      }
+      .apple-segment-bar {
+        width: 320px;
+        flex-shrink: 0;
+      }
+    }
+
+    .apple-help-search-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-top: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 9999px;
+      padding: 0 14px 0 16px;
+      height: 44px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .apple-help-search-wrap:focus-within {
+      border-color: rgba(56, 189, 248, 0.6);
+      border-top-color: rgba(56, 189, 248, 0.9);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.22), 0 8px 24px rgba(0, 0, 0, 0.4);
+      background: rgba(15, 23, 42, 0.9);
+    }
+    .apple-search-icon {
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 13px;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+    .apple-help-search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+      font-size: 13px;
+      letter-spacing: -0.01em;
+    }
+    .apple-help-search-input::placeholder {
+      color: rgba(255, 255, 255, 0.45);
+    }
+    .apple-search-clear-btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      margin-left: 6px;
+    }
+    .apple-search-clear-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      color: #ffffff;
     }
 
     /* Apple Segmented Capsule Filter */
     .apple-segment-bar {
       display: flex;
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(15, 23, 42, 0.6);
       padding: 4px;
-      border-radius: 999px;
+      border-radius: 9999px;
       border: 1px solid rgba(255, 255, 255, 0.12);
-      border-top: 1.5px solid rgba(255, 255, 255, 0.25);
+      border-top: 1px solid rgba(255, 255, 255, 0.25);
       backdrop-filter: blur(28px) saturate(210%);
       -webkit-backdrop-filter: blur(28px) saturate(210%);
       box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.25);
@@ -2509,8 +2703,8 @@
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
       font-size: 12px;
       font-weight: 600;
-      letter-spacing: -0.2px;
-      border-radius: 999px;
+      letter-spacing: -0.01em;
+      border-radius: 9999px;
       cursor: pointer;
       transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
       user-select: none;
@@ -2519,113 +2713,149 @@
       color: #ffffff;
     }
     .apple-segment-btn.active {
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.12) 100%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.32);
-      border-top: 1.5px solid rgba(255, 255, 255, 0.55);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-top: 1px solid rgba(255, 255, 255, 0.55);
       color: #ffffff !important;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.45) !important;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.35) !important;
     }
 
-    /* Apple 2x2 Tactical Action Matrix */
+    /* Empty Search Card */
+    .apple-help-empty-card {
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.7) 100%);
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 24px;
+      padding: 32px 20px;
+      text-align: center;
+      margin-bottom: 24px;
+      backdrop-filter: blur(20px);
+    }
+    .apple-empty-icon {
+      font-size: 32px;
+      color: #38bdf8;
+      margin-bottom: 10px;
+    }
+    .apple-empty-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+    .apple-empty-desc {
+      font-size: 12.5px;
+      color: rgba(255, 255, 255, 0.65);
+      max-width: 440px;
+      margin: 0 auto 16px auto;
+      line-height: 1.5;
+    }
+    .apple-empty-action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: #ff453a;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 9px 18px;
+      border-radius: 9999px;
+      text-decoration: none;
+      box-shadow: 0 4px 16px rgba(255, 69, 58, 0.4);
+      transition: all 0.2s ease;
+    }
+    .apple-empty-action-btn:hover {
+      transform: scale(1.04);
+      box-shadow: 0 6px 22px rgba(255, 69, 58, 0.6);
+    }
+
+    /* Apple 2x2 Tactical Rapid Dispatch Matrix */
     .help-tactical-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-top: 16px;
+      gap: 14px;
+      margin-bottom: 24px;
     }
-    @media (max-width: 320px) {
+    @media (min-width: 900px) {
+      .help-tactical-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    @media (max-width: 340px) {
       .help-tactical-grid {
         grid-template-columns: 1fr;
       }
     }
+
     .help-card-tile {
-      background: linear-gradient(145deg, rgba(28, 30, 44, 0.82) 0%, rgba(16, 18, 28, 0.92) 100%);
-      backdrop-filter: blur(36px) saturate(220%) brightness(1.06);
-      -webkit-backdrop-filter: blur(36px) saturate(220%) brightness(1.06);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-top: 1.5px solid rgba(255, 255, 255, 0.42);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(155deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.85) 100%);
+      backdrop-filter: blur(32px) saturate(200%);
+      -webkit-backdrop-filter: blur(32px) saturate(200%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-top: 1.5px solid rgba(255, 255, 255, 0.32);
       border-radius: 22px;
-      padding: 15px 14px;
+      padding: 16px 14px 14px 14px;
       text-align: left;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 128px;
+      min-height: 136px;
       cursor: pointer;
       position: relative;
       overflow: hidden;
-      transition: all 0.26s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.18), 0 0 20px rgba(0, 0, 0, 0.2);
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.12);
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
-    .help-card-tile::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 52px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 100%);
-      pointer-events: none;
-      border-radius: 22px 22px 0 0;
-    }
     .help-card-tile:hover {
       transform: translateY(-3px) scale(1.015);
-      border-color: rgba(255, 255, 255, 0.28);
-      border-top-color: rgba(255, 255, 255, 0.65);
-      box-shadow: 0 16px 42px rgba(0, 0, 0, 0.62), inset 0 1px 1px rgba(255, 255, 255, 0.32);
+      border-color: rgba(255, 255, 255, 0.26);
+      border-top-color: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.25);
     }
     .help-card-tile:active {
-      transform: scale(0.965);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+      transform: scale(0.97);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
     }
 
-    /* Apple-Themed Bioluminescent Accents for Tiles */
+    /* Ambient Bioluminescent Card Themes */
     .help-card-tile.theme-ambulance {
-      background: radial-gradient(circle at 15% 15%, rgba(255, 59, 48, 0.26) 0%, transparent 68%), linear-gradient(145deg, rgba(34, 22, 28, 0.88) 0%, rgba(18, 14, 18, 0.94) 100%);
-      border-color: rgba(255, 59, 48, 0.35);
-      border-top-color: rgba(255, 105, 97, 0.68);
+      background: radial-gradient(circle at 15% 15%, rgba(255, 69, 58, 0.2) 0%, transparent 70%), linear-gradient(155deg, rgba(38, 22, 28, 0.8) 0%, rgba(18, 14, 18, 0.92) 100%);
+      border-color: rgba(255, 69, 58, 0.28);
+      border-top-color: rgba(255, 105, 97, 0.55);
     }
     .help-card-tile.theme-ambulance:hover {
-      border-color: rgba(255, 59, 48, 0.6);
-      border-top-color: rgba(255, 120, 110, 0.85);
-      box-shadow: 0 16px 42px rgba(255, 59, 48, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 69, 58, 0.55);
+      box-shadow: 0 16px 40px rgba(255, 69, 58, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.25);
     }
 
     .help-card-tile.theme-patient {
-      background: radial-gradient(circle at 15% 15%, rgba(255, 149, 0, 0.26) 0%, transparent 68%), linear-gradient(145deg, rgba(34, 26, 20, 0.88) 0%, rgba(18, 15, 12, 0.94) 100%);
-      border-color: rgba(255, 149, 0, 0.35);
-      border-top-color: rgba(255, 180, 70, 0.68);
+      background: radial-gradient(circle at 15% 15%, rgba(255, 159, 10, 0.2) 0%, transparent 70%), linear-gradient(155deg, rgba(38, 28, 20, 0.8) 0%, rgba(18, 15, 12, 0.92) 100%);
+      border-color: rgba(255, 159, 10, 0.28);
+      border-top-color: rgba(255, 180, 70, 0.55);
     }
     .help-card-tile.theme-patient:hover {
-      border-color: rgba(255, 149, 0, 0.6);
-      border-top-color: rgba(255, 195, 90, 0.85);
-      box-shadow: 0 16px 42px rgba(255, 149, 0, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 159, 10, 0.55);
+      box-shadow: 0 16px 40px rgba(255, 159, 10, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.25);
     }
 
     .help-card-tile.theme-fire {
-      background: radial-gradient(circle at 15% 15%, rgba(255, 107, 53, 0.26) 0%, transparent 68%), linear-gradient(145deg, rgba(36, 22, 18, 0.88) 0%, rgba(18, 13, 11, 0.94) 100%);
-      border-color: rgba(255, 107, 53, 0.35);
-      border-top-color: rgba(255, 140, 90, 0.68);
+      background: radial-gradient(circle at 15% 15%, rgba(255, 107, 53, 0.2) 0%, transparent 70%), linear-gradient(155deg, rgba(38, 22, 18, 0.8) 0%, rgba(20, 12, 10, 0.92) 100%);
+      border-color: rgba(255, 107, 53, 0.28);
+      border-top-color: rgba(255, 140, 90, 0.55);
     }
     .help-card-tile.theme-fire:hover {
-      border-color: rgba(255, 107, 53, 0.6);
-      border-top-color: rgba(255, 160, 110, 0.85);
-      box-shadow: 0 16px 42px rgba(255, 107, 53, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 107, 53, 0.55);
+      box-shadow: 0 16px 40px rgba(255, 107, 53, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.25);
     }
 
     .help-card-tile.theme-blood {
-      background: radial-gradient(circle at 15% 15%, rgba(255, 45, 85, 0.26) 0%, transparent 68%), linear-gradient(145deg, rgba(34, 18, 26, 0.88) 0%, rgba(18, 12, 16, 0.94) 100%);
-      border-color: rgba(255, 45, 85, 0.35);
-      border-top-color: rgba(255, 95, 130, 0.68);
+      background: radial-gradient(circle at 15% 15%, rgba(255, 45, 85, 0.22) 0%, transparent 70%), linear-gradient(155deg, rgba(40, 18, 26, 0.8) 0%, rgba(20, 10, 16, 0.92) 100%);
+      border-color: rgba(255, 45, 85, 0.28);
+      border-top-color: rgba(255, 110, 140, 0.55);
     }
     .help-card-tile.theme-blood:hover {
-      border-color: rgba(255, 45, 85, 0.6);
-      border-top-color: rgba(255, 115, 150, 0.85);
-      box-shadow: 0 16px 42px rgba(255, 45, 85, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 45, 85, 0.55);
+      box-shadow: 0 16px 40px rgba(255, 45, 85, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.25);
     }
 
     .help-card-top {
@@ -2634,74 +2864,42 @@
       justify-content: space-between;
       margin-bottom: 12px;
     }
-
-    /* Apple iOS Vibrant Squircle Icons */
     .help-icon-bubble {
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 15px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       color: #ffffff;
-      flex-shrink: 0;
-      position: relative;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.45);
     }
-    .theme-ambulance .help-icon-bubble {
-      background: linear-gradient(140deg, #ff453a 0%, #c4001a 100%);
-      box-shadow: 0 6px 18px rgba(255, 69, 58, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.5);
-    }
-    .theme-patient .help-icon-bubble {
-      background: linear-gradient(140deg, #ff9f0a 0%, #d46b08 100%);
-      box-shadow: 0 6px 18px rgba(255, 159, 10, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.5);
-    }
-    .theme-fire .help-icon-bubble {
-      background: linear-gradient(140deg, #ff6b35 0%, #dc420e 100%);
-      box-shadow: 0 6px 18px rgba(255, 107, 53, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.5);
-    }
-    .theme-blood .help-icon-bubble {
-      background: linear-gradient(140deg, #ff2d55 0%, #b8002d 100%);
-      box-shadow: 0 6px 18px rgba(255, 45, 85, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.5);
-    }
+    .theme-ambulance .help-icon-bubble { background: rgba(255, 69, 58, 0.2); border-color: rgba(255, 69, 58, 0.45); color: #ff6961; }
+    .theme-patient .help-icon-bubble { background: rgba(255, 159, 10, 0.2); border-color: rgba(255, 159, 10, 0.45); color: #ffb340; }
+    .theme-fire .help-icon-bubble { background: rgba(255, 107, 53, 0.2); border-color: rgba(255, 107, 53, 0.45); color: #ff8c5a; }
+    .theme-blood .help-icon-bubble { background: rgba(255, 45, 85, 0.2); border-color: rgba(255, 45, 85, 0.45); color: #ff6e8c; }
 
-    /* Apple Glass Status Pill */
     .help-pill-badge {
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+      padding: 4px 9px;
+      border-radius: 9999px;
       font-size: 10px;
       font-weight: 700;
-      letter-spacing: 0.2px;
-      padding: 4px 9px;
-      border-radius: 999px;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      letter-spacing: 0.04em;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
     }
-    .theme-ambulance .help-pill-badge {
-      background: rgba(255, 69, 58, 0.18);
-      border-color: rgba(255, 69, 58, 0.45);
-      color: #ff857d;
-    }
-    .theme-patient .help-pill-badge {
-      background: rgba(255, 159, 10, 0.18);
-      border-color: rgba(255, 159, 10, 0.45);
-      color: #ffb84d;
-    }
-    .theme-fire .help-pill-badge {
-      background: rgba(255, 107, 53, 0.18);
-      border-color: rgba(255, 107, 53, 0.45);
-      color: #ffa375;
-    }
-    .theme-blood .help-pill-badge {
-      background: rgba(255, 45, 85, 0.18);
-      border-color: rgba(255, 45, 85, 0.45);
-      color: #ff7597;
-    }
+    .theme-ambulance .help-pill-badge { background: rgba(255, 69, 58, 0.16); border-color: rgba(255, 69, 58, 0.4); color: #ff857f; }
+    .theme-patient .help-pill-badge { background: rgba(255, 159, 10, 0.16); border-color: rgba(255, 159, 10, 0.4); color: #ffc466; }
+    .theme-fire .help-pill-badge { background: rgba(255, 107, 53, 0.16); border-color: rgba(255, 107, 53, 0.4); color: #ffa67d; }
+    .theme-blood .help-pill-badge { background: rgba(255, 45, 85, 0.16); border-color: rgba(255, 45, 85, 0.4); color: #ff809b; }
 
     .live-beacon-dot {
       width: 6px;
@@ -2716,172 +2914,220 @@
       50% { transform: scale(0.7); opacity: 0.55; }
     }
 
-    /* Refined Typography */
     .help-card-title {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 700;
       color: #ffffff;
-      line-height: 1.3;
-      letter-spacing: -0.2px;
+      line-height: 1.25;
+      letter-spacing: -0.015em;
       margin-bottom: 4px;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
     }
     .help-card-desc {
-      font-size: 10.5px;
+      font-size: 11px;
       line-height: 1.4;
-      color: rgba(255, 255, 255, 0.72);
-      font-weight: 400;
-      letter-spacing: -0.05px;
+      color: rgba(255, 255, 255, 0.68);
+      letter-spacing: -0.01em;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .theme-ambulance .help-card-desc { color: rgba(255, 225, 225, 0.78); }
-    .theme-patient .help-card-desc { color: rgba(255, 243, 215, 0.78); }
-    .theme-fire .help-card-desc { color: rgba(255, 235, 220, 0.78); }
-    .theme-blood .help-card-desc { color: rgba(255, 225, 235, 0.78); }
 
-    /* Apple VisionOS Section Glass Panels */
-    #section-help-hotlines,
-    #section-help-firstaid {
-      background: linear-gradient(180deg, rgba(28, 30, 44, 0.84) 0%, rgba(16, 18, 28, 0.94) 100%) !important;
-      backdrop-filter: blur(40px) saturate(230%) !important;
-      -webkit-backdrop-filter: blur(40px) saturate(230%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.14) !important;
-      border-top: 1.5px solid rgba(255, 255, 255, 0.38) !important;
+    /* Apple Frosted Glass Sections */
+    .apple-glass-panel {
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.75) 100%) !important;
+      backdrop-filter: blur(36px) saturate(210%) !important;
+      -webkit-backdrop-filter: blur(36px) saturate(210%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      border-top: 1.5px solid rgba(255, 255, 255, 0.3) !important;
       border-radius: 26px !important;
-      padding: 18px !important;
-      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.12) !important;
+      padding: 20px 18px !important;
+      margin-bottom: 24px !important;
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    .apple-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .apple-panel-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .apple-panel-sub {
+      font-size: 11.5px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-top: 3px;
+      display: block;
+    }
 
-    /* Posh Apple Hotline Rows */
+    /* Apple Hotline Rows */
     .hotline-row-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      background: rgba(255, 255, 255, 0.045);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      border-top: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-top: 1px solid rgba(255, 255, 255, 0.16);
       padding: 12px 14px;
       border-radius: 18px;
       text-decoration: none;
       color: inherit;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      margin-bottom: 9px;
+    }
+    .hotline-row-item:last-child {
+      margin-bottom: 0;
     }
     .hotline-row-item:hover {
-      background: rgba(255, 255, 255, 0.09);
-      border-color: rgba(255, 255, 255, 0.24);
-      border-top-color: rgba(255, 255, 255, 0.45);
-      transform: translateX(3px) translateY(-1px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+      border-top-color: rgba(255, 255, 255, 0.4);
+      transform: translateY(-1.5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     }
     .hotline-row-item:active {
       transform: scale(0.985);
     }
+
     .hotline-squircle {
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
+      width: 40px;
+      height: 40px;
+      border-radius: 13px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 15px;
+      font-size: 16px;
       flex-shrink: 0;
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
-      position: relative;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
     }
+    .hotline-actions-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .hotline-copy-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: rgba(255, 255, 255, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .hotline-copy-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      transform: scale(1.08);
+    }
+    .hotline-copy-btn:active {
+      transform: scale(0.92);
+    }
+
     .hotline-call-pill {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      background: linear-gradient(135deg, rgba(48, 209, 88, 0.18) 0%, rgba(52, 199, 89, 0.1) 100%);
-      border: 1px solid rgba(48, 209, 88, 0.42);
-      border-top: 1px solid rgba(48, 209, 88, 0.65);
+      gap: 6px;
+      background: linear-gradient(135deg, rgba(48, 209, 88, 0.2) 0%, rgba(52, 199, 89, 0.12) 100%);
+      border: 1px solid rgba(48, 209, 88, 0.45);
+      border-top: 1px solid rgba(48, 209, 88, 0.75);
       color: #30d158;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
       font-size: 11.5px;
       font-weight: 700;
-      letter-spacing: 0.1px;
-      padding: 6px 13px;
+      padding: 7px 14px;
       border-radius: 9999px;
       flex-shrink: 0;
+      text-decoration: none;
       transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 2px 8px rgba(48, 209, 88, 0.22);
+      box-shadow: 0 2px 10px rgba(48, 209, 88, 0.25);
     }
-    .hotline-row-item:hover .hotline-call-pill {
+    .hotline-call-pill:hover {
       background: #30d158 !important;
       color: #000000 !important;
       font-weight: 800;
-      box-shadow: 0 0 18px rgba(48, 209, 88, 0.65) !important;
-      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(48, 209, 88, 0.7) !important;
+      transform: scale(1.04);
     }
     .hotline-call-pill:active {
       transform: scale(0.94);
     }
 
-    /* Posh Apple First Aid Accordion */
+    /* Apple First Aid Accordion */
     .firstaid-accordion-card {
-      background: rgba(255, 255, 255, 0.045);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      border-top: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-top: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 20px;
       margin-bottom: 12px;
       overflow: hidden;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.26s cubic-bezier(0.16, 1, 0.3, 1);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
+    .firstaid-accordion-card:last-child {
+      margin-bottom: 0;
+    }
     .firstaid-accordion-card:hover {
-      border-color: rgba(255, 255, 255, 0.24);
-      border-top-color: rgba(255, 255, 255, 0.45);
-      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.2);
+      border-top-color: rgba(255, 255, 255, 0.38);
+      background: rgba(255, 255, 255, 0.06);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     }
     .firstaid-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 16px;
+      padding: 15px 16px;
       cursor: pointer;
       user-select: none;
     }
     .firstaid-body {
       display: none;
-      padding: 4px 16px 16px 16px;
+      padding: 4px 18px 18px 18px;
       border-top: 1px solid rgba(255, 255, 255, 0.08);
       margin-top: 4px;
-      padding-top: 14px;
-      animation: appleFirstAidOpen 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      padding-top: 16px;
+      animation: appleFirstAidOpen 0.28s cubic-bezier(0.16, 1, 0.3, 1);
     }
     @keyframes appleFirstAidOpen {
-      from { opacity: 0; transform: translateY(-4px); }
+      from { opacity: 0; transform: translateY(-6px); }
       to { opacity: 1; transform: translateY(0); }
     }
     .firstaid-step-list {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
     .firstaid-step-item {
       display: flex;
       align-items: flex-start;
-      gap: 11px;
-      font-size: 12.5px;
+      gap: 12px;
+      font-size: 13px;
       color: #e2e8f0;
-      line-height: 1.5;
+      line-height: 1.55;
     }
     .firstaid-step-num {
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.09) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.28);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.25);
       color: #ffffff;
       font-size: 11px;
       font-weight: 800;
@@ -2889,24 +3135,40 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      margin-top: 1px;
+      margin-top: 2px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     }
     .firstaid-warning-box {
-      margin-top: 12px;
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.16) 0%, rgba(185, 28, 28, 0.22) 100%);
-      border: 1px solid rgba(239, 68, 68, 0.45);
-      border-top: 1.5px solid rgba(239, 68, 68, 0.7);
+      margin-top: 14px;
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.14) 0%, rgba(185, 28, 28, 0.2) 100%);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      border-top: 1.5px solid rgba(239, 68, 68, 0.65);
       border-radius: 14px;
-      padding: 11px 14px;
-      font-size: 11.5px;
+      padding: 12px 14px;
+      font-size: 12px;
       color: #fecaca;
-      line-height: 1.45;
+      line-height: 1.5;
       display: flex;
       align-items: flex-start;
-      gap: 9px;
-      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.22);
+      gap: 10px;
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);
     }
+
+    /* Accessibility: Respect Reduced Motion Preferences */
+    @media (prefers-reduced-motion: reduce) {
+      #screen-help,
+      .apple-beacon-live,
+      .apple-help-stat-chip,
+      .help-card-tile,
+      .hotline-row-item,
+      .hotline-call-pill,
+      .firstaid-accordion-card,
+      .firstaid-body {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+
     .form-group {
       margin-bottom: 14px;
       text-align: left;
@@ -4287,29 +4549,65 @@
     </div>
 
     <!-- SCREEN 4: EMERGENCY TACTICAL HELP & HOTLINES -->
-    <div id="screen-help" class="screen screen-padded" style="display: none; padding-bottom: 90px;">
-      <!-- Apple Clean Header with Segmented Filter -->
-      <div style="margin-bottom: 16px;">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <div>
-            <h2 style="font-size: 22px; font-weight: 800; color: #fff; margin: 0; letter-spacing: -0.4px;" data-i18n="help_screen_title">Emergency Tactical Help</h2>
-            <p style="font-size: 12px; color: var(--text-muted); margin: 3px 0 0 0;" data-i18n="help_screen_sub">Direct hotlines, immediate dispatches &amp; life-saving lifelines</p>
+    <div id="screen-help" class="screen screen-padded" style="display: none; padding-bottom: 110px;">
+      
+      <!-- Apple Editorial Hero Header -->
+      <header class="apple-help-hero">
+        <div class="apple-hero-eyebrow">
+          <span class="apple-beacon-live"></span>
+          <span class="apple-hero-eyebrow-text">24/7 National Emergency Command</span>
+        </div>
+        <h1 class="apple-help-hero-title" data-i18n="help_screen_title">Emergency Tactical Help</h1>
+        <p class="apple-help-hero-subtitle" data-i18n="help_screen_sub">Direct hotlines, immediate dispatches &amp; life-saving lifelines</p>
+
+        <!-- Live Stats Ticker Strip -->
+        <div class="apple-help-stats-strip">
+          <div class="apple-help-stat-chip">
+            <span class="apple-stat-val">10+</span>
+            <span class="apple-stat-lbl">National Lines</span>
           </div>
-          <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); display: flex; align-items: center; justify-content: center; color: #ef4444; font-size: 16px; box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);">
-            <i class="fas fa-hand-holding-medical"></i>
+          <div class="apple-help-stat-chip">
+            <span class="apple-stat-val">641</span>
+            <span class="apple-stat-lbl">Thanas Linked</span>
+          </div>
+          <div class="apple-help-stat-chip">
+            <span class="apple-stat-val">24/7</span>
+            <span class="apple-stat-lbl">Toll-Free Dispatch</span>
+          </div>
+          <div class="apple-help-stat-chip">
+            <span class="apple-stat-val">0s</span>
+            <span class="apple-stat-lbl">Instant Dial</span>
           </div>
         </div>
 
-        <!-- Apple Segmented Capsule Filter -->
-        <div class="apple-segment-bar" style="margin-top: 14px;">
-          <button type="button" class="apple-segment-btn active" onclick="filterHelpSection('all', this)" data-i18n="help_filter_all">All</button>
-          <button type="button" class="apple-segment-btn" onclick="filterHelpSection('hotlines', this)" data-i18n="help_filter_hotlines">Hotlines</button>
-          <button type="button" class="apple-segment-btn" onclick="filterHelpSection('firstaid', this)" data-i18n="help_filter_firstaid">First Aid</button>
+        <!-- Control Deck: Search + Segmented Capsule -->
+        <div class="apple-help-control-deck">
+          <div class="apple-help-search-wrap">
+            <i class="fas fa-magnifying-glass apple-search-icon"></i>
+            <input type="text" id="help-search-input" class="apple-help-search-input" placeholder="Search hotlines or first-aid protocols (e.g. 999, fire, burn, CPR)..." oninput="searchHelpDirectory(this.value)" autocomplete="off">
+            <button type="button" id="help-search-clear" class="apple-search-clear-btn" onclick="clearHelpSearch()" style="display: none;" title="Clear Search">
+              <i class="fas fa-xmark"></i>
+            </button>
+          </div>
+
+          <div class="apple-segment-bar">
+            <button type="button" class="apple-segment-btn active" data-filter="all" onclick="filterHelpSection('all', this)" data-i18n="help_filter_all">All</button>
+            <button type="button" class="apple-segment-btn" data-filter="hotlines" onclick="filterHelpSection('hotlines', this)" data-i18n="help_filter_hotlines">Hotlines</button>
+            <button type="button" class="apple-segment-btn" data-filter="firstaid" onclick="filterHelpSection('firstaid', this)" data-i18n="help_filter_firstaid">First Aid</button>
+          </div>
         </div>
+      </header>
+
+      <!-- Empty Search Feedback -->
+      <div id="help-search-empty" class="apple-help-empty-card" style="display: none;">
+        <div class="apple-empty-icon"><i class="fas fa-magnifying-glass"></i></div>
+        <div class="apple-empty-title">No Emergency Match Found</div>
+        <div class="apple-empty-desc">Try searching "999", "Police", "Fire", "Doctor", "Burn", or tap "Call 999" directly for immediate central command.</div>
+        <a href="tel:999" class="apple-empty-action-btn"><i class="fas fa-phone-volume"></i> Call 999 National Command</a>
       </div>
 
       <!-- TACTICAL 2x2 ACTION MATRIX -->
-      <div class="help-tactical-grid" style="margin-bottom: 20px;">
+      <section class="help-tactical-grid">
         <!-- OPTION 1: STUCK WITH AN AMBULANCE? -->
         <button type="button" onclick="selectEmergencyHelp('ambulance_traffic')" class="help-card-tile theme-ambulance">
           <div class="help-card-top">
@@ -4357,200 +4655,230 @@
             <div class="help-card-desc" data-i18n="help_opt4_desc">Find immediate blood donors nearby or donate blood</div>
           </div>
         </button>
-      </div>
+      </section>
 
       <!-- SECTION: SPECIALIZED EMERGENCY HOTLINES -->
-      <div id="section-help-hotlines" style="background: rgba(26, 28, 38, 0.72); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 16px; margin-bottom: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+      <section id="section-help-hotlines" class="apple-glass-panel">
+        <div class="apple-panel-header">
           <div>
-            <span style="font-size: 13.5px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 7px;" data-i18n="help_sec_hotlines">
+            <span class="apple-panel-title" data-i18n="help_sec_hotlines">
               <i class="fas fa-phone-volume" style="color: #30d158;"></i> Specialized Emergency Hotlines
             </span>
-            <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px;" data-i18n="help_sec_hotlines_sub">Direct hotlines across Bangladesh (Toll-free / 24/7)</span>
+            <span class="apple-panel-sub" data-i18n="help_sec_hotlines_sub">Direct hotlines across Bangladesh (Toll-free / 24/7)</span>
           </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div>
           <!-- 1. National 999 -->
           <div class="hotline-row-item">
-            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
-              <div class="hotline-squircle" style="background: rgba(255, 69, 58, 0.18); border: 1px solid rgba(255, 69, 58, 0.5); color: #ff453a;">
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(255, 69, 58, 0.18); border: 1px solid rgba(255, 69, 58, 0.45); color: #ff453a;">
                 <i class="fas fa-shield-halved"></i>
               </div>
               <div style="min-width: 0;">
-                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                <div style="font-size: 13.5px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
                   <span>National Emergency CAD</span>
-                  <span style="font-size: 9.5px; background: rgba(255,69,58,0.2); color: #ff6b6b; padding: 1px 6px; border-radius: 6px; font-weight: 800;">999</span>
+                  <span style="font-size: 9.5px; background: rgba(255,69,58,0.22); color: #ff6b6b; padding: 2px 7px; border-radius: 6px; font-weight: 800;">999</span>
                 </div>
-                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Police, Fire &amp; Ambulance Central Command</div>
+                <div style="font-size: 11px; color: rgba(255, 255, 255, 0.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;">Police, Fire &amp; Ambulance Central Command</div>
               </div>
             </div>
-            <a href="tel:999" class="hotline-call-pill"><i class="fas fa-phone"></i> Call 999</a>
+            <div class="hotline-actions-wrap">
+              <button type="button" class="hotline-copy-btn" onclick="copyHotlineNumber('999', event)" title="Copy 999"><i class="fas fa-copy"></i></button>
+              <a href="tel:999" class="hotline-call-pill"><i class="fas fa-phone"></i> Call 999</a>
+            </div>
           </div>
 
           <!-- 2. Fire Service 102 -->
           <div class="hotline-row-item">
-            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
-              <div class="hotline-squircle" style="background: rgba(255, 107, 53, 0.18); border: 1px solid rgba(255, 107, 53, 0.5); color: #ff6b35;">
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(255, 107, 53, 0.18); border: 1px solid rgba(255, 107, 53, 0.45); color: #ff6b35;">
                 <i class="fas fa-fire-extinguisher"></i>
               </div>
               <div style="min-width: 0;">
-                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                <div style="font-size: 13.5px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
                   <span>Fire Service &amp; Civil Defence</span>
-                  <span style="font-size: 9.5px; background: rgba(255,107,53,0.2); color: #ff8c5a; padding: 1px 6px; border-radius: 6px; font-weight: 800;">102</span>
+                  <span style="font-size: 9.5px; background: rgba(255,107,53,0.22); color: #ff8c5a; padding: 2px 7px; border-radius: 6px; font-weight: 800;">102</span>
                 </div>
-                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Direct Fire Control &amp; Disaster Rescue Operations</div>
+                <div style="font-size: 11px; color: rgba(255, 255, 255, 0.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;">Direct Fire Control &amp; Disaster Rescue Operations</div>
               </div>
             </div>
-            <a href="tel:102" class="hotline-call-pill" style="border-color: rgba(255, 107, 53, 0.4); color: #ff8c5a; background: rgba(255, 107, 53, 0.15);"><i class="fas fa-phone"></i> Call 102</a>
+            <div class="hotline-actions-wrap">
+              <button type="button" class="hotline-copy-btn" onclick="copyHotlineNumber('102', event)" title="Copy 102"><i class="fas fa-copy"></i></button>
+              <a href="tel:102" class="hotline-call-pill" style="border-color: rgba(255, 107, 53, 0.45); color: #ff8c5a; background: rgba(255, 107, 53, 0.15);"><i class="fas fa-phone"></i> Call 102</a>
+            </div>
           </div>
 
           <!-- 3. Women & Child 109 -->
           <div class="hotline-row-item">
-            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
-              <div class="hotline-squircle" style="background: rgba(191, 90, 242, 0.18); border: 1px solid rgba(191, 90, 242, 0.5); color: #bf5af2;">
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(191, 90, 242, 0.18); border: 1px solid rgba(191, 90, 242, 0.45); color: #bf5af2;">
                 <i class="fas fa-person-breastfeeding"></i>
               </div>
               <div style="min-width: 0;">
-                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                <div style="font-size: 13.5px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
                   <span>Women &amp; Child Safety Line</span>
-                  <span style="font-size: 9.5px; background: rgba(191,90,242,0.2); color: #da8fff; padding: 1px 6px; border-radius: 6px; font-weight: 800;">109</span>
+                  <span style="font-size: 9.5px; background: rgba(191,90,242,0.22); color: #da8fff; padding: 2px 7px; border-radius: 6px; font-weight: 800;">109</span>
                 </div>
-                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">24/7 Violence, harassment prevention &amp; legal aid</div>
+                <div style="font-size: 11px; color: rgba(255, 255, 255, 0.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;">24/7 Violence, harassment prevention &amp; legal aid</div>
               </div>
             </div>
-            <a href="tel:109" class="hotline-call-pill" style="border-color: rgba(191, 90, 242, 0.4); color: #da8fff; background: rgba(191, 90, 242, 0.15);"><i class="fas fa-phone"></i> Call 109</a>
+            <div class="hotline-actions-wrap">
+              <button type="button" class="hotline-copy-btn" onclick="copyHotlineNumber('109', event)" title="Copy 109"><i class="fas fa-copy"></i></button>
+              <a href="tel:109" class="hotline-call-pill" style="border-color: rgba(191, 90, 242, 0.45); color: #da8fff; background: rgba(191, 90, 242, 0.15);"><i class="fas fa-phone"></i> Call 109</a>
+            </div>
           </div>
 
           <!-- 4. Police Cyber Support for Women (PCSC) -->
           <div class="hotline-row-item">
-            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
-              <div class="hotline-squircle" style="background: rgba(244, 63, 94, 0.18); border: 1px solid rgba(244, 63, 94, 0.5); color: #f43f5e;">
-                <i class="fas fa-user-shield"></i>
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(244, 63, 94, 0.18); border: 1px solid rgba(244, 63, 94, 0.45); color: #f43f5e;">
+                <i class="fas fa-laptop-code"></i>
               </div>
               <div style="min-width: 0;">
-                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                <div style="font-size: 13.5px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
                   <span>Police Cyber Support (PCSC)</span>
-                  <span style="font-size: 9.5px; background: rgba(244,63,94,0.2); color: #fda4af; padding: 1px 6px; border-radius: 6px; font-weight: 800;">Women</span>
+                  <span style="font-size: 9.5px; background: rgba(244,63,94,0.22); color: #fb7185; padding: 2px 7px; border-radius: 6px; font-weight: 800;">HQ</span>
                 </div>
-                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Online harassment, fake ID, blackmail &amp; hacking</div>
+                <div style="font-size: 11px; color: rgba(255, 255, 255, 0.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;">Immediate action against online harassment &amp; blackmail</div>
               </div>
             </div>
-            <a href="tel:01320000888" class="hotline-call-pill" style="border-color: rgba(244, 63, 94, 0.4); color: #fda4af; background: rgba(244, 63, 94, 0.15);"><i class="fas fa-phone"></i> 01320000888</a>
+            <div class="hotline-actions-wrap">
+              <button type="button" class="hotline-copy-btn" onclick="copyHotlineNumber('01320000888', event)" title="Copy Number"><i class="fas fa-copy"></i></button>
+              <a href="tel:01320000888" class="hotline-call-pill" style="border-color: rgba(244, 63, 94, 0.45); color: #fb7185; background: rgba(244, 63, 94, 0.15);"><i class="fas fa-phone"></i> 01320-000888</a>
+            </div>
           </div>
 
-          <!-- 5. Sheikh Hasina National Burn Institute -->
+          <!-- 5. National Health Helpline (Shastho Batayon 16263) -->
           <div class="hotline-row-item">
-            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
-              <div class="hotline-squircle" style="background: rgba(245, 158, 11, 0.18); border: 1px solid rgba(245, 158, 11, 0.5); color: #f59e0b;">
-                <i class="fas fa-hospital"></i>
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(14, 165, 233, 0.18); border: 1px solid rgba(14, 165, 233, 0.45); color: #0ea5e9;">
+                <i class="fas fa-user-doctor"></i>
               </div>
               <div style="min-width: 0;">
-                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
-                  <span>National Burn &amp; Plastic Surgery</span>
-                  <span style="font-size: 9.5px; background: rgba(245,158,11,0.2); color: #fcd34d; padding: 1px 6px; border-radius: 6px; font-weight: 800;">Emergency</span>
+                <div style="font-size: 13.5px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                  <span>Shastho Batayon (স্বাস্থ্য বাতায়ন)</span>
+                  <span style="font-size: 9.5px; background: rgba(14,165,233,0.22); color: #38bdf8; padding: 2px 7px; border-radius: 6px; font-weight: 800;">16263</span>
                 </div>
-                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Critical burn ICU &amp; acute plastic trauma response</div>
+                <div style="font-size: 11px; color: rgba(255, 255, 255, 0.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;">24/7 free certified medical consultation &amp; doctor advice</div>
               </div>
             </div>
-            <a href="tel:02223363345" class="hotline-call-pill" style="border-color: rgba(245, 158, 11, 0.4); color: #fcd34d; background: rgba(245, 158, 11, 0.15);"><i class="fas fa-phone"></i> Call Burn Unit</a>
+            <div class="hotline-actions-wrap">
+              <button type="button" class="hotline-copy-btn" onclick="copyHotlineNumber('16263', event)" title="Copy 16263"><i class="fas fa-copy"></i></button>
+              <a href="tel:02223363345" class="hotline-call-pill" style="border-color: rgba(14, 165, 233, 0.45); color: #38bdf8; background: rgba(14, 165, 233, 0.15);"><i class="fas fa-phone"></i> Call 16263</a>
+            </div>
           </div>
 
           <!-- 6. Child Helpline 1098 -->
           <div class="hotline-row-item">
-            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
-              <div class="hotline-squircle" style="background: rgba(14, 165, 233, 0.18); border: 1px solid rgba(14, 165, 233, 0.5); color: #0ea5e9;">
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(236, 72, 153, 0.18); border: 1px solid rgba(236, 72, 153, 0.45); color: #ec4899;">
                 <i class="fas fa-children"></i>
               </div>
               <div style="min-width: 0;">
-                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                <div style="font-size: 13.5px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
                   <span>Child Helpline Bangladesh</span>
-                  <span style="font-size: 9.5px; background: rgba(14,165,233,0.2); color: #7dd3fc; padding: 1px 6px; border-radius: 6px; font-weight: 800;">1098</span>
+                  <span style="font-size: 9.5px; background: rgba(236,72,153,0.22); color: #f472b6; padding: 2px 7px; border-radius: 6px; font-weight: 800;">1098</span>
                 </div>
-                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Child protection, abuse response &amp; lost children</div>
+                <div style="font-size: 11px; color: rgba(255, 255, 255, 0.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;">Child protection, abuse response &amp; emergency shelter</div>
               </div>
             </div>
-            <a href="tel:1098" class="hotline-call-pill" style="border-color: rgba(14, 165, 233, 0.4); color: #7dd3fc; background: rgba(14, 165, 233, 0.15);"><i class="fas fa-phone"></i> Call 1098</a>
+            <div class="hotline-actions-wrap">
+              <button type="button" class="hotline-copy-btn" onclick="copyHotlineNumber('1098', event)" title="Copy 1098"><i class="fas fa-copy"></i></button>
+              <a href="tel:1098" class="hotline-call-pill" style="border-color: rgba(236, 72, 153, 0.45); color: #f472b6; background: rgba(236, 72, 153, 0.15);"><i class="fas fa-phone"></i> Call 1098</a>
+            </div>
           </div>
 
-          <!-- 7. RAB Control Room -->
+          <!-- 7. RAB Emergency Control -->
           <div class="hotline-row-item">
-            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
-              <div class="hotline-squircle" style="background: rgba(99, 102, 241, 0.18); border: 1px solid rgba(99, 102, 241, 0.5); color: #6366f1;">
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(99, 102, 241, 0.18); border: 1px solid rgba(99, 102, 241, 0.45); color: #6366f1;">
                 <i class="fas fa-person-rifle"></i>
               </div>
               <div style="min-width: 0;">
-                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
-                  <span>RAB Emergency Control Room</span>
-                  <span style="font-size: 9.5px; background: rgba(99,102,241,0.2); color: #a5b4fc; padding: 1px 6px; border-radius: 6px; font-weight: 800;">HQ</span>
+                <div style="font-size: 13.5px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                  <span>RAB Emergency Operations</span>
+                  <span style="font-size: 9.5px; background: rgba(99,102,241,0.22); color: #a5b4fc; padding: 2px 7px; border-radius: 6px; font-weight: 800;">HQ</span>
                 </div>
-                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Rapid Action Battalion quick response force</div>
+                <div style="font-size: 11px; color: rgba(255, 255, 255, 0.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;">Rapid Action Battalion quick response force</div>
               </div>
             </div>
-            <a href="tel:01777720029" class="hotline-call-pill" style="border-color: rgba(99, 102, 241, 0.4); color: #a5b4fc; background: rgba(99, 102, 241, 0.15);"><i class="fas fa-phone"></i> 01777720029</a>
+            <div class="hotline-actions-wrap">
+              <button type="button" class="hotline-copy-btn" onclick="copyHotlineNumber('01777720029', event)" title="Copy Number"><i class="fas fa-copy"></i></button>
+              <a href="tel:01777720029" class="hotline-call-pill" style="border-color: rgba(99, 102, 241, 0.45); color: #a5b4fc; background: rgba(99, 102, 241, 0.15);"><i class="fas fa-phone"></i> 01777720029</a>
+            </div>
           </div>
 
-          <!-- 8. Kaan Pete Roi (Emotional Support) -->
+          <!-- 8. Kaan Pete Roi (Mental Health) -->
           <div class="hotline-row-item">
-            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
-              <div class="hotline-squircle" style="background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16, 185, 129, 0.5); color: #10b981;">
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16, 185, 129, 0.45); color: #10b981;">
                 <i class="fas fa-hand-holding-heart"></i>
               </div>
               <div style="min-width: 0;">
-                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                <div style="font-size: 13.5px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
                   <span>Kaan Pete Roi (কান পেতে রই)</span>
-                  <span style="font-size: 9.5px; background: rgba(16,185,129,0.2); color: #6ee7b7; padding: 1px 6px; border-radius: 6px; font-weight: 800;">Mental Health</span>
+                  <span style="font-size: 9.5px; background: rgba(16,185,129,0.22); color: #6ee7b7; padding: 2px 7px; border-radius: 6px; font-weight: 800;">Mental Health</span>
                 </div>
-                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Confidential emotional support &amp; suicide prevention</div>
+                <div style="font-size: 11px; color: rgba(255, 255, 255, 0.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;">Confidential emotional support &amp; suicide prevention</div>
               </div>
             </div>
-            <a href="tel:01779554391" class="hotline-call-pill" style="border-color: rgba(16, 185, 129, 0.4); color: #6ee7b7; background: rgba(16, 185, 129, 0.15);"><i class="fas fa-phone"></i> 01779554391</a>
+            <div class="hotline-actions-wrap">
+              <button type="button" class="hotline-copy-btn" onclick="copyHotlineNumber('01779554391', event)" title="Copy Number"><i class="fas fa-copy"></i></button>
+              <a href="tel:01779554391" class="hotline-call-pill" style="border-color: rgba(16, 185, 129, 0.45); color: #6ee7b7; background: rgba(16, 185, 129, 0.15);"><i class="fas fa-phone"></i> 01779554391</a>
+            </div>
           </div>
 
           <!-- 9. Disaster Early Warning 1090 -->
           <div class="hotline-row-item">
-            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
-              <div class="hotline-squircle" style="background: rgba(234, 179, 8, 0.18); border: 1px solid rgba(234, 179, 8, 0.5); color: #eab308;">
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(234, 179, 8, 0.18); border: 1px solid rgba(234, 179, 8, 0.45); color: #eab308;">
                 <i class="fas fa-cloud-bolt"></i>
               </div>
               <div style="min-width: 0;">
-                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                <div style="font-size: 13.5px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
                   <span>Disaster Early Warning System</span>
-                  <span style="font-size: 9.5px; background: rgba(234,179,8,0.2); color: #fde047; padding: 1px 6px; border-radius: 6px; font-weight: 800;">1090</span>
+                  <span style="font-size: 9.5px; background: rgba(234,179,8,0.22); color: #fde047; padding: 2px 7px; border-radius: 6px; font-weight: 800;">1090</span>
                 </div>
-                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Flood, cyclone &amp; severe weather emergencies</div>
+                <div style="font-size: 11px; color: rgba(255, 255, 255, 0.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;">Flood, cyclone &amp; severe weather emergencies</div>
               </div>
             </div>
-            <a href="tel:1090" class="hotline-call-pill" style="border-color: rgba(234, 179, 8, 0.4); color: #fde047; background: rgba(234, 179, 8, 0.15);"><i class="fas fa-phone"></i> Call 1090</a>
+            <div class="hotline-actions-wrap">
+              <button type="button" class="hotline-copy-btn" onclick="copyHotlineNumber('1090', event)" title="Copy 1090"><i class="fas fa-copy"></i></button>
+              <a href="tel:1090" class="hotline-call-pill" style="border-color: rgba(234, 179, 8, 0.45); color: #fde047; background: rgba(234, 179, 8, 0.15);"><i class="fas fa-phone"></i> Call 1090</a>
+            </div>
           </div>
 
           <!-- 10. Anti-Corruption 106 -->
           <div class="hotline-row-item">
-            <div style="display: flex; align-items: center; gap: 11px; min-width: 0;">
-              <div class="hotline-squircle" style="background: rgba(168, 85, 247, 0.18); border: 1px solid rgba(168, 85, 247, 0.5); color: #a855f7;">
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+              <div class="hotline-squircle" style="background: rgba(168, 85, 247, 0.18); border: 1px solid rgba(168, 85, 247, 0.45); color: #a855f7;">
                 <i class="fas fa-gavel"></i>
               </div>
               <div style="min-width: 0;">
-                <div style="font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                <div style="font-size: 13.5px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
                   <span>Anti-Corruption Commission</span>
-                  <span style="font-size: 9.5px; background: rgba(168,85,247,0.2); color: #d8b4fe; padding: 1px 6px; border-radius: 6px; font-weight: 800;">106</span>
+                  <span style="font-size: 9.5px; background: rgba(168,85,247,0.22); color: #d8b4fe; padding: 2px 7px; border-radius: 6px; font-weight: 800;">106</span>
                 </div>
-                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Report bribery, extortion &amp; citizen rights violations</div>
+                <div style="font-size: 11px; color: rgba(255, 255, 255, 0.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;">Report bribery, extortion &amp; citizen rights violations</div>
               </div>
             </div>
-            <a href="tel:106" class="hotline-call-pill" style="border-color: rgba(168, 85, 247, 0.4); color: #d8b4fe; background: rgba(168, 85, 247, 0.15);"><i class="fas fa-phone"></i> Call 106</a>
+            <div class="hotline-actions-wrap">
+              <button type="button" class="hotline-copy-btn" onclick="copyHotlineNumber('106', event)" title="Copy 106"><i class="fas fa-copy"></i></button>
+              <a href="tel:106" class="hotline-call-pill" style="border-color: rgba(168, 85, 247, 0.45); color: #d8b4fe; background: rgba(168, 85, 247, 0.15);"><i class="fas fa-phone"></i> Call 106</a>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- SECTION: CRITICAL FIRST AID PROTOCOLS -->
-      <div id="section-help-firstaid" style="background: rgba(26, 28, 38, 0.72); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 16px; margin-bottom: 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+      <!-- SECTION: LIFE-SAVING FIRST AID PROTOCOLS -->
+      <section id="section-help-firstaid" class="apple-glass-panel">
+        <div class="apple-panel-header">
           <div>
-            <span style="font-size: 13.5px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 7px;" data-i18n="help_sec_firstaid">
-              <i class="fas fa-kit-medical" style="color: #ff375f;"></i> Critical First Aid Protocols
+            <span class="apple-panel-title" data-i18n="help_sec_firstaid">
+              <i class="fas fa-kit-medical" style="color: #ff453a;"></i> Critical First Aid Protocols
             </span>
-            <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px;" data-i18n="help_sec_firstaid_sub">Immediate step-by-step actions before medics arrive</span>
+            <span class="apple-panel-sub" data-i18n="help_sec_firstaid_sub">Immediate step-by-step actions before medics arrive</span>
           </div>
         </div>
 
@@ -4558,67 +4886,71 @@
           <!-- GUIDE 1: SEVERE BLEEDING -->
           <div class="firstaid-accordion-card" id="guide-bleeding">
             <div class="firstaid-head" onclick="toggleFirstAidGuide('guide-bleeding')">
-              <div style="display: flex; align-items: center; gap: 11px;">
-                <div class="hotline-squircle" style="background: rgba(255, 55, 95, 0.18); border: 1px solid rgba(255, 55, 95, 0.5); color: #ff375f;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="hotline-squircle" style="background: rgba(255, 69, 58, 0.18); border: 1px solid rgba(255, 69, 58, 0.45); color: #ff453a;">
                   <i class="fas fa-droplet"></i>
                 </div>
                 <div>
-                  <div style="font-size: 13px; font-weight: 800; color: #fff;">Severe Bleeding &amp; Trauma</div>
-                  <div style="font-size: 11px; color: var(--text-muted);">Direct pressure, elevation &amp; clotting</div>
+                  <div style="font-size: 13.5px; font-weight: 800; color: #fff;">Severe Traumatic Bleeding &amp; Tourniquet</div>
+                  <div style="font-size: 11px; color: rgba(255, 255, 255, 0.65);">Stop catastrophic hemorrhaging in seconds</div>
                 </div>
               </div>
-              <i class="fas fa-chevron-down" style="color: var(--text-muted); font-size: 12px; transition: transform 0.25s ease;"></i>
+              <i class="fas fa-chevron-down" style="color: rgba(255, 255, 255, 0.6); font-size: 12px; transition: transform 0.28s ease;"></i>
             </div>
             <div class="firstaid-body">
               <div class="firstaid-step-list">
                 <div class="firstaid-step-item">
                   <div class="firstaid-step-num">1</div>
-                  <div><strong>Apply Firm Direct Pressure:</strong> Place a clean cloth, sterile gauze, or clothing over the wound and press firmly with both hands without lifting.</div>
+                  <div><strong>Apply Direct Firm Pressure:</strong> Cover the wound with a clean cloth or sterile gauze. Press with both hands firmly and continuously without letting go.</div>
                 </div>
                 <div class="firstaid-step-item">
                   <div class="firstaid-step-num">2</div>
-                  <div><strong>Elevate the Injured Limb:</strong> Raise the bleeding area above heart level if no bone fracture is suspected to reduce blood flow.</div>
+                  <div><strong>Apply Tourniquet for Limb Hemorrhage:</strong> If bleeding is life-threatening on an arm or leg, wrap a firm belt, scarf, or commercial tourniquet 2–3 inches above the wound (never over a joint). Tighten until bleeding completely halts.</div>
                 </div>
                 <div class="firstaid-step-item">
                   <div class="firstaid-step-num">3</div>
-                  <div><strong>Do Not Remove Soaked Dressing:</strong> If blood seeps through, place another cloth directly on top of it. Removing the first cloth disrupts clotting.</div>
+                  <div><strong>Note the Exact Time:</strong> Write the tourniquet application time on the patient's forehead or arm so emergency trauma surgeons know the vascular timeline.</div>
                 </div>
               </div>
               <div class="firstaid-warning-box">
-                <i class="fas fa-triangle-exclamation" style="margin-top: 2px; font-size: 13px; color: #ef4444;"></i>
-                <div><strong>Caution:</strong> Never pull out embedded knives, glass, or foreign objects. Secure them in place with rolled cloths and call 999.</div>
+                <i class="fas fa-triangle-exclamation" style="margin-top: 2px; font-size: 14px; color: #ef4444; flex-shrink: 0;"></i>
+                <div><strong>Never:</strong> Never loosen or remove a tightened tourniquet before arriving at the hospital. Never press on an impaled object; stabilize around it instead.</div>
               </div>
             </div>
           </div>
 
-          <!-- GUIDE 2: CPR & CHOKING -->
+          <!-- GUIDE 2: CHOKING (HEIMLICH) -->
           <div class="firstaid-accordion-card" id="guide-cpr">
             <div class="firstaid-head" onclick="toggleFirstAidGuide('guide-cpr')">
-              <div style="display: flex; align-items: center; gap: 11px;">
-                <div class="hotline-squircle" style="background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.5); color: #ef4444;">
-                  <i class="fas fa-heart-pulse"></i>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="hotline-squircle" style="background: rgba(14, 165, 233, 0.18); border: 1px solid rgba(14, 165, 233, 0.45); color: #0ea5e9;">
+                  <i class="fas fa-lungs"></i>
                 </div>
                 <div>
-                  <div style="font-size: 13px; font-weight: 800; color: #fff;">Hands-Only CPR &amp; Choking</div>
-                  <div style="font-size: 11px; color: var(--text-muted);">Cardiac arrest &amp; Heimlich maneuver</div>
+                  <div style="font-size: 13.5px; font-weight: 800; color: #fff;">Choking &amp; Airway Blockage (Heimlich Maneuver)</div>
+                  <div style="font-size: 11px; color: rgba(255, 255, 255, 0.65);">Clear blocked windpipe for adults &amp; children</div>
                 </div>
               </div>
-              <i class="fas fa-chevron-down" style="color: var(--text-muted); font-size: 12px; transition: transform 0.25s ease;"></i>
+              <i class="fas fa-chevron-down" style="color: rgba(255, 255, 255, 0.6); font-size: 12px; transition: transform 0.28s ease;"></i>
             </div>
             <div class="firstaid-body">
               <div class="firstaid-step-list">
                 <div class="firstaid-step-item">
                   <div class="firstaid-step-num">1</div>
-                  <div><strong>Check Response &amp; Call 999:</strong> Shake shoulders gently and shout. If no normal breathing or response, call 999 CAD immediately.</div>
+                  <div><strong>Deliver 5 Sharp Back Blows:</strong> Stand behind the victim, lean them forward, and deliver 5 forceful heel-of-hand blows between their shoulder blades.</div>
                 </div>
                 <div class="firstaid-step-item">
                   <div class="firstaid-step-num">2</div>
-                  <div><strong>Hard &amp; Fast Chest Compressions:</strong> Place heel of hand on center of chest. Interlock fingers. Push hard and fast (100–120 bpm, ~2 inches deep).</div>
+                  <div><strong>Perform 5 Abdominal Thrusts (Heimlich):</strong> Place your fist thumb-in just above their navel. Grasp with your other hand and pull sharply inward and upward.</div>
                 </div>
                 <div class="firstaid-step-item">
                   <div class="firstaid-step-num">3</div>
-                  <div><strong>For Choking (Heimlich Maneuver):</strong> Stand behind victim. Give 5 sharp blows between shoulder blades, then 5 quick inward &amp; upward abdominal thrusts above the navel.</div>
+                  <div><strong>Repeat 5 and 5:</strong> Alternate between 5 back blows and 5 abdominal thrusts until the object dislodges. If unconscious, begin CPR immediately.</div>
                 </div>
+              </div>
+              <div class="firstaid-warning-box">
+                <i class="fas fa-triangle-exclamation" style="margin-top: 2px; font-size: 14px; color: #ef4444; flex-shrink: 0;"></i>
+                <div><strong>Never:</strong> Never perform blind finger sweeps in the mouth—it can push the obstruction deeper. For infants under 1 year, use 2-finger chest thrusts instead of abdominal thrusts.</div>
               </div>
             </div>
           </div>
@@ -4626,16 +4958,16 @@
           <!-- GUIDE 3: BURNS & SCALDS -->
           <div class="firstaid-accordion-card" id="guide-burns">
             <div class="firstaid-head" onclick="toggleFirstAidGuide('guide-burns')">
-              <div style="display: flex; align-items: center; gap: 11px;">
-                <div class="hotline-squircle" style="background: rgba(245, 158, 11, 0.18); border: 1px solid rgba(245, 158, 11, 0.5); color: #f59e0b;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="hotline-squircle" style="background: rgba(245, 158, 11, 0.18); border: 1px solid rgba(245, 158, 11, 0.45); color: #f59e0b;">
                   <i class="fas fa-fire-burner"></i>
                 </div>
                 <div>
-                  <div style="font-size: 13px; font-weight: 800; color: #fff;">Burns &amp; Chemical Scalds</div>
-                  <div style="font-size: 11px; color: var(--text-muted);">Cool tap water &amp; sterile protection</div>
+                  <div style="font-size: 13.5px; font-weight: 800; color: #fff;">Burns &amp; Chemical Scalds</div>
+                  <div style="font-size: 11px; color: rgba(255, 255, 255, 0.65);">Cool running water &amp; sterile protection</div>
                 </div>
               </div>
-              <i class="fas fa-chevron-down" style="color: var(--text-muted); font-size: 12px; transition: transform 0.25s ease;"></i>
+              <i class="fas fa-chevron-down" style="color: rgba(255, 255, 255, 0.6); font-size: 12px; transition: transform 0.28s ease;"></i>
             </div>
             <div class="firstaid-body">
               <div class="firstaid-step-list">
@@ -4645,16 +4977,16 @@
                 </div>
                 <div class="firstaid-step-item">
                   <div class="firstaid-step-num">2</div>
-                  <div><strong>Cover Loosely:</strong> Use sterile non-stick plastic wrap (cling film) or clean lint-free cloth to shield from airborne infections.</div>
+                  <div><strong>Cover Loosely with Cling Wrap:</strong> Use sterile non-stick plastic wrap (cling film) or clean lint-free cloth to shield from airborne infections.</div>
                 </div>
                 <div class="firstaid-step-item">
                   <div class="firstaid-step-num">3</div>
-                  <div><strong>Remove Accessories:</strong> Quickly and gently remove rings, watches, or tight clothing around the burn before swelling starts.</div>
+                  <div><strong>Remove Accessories Promptly:</strong> Gently remove rings, watches, or tight clothing around the burn area before swelling begins.</div>
                 </div>
               </div>
               <div class="firstaid-warning-box">
-                <i class="fas fa-triangle-exclamation" style="margin-top: 2px; font-size: 13px; color: #ef4444;"></i>
-                <div><strong>Never:</strong> Apply ice, toothpaste, butter, raw egg, or oil. Never pop blisters or peel clothing stuck to burnt skin.</div>
+                <i class="fas fa-triangle-exclamation" style="margin-top: 2px; font-size: 14px; color: #ef4444; flex-shrink: 0;"></i>
+                <div><strong>Never:</strong> Never apply ice, toothpaste, butter, raw egg, or oil. Never pop blisters or peel clothing that is stuck to burnt skin.</div>
               </div>
             </div>
           </div>
@@ -4662,40 +4994,41 @@
           <!-- GUIDE 4: SNAKE BITE -->
           <div class="firstaid-accordion-card" id="guide-snake">
             <div class="firstaid-head" onclick="toggleFirstAidGuide('guide-snake')">
-              <div style="display: flex; align-items: center; gap: 11px;">
-                <div class="hotline-squircle" style="background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16, 185, 129, 0.5); color: #10b981;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="hotline-squircle" style="background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16, 185, 129, 0.45); color: #10b981;">
                   <i class="fas fa-staff-snake"></i>
                 </div>
                 <div>
-                  <div style="font-size: 13px; font-weight: 800; color: #fff;">Snake Bite Emergency Protocol</div>
-                  <div style="font-size: 11px; color: var(--text-muted);">Immobilization &amp; anti-venom hospital transfer</div>
+                  <div style="font-size: 13.5px; font-weight: 800; color: #fff;">Snake Bite Emergency Protocol</div>
+                  <div style="font-size: 11px; color: rgba(255, 255, 255, 0.65);">Immobilization &amp; anti-venom hospital transfer</div>
                 </div>
               </div>
-              <i class="fas fa-chevron-down" style="color: var(--text-muted); font-size: 12px; transition: transform 0.25s ease;"></i>
+              <i class="fas fa-chevron-down" style="color: rgba(255, 255, 255, 0.6); font-size: 12px; transition: transform 0.28s ease;"></i>
             </div>
             <div class="firstaid-body">
               <div class="firstaid-step-list">
                 <div class="firstaid-step-item">
                   <div class="firstaid-step-num">1</div>
-                  <div><strong>Keep Patient Absolutely Calm:</strong> Panic increases heart rate, circulating venom faster. Lie down and keep the bitten limb still below heart level.</div>
+                  <div><strong>Keep Patient Completely Calm &amp; Still:</strong> Panic spikes heart rate and accelerates venom circulation. Have the patient lie down; keep the bitten limb below heart level.</div>
                 </div>
                 <div class="firstaid-step-item">
                   <div class="firstaid-step-num">2</div>
-                  <div><strong>Immobilize with a Splint:</strong> Tie a soft splint or bandage comfortably around the limb (firm but NOT a tight tourniquet) to prevent movement.</div>
+                  <div><strong>Immobilize with a Splint:</strong> Tie a soft splint or bandage comfortably around the limb (firm but NOT a tight tourniquet) to halt muscle pumping.</div>
                 </div>
                 <div class="firstaid-step-item">
                   <div class="firstaid-step-num">3</div>
-                  <div><strong>Rush to Government Hospital:</strong> Immediately transfer to the nearest Upazila Health Complex, District Sadar Hospital, or Medical College Hospital with Anti-Venom.</div>
+                  <div><strong>Rush to Government Anti-Venom Hospital:</strong> Immediately transfer to the nearest Upazila Health Complex, District Sadar Hospital, or Medical College Hospital with anti-venom.</div>
                 </div>
               </div>
               <div class="firstaid-warning-box">
-                <i class="fas fa-triangle-exclamation" style="margin-top: 2px; font-size: 13px; color: #ef4444;"></i>
-                <div><strong>Dangerous Myths:</strong> DO NOT cut the bite mark, DO NOT suck venom, DO NOT apply battery acid/herbal paste, and DO NOT apply tight arterial tourniquets.</div>
+                <i class="fas fa-triangle-exclamation" style="margin-top: 2px; font-size: 14px; color: #ef4444; flex-shrink: 0;"></i>
+                <div><strong>Dangerous Myths:</strong> DO NOT cut the bite wound, DO NOT suck venom, DO NOT apply battery acid, herbal paste, or tight arterial tourniquets.</div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
     </div>
 
     <!-- SCREEN 5: DEDICATED CITIZEN PROFILE & SECURITY -->
@@ -12051,6 +12384,119 @@
         if (secHotlines) secHotlines.style.display = 'none';
         if (secFirstAid) secFirstAid.style.display = 'block';
       }
+    }
+
+    
+    /* ----------------------------------------------------
+       APPLE HELP DIRECTORY SEARCH & TACTILE COPY HELPERS
+    ---------------------------------------------------- */
+    function searchHelpDirectory(query) {
+      const q = (query || '').toLowerCase().trim();
+      const clearBtn = document.getElementById('help-search-clear');
+      if (clearBtn) clearBtn.style.display = q ? 'flex' : 'none';
+
+      const tacticalGrid = document.querySelector('#screen-help .help-tactical-grid');
+      const secHotlines = document.getElementById('section-help-hotlines');
+      const secFirstAid = document.getElementById('section-help-firstaid');
+      const emptyBox = document.getElementById('help-search-empty');
+
+      let matches = 0;
+
+      // 1. Filter Hotline Rows
+      const rows = document.querySelectorAll('#screen-help .hotline-row-item');
+      rows.forEach(r => {
+        const text = r.textContent.toLowerCase();
+        const tel = (r.querySelector('a[href^="tel:"]') ? r.querySelector('a[href^="tel:"]').getAttribute('href') : '').toLowerCase();
+        const hit = !q || text.includes(q) || tel.includes(q);
+        r.style.display = hit ? 'flex' : 'none';
+        if (hit) matches++;
+      });
+
+      // 2. Filter First Aid Accordions
+      const cards = document.querySelectorAll('#screen-help .firstaid-accordion-card');
+      cards.forEach(c => {
+        const text = c.textContent.toLowerCase();
+        const hit = !q || text.includes(q);
+        c.style.display = hit ? 'block' : 'none';
+        if (hit) matches++;
+      });
+
+      // 3. Filter Tactical Tiles
+      const tiles = document.querySelectorAll('#screen-help .help-card-tile');
+      tiles.forEach(t => {
+        const text = t.textContent.toLowerCase();
+        const hit = !q || text.includes(q);
+        t.style.display = hit ? 'flex' : 'none';
+        if (hit) matches++;
+      });
+
+      if (q) {
+        if (tacticalGrid) tacticalGrid.style.display = 'grid';
+        if (secHotlines) secHotlines.style.display = 'block';
+        if (secFirstAid) secFirstAid.style.display = 'block';
+        if (emptyBox) emptyBox.style.display = matches === 0 ? 'block' : 'none';
+      } else {
+        if (emptyBox) emptyBox.style.display = 'none';
+        const activeBtn = document.querySelector('#screen-help .apple-segment-btn.active');
+        const filterType = activeBtn ? (activeBtn.getAttribute('data-filter') || 'all') : 'all';
+        filterHelpSection(filterType, activeBtn);
+      }
+    }
+
+    function clearHelpSearch() {
+      const input = document.getElementById('help-search-input');
+      if (input) {
+        input.value = '';
+        searchHelpDirectory('');
+        input.focus();
+      }
+    }
+
+    function copyHotlineNumber(number, event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      const numStr = String(number || '').trim();
+      if (!numStr) return;
+
+      const btn = event && event.currentTarget;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(numStr).then(() => {
+          showHotlineCopyFeedback(btn);
+        }).catch(() => {
+          fallbackHotlineCopy(numStr, btn);
+        });
+      } else {
+        fallbackHotlineCopy(numStr, btn);
+      }
+    }
+
+    function showHotlineCopyFeedback(btn) {
+      if (!btn) return;
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-check" style="color: #30d158;"></i>';
+      btn.style.borderColor = 'rgba(48, 209, 88, 0.6)';
+      btn.style.color = '#30d158';
+      setTimeout(() => {
+        btn.innerHTML = originalHtml;
+        btn.style.borderColor = '';
+        btn.style.color = '';
+      }, 1600);
+    }
+
+    function fallbackHotlineCopy(text, btn) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showHotlineCopyFeedback(btn);
+      } catch (e) {}
+      document.body.removeChild(ta);
     }
 
     function toggleFirstAidGuide(id) {
