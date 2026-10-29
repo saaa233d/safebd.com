@@ -2206,7 +2206,7 @@ app.post('/api/feed/posts', postCreateLimiter, async (req, res) => {
     let mediaFileName = null;
     let mediaMimeType = null;
 
-    // Upload post picture or video directly to Private 5TB Google Drive Vault (SAFE_BD_VAULT) so Render RAM never overflows
+    // Upload post picture or video directly to Supabase Storage Global CDN + 5TB Vault
     if (media && typeof media === 'string' && media.startsWith('data:')) {
       const mimeMatch = media.match(/^data:([^;]+);base64,/);
       const mime = (mimeMatch && mimeMatch[1]) ? mimeMatch[1] : 'image/jpeg';
@@ -2219,16 +2219,35 @@ app.post('/api/feed/posts', postCreateLimiter, async (req, res) => {
       mediaFileName = `${cleanPhoneForFile}_POST_${Date.now()}.${ext}`;
       mediaMimeType = mime;
 
-      // Cache locally on disk for instant serving
+      const base64Clean = media.includes(',') ? media.split(',')[1] : media;
+      const mediaBuf = Buffer.from(base64Clean, 'base64');
+
+      // 1. Primary: Save to Supabase Storage Global CDN (Indestructible across Render redeployments)
       try {
-        const base64Clean = media.includes(',') ? media.split(',')[1] : media;
-        const mediaBuf = Buffer.from(base64Clean, 'base64');
+        if (db.uploadMediaToSupabaseStorage) {
+          const supaUrl = await db.uploadMediaToSupabaseStorage({
+            fileName: mediaFileName,
+            mimeType: mime,
+            buffer: mediaBuf
+          });
+          if (supaUrl) {
+            storedMediaUrl = supaUrl;
+          }
+        }
+      } catch (supaErr) {
+        console.warn('[⚠️ SUPABASE POST MEDIA UPLOAD ERROR]:', supaErr.message);
+      }
+
+      // 2. Cache locally on ephemeral disk for sub-millisecond local serving if needed
+      try {
         if (!fs.existsSync(EVIDENCE_DIR)) fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
         fs.writeFileSync(path.join(EVIDENCE_DIR, mediaFileName), mediaBuf);
-        storedMediaUrl = `/api/feed/posts/${postId}/media.${ext}`;
+        if (!storedMediaUrl) {
+          storedMediaUrl = `/api/feed/posts/${postId}/media.${ext}`;
+        }
       } catch (diskErr) {}
 
-      // Upload to 5TB Google Drive Vault (SAFE_BD_VAULT)
+      // 3. Secondary Backup: 5TB Google Drive Vault
       try {
         const gdRes = await db.uploadToGoogleDriveVault({
           fileName: mediaFileName,
@@ -2237,7 +2256,6 @@ app.post('/api/feed/posts', postCreateLimiter, async (req, res) => {
         });
         if (gdRes && gdRes.success && gdRes.fileId) {
           gdriveFileId = gdRes.fileId;
-          storedMediaUrl = `/api/feed/posts/${postId}/media.${ext}`;
         }
       } catch (gdErr) {
         console.warn('[⚠️ GDRIVE POST MEDIA UPLOAD WARN]:', gdErr.message);
@@ -2846,6 +2864,11 @@ app.get(['/api/feed/posts/:id/media', '/api/feed/posts/:id/media.:ext'], async (
     }
 
     const media = post.media || '';
+
+    // 0. If permanent Supabase CDN or external URL: Redirect 302 directly
+    if (typeof media === 'string' && (media.startsWith('http://') || media.startsWith('https://'))) {
+      return res.redirect(302, media);
+    }
 
     // 1. If legacy inline base64 data URI
     if (typeof media === 'string' && media.startsWith('data:')) {
