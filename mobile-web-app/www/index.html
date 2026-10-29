@@ -580,13 +580,13 @@
       position: relative;
       display: flex;
       flex-direction: column;
-      background: #09070d;
+      background: #050806;
     }
     .google-map-iframe {
       width: 100%;
       height: 100%;
       border: none;
-      filter: invert(90%) hue-rotate(180deg) brightness(85%) contrast(110%);
+      filter: invert(90%) hue-rotate(280deg) brightness(82%) contrast(120%) saturate(1.25);
     }
 
     .walk-overlay-panel {
@@ -594,18 +594,19 @@
       top: 10px;
       left: 12px;
       right: 12px;
-      background: linear-gradient(168deg, rgba(14, 21, 38, 0.90) 0%, rgba(8, 12, 24, 0.95) 100%);
-      border: 1px solid rgba(56, 189, 248, 0.28);
-      border-radius: 22px;
-      padding: 11px 14px 13px 14px;
-      backdrop-filter: blur(32px) saturate(210%);
-      -webkit-backdrop-filter: blur(32px) saturate(210%);
+      background: linear-gradient(168deg, rgba(11, 31, 23, 0.88) 0%, rgba(5, 12, 9, 0.94) 100%) !important;
+      border: 1px solid rgba(61, 255, 162, 0.22) !important;
+      border-top: 1.5px solid rgba(61, 255, 162, 0.48) !important;
+      border-radius: 24px !important;
+      padding: 12px 14px 14px 14px;
+      backdrop-filter: blur(30px) saturate(190%) !important;
+      -webkit-backdrop-filter: blur(30px) saturate(190%) !important;
       box-shadow: 
-        0 24px 50px -10px rgba(0, 0, 0, 0.85),
-        0 0 35px rgba(56, 189, 248, 0.1),
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.28);
+        0 24px 50px -10px rgba(0, 0, 0, 0.88),
+        0 0 30px rgba(61, 255, 162, 0.12),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.26) !important;
       z-index: 100;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .walk-overlay-panel::before {
       content: '';
@@ -613,7 +614,7 @@
       width: 42px;
       height: 4px;
       border-radius: 9999px;
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), rgba(56, 189, 248, 0.55), rgba(255, 255, 255, 0.08));
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), rgba(61, 255, 162, 0.55), rgba(255, 255, 255, 0.08));
       margin: 0 auto 9px auto;
     }
     .walk-header-row {
@@ -632,21 +633,21 @@
       gap: 7px;
     }
     .walk-title i {
-      color: #38bdf8 !important;
-      filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
+      color: #3dffa2 !important;
+      filter: drop-shadow(0 0 8px rgba(61, 255, 162, 0.6));
     }
     .walk-live-indicator {
       font-size: 10px;
       font-weight: 800;
-      color: #34d399;
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.1) 100%);
+      color: #3dffa2;
+      background: linear-gradient(135deg, rgba(61, 255, 162, 0.16) 0%, rgba(20, 83, 45, 0.2) 100%);
       padding: 3.5px 10px;
       border-radius: 9999px;
-      border: 1px solid rgba(16, 185, 129, 0.45);
+      border: 1px solid rgba(61, 255, 162, 0.4);
       display: flex;
       align-items: center;
       gap: 5px;
-      box-shadow: 0 0 14px rgba(16, 185, 129, 0.22);
+      box-shadow: 0 0 14px rgba(61, 255, 162, 0.22);
     }
 
     /* Apple Inset Segmented Mode Bar Inside Walk Panel */
@@ -660,27 +661,27 @@
       cursor: pointer;
     }
     .walk-overlay-panel .auth-toggle-tab.active {
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.24) 0%, rgba(14, 165, 233, 0.14) 100%) !important;
-      color: #38bdf8 !important;
-      border: 1px solid rgba(56, 189, 248, 0.5) !important;
+      background: linear-gradient(135deg, rgba(61, 255, 162, 0.22) 0%, rgba(20, 83, 45, 0.35) 100%) !important;
+      color: #3dffa2 !important;
+      border: 1px solid rgba(61, 255, 162, 0.55) !important;
       font-weight: 800 !important;
-      box-shadow: 0 2px 12px rgba(56, 189, 248, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+      box-shadow: 0 2px 14px rgba(61, 255, 162, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.28) !important;
     }
     .walk-overlay-panel .auth-toggle-tab:active {
       transform: scale(0.96);
     }
 
     #walk-user-badge {
-      background: rgba(15, 23, 42, 0.65) !important;
-      border: 1px solid rgba(56, 189, 248, 0.2) !important;
+      background: rgba(11, 31, 23, 0.65) !important;
+      border: 1px solid rgba(61, 255, 162, 0.22) !important;
       border-radius: 10px !important;
       padding: 4px 10px !important;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
       transition: all 0.2s ease;
     }
     #walk-user-badge:hover {
-      background: rgba(15, 23, 42, 0.85) !important;
-      border-color: rgba(56, 189, 248, 0.4) !important;
+      background: rgba(15, 38, 28, 0.85) !important;
+      border-color: rgba(61, 255, 162, 0.4) !important;
     }
 
     .route-input-group {
@@ -693,8 +694,8 @@
     .route-input-box {
       display: flex;
       align-items: center;
-      background: rgba(10, 16, 30, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(7, 18, 13, 0.8);
+      border: 1px solid rgba(61, 255, 162, 0.16);
       border-radius: 13px;
       padding: 8px 12px;
       gap: 8px;
@@ -702,9 +703,9 @@
       box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
     }
     .route-input-box:focus-within {
-      background: rgba(12, 19, 36, 0.9);
-      border-color: #38bdf8;
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.22), inset 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.35);
+      background: rgba(9, 24, 17, 0.92);
+      border-color: #3dffa2;
+      box-shadow: 0 0 0 3px rgba(61, 255, 162, 0.22), inset 0 1px 2px rgba(0, 0, 0, 0.25), 0 4px 16px rgba(0, 0, 0, 0.4);
     }
     .route-input-box i {
       font-size: 13px;
@@ -759,18 +760,19 @@
       right: 0;
       max-height: 290px;
       overflow-y: auto;
-      background: linear-gradient(168deg, rgba(14, 21, 38, 0.96) 0%, rgba(7, 11, 22, 0.98) 100%);
-      border: 1px solid rgba(56, 189, 248, 0.28);
+      background: linear-gradient(168deg, rgba(11, 31, 23, 0.96) 0%, rgba(5, 12, 9, 0.98) 100%);
+      border: 1px solid rgba(61, 255, 162, 0.28);
+      border-top: 1.5px solid rgba(61, 255, 162, 0.5);
       border-radius: 16px;
       backdrop-filter: blur(32px) saturate(200%);
       -webkit-backdrop-filter: blur(32px) saturate(200%);
       box-shadow: 
-        0 24px 54px rgba(0, 0, 0, 0.85),
-        0 0 25px rgba(56, 189, 248, 0.12),
+        0 24px 54px rgba(0, 0, 0, 0.9),
+        0 0 25px rgba(61, 255, 162, 0.15),
         inset 0 1px 0 0 rgba(255, 255, 255, 0.22);
       z-index: 500;
       scrollbar-width: thin;
-      scrollbar-color: rgba(56, 189, 248, 0.4) transparent;
+      scrollbar-color: rgba(61, 255, 162, 0.4) transparent;
     }
     .location-dropdown-popup.open {
       display: block;
@@ -788,7 +790,7 @@
       border-bottom: none;
     }
     .location-suggestion-item:hover, .location-suggestion-item:active {
-      background: rgba(56, 189, 248, 0.12);
+      background: rgba(61, 255, 162, 0.12);
     }
     .sug-icon-box {
       width: 32px;
@@ -857,8 +859,9 @@
     }
     .btn-start-walk {
       flex: 1;
-      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 50%, #0369a1 100%) !important;
-      border: 1px solid rgba(56, 189, 248, 0.6) !important;
+      background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%) !important;
+      border: 1px solid rgba(61, 255, 162, 0.55) !important;
+      border-top: 1.5px solid rgba(255, 255, 255, 0.45) !important;
       color: #ffffff !important;
       padding: 11.5px 14px;
       border-radius: 14px;
@@ -870,12 +873,12 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow: 0 8px 26px rgba(2, 132, 199, 0.48), 0 0 22px rgba(56, 189, 248, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 8px 26px rgba(5, 150, 105, 0.5), 0 0 22px rgba(61, 255, 162, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+      transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .btn-start-walk:hover {
-      background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 50%, #0284c7 100%) !important;
-      box-shadow: 0 10px 32px rgba(2, 132, 199, 0.6), 0 0 28px rgba(56, 189, 248, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+      background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%) !important;
+      box-shadow: 0 10px 32px rgba(5, 150, 105, 0.6), 0 0 28px rgba(61, 255, 162, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
       transform: translateY(-1.5px);
     }
     .btn-start-walk:active {
@@ -901,9 +904,9 @@
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .btn-open-gmaps:hover {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(56, 189, 248, 0.4);
-      color: #38bdf8;
+      background: rgba(61, 255, 162, 0.15);
+      border-color: rgba(61, 255, 162, 0.4);
+      color: #3dffa2;
       transform: translateY(-1.5px);
     }
     .btn-open-gmaps:active {
@@ -916,15 +919,16 @@
       bottom: 74px;
       left: 12px;
       right: 12px;
-      background: linear-gradient(175deg, rgba(14, 21, 38, 0.94) 0%, rgba(6, 10, 18, 0.98) 100%) !important;
-      border: 1px solid rgba(56, 189, 248, 0.28) !important;
+      background: linear-gradient(175deg, rgba(11, 31, 23, 0.92) 0%, rgba(5, 14, 10, 0.96) 100%) !important;
+      border: 1px solid rgba(61, 255, 162, 0.25) !important;
+      border-top: 1.5px solid rgba(61, 255, 162, 0.5) !important;
       border-radius: 28px !important;
       padding: 12px 16px 16px 16px;
       backdrop-filter: blur(34px) saturate(210%);
       -webkit-backdrop-filter: blur(34px) saturate(210%);
       box-shadow: 
-        0 -12px 45px rgba(0, 0, 0, 0.85),
-        0 0 30px rgba(56, 189, 248, 0.12),
+        0 -12px 45px rgba(0, 0, 0, 0.88),
+        0 0 30px rgba(61, 255, 162, 0.12),
         inset 0 1px 0 0 rgba(255, 255, 255, 0.3) !important;
       z-index: 95;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -935,7 +939,7 @@
       width: 42px;
       height: 4.5px;
       border-radius: 9999px;
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(56, 189, 248, 0.55), rgba(255, 255, 255, 0.1)) !important;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(61, 255, 162, 0.55), rgba(255, 255, 255, 0.1)) !important;
       margin: 0 auto 10px auto;
     }
 
@@ -1018,24 +1022,24 @@
 
     /* GOOGLE MAPS DARK THEME NAVIGATION INTERFACE */
     #interactive-nav-map {
-      background: #09070d !important;
+      background: #050806 !important;
       outline: none;
     }
     #interactive-nav-map .leaflet-container {
-      background: #09070d !important;
+      background: #050806 !important;
       font-family: inherit;
     }
     #interactive-nav-map .leaflet-tile-pane {
-      /* High-Precision Google Maps Midnight Filter:
-         1. Inverts white/light roads & land into dark navy/slate
-         2. Hue-rotates 180deg so water stays cool navy & parks stay deep forest olive
-         3. Adjusts brightness, contrast & saturation for clean nighttime legibility
+      /* High-Precision Dark Forest Green Midnight Filter:
+         1. Inverts white/light roads & land into dark forest/slate
+         2. Hue-rotates 280deg for deep emerald/black-green landscape matching Help page
+         3. Adjusts brightness, contrast & saturation for Apple Liquid Glass theme
       */
-      filter: invert(100%) hue-rotate(180deg) brightness(82%) contrast(108%) saturate(0.72);
-      -webkit-filter: invert(100%) hue-rotate(180deg) brightness(82%) contrast(108%) saturate(0.72);
+      filter: invert(100%) hue-rotate(280deg) brightness(82%) contrast(125%) saturate(1.3);
+      -webkit-filter: invert(100%) hue-rotate(280deg) brightness(82%) contrast(125%) saturate(1.3);
     }
     #interactive-nav-map .leaflet-tile {
-      background: #09070d !important;
+      background: #050806 !important;
       image-rendering: -webkit-optimize-contrast;
       image-rendering: high-quality;
     }
@@ -1050,40 +1054,40 @@
     }
     /* Dark mode controls & attribution */
     #interactive-nav-map .leaflet-control-zoom {
-      border: 1px solid rgba(225, 29, 72, 0.3) !important;
+      border: 1px solid rgba(61, 255, 162, 0.3) !important;
       border-radius: 10px !important;
       overflow: hidden;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7) !important;
     }
     #interactive-nav-map .leaflet-control-zoom a {
-      background: rgba(18, 15, 24, 0.92) !important;
-      color: #f1f5f9 !important;
+      background: rgba(11, 31, 23, 0.92) !important;
+      color: #3dffa2 !important;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
       backdrop-filter: blur(8px);
     }
     #interactive-nav-map .leaflet-control-zoom a:hover {
-      background: var(--burgundy-core) !important;
-      color: #fff !important;
+      background: rgba(20, 83, 45, 0.95) !important;
+      color: #3dffa2 !important;
     }
     #interactive-nav-map .leaflet-control-attribution {
-      background: rgba(10, 8, 13, 0.8) !important;
+      background: rgba(5, 8, 6, 0.85) !important;
       color: rgba(255, 255, 255, 0.4) !important;
       font-size: 9px;
       backdrop-filter: blur(4px);
     }
     #interactive-nav-map .leaflet-control-attribution a {
-      color: rgba(225, 29, 72, 0.8) !important;
+      color: rgba(61, 255, 162, 0.8) !important;
     }
     #interactive-nav-map .leaflet-popup-content-wrapper {
-      background: rgba(14, 11, 18, 0.95) !important;
+      background: rgba(11, 31, 23, 0.95) !important;
       color: #fff !important;
-      border: 1px solid var(--burgundy-border) !important;
+      border: 1px solid rgba(61, 255, 162, 0.35) !important;
       border-radius: 12px !important;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
     }
     #interactive-nav-map .leaflet-popup-tip {
-      background: rgba(14, 11, 18, 0.95) !important;
-      border: 1px solid var(--burgundy-border) !important;
+      background: rgba(11, 31, 23, 0.95) !important;
+      border: 1px solid rgba(61, 255, 162, 0.35) !important;
     }
     .custom-live-green-nav-icon {
       background: transparent;
@@ -1112,15 +1116,15 @@
     .dock-timer-badge {
       font-size: 15px;
       font-weight: 900;
-      color: #38bdf8;
+      color: #3dffa2;
       font-variant-numeric: tabular-nums;
       letter-spacing: -0.5px;
-      background: rgba(56, 189, 248, 0.16);
-      border: 1px solid rgba(56, 189, 248, 0.4);
+      background: rgba(61, 255, 162, 0.16);
+      border: 1px solid rgba(61, 255, 162, 0.45);
       padding: 3.5px 11px;
       border-radius: 9999px;
-      box-shadow: 0 0 16px rgba(56, 189, 248, 0.32);
-      text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+      box-shadow: 0 0 16px rgba(61, 255, 162, 0.32);
+      text-shadow: 0 0 10px rgba(61, 255, 162, 0.5);
       cursor: pointer;
       transition: all 0.18s ease;
     }
@@ -1152,10 +1156,10 @@
       letter-spacing: -0.1px;
     }
     .dock-telemetry-pod {
-      background: rgba(10, 16, 28, 0.72) !important;
+      background: rgba(7, 18, 13, 0.8) !important;
       padding: 8px 12px;
       border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.09);
+      border: 1px solid rgba(61, 255, 162, 0.16);
       box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
     }
     .dock-telemetry-label {
@@ -1169,8 +1173,8 @@
     }
     .dock-tool-btn {
       flex: 1;
-      background: rgba(14, 21, 38, 0.8);
-      border: 1px solid rgba(56, 189, 248, 0.22);
+      background: rgba(11, 31, 23, 0.8);
+      border: 1px solid rgba(61, 255, 162, 0.25);
       color: #ffffff;
       padding: 8.5px 12px;
       border-radius: 13px;
@@ -1189,8 +1193,8 @@
       transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .dock-tool-btn:hover {
-      background: rgba(56, 189, 248, 0.16);
-      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(61, 255, 162, 0.16);
+      border-color: rgba(61, 255, 162, 0.45);
     }
     .dock-tool-btn:active {
       transform: scale(0.96);
@@ -1252,9 +1256,10 @@
       z-index: 105;
     }
     .btn-map-control {
-      background: linear-gradient(135deg, rgba(14, 21, 38, 0.88) 0%, rgba(7, 11, 20, 0.94) 100%);
-      border: 1px solid rgba(56, 189, 248, 0.28);
-      color: #ffffff;
+      background: linear-gradient(135deg, rgba(11, 31, 23, 0.88) 0%, rgba(5, 12, 9, 0.94) 100%);
+      border: 1px solid rgba(61, 255, 162, 0.3);
+      border-top: 1.5px solid rgba(61, 255, 162, 0.5);
+      color: #3dffa2;
       width: 44px;
       height: 44px;
       border-radius: 50%;
@@ -1264,17 +1269,17 @@
       font-size: 15px;
       cursor: pointer;
       box-shadow: 
-        0 8px 24px rgba(0, 0, 0, 0.55),
-        0 0 16px rgba(56, 189, 248, 0.1),
+        0 8px 24px rgba(0, 0, 0, 0.6),
+        0 0 16px rgba(61, 255, 162, 0.15),
         inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
-      backdrop-filter: blur(24px) saturate(200%);
-      -webkit-backdrop-filter: blur(24px) saturate(200%);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .btn-map-control:hover {
-      background: rgba(56, 189, 248, 0.2);
-      border-color: rgba(56, 189, 248, 0.55);
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
+      background: rgba(61, 255, 162, 0.2);
+      border-color: rgba(61, 255, 162, 0.6);
+      box-shadow: 0 0 20px rgba(61, 255, 162, 0.35);
       transform: scale(1.06);
     }
     .btn-map-control:active {
@@ -1286,15 +1291,16 @@
       top: 12px;
       left: 12px;
       right: 12px;
-      background: linear-gradient(168deg, rgba(14, 21, 38, 0.94) 0%, rgba(7, 11, 20, 0.98) 100%) !important;
-      border: 1px solid rgba(56, 189, 248, 0.32) !important;
+      background: linear-gradient(168deg, rgba(11, 31, 23, 0.94) 0%, rgba(5, 14, 10, 0.98) 100%) !important;
+      border: 1px solid rgba(61, 255, 162, 0.3) !important;
+      border-top: 1.5px solid rgba(61, 255, 162, 0.5) !important;
       border-radius: 22px !important;
       padding: 13px 16px;
       backdrop-filter: blur(34px) saturate(220%) !important;
       -webkit-backdrop-filter: blur(34px) saturate(220%) !important;
       box-shadow: 
-        0 24px 54px rgba(0, 0, 0, 0.85),
-        0 0 25px rgba(56, 189, 248, 0.12),
+        0 24px 54px rgba(0, 0, 0, 0.88),
+        0 0 25px rgba(61, 255, 162, 0.15),
         inset 0 1px 0 0 rgba(255, 255, 255, 0.28) !important;
       z-index: 100;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -2527,8 +2533,8 @@
       color: #ff453a;
     }
     #nav-tab-map.nav-tab-btn.active .nav-tab-icon { 
-      color: #38bdf8; 
-      filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.75)); 
+      color: #3dffa2; 
+      filter: drop-shadow(0 0 8px rgba(61, 255, 162, 0.75)); 
     }
     #nav-tab-feed.nav-tab-btn.active .nav-tab-icon { color: #ff9f0a; }
     #nav-tab-help.nav-tab-btn.active .nav-tab-icon { color: #ff375f; }
@@ -4313,7 +4319,7 @@
       position: relative !important;
       display: flex;
       flex-direction: column;
-      background: #09070d;
+      background: #050806;
       transform: none !important;
       will-change: auto !important;
     }
@@ -4324,7 +4330,7 @@
       width: 100% !important;
       height: 100% !important;
       z-index: 1 !important;
-      background: #09070d !important;
+      background: #050806 !important;
       transform: none !important;
       will-change: auto !important;
     }
@@ -5816,7 +5822,7 @@
           <!-- Personal Citizen Companion Indicator -->
           <div id="walk-user-badge" onclick="openAuthModal()" style="font-size: 10px; margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; padding: 3px 8px; background: rgba(255, 255, 255, 0.04); border-radius: 8px; border: 1px solid var(--border-quiet); cursor: pointer;" title="Tap to unlock Citizen Profile">
             <div id="walk-user-badge-text" style="color: #94a3b8; font-size: 10px; display: flex; align-items: center; gap: 5px;">
-              <i class="fas fa-user-shield" style="color: #38bdf8;"></i> <span data-i18n="walk_guard_dedicated">Personal Route Guardian</span>
+              <i class="fas fa-user-shield" style="color: #3dffa2;"></i> <span data-i18n="walk_guard_dedicated">Personal Route Guardian</span>
             </div>
             <div id="walk-user-auth-indicator" style="font-size: 9.5px; font-weight: 700; color: #10b981;">
               ● Profile Active
@@ -5836,7 +5842,7 @@
             </div>
             
             <!-- Transportation Mode Selector (Walk, Car/CNG, Bike) -->
-            <div style="display: flex; gap: 5px; margin: 4px 0 5px 0; background: rgba(6, 10, 18, 0.85); border: 1px solid rgba(255, 255, 255, 0.09); padding: 3.5px; border-radius: 11px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);">
+            <div style="display: flex; gap: 5px; margin: 4px 0 5px 0; background: rgba(5, 14, 10, 0.85); border: 1px solid rgba(61, 255, 162, 0.18); padding: 3.5px; border-radius: 11px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);">
               <button type="button" class="auth-toggle-tab active" id="mode-btn-walking" style="padding: 5px 3px; font-size: 10.5px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="selectTravelMode('walking')">
                 <i class="fas fa-person-walking"></i> <span data-i18n="walk_mode_walk">Walk</span>
               </button>
@@ -5862,9 +5868,9 @@
             </div>
 
             <!-- Compact Single-Line Journey Safety Timer with Google Maps ETA Auto-Prediction -->
-            <div id="walk-timer-setting-box" style="margin-top: 6px; background: linear-gradient(135deg, rgba(14, 21, 38, 0.92) 0%, rgba(8, 12, 24, 0.96) 100%); backdrop-filter: blur(24px); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 14px; padding: 7px 11px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.18);">
+            <div id="walk-timer-setting-box" style="margin-top: 6px; background: linear-gradient(135deg, rgba(11, 31, 23, 0.92) 0%, rgba(5, 12, 9, 0.96) 100%); backdrop-filter: blur(24px); border: 1px solid rgba(61, 255, 162, 0.3); border-top: 1.5px solid rgba(61, 255, 162, 0.5); border-radius: 14px; padding: 7px 11px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.18);">
               <div style="display: flex; align-items: center; gap: 7px; min-width: 0;">
-                <div style="width: 26px; height: 26px; border-radius: 8px; background: rgba(56, 189, 248, 0.16); border: 1px solid rgba(56, 189, 248, 0.4); display: flex; align-items: center; justify-content: center; color: #38bdf8; font-size: 12px; flex-shrink: 0; box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);">
+                <div style="width: 26px; height: 26px; border-radius: 8px; background: rgba(61, 255, 162, 0.14); border: 1px solid rgba(61, 255, 162, 0.4); display: flex; align-items: center; justify-content: center; color: #3dffa2; font-size: 12px; flex-shrink: 0; box-shadow: 0 0 10px rgba(61, 255, 162, 0.25);">
                   <i class="fas fa-stopwatch"></i>
                 </div>
                 <div style="display: flex; flex-direction: column; line-height: 1.2;">
@@ -5879,10 +5885,10 @@
               </div>
               <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
                 <button type="button" onclick="adjustCustomTimerMinutes(-5)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; width: 25px; height: 25px; border-radius: 7px; font-size: 11px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.25); transition: transform 0.1s ease;" onmousedown="this.style.transform='scale(0.92)'" onmouseup="this.style.transform='none'" title="Minus 5 mins">-5</button>
-                <input type="number" id="user-custom-timer-mins" min="1" max="720" value="20" oninput="onCustomTimerInputChange(this.value)" style="width: 44px; text-align: center; background: rgba(56, 189, 248, 0.16); border: 1.5px solid #38bdf8; border-radius: 8px; color: #38bdf8; font-weight: 800; font-size: 13px; padding: 2px 0; outline: none; transition: all 0.25s ease; text-shadow: 0 0 10px rgba(56, 189, 248, 0.45); box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);">
+                <input type="number" id="user-custom-timer-mins" min="1" max="720" value="20" oninput="onCustomTimerInputChange(this.value)" style="width: 44px; text-align: center; background: rgba(61, 255, 162, 0.14); border: 1.5px solid #3dffa2; border-radius: 8px; color: #3dffa2; font-weight: 800; font-size: 13px; padding: 2px 0; outline: none; transition: all 0.25s ease; text-shadow: 0 0 10px rgba(61, 255, 162, 0.45); box-shadow: 0 0 12px rgba(61, 255, 162, 0.25);">
                 <span style="font-size: 10px; color: #94a3b8; font-weight: 700;" data-i18n="walk_timer_mins_unit">mins</span>
                 <button type="button" onclick="adjustCustomTimerMinutes(+5)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; width: 25px; height: 25px; border-radius: 7px; font-size: 11px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.25); transition: transform 0.1s ease;" onmousedown="this.style.transform='scale(0.92)'" onmouseup="this.style.transform='none'" title="Plus 5 mins">+5</button>
-                <button type="button" id="btn-reset-maps-eta" onclick="resetTimerToGoogleMapsEta()" style="display: none; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; width: 25px; height: 25px; border-radius: 7px; font-size: 10px; cursor: pointer; align-items: center; justify-content: center;" title="Reset to Google Maps ETA">
+                <button type="button" id="btn-reset-maps-eta" onclick="resetTimerToGoogleMapsEta()" style="display: none; background: rgba(61, 255, 162, 0.14); border: 1px solid rgba(61, 255, 162, 0.4); color: #3dffa2; width: 25px; height: 25px; border-radius: 7px; font-size: 10px; cursor: pointer; align-items: center; justify-content: center;" title="Reset to Google Maps ETA">
                   <i class="fas fa-rotate-left"></i>
                 </button>
               </div>
@@ -5910,7 +5916,7 @@
               <div style="font-size: 11px; color: #34d399; font-weight: 800; background: rgba(16, 185, 129, 0.18); padding: 2.5px 9px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.4); box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);" id="transit-speed-badge">
                 ⚡ 0 km/h
               </div>
-              <button type="button" onclick="openEditTimerModal()" style="background: rgba(56, 189, 248, 0.16); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; border-radius: 7px; padding: 2.5px 7px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 3px; box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);" title="Edit Timer">
+              <button type="button" onclick="openEditTimerModal()" style="background: rgba(61, 255, 162, 0.16); border: 1px solid rgba(61, 255, 162, 0.4); color: #3dffa2; border-radius: 7px; padding: 2.5px 7px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 3px; box-shadow: 0 0 10px rgba(61, 255, 162, 0.2);" title="Edit Timer">
                 <i class="fas fa-stopwatch"></i>
               </button>
               <button type="button" onclick="editWalkDestination()" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--text-muted); border-radius: 7px; cursor: pointer; padding: 2.5px 6px; font-size: 11px; transition: color 0.15s ease;" title="Edit route">
@@ -5924,14 +5930,14 @@
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 10.5px; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.08); padding-top: 6px;">
             <div>To: <strong style="color: #fff;" id="transit-target-dest">--</strong></div>
-            <div id="transit-eta-metric" onclick="openEditTimerModal()" style="color: #38bdf8; font-weight: 700; cursor: pointer; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);" title="Tap to edit timer">Remaining: ~-- mins</div>
+            <div id="transit-eta-metric" onclick="openEditTimerModal()" style="color: #3dffa2; font-weight: 700; cursor: pointer; text-shadow: 0 0 10px rgba(61, 255, 162, 0.4);" title="Tap to edit timer">Remaining: ~-- mins</div>
           </div>
         </div>
 
         <!-- Floating Google Maps Live Tracking Quick Actions -->
         <div class="map-floating-controls" id="map-floating-controls">
           <button type="button" class="btn-map-control" onclick="centerOnUserLiveLocation(true)" title="Center on My Live Location">
-            <i class="fas fa-crosshairs" style="color: #38bdf8; filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.6));"></i>
+            <i class="fas fa-crosshairs" style="color: #3dffa2; filter: drop-shadow(0 0 6px rgba(61, 255, 162, 0.6));"></i>
           </button>
           <button type="button" class="btn-map-control" onclick="toggleMapOverviewRoute()" id="btn-toggle-route-view" title="Toggle Route / Live Pin View" style="display: none;">
             <i class="fas fa-route" style="color: #10b981; filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.6));"></i>
@@ -5960,7 +5966,7 @@
           </div>
 
           <!-- Active Vehicle Number Plate Badge -->
-          <div id="walk-dock-vehicle-badge" style="display: none; align-items: center; gap: 6px; background: rgba(56, 189, 248, 0.16); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 9999px; padding: 3px 11px; margin-bottom: 8px; width: fit-content; font-size: 11px; font-weight: 800; color: #38bdf8; box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);">
+          <div id="walk-dock-vehicle-badge" style="display: none; align-items: center; gap: 6px; background: rgba(61, 255, 162, 0.16); border: 1px solid rgba(61, 255, 162, 0.4); border-radius: 9999px; padding: 3px 11px; margin-bottom: 8px; width: fit-content; font-size: 11px; font-weight: 800; color: #3dffa2; box-shadow: 0 0 12px rgba(61, 255, 162, 0.25);">
             <i class="fas fa-car-side"></i> <span id="walk-dock-vehicle-text">Vehicle: --</span>
           </div>
 
@@ -5972,7 +5978,7 @@
             </div>
             <div class="dock-telemetry-pod">
               <span class="dock-telemetry-label" data-i18n="dock_gps_label">GPS TRACKING</span>
-              <strong id="dock-live-accuracy" style="color: #38bdf8; font-size: 13.5px; font-weight: 900; text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);" data-i18n="dock_satellite_active">Satellite Active</strong>
+              <strong id="dock-live-accuracy" style="color: #3dffa2; font-size: 13.5px; font-weight: 900; text-shadow: 0 0 10px rgba(61, 255, 162, 0.5);" data-i18n="dock_satellite_active">Satellite Active</strong>
             </div>
           </div>
 
@@ -9053,10 +9059,10 @@
     function renderTurnByTurnPolyline(latLngs) {
       if (!navMap || !Array.isArray(latLngs) || latLngs.length < 2) return;
 
-      // 1. Google Maps Navigation Outer Casing (Deep vibrant cyan/blue casing)
+      // 1. Google Maps Navigation Outer Casing (Deep forest emerald casing)
       if (!navRouteCasingPolyline) {
         navRouteCasingPolyline = L.polyline(latLngs, {
-          color: '#0284c7',
+          color: '#065f46',
           weight: 7,
           opacity: 0.95,
           lineCap: 'round',
@@ -9066,10 +9072,10 @@
         navRouteCasingPolyline.setLatLngs(latLngs);
       }
 
-      // 2. Google Maps Navigation Core Path (Luminous sky cyan path)
+      // 2. Google Maps Navigation Core Path (Luminous mint green path)
       if (!navRoutePolyline) {
         navRoutePolyline = L.polyline(latLngs, {
-          color: '#38bdf8',
+          color: '#3dffa2',
           weight: 4.5,
           opacity: 1.0,
           lineCap: 'round',
@@ -9358,7 +9364,7 @@
         mapTrackingViewMode = 'route';
         const toggleBtn = document.getElementById('btn-toggle-route-view');
         if (toggleBtn) {
-          toggleBtn.innerHTML = '<i class="fas fa-crosshairs" style="color: #38bdf8;"></i>';
+          toggleBtn.innerHTML = '<i class="fas fa-crosshairs" style="color: #3dffa2;"></i>';
           toggleBtn.title = 'Track My Live Location Pin';
         }
         if (navMap && cachedRouteWaypoints && cachedRouteWaypoints.length > 1) {
@@ -11741,8 +11747,8 @@
           input.style.color = '#34d399';
           setTimeout(() => {
             if (input) {
-              input.style.borderColor = '#38bdf8';
-              input.style.color = '#38bdf8';
+              input.style.borderColor = '#3dffa2';
+              input.style.color = '#3dffa2';
             }
           }, 800);
         }
@@ -11816,9 +11822,9 @@
       updateTimerSourceBadge(false);
       const chip = document.getElementById(`chip-timer-${userConfiguredTimerMinutes}`);
       if (chip) {
-        chip.style.background = 'rgba(56, 189, 248, 0.22)';
-        chip.style.borderColor = '#38bdf8';
-        chip.style.color = '#38bdf8';
+        chip.style.background = 'rgba(61, 255, 162, 0.22)';
+        chip.style.borderColor = '#3dffa2';
+        chip.style.color = '#3dffa2';
       }
     }
 
@@ -11854,9 +11860,9 @@
       });
       const chip = document.getElementById(`chip-timer-${mins}`);
       if (chip) {
-        chip.style.background = 'rgba(56, 189, 248, 0.22)';
-        chip.style.borderColor = '#38bdf8';
-        chip.style.color = '#38bdf8';
+        chip.style.background = 'rgba(61, 255, 162, 0.22)';
+        chip.style.borderColor = '#3dffa2';
+        chip.style.color = '#3dffa2';
       }
     }
 
