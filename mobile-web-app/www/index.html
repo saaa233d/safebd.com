@@ -227,118 +227,68 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 16px;
-      background: rgba(18, 22, 34, 0.7);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
+      padding: 11px 18px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 9999px;
       margin-bottom: 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.6),
+                  inset 0 1px 1px rgba(255, 255, 255, 0.12);
       gap: 12px;
     }
-    .strip-content-wrap {
-      min-width: 0;
-      flex: 1;
+    #screen-sos {
+      position: relative;
+      background: radial-gradient(circle at 50% 190px, rgba(225, 29, 72, 0.12) 0%, rgba(120, 0, 22, 0.04) 45%, transparent 75%);
     }
-    .strip-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: #f8fafc;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      letter-spacing: -0.2px;
-    }
-    .cad-live-beacon {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #10b981;
-      box-shadow: 0 0 8px #10b981;
-      display: inline-block;
-      animation: cadBeaconPulse 2s infinite ease-in-out;
-      flex-shrink: 0;
-    }
-    @keyframes cadBeaconPulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
-    }
-    .strip-sub {
-      font-size: 10.5px;
-      color: #94a3b8;
-      margin-top: 1px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      letter-spacing: 0.1px;
-    }
-    .strip-btn {
-      background: linear-gradient(135deg, #ff3b30 0%, #e11d48 100%);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 7px 16px;
-      border-radius: 9999px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 4px 14px rgba(255, 59, 48, 0.4);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .strip-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(255, 59, 48, 0.55);
-    }
-    .strip-btn:active {
-      transform: scale(0.96);
-    }
-
-    /* 2. APPLE WATCH ULTRA LIVING RADAR SOS DISC */
     .sos-stage {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      margin: 28px 0 34px 0;
+      margin: 30px 0 36px 0;
       position: relative;
     }
     .sos-radar-ring {
       position: absolute;
       border-radius: 50%;
       pointer-events: none;
-      border: 1.5px solid rgba(255, 59, 48, 0.35);
+      border: none !important;
+      filter: blur(14px);
     }
     .sos-radar-ring.ring-1 {
-      width: 195px;
-      height: 200px;
-      background: radial-gradient(circle, rgba(255, 69, 58, 0.28) 0%, rgba(255, 69, 58, 0.08) 60%, transparent 80%);
-      animation: appleRadarPulse 2.8s infinite cubic-bezier(0.2, 0.8, 0.2, 1);
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(255, 59, 48, 0.38) 0%, rgba(225, 29, 72, 0.14) 50%, transparent 75%);
+      animation: appleLivingAura 4.2s infinite ease-in-out;
     }
     .sos-radar-ring.ring-2 {
-      width: 250px;
-      height: 250px;
-      background: radial-gradient(circle, rgba(255, 69, 58, 0.18) 0%, rgba(255, 69, 58, 0.04) 70%, transparent 90%);
-      animation: appleRadarPulse 2.8s infinite 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+      width: 290px;
+      height: 290px;
+      background: radial-gradient(circle, rgba(255, 59, 48, 0.22) 0%, rgba(225, 29, 72, 0.06) 60%, transparent 85%);
+      animation: appleLivingAura 4.2s infinite 2.1s ease-in-out;
     }
-    @keyframes appleRadarPulse {
-      0% { transform: scale(0.72); opacity: 0.9; }
-      50% { opacity: 0.35; }
-      100% { transform: scale(1.22); opacity: 0; }
+    @keyframes appleLivingAura {
+      0%, 100% {
+        transform: scale(0.92);
+        opacity: 0.55;
+      }
+      50% {
+        transform: scale(1.14);
+        opacity: 0.95;
+      }
     }
     .sos-button-disc {
       width: 172px;
       height: 172px;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 25%, #ff453a 0%, #e01435 40%, #9e001c 80%, #59000e 100%);
-      border: 2px solid rgba(255, 255, 255, 0.35);
-      box-shadow: 0 18px 50px rgba(225, 29, 72, 0.55), 
-                  inset 0 3px 6px rgba(255, 255, 255, 0.6), 
-                  inset 0 -10px 22px rgba(0, 0, 0, 0.65);
+      background: radial-gradient(circle at 38% 28%, #ff453a 0%, #d81436 42%, #8e0019 82%, #4d000c 100%);
+      border: 1.5px solid rgba(255, 255, 255, 0.45);
+      box-shadow: 0 24px 60px -12px rgba(225, 29, 72, 0.65), 
+                  0 0 40px rgba(255, 59, 48, 0.25), 
+                  inset 0 2px 4px rgba(255, 255, 255, 0.7), 
+                  inset 0 -12px 24px rgba(0, 0, 0, 0.75);
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -346,69 +296,60 @@
       cursor: pointer;
       position: relative;
       user-select: none;
-      transition: transform 0.22s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.22s ease;
+      transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease;
       z-index: 2;
       -webkit-tap-highlight-color: transparent;
     }
+    .sos-button-disc:active,
+    .sos-button-disc.holding {
+      transform: scale(0.95) !important;
+      box-shadow: 0 12px 35px -8px rgba(225, 29, 72, 0.8),
+                  0 0 50px rgba(255, 59, 48, 0.4),
+                  inset 0 3px 8px rgba(0, 0, 0, 0.8) !important;
+    }
     .sos-glass-reflection {
       position: absolute;
-      top: 6px;
-      left: 18px;
-      right: 18px;
-      height: 60px;
+      top: 8px;
+      left: 20px;
+      right: 20px;
+      height: 52px;
       border-radius: 50% 50% 40% 40%;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0) 100%);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.08) 75%, transparent 100%);
       pointer-events: none;
     }
     .sos-progress-svg {
       position: absolute;
-      top: -6px;
-      left: -6px;
-      width: 184px;
-      height: 184px;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       transform: rotate(-90deg);
       pointer-events: none;
     }
     .sos-progress-meter {
       fill: none;
-      stroke: rgba(255, 255, 255, 0.95);
-      stroke-width: 4px;
+      stroke: #fff;
+      stroke-width: 6;
       stroke-linecap: round;
       stroke-dasharray: 540;
       stroke-dashoffset: 540;
-      transition: stroke-dashoffset 0.15s ease-out;
-      filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8));
-    }
-    .sos-button-disc:hover {
-      transform: scale(1.03);
-      box-shadow: 0 24px 60px rgba(225, 29, 72, 0.68), 
-                  inset 0 3px 8px rgba(255, 255, 255, 0.7), 
-                  inset 0 -10px 22px rgba(0, 0, 0, 0.65);
-    }
-    .sos-button-disc:active {
-      transform: scale(0.94);
-      box-shadow: 0 10px 28px rgba(225, 29, 72, 0.7);
+      transition: stroke-dashoffset 0.05s linear;
+      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
     }
     .sos-text-label {
-      font-size: 32px;
+      font-size: 38px;
       font-weight: 900;
-      letter-spacing: 0.5px;
-      color: #ffffff;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
-      line-height: 1;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     }
     .sos-text-sub {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1.4px;
-      color: rgba(255, 255, 255, 0.9);
-      margin-top: 6px;
+      font-size: 11px;
       font-weight: 700;
-      background: rgba(0, 0, 0, 0.28);
-      backdrop-filter: blur(8px);
-      padding: 2px 10px;
-      border-radius: 9999px;
-      border: 1px solid rgba(255, 255, 255, 0.16);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.85);
+      margin-top: 2px;
     }
 
     /* 3. APPLE INSET GROUPED TILES */
@@ -448,18 +389,19 @@
       transform: translateY(-1px);
     }
     .clean-tile {
-      background: rgba(18, 22, 34, 0.65);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      border-radius: 18px;
-      padding: 14px 16px;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.075);
+      border-radius: 20px;
+      padding: 15px 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      margin-bottom: 12px;
+      box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.65),
+                  inset 0 1px 1px rgba(255, 255, 255, 0.09);
+      transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, border-color 0.22s ease;
     }
     .clean-tile:hover {
       transform: translateY(-2px);
@@ -510,28 +452,29 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
     .squircle-walk {
-      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 50%, #0369a1 100%);
-      box-shadow: 0 4px 18px rgba(14, 165, 233, 0.45), 0 0 16px rgba(56, 189, 248, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      box-shadow: 0 6px 18px -4px rgba(2, 132, 199, 0.55);
     }
     .squircle-gps {
-      background: linear-gradient(135deg, #0a84ff 0%, #64d2ff 100%);
-      box-shadow: 0 4px 14px rgba(10, 132, 255, 0.35);
+      background: linear-gradient(135deg, #059669, #047857);
+      box-shadow: 0 6px 18px -4px rgba(5, 150, 105, 0.55);
     }
 
     /* 5. CONTACTS LIST APPLE STYLING */
     .contact-item-card {
-      background: rgba(18, 22, 34, 0.65);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.075);
+      border-radius: 20px;
       padding: 13px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 9px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      margin-bottom: 10px;
+      box-shadow: 0 10px 28px -10px rgba(0, 0, 0, 0.65),
+                  inset 0 1px 1px rgba(255, 255, 255, 0.09);
+      transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, border-color 0.22s ease;
     }
     .contact-item-card:hover {
       transform: translateY(-2px);
