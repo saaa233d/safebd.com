@@ -5176,70 +5176,127 @@
       transform: translateY(-1px);
     }
 
-    /* First Aid Drawers (Liquid Glass Accordions) */
+    /* First Aid Drawers — High-Contrast Apple Liquid Forest Glass */
     .lg-aid-card {
-      background: linear-gradient(145deg, rgba(11, 31, 23, 0.65) 0%, rgba(5, 8, 6, 0.8) 100%);
-      border: 1px solid rgba(61, 255, 162, 0.12);
-      border-top: 1px solid rgba(61, 255, 162, 0.24);
-      border-radius: 20px;
-      margin-bottom: 11px;
-      overflow: hidden;
-      box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.08);
-      transition: all 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+      background: linear-gradient(155deg, rgba(16, 36, 28, 0.94) 0%, rgba(9, 20, 16, 0.98) 100%) !important;
+      border: 1px solid rgba(61, 255, 162, 0.22) !important;
+      border-top: 1.5px solid rgba(61, 255, 162, 0.45) !important;
+      border-radius: 20px !important;
+      margin-bottom: 13px !important;
+      overflow: hidden !important;
+      box-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.75), 0 0 16px rgba(61, 255, 162, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.12) !important;
+      transition: all 0.24s cubic-bezier(0.22, 1, 0.36, 1) !important;
+    }
+    .lg-aid-card:hover {
+      border-color: rgba(61, 255, 162, 0.45) !important;
+      box-shadow: 0 14px 34px -8px rgba(0, 0, 0, 0.85), 0 0 22px rgba(61, 255, 162, 0.1) !important;
     }
     .lg-aid-header {
-      padding: 13px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      user-select: none;
+      padding: 15px 18px !important;
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      cursor: pointer !important;
+      user-select: none !important;
+      -webkit-tap-highlight-color: transparent !important;
     }
     .lg-aid-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--lg-text-main);
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      font-size: 14.5px !important;
+      font-weight: 800 !important;
+      color: #f8fafc !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      letter-spacing: -0.2px !important;
+    }
+    .lg-aid-title i {
+      font-size: 16px !important;
+      filter: drop-shadow(0 0 8px rgba(61, 255, 162, 0.5));
     }
     .lg-aid-chevron {
-      color: var(--lg-mint);
-      font-size: 12px;
-      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      color: #3dffa2 !important;
+      font-size: 14px !important;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1) !important;
     }
     .lg-aid-body {
-      padding: 4px 16px 14px 16px;
-      border-top: 1px solid rgba(61, 255, 162, 0.08);
-      font-size: 11.5px;
-      color: var(--lg-text-sub);
-      line-height: 1.5;
+      padding: 10px 18px 18px 18px !important;
+      border-top: 1px solid rgba(61, 255, 162, 0.12) !important;
+      font-size: 13.5px !important;
+      color: #f1f5f9 !important;
+      line-height: 1.65 !important;
+      background: rgba(4, 10, 8, 0.6) !important;
+    }
+    .lg-aid-step-row {
+      display: flex !important;
+      align-items: flex-start !important;
+      margin-bottom: 11px !important;
+      gap: 11px !important;
     }
     .lg-step-badge {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: rgba(61, 255, 162, 0.15);
-      border: 1px solid rgba(61, 255, 162, 0.3);
-      color: var(--lg-mint);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: 800;
-      margin-right: 8px;
+      width: 24px !important;
+      height: 24px !important;
+      border-radius: 50% !important;
+      background: rgba(61, 255, 162, 0.22) !important;
+      border: 1.5px solid #3dffa2 !important;
+      color: #3dffa2 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      font-size: 12px !important;
+      font-weight: 800 !important;
+      flex-shrink: 0 !important;
+      margin-top: 2px !important;
+      box-shadow: 0 0 10px rgba(61, 255, 162, 0.3) !important;
+    }
+    .lg-step-content {
+      flex: 1 !important;
+      font-size: 13px !important;
+      line-height: 1.6 !important;
+      color: #f1f5f9 !important;
+    }
+    .lg-step-title {
+      color: #3dffa2 !important;
+      font-weight: 800 !important;
+      margin-right: 5px !important;
+      font-size: 13.5px !important;
+      display: inline !important;
+    }
+    .lg-step-desc {
+      color: #f8fafc !important;
+      font-weight: 400 !important;
+      display: inline !important;
     }
     .lg-caution-box {
-      margin-top: 10px;
-      padding: 8px 12px;
-      border-radius: 12px;
-      background: rgba(255, 77, 79, 0.1);
-      border: 1px solid rgba(255, 77, 79, 0.3);
-      color: #ff999a;
-      font-size: 11px;
-      display: flex;
-      gap: 8px;
-      align-items: flex-start;
+      margin-top: 14px !important;
+      padding: 11px 15px !important;
+      border-radius: 14px !important;
+      background: rgba(255, 77, 79, 0.16) !important;
+      border: 1.5px solid rgba(255, 77, 79, 0.45) !important;
+      color: #ffe4e6 !important;
+      font-size: 12.5px !important;
+      line-height: 1.6 !important;
+      display: flex !important;
+      gap: 10px !important;
+      align-items: flex-start !important;
+      box-shadow: 0 4px 16px rgba(255, 77, 79, 0.15) !important;
+    }
+    .lg-caution-box i {
+      color: #ff4d4f !important;
+      font-size: 15px !important;
+      margin-top: 2px !important;
+      flex-shrink: 0 !important;
+      filter: drop-shadow(0 0 6px rgba(255, 77, 79, 0.5)) !important;
+    }
+    .lg-caution-label {
+      color: #ff4d4f !important;
+      font-weight: 800 !important;
+      margin-right: 5px !important;
+      display: inline !important;
+    }
+    .lg-caution-desc {
+      color: #fff1f2 !important;
+      font-weight: 500 !important;
+      display: inline !important;
     }
 
     /* Floating Bottom Nav Liquid Mint Active Pill */
@@ -6343,125 +6400,173 @@
 
         <div>
           <!-- GUIDE 1: SEVERE BLEEDING -->
-          <div class="lg-aid-card firstaid-accordion-card">
+          <div class="lg-aid-card firstaid-accordion-card" id="fa-guide-bleeding">
             <div class="lg-aid-header" onclick="toggleFirstAidGuide('bleeding')">
               <div class="lg-aid-title">
-                <i class="fas fa-droplet" style="color: var(--lg-mint);"></i>
+                <i class="fas fa-droplet" style="color: #3dffa2;"></i>
                 <span data-i18n="fa_bleeding_title">Severe Bleeding &amp; Deep Wounds</span>
               </div>
               <i class="fas fa-chevron-down lg-aid-chevron" id="fa-chevron-bleeding"></i>
             </div>
             <div class="lg-aid-body firstaid-body" id="fa-body-bleeding" style="display: none;">
               <div style="margin-bottom: 8px;">
-                <div style="display: flex; align-items: flex-start; margin-bottom: 6px;">
+                <div class="lg-aid-step-row">
                   <span class="lg-step-badge">1</span>
-                  <div><strong>Apply Firm Direct Pressure:</strong> Place a clean cloth, sterile pad, or clothing directly over the wound and press down hard with both hands.</div>
+                  <div class="lg-step-content">
+                    <strong class="lg-step-title" data-i18n="fa_bleeding_s1_title">Apply Firm Direct Pressure:</strong>
+                    <span class="lg-step-desc" data-i18n="fa_bleeding_s1_desc">Place a clean cloth, sterile pad, or clothing directly over the wound and press down hard with both hands.</span>
+                  </div>
                 </div>
-                <div style="display: flex; align-items: flex-start; margin-bottom: 6px;">
+                <div class="lg-aid-step-row">
                   <span class="lg-step-badge">2</span>
-                  <div><strong>Do Not Remove Blood-Soaked Cloth:</strong> Add more pads directly on top. Removing the original pad tears away blood clots and accelerates bleeding.</div>
+                  <div class="lg-step-content">
+                    <strong class="lg-step-title" data-i18n="fa_bleeding_s2_title">Do Not Remove Blood-Soaked Cloth:</strong>
+                    <span class="lg-step-desc" data-i18n="fa_bleeding_s2_desc">Add more pads directly on top. Removing the original pad tears away blood clots and accelerates bleeding.</span>
+                  </div>
                 </div>
-                <div style="display: flex; align-items: flex-start;">
+                <div class="lg-aid-step-row">
                   <span class="lg-step-badge">3</span>
-                  <div><strong>Elevate Above Heart:</strong> If an extremity is bleeding, keep the limb elevated above heart level while pressing firmly.</div>
+                  <div class="lg-step-content">
+                    <strong class="lg-step-title" data-i18n="fa_bleeding_s3_title">Elevate Above Heart:</strong>
+                    <span class="lg-step-desc" data-i18n="fa_bleeding_s3_desc">If an extremity is bleeding, keep the limb elevated above heart level while pressing firmly.</span>
+                  </div>
                 </div>
               </div>
               <div class="lg-caution-box">
-                <i class="fas fa-triangle-exclamation" style="margin-top: 2px;"></i>
-                <div><strong>Never Do This:</strong> Do not wash deep arterial wounds with water. Do not remove penetrating objects (knives, glass shards) as they plug the hemorrhage.</div>
+                <i class="fas fa-triangle-exclamation"></i>
+                <div>
+                  <strong class="lg-caution-label" data-i18n="fa_bleeding_c_label">Never Do This:</strong>
+                  <span class="lg-caution-desc" data-i18n="fa_bleeding_c_desc">Do not wash deep arterial wounds with water. Do not remove penetrating objects (knives, glass shards) as they plug the hemorrhage.</span>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- GUIDE 2: CHOKING (HEIMLICH) -->
-          <div class="lg-aid-card firstaid-accordion-card">
+          <div class="lg-aid-card firstaid-accordion-card" id="fa-guide-choking">
             <div class="lg-aid-header" onclick="toggleFirstAidGuide('choking')">
               <div class="lg-aid-title">
-                <i class="fas fa-head-side-cough" style="color: var(--lg-mint);"></i>
+                <i class="fas fa-head-side-cough" style="color: #3dffa2;"></i>
                 <span data-i18n="fa_choking_title">Choking / Airway Obstruction</span>
               </div>
               <i class="fas fa-chevron-down lg-aid-chevron" id="fa-chevron-choking"></i>
             </div>
             <div class="lg-aid-body firstaid-body" id="fa-body-choking" style="display: none;">
               <div style="margin-bottom: 8px;">
-                <div style="display: flex; align-items: flex-start; margin-bottom: 6px;">
+                <div class="lg-aid-step-row">
                   <span class="lg-step-badge">1</span>
-                  <div><strong>5 Firm Back Blows:</strong> Stand behind the person, bend them forward at the waist, and deliver 5 firm heel-of-hand blows between shoulder blades.</div>
+                  <div class="lg-step-content">
+                    <strong class="lg-step-title" data-i18n="fa_choking_s1_title">5 Firm Back Blows:</strong>
+                    <span class="lg-step-desc" data-i18n="fa_choking_s1_desc">Stand behind the person, bend them forward at the waist, and deliver 5 firm heel-of-hand blows between shoulder blades.</span>
+                  </div>
                 </div>
-                <div style="display: flex; align-items: flex-start; margin-bottom: 6px;">
+                <div class="lg-aid-step-row">
                   <span class="lg-step-badge">2</span>
-                  <div><strong>5 Abdominal Thrusts (Heimlich):</strong> Wrap arms around waist, place a fist just above the navel, and pull sharply upward and inward.</div>
+                  <div class="lg-step-content">
+                    <strong class="lg-step-title" data-i18n="fa_choking_s2_title">5 Abdominal Thrusts (Heimlich):</strong>
+                    <span class="lg-step-desc" data-i18n="fa_choking_s2_desc">Wrap arms around waist, place a fist just above the navel, and pull sharply upward and inward.</span>
+                  </div>
                 </div>
-                <div style="display: flex; align-items: flex-start;">
+                <div class="lg-aid-step-row">
                   <span class="lg-step-badge">3</span>
-                  <div><strong>If Victim Collapses Unconscious:</strong> Lower them gently to the floor and immediately begin CPR chest compressions.</div>
+                  <div class="lg-step-content">
+                    <strong class="lg-step-title" data-i18n="fa_choking_s3_title">If Victim Collapses Unconscious:</strong>
+                    <span class="lg-step-desc" data-i18n="fa_choking_s3_desc">Lower them gently to the floor and immediately begin CPR chest compressions.</span>
+                  </div>
                 </div>
               </div>
               <div class="lg-caution-box">
-                <i class="fas fa-triangle-exclamation" style="margin-top: 2px;"></i>
-                <div><strong>Never Do This:</strong> Never perform blind finger sweeps in the throat as this lodges the foreign object deeper.</div>
+                <i class="fas fa-triangle-exclamation"></i>
+                <div>
+                  <strong class="lg-caution-label" data-i18n="fa_choking_c_label">Never Do This:</strong>
+                  <span class="lg-caution-desc" data-i18n="fa_choking_c_desc">Never perform blind finger sweeps in the throat as this lodges the foreign object deeper.</span>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- GUIDE 3: BURNS & SCALDS -->
-          <div class="lg-aid-card firstaid-accordion-card">
+          <div class="lg-aid-card firstaid-accordion-card" id="fa-guide-burn">
             <div class="lg-aid-header" onclick="toggleFirstAidGuide('burn')">
               <div class="lg-aid-title">
-                <i class="fas fa-fire" style="color: var(--lg-mint);"></i>
+                <i class="fas fa-fire" style="color: #3dffa2;"></i>
                 <span data-i18n="fa_burn_title">Burns &amp; Thermal Scalds</span>
               </div>
               <i class="fas fa-chevron-down lg-aid-chevron" id="fa-chevron-burn"></i>
             </div>
             <div class="lg-aid-body firstaid-body" id="fa-body-burn" style="display: none;">
               <div style="margin-bottom: 8px;">
-                <div style="display: flex; align-items: flex-start; margin-bottom: 6px;">
+                <div class="lg-aid-step-row">
                   <span class="lg-step-badge">1</span>
-                  <div><strong>Cool with Tap Water for 20 Minutes:</strong> Hold under clean, room-temperature running water. This halts internal thermal tissue destruction.</div>
+                  <div class="lg-step-content">
+                    <strong class="lg-step-title" data-i18n="fa_burn_s1_title">Cool with Tap Water for 20 Minutes:</strong>
+                    <span class="lg-step-desc" data-i18n="fa_burn_s1_desc">Hold under clean, room-temperature running water. This halts internal thermal tissue destruction.</span>
+                  </div>
                 </div>
-                <div style="display: flex; align-items: flex-start; margin-bottom: 6px;">
+                <div class="lg-aid-step-row">
                   <span class="lg-step-badge">2</span>
-                  <div><strong>Remove Jewelry &amp; Tight Items:</strong> Swelling begins immediately; remove rings, watches, and loose clothing before constriction occurs.</div>
+                  <div class="lg-step-content">
+                    <strong class="lg-step-title" data-i18n="fa_burn_s2_title">Remove Jewelry &amp; Tight Items:</strong>
+                    <span class="lg-step-desc" data-i18n="fa_burn_s2_desc">Swelling begins immediately; remove rings, watches, and loose clothing before constriction occurs.</span>
+                  </div>
                 </div>
-                <div style="display: flex; align-items: flex-start;">
+                <div class="lg-aid-step-row">
                   <span class="lg-step-badge">3</span>
-                  <div><strong>Cover Loosely with Clean Film or Sterile Gauze:</strong> Protect raw dermis from airborne infection without sticking to the wound.</div>
+                  <div class="lg-step-content">
+                    <strong class="lg-step-title" data-i18n="fa_burn_s3_title">Cover Loosely with Clean Film or Sterile Gauze:</strong>
+                    <span class="lg-step-desc" data-i18n="fa_burn_s3_desc">Protect raw dermis from airborne infection without sticking to the wound.</span>
+                  </div>
                 </div>
               </div>
               <div class="lg-caution-box">
-                <i class="fas fa-triangle-exclamation" style="margin-top: 2px;"></i>
-                <div><strong>Dangerous Myths:</strong> NEVER apply ice, toothpaste, butter, egg whites, or mud to burns. Do not pop blisters.</div>
+                <i class="fas fa-triangle-exclamation"></i>
+                <div>
+                  <strong class="lg-caution-label" data-i18n="fa_burn_c_label">Dangerous Myths:</strong>
+                  <span class="lg-caution-desc" data-i18n="fa_burn_c_desc">NEVER apply ice, toothpaste, butter, egg whites, or mud to burns. Do not pop blisters.</span>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- GUIDE 4: SNAKE BITE -->
-          <div class="lg-aid-card firstaid-accordion-card">
+          <div class="lg-aid-card firstaid-accordion-card" id="fa-guide-snake">
             <div class="lg-aid-header" onclick="toggleFirstAidGuide('snake')">
               <div class="lg-aid-title">
-                <i class="fas fa-staff-snake" style="color: var(--lg-mint);"></i>
+                <i class="fas fa-staff-snake" style="color: #3dffa2;"></i>
                 <span data-i18n="fa_snake_title">Snake Bite Emergency</span>
               </div>
               <i class="fas fa-chevron-down lg-aid-chevron" id="fa-chevron-snake"></i>
             </div>
             <div class="lg-aid-body firstaid-body" id="fa-body-snake" style="display: none;">
               <div style="margin-bottom: 8px;">
-                <div style="display: flex; align-items: flex-start; margin-bottom: 6px;">
+                <div class="lg-aid-step-row">
                   <span class="lg-step-badge">1</span>
-                  <div><strong>Keep Patient Absolutely Calm &amp; Still:</strong> Movement spreads venom rapidly through the lymphatic system. Keep limb below heart level.</div>
+                  <div class="lg-step-content">
+                    <strong class="lg-step-title" data-i18n="fa_snake_s1_title">Keep Patient Absolutely Calm &amp; Still:</strong>
+                    <span class="lg-step-desc" data-i18n="fa_snake_s1_desc">Movement spreads venom rapidly through the lymphatic system. Keep limb below heart level.</span>
+                  </div>
                 </div>
-                <div style="display: flex; align-items: flex-start; margin-bottom: 6px;">
+                <div class="lg-aid-step-row">
                   <span class="lg-step-badge">2</span>
-                  <div><strong>Immobilize with a Soft Splint:</strong> Tie a soft splint or broad bandage comfortably around the limb to halt muscle pumping (NOT a tourniquet).</div>
+                  <div class="lg-step-content">
+                    <strong class="lg-step-title" data-i18n="fa_snake_s2_title">Immobilize with a Soft Splint:</strong>
+                    <span class="lg-step-desc" data-i18n="fa_snake_s2_desc">Tie a soft splint or broad bandage comfortably around the limb to halt muscle pumping (NOT a tourniquet).</span>
+                  </div>
                 </div>
-                <div style="display: flex; align-items: flex-start;">
+                <div class="lg-aid-step-row">
                   <span class="lg-step-badge">3</span>
-                  <div><strong>Rush to Government Anti-Venom Hospital:</strong> Immediately transfer to the nearest Upazila Health Complex or District Hospital with anti-venom.</div>
+                  <div class="lg-step-content">
+                    <strong class="lg-step-title" data-i18n="fa_snake_s3_title">Rush to Government Anti-Venom Hospital:</strong>
+                    <span class="lg-step-desc" data-i18n="fa_snake_s3_desc">Immediately transfer to the nearest Upazila Health Complex or District Hospital with anti-venom.</span>
+                  </div>
                 </div>
               </div>
               <div class="lg-caution-box">
-                <i class="fas fa-triangle-exclamation" style="margin-top: 2px;"></i>
-                <div><strong>Dangerous Myths:</strong> DO NOT cut the bite wound, DO NOT suck venom, DO NOT apply battery acid, herbal paste, or tight arterial tourniquets.</div>
+                <i class="fas fa-triangle-exclamation"></i>
+                <div>
+                  <strong class="lg-caution-label" data-i18n="fa_snake_c_label">Dangerous Myths:</strong>
+                  <span class="lg-caution-desc" data-i18n="fa_snake_c_desc">DO NOT cut the bite wound, DO NOT suck venom, DO NOT apply battery acid, herbal paste, or tight arterial tourniquets.</span>
+                </div>
               </div>
             </div>
           </div>
@@ -7691,7 +7796,48 @@
         sos_modal_cancel: "Cancel (False Alarm)",
 
         shurokha_sub: "24/7 Personal Safety & Universal Companion",
-        shurokha_placeholder: "Ask for any Thana OC, emergency hospital, helpline... (English বা বাংলা)"
+        shurokha_placeholder: "Ask for any Thana OC, emergency hospital, helpline... (English বা বাংলা)",
+
+        /* Life-Saving Emergency First Aid Translations (English) */
+        fa_bleeding_title: "Severe Bleeding & Deep Wounds",
+        fa_bleeding_s1_title: "Apply Firm Direct Pressure:",
+        fa_bleeding_s1_desc: "Place a clean cloth, sterile pad, or clothing directly over the wound and press down hard with both hands.",
+        fa_bleeding_s2_title: "Do Not Remove Blood-Soaked Cloth:",
+        fa_bleeding_s2_desc: "Add more pads directly on top. Removing the original pad tears away blood clots and accelerates bleeding.",
+        fa_bleeding_s3_title: "Elevate Above Heart:",
+        fa_bleeding_s3_desc: "If an extremity is bleeding, keep the limb elevated above heart level while pressing firmly.",
+        fa_bleeding_c_label: "Never Do This:",
+        fa_bleeding_c_desc: "Do not wash deep arterial wounds with water. Do not remove penetrating objects (knives, glass shards) as they plug the hemorrhage.",
+
+        fa_choking_title: "Choking / Airway Obstruction",
+        fa_choking_s1_title: "5 Firm Back Blows:",
+        fa_choking_s1_desc: "Stand behind the person, bend them forward at the waist, and deliver 5 firm heel-of-hand blows between shoulder blades.",
+        fa_choking_s2_title: "5 Abdominal Thrusts (Heimlich):",
+        fa_choking_s2_desc: "Wrap arms around waist, place a fist just above the navel, and pull sharply upward and inward.",
+        fa_choking_s3_title: "If Victim Collapses Unconscious:",
+        fa_choking_s3_desc: "Lower them gently to the floor and immediately begin CPR chest compressions.",
+        fa_choking_c_label: "Never Do This:",
+        fa_choking_c_desc: "Never perform blind finger sweeps in the throat as this lodges the foreign object deeper.",
+
+        fa_burn_title: "Burns & Thermal Scalds",
+        fa_burn_s1_title: "Cool with Tap Water for 20 Minutes:",
+        fa_burn_s1_desc: "Hold under clean, room-temperature running water. This halts internal thermal tissue destruction.",
+        fa_burn_s2_title: "Remove Jewelry & Tight Items:",
+        fa_burn_s2_desc: "Swelling begins immediately; remove rings, watches, and loose clothing before constriction occurs.",
+        fa_burn_s3_title: "Cover Loosely with Clean Film or Sterile Gauze:",
+        fa_burn_s3_desc: "Protect raw dermis from airborne infection without sticking to the wound.",
+        fa_burn_c_label: "Dangerous Myths:",
+        fa_burn_c_desc: "NEVER apply ice, toothpaste, butter, egg whites, or mud to burns. Do not pop blisters.",
+
+        fa_snake_title: "Snake Bite Emergency",
+        fa_snake_s1_title: "Keep Patient Absolutely Calm & Still:",
+        fa_snake_s1_desc: "Movement spreads venom rapidly through the lymphatic system. Keep limb below heart level.",
+        fa_snake_s2_title: "Immobilize with a Soft Splint:",
+        fa_snake_s2_desc: "Tie a soft splint or broad bandage comfortably around the limb to halt muscle pumping (NOT a tourniquet).",
+        fa_snake_s3_title: "Rush to Government Anti-Venom Hospital:",
+        fa_snake_s3_desc: "Immediately transfer to the nearest Upazila Health Complex or District Hospital with anti-venom.",
+        fa_snake_c_label: "Dangerous Myths:",
+        fa_snake_c_desc: "DO NOT cut the bite wound, DO NOT suck venom, DO NOT apply battery acid, herbal paste, or tight arterial tourniquets."
       },
       bn: {
         brand_fullform: "নিরাপত্তা • সচেতনতা • দ্রুত রেসপন্স • জরুরি সহায়তা",
@@ -7855,7 +8001,48 @@
         sos_modal_cancel: "বাতিল (ভুল সংকেত)",
 
         shurokha_sub: "২৪/৭ ব্যক্তিগত নিরাপত্তা ও সার্বজনীন সহযোগী",
-        shurokha_placeholder: "যেকোনো থানার ওসি, জরুরি হাসপাতাল বা হেল্পলাইনের নাম্বার জিজ্ঞাসা করুন..."
+        shurokha_placeholder: "যেকোনো থানার ওসি, জরুরি হাসপাতাল বা হেল্পলাইনের নাম্বার জিজ্ঞাসা করুন...",
+
+        /* Life-Saving Emergency First Aid Translations (বাংলা) */
+        fa_bleeding_title: "অতিরিক্ত রক্তক্ষরণ ও গভীর ক্ষত",
+        fa_bleeding_s1_title: "সরাসরি ও শক্তভাবে চেপে ধরুন:",
+        fa_bleeding_s1_desc: "ক্ষতের উপর পরিষ্কার শুকনো কাপড়, জীবাণুমুক্ত গজ বা ব্যান্ডেজ রেখে দুই হাত দিয়ে শক্তভাবে চেপে ধরে রাখুন।",
+        fa_bleeding_s2_title: "রক্তভেজা কাপড় কখনো সরাবেন না:",
+        fa_bleeding_s2_desc: "আগের কাপড় না তুলে তার উপরেই আরও নতুন কাপড় চেপে রাখুন। ভেজা কাপড় সরালে রক্ত জমাট বাঁধার প্রক্রিয়া ব্যাহত হয়।",
+        fa_bleeding_s3_title: "অঙ্গটি হৃদপিণ্ডের উপরে তুলে রাখুন:",
+        fa_bleeding_s3_desc: "হাত বা পা কেটে গেলে শক্তভাবে চেপে ধরা অবস্থায় অঙ্গটি বুকের চেয়ে উঁচুতে তুলে রাখুন যাতে রক্তক্ষরণ দ্রুত কমে।",
+        fa_bleeding_c_label: "কখনোই করবেন না:",
+        fa_bleeding_c_desc: "গভীর রক্তনালী কাটা ক্ষতে কখনো পানি ঢালবেন না। ক্ষতস্থানে বিদ্ধ হওয়া কাচ বা ছুরি কখনো টেনে বের করবেন না।",
+
+        fa_choking_title: "গলায় কিছু আটকে দম বন্ধ হওয়া (শ্বাসরোধ)",
+        fa_choking_s1_title: "পিঠে ৫ বার শক্ত চাপ দিন:",
+        fa_choking_s1_desc: "ভুক্তভোগীর পেছনে দাঁড়িয়ে তাকে কোমরের সামনে ঝুঁকিয়ে দিন এবং দুই পিঠের হাড়ের মাঝে হাতের তালু দিয়ে ৫ বার সজোরে চাপ দিন।",
+        fa_choking_s2_title: "৫ বার পেটে চাপ দিন (হেইমলিক পদ্ধতি):",
+        fa_choking_s2_desc: "পেছন থেকে দুই হাতে জড়িয়ে নাভির ঠিক উপরে মুষ্টিবদ্ধ হাত রেখে ভেতরের ও উপরের দিকে সজোরে ৫ বার হ্যাঁচকা টান দিন।",
+        fa_choking_s3_title: "রোগী অচেতন হয়ে পড়লে:",
+        fa_choking_s3_desc: "সাবধানে মেঝেতে শুইয়ে দিন এবং দেরি না করে অবিলম্বে সিপিআর (বুকের মাঝে ক্রমাগত চাপ দেওয়া) শুরু করুন।",
+        fa_choking_c_label: "কখনোই করবেন না:",
+        fa_choking_c_desc: "না দেখে মুখে বা গলায় আঙুল দিয়ে বস্তু খোঁজার চেষ্টা করবেন না, এতে বস্তুটি আরও গভীরে আটকে যেতে পারে।",
+
+        fa_burn_title: "আগুনে পোড়া ও ফুটন্ত তরলের ক্ষত",
+        fa_burn_s1_title: "স্বাভাবিক পানিতে ২০ মিনিট ধুয়ে নিন:",
+        fa_burn_s1_desc: "স্বাভাবিক তাপমাত্রার পরিষ্কার চলমান ট্যাপের পানিতে অন্তত ২০ মিনিট ক্ষতস্থান ধরে রাখুন। এটি ভেতরের চামড়া পুড়ে যাওয়া বন্ধ করে।",
+        fa_burn_s2_title: "আংটি, ঘড়ি ও টাইট কাপড় খুলে ফেলুন:",
+        fa_burn_s2_desc: "পোড়া অংশ দ্রুত ফুলে যায়, তাই রক্ত সঞ্চালন বন্ধ হওয়ার আগেই সাবধানে গহনা ও আঁটসাঁট পোশাক খুলে দিন।",
+        fa_burn_s3_title: "পরিষ্কার কাপড় দিয়ে আলতো করে ঢাকুন:",
+        fa_burn_s3_desc: "ধুলাবালি ও সংক্রমণ রোধে পরিষ্কার পাতলা শুকনো গজ বা কাপড় দিয়ে ক্ষতটি আলতোভাবে ঢেকে দ্রুত ডাক্তারের কাছে নিন।",
+        fa_burn_c_label: "বিপজ্জনক ভুল ধারণা:",
+        fa_burn_c_desc: "পোড়া স্থানে কখনো বরফ, টুথপেস্ট, মাখন, ডিমের সাদা অংশ বা মাটি লাগাবেন না। ফোসকা কখনো ফুটো করবেন না।",
+
+        fa_snake_title: "সাপে কাটা রোগীর জরুরি প্রাথমিক চিকিৎসা",
+        fa_snake_s1_title: "রোগীকে সম্পূর্ণ শান্ত ও স্থির রাখুন:",
+        fa_snake_s1_desc: "নড়াচড়া বা দৌড়াদৌড়ি করলে বিষ দ্রুত রক্ত ও লসিকাতন্ত্রের মাধ্যমে ছড়িয়ে পড়ে। আক্রান্ত অঙ্গটি বুকের নিচে স্থির রাখুন।",
+        fa_snake_s2_title: "নরম কাঠ বা কাপড় দিয়ে বেঁধে স্থির রাখুন:",
+        fa_snake_s2_desc: "আক্রান্ত হাত বা পায়ে কাঠের চটা বা স্কেল দিয়ে আলতো করে কাপড় পেঁচিয়ে স্থির রাখুন যাতে মাংসপেশি না নড়ে (দড়ি দিয়ে খুব শক্ত বাঁধন দেবেন না)।",
+        fa_snake_s3_title: "দ্রুত অ্যান্টিভেনম সরকারি হাসপাতালে নিন:",
+        fa_snake_s3_desc: "ওঝা বা ঝাড়ফুঁকে এক সেকেন্ডও নষ্ট না করে নিকটস্থ উপজেলা স্বাস্থ্য কমপ্লেক্স বা জেলা সদর হাসপাতালে দ্রুত নিয়ে যান।",
+        fa_snake_c_label: "বিপজ্জনক ভুল ধারণা:",
+        fa_snake_c_desc: "ক্ষতস্থানে কখনো ব্লেড দিয়ে কাটবেন না, মুখ দিয়ে বিষ চুষবেন না এবং শক্ত রশি বা টর্নিকেট বাঁধবেন না। অ্যান্টিভেনমই একমাত্র জীবনরক্ষাকারী চিকিৎসা।"
       }
     };
 
@@ -7898,10 +8085,6 @@
       if (typeof updateTimerSourceBadge === 'function') {
         updateTimerSourceBadge(isTimerAutoPredicted);
       }
-    }
-
-    function toggleLanguage() {
-      setAppLanguage(currentAppLanguage === 'bn' ? 'en' : 'bn');
     }
 
     function applyI18nToDOM(lang) {
@@ -14023,17 +14206,16 @@
     }
 
     function toggleFirstAidGuide(id) {
-      const card = document.getElementById(id);
-      if (!card) return;
-      const body = card.querySelector('.firstaid-body');
-      const chevron = card.querySelector('.fa-chevron-down');
-      const isOpen = body && body.style.display === 'block';
+      const body = document.getElementById('fa-body-' + id) || (document.getElementById(id) && document.getElementById(id).querySelector('.firstaid-body'));
+      const chevron = document.getElementById('fa-chevron-' + id) || (document.getElementById(id) && document.getElementById(id).querySelector('.fa-chevron-down'));
+      if (!body) return;
+      const isOpen = body.style.display === 'block';
 
       // Clean single-open accordion behavior
       document.querySelectorAll('#screen-help .firstaid-body').forEach(b => b.style.display = 'none');
-      document.querySelectorAll('#screen-help .fa-chevron-down').forEach(c => c.style.transform = 'rotate(0deg)');
+      document.querySelectorAll('#screen-help .lg-aid-chevron, #screen-help .fa-chevron-down').forEach(c => c.style.transform = 'rotate(0deg)');
 
-      if (!isOpen && body) {
+      if (!isOpen) {
         body.style.display = 'block';
         if (chevron) chevron.style.transform = 'rotate(180deg)';
       }
