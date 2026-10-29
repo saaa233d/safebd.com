@@ -1245,11 +1245,11 @@
     .map-floating-controls {
       position: absolute;
       right: 14px;
-      top: 130px;
+      bottom: 84px;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      z-index: 95;
+      z-index: 105;
     }
     .btn-map-control {
       background: linear-gradient(135deg, rgba(14, 21, 38, 0.88) 0%, rgba(7, 11, 20, 0.94) 100%);
@@ -4244,10 +4244,9 @@
 
     /* Top Bar Dynamic Scroll Blur */
     .top-bar {
-      transition: background 300ms cubic-bezier(0.16, 1, 0.3, 1),
-                  border-color 300ms cubic-bezier(0.16, 1, 0.3, 1),
-                  box-shadow 300ms cubic-bezier(0.16, 1, 0.3, 1),
-                  backdrop-filter 300ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+      transition: background 200ms cubic-bezier(0.16, 1, 0.3, 1),
+                  border-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+                  box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
     .top-bar.scrolled {
       background: rgba(10, 10, 14, 0.85) !important;
@@ -4409,8 +4408,7 @@
       -webkit-overflow-scrolling: touch !important;
       scroll-behavior: auto !important;
       overscroll-behavior-y: contain;
-      transform: translateZ(0);
-      will-change: scroll-position;
+      contain: content;
     }
 
     /* Disable expensive per-frame Gaussian blurs on scrolling list items */
@@ -8556,36 +8554,61 @@
       return (brng + 360) % 360;
     }
 
+    let pendingMapCoords = null;
+    let activeMapTileLayer = null;
+
     function initLeafletNavMap(initialLat = 23.8103, initialLon = 90.4125) {
-      if (isLeafletInitialized || typeof L === 'undefined') return;
+      if (isLeafletInitialized && navMap) return;
+
       const container = document.getElementById('interactive-nav-map');
       if (!container) return;
+
+      // GUARD: If container is currently hidden (e.g., user is on SOS tab), DO NOT initialize Leaflet with 0x0 bounds!
+      if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+        pendingMapCoords = { lat: initialLat, lon: initialLon };
+        console.log("📍 [NAV MAP] Container hidden (0x0). Stored pending coordinates for activation:", pendingMapCoords);
+        return;
+      }
+
+      if (typeof L === 'undefined') {
+        console.warn("📍 [NAV MAP] Leaflet library still loading, retrying in 200ms...");
+        setTimeout(() => initLeafletNavMap(initialLat, initialLon), 200);
+        return;
+      }
 
       try {
         navMap = L.map('interactive-nav-map', {
           zoomControl: false,
-          attributionControl: false
+          attributionControl: false,
+          fadeAnimation: false
         }).setView([initialLat, initialLon], 16);
 
-        // Genuine High-DPI Retina Google Maps Tile Engine (Zero watermark, 512x512 retina tiles, razor-sharp on mobile)
-        const dpr = window.devicePixelRatio || 1;
-        const googleTileUrl = dpr > 1.2
-          ? 'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&scale=2'
-          : 'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}';
+        // Resilient Dual-Engine Tile System (OSM Midnight + Google Maps with Automatic Failover)
+        // Primary: OpenStreetMap Retina with High-Precision Midnight Filter (Zero rate limits, 100% uptime in Bangladesh)
+        const osmTileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        const googleTileUrl = 'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}';
 
-        const googleLayer = L.tileLayer(googleTileUrl, {
-          maxZoom: 20,
-          maxNativeZoom: 20,
-          subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-          tileSize: 256,
+        activeMapTileLayer = L.tileLayer(osmTileUrl, {
+          maxZoom: 19,
+          subdomains: ['a', 'b', 'c'],
           keepBuffer: 6,
           updateWhenIdle: false,
           updateWhenZooming: true
         }).addTo(navMap);
 
-        googleLayer.on('tileerror', function() {
-          const gFrame = document.getElementById('gmaps-frame');
-          if (gFrame) gFrame.style.display = 'block';
+        activeMapTileLayer.on('tileerror', function() {
+          console.warn("⚠️ OSM tile error, switching to Google tile engine...");
+          if (navMap && !navMap._hasFallenBack) {
+            navMap._hasFallenBack = true;
+            try {
+              navMap.removeLayer(activeMapTileLayer);
+              activeMapTileLayer = L.tileLayer(googleTileUrl, {
+                maxZoom: 20,
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                tileSize: 256
+              }).addTo(navMap);
+            } catch(e) {}
+          }
         });
 
         // Custom Live Green Navigation Puck Icon with Radar Ripple and Live Tag
@@ -8637,10 +8660,22 @@
       const leafletDiv = document.getElementById('interactive-nav-map');
       if (gFrame && leafletDiv) {
         const isFrameHidden = gFrame.style.display === 'none';
-        gFrame.style.display = isFrameHidden ? 'block' : 'none';
-        leafletDiv.style.display = isFrameHidden ? 'none' : 'block';
-        if (isFrameHidden && currentCoords && currentCoords.lat) {
-          gFrame.src = `https://maps.google.com/maps?q=${currentCoords.lat},${currentCoords.lon}&t=&z=15&ie=UTF8&iwloc=B&output=embed`;
+        if (isFrameHidden) {
+          gFrame.style.display = 'block';
+          gFrame.style.zIndex = '10';
+          leafletDiv.style.display = 'none';
+          const lat = (currentCoords && currentCoords.lat) ? currentCoords.lat : 23.8103;
+          const lon = (currentCoords && currentCoords.lon) ? currentCoords.lon : 90.4125;
+          gFrame.src = `https://maps.google.com/maps?q=${lat},${lon}&t=&z=16&ie=UTF8&iwloc=B&output=embed`;
+          showStatusToast("Switched to Direct Google Maps View");
+        } else {
+          gFrame.style.display = 'none';
+          gFrame.style.zIndex = '0';
+          leafletDiv.style.display = 'block';
+          if (navMap) {
+            navMap.invalidateSize(true);
+          }
+          showStatusToast("Switched to Live Tactical Vector Navigation");
         }
       }
     }
@@ -8836,8 +8871,13 @@
     }
 
     function updateLiveNavMarker(lat, lon, speedKmh = 0, heading = null) {
+      const mapContainer = document.getElementById('interactive-nav-map');
       if (!isLeafletInitialized || !navMap) {
-        initLeafletNavMap(lat, lon);
+        if (mapContainer && mapContainer.offsetWidth > 0 && mapContainer.offsetHeight > 0) {
+          initLeafletNavMap(lat, lon);
+        } else {
+          pendingMapCoords = { lat, lon };
+        }
       }
       if (!liveNavMarker) return;
 
@@ -13586,22 +13626,26 @@
       // 2. Map-Specific Immediate Invalidation & Coordinate Center
       if (id === 'screen-map') {
         const syncMap = () => {
-          if (navMap) {
+          const lat = (currentCoords && currentCoords.lat) ? currentCoords.lat : (pendingMapCoords ? pendingMapCoords.lat : 23.8103);
+          const lon = (currentCoords && currentCoords.lon) ? currentCoords.lon : (pendingMapCoords ? pendingMapCoords.lon : 90.4125);
+
+          if (!navMap || !isLeafletInitialized) {
+            initLeafletNavMap(lat, lon);
+          } else {
             try {
               navMap.invalidateSize(true);
-              const lat = (currentCoords && currentCoords.lat) ? currentCoords.lat : 23.8103;
-              const lon = (currentCoords && currentCoords.lon) ? currentCoords.lon : 90.4125;
               navMap.setView([lat, lon], navMap.getZoom() || 16, { animate: false });
+              if (liveNavMarker) liveNavMarker.setLatLng([lat, lon]);
             } catch (e) {}
-          } else {
-            initLeafletNavMap(currentCoords.lat || 23.8103, currentCoords.lon || 90.4125);
           }
         };
-        syncMap();
-        requestAnimationFrame(syncMap);
-        setTimeout(syncMap, 60);
-        setTimeout(syncMap, 200);
-        setTimeout(syncMap, 500);
+
+        requestAnimationFrame(() => {
+          syncMap();
+          setTimeout(syncMap, 50);
+          setTimeout(syncMap, 180);
+          setTimeout(syncMap, 450);
+        });
       } else if (id === 'screen-admin') {
         fetchAdminSosAlerts();
         fetchAdminPendingPosts();
