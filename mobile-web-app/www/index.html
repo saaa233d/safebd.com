@@ -4398,6 +4398,42 @@
       }
     }
 
+  
+    /* ========================================================
+       ULTRA-SMOOTH 120HZ COMPOSITOR ENGINE (SOS & HELP)
+       Eliminates mobile scroll latency and GPU fill-rate drops
+    ======================================================== */
+    #screen-sos,
+    #screen-help,
+    .screen {
+      -webkit-overflow-scrolling: touch !important;
+      scroll-behavior: auto !important;
+      overscroll-behavior-y: contain;
+      transform: translateZ(0);
+      will-change: scroll-position;
+    }
+
+    /* Disable expensive per-frame Gaussian blurs on scrolling list items */
+    #screen-sos .clean-tile,
+    #screen-sos .contact-item-card,
+    #screen-sos .emergency-strip,
+    #screen-help .apple-glass-panel,
+    #screen-help .hotline-row-item,
+    #screen-help .help-card-tile,
+    #screen-help .firstaid-accordion-card,
+    #screen-help .apple-help-stat-chip {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      transform: translateZ(0);
+    }
+
+    /* Ensure SOS breathing aura uses pure zero-cost GPU compositing */
+    .sos-radar-ring {
+      filter: none !important;
+      will-change: transform, opacity;
+      transform: translateZ(0);
+    }
+
   </style>
   </head>
 <body>
@@ -16208,12 +16244,9 @@
       }, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' });
 
       const elementsToObserve = document.querySelectorAll(
-        '.apple-reveal, .apple-stagger, .clean-tile, .apple-tactical-card, .apple-hotline-card, .apple-aid-card, .create-post-card, .feed-post-card, .emergency-strip, [data-apple-counter]'
+        '.apple-reveal, .apple-stagger, [data-apple-counter]'
       );
       elementsToObserve.forEach(el => {
-        if (!el.classList.contains('apple-reveal') && !el.classList.contains('apple-stagger') && !el.dataset.appleCounter) {
-          el.classList.add('apple-reveal');
-        }
         appleRevealObserver.observe(el);
       });
     }
