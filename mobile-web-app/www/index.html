@@ -4134,7 +4134,328 @@
     .shurokha-send-button:active {
       transform: scale(0.92);
     }
+  
+    /* ========================================================
+       APPLE MOTION DESIGN SYSTEM
+       Fluid, GPU-accelerated transitions & scroll choreography
+    ======================================================== */
+    :root {
+      --apple-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --apple-ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+      --apple-ease-smooth: cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    /* 1. View Transitions API (Chrome / Edge / Safari 18+) */
+    ::view-transition-old(root) {
+      animation: 380ms cubic-bezier(0.16, 1, 0.3, 1) both appleRouteFadeOut;
+    }
+    ::view-transition-new(root) {
+      animation: 440ms cubic-bezier(0.16, 1, 0.3, 1) both appleRouteFadeIn;
+    }
+    @keyframes appleRouteFadeOut {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0; transform: scale(0.985); }
+    }
+    @keyframes appleRouteFadeIn {
+      from { opacity: 0; transform: translateY(14px) scale(0.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Fallback Screen Slide-Up */
+    .screen.active {
+      animation: appleScreenSlideUp 460ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      will-change: opacity, transform;
+    }
+    @keyframes appleScreenSlideUp {
+      0% {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 2. Scroll-Reveal & Stagger */
+    .apple-reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 780ms cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 780ms cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+    }
+    .apple-reveal.is-revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .apple-stagger > * {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 720ms cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 720ms cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+    }
+    .apple-stagger.is-revealed > *:nth-child(1) { transition-delay: 0ms; opacity: 1; transform: translateY(0); }
+    .apple-stagger.is-revealed > *:nth-child(2) { transition-delay: 75ms; opacity: 1; transform: translateY(0); }
+    .apple-stagger.is-revealed > *:nth-child(3) { transition-delay: 150ms; opacity: 1; transform: translateY(0); }
+    .apple-stagger.is-revealed > *:nth-child(4) { transition-delay: 225ms; opacity: 1; transform: translateY(0); }
+    .apple-stagger.is-revealed > *:nth-child(5) { transition-delay: 300ms; opacity: 1; transform: translateY(0); }
+    .apple-stagger.is-revealed > *:nth-child(6) { transition-delay: 375ms; opacity: 1; transform: translateY(0); }
+    .apple-stagger.is-revealed > *:nth-child(7) { transition-delay: 450ms; opacity: 1; transform: translateY(0); }
+    .apple-stagger.is-revealed > *:nth-child(8) { transition-delay: 525ms; opacity: 1; transform: translateY(0); }
+
+    /* 3. Masked Line-by-Line Reveals */
+    .apple-mask-line {
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: top;
+    }
+    .apple-mask-line > span {
+      display: inline-block;
+      transform: translateY(110%);
+      opacity: 0;
+      animation: appleMaskTextUp 850ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .apple-mask-line:nth-child(2) > span { animation-delay: 80ms; }
+    .apple-mask-line:nth-child(3) > span { animation-delay: 160ms; }
+    @keyframes appleMaskTextUp {
+      0% {
+        transform: translateY(110%);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* 4. Micro-Interactions: Cards, Buttons, Squircles */
+    .clean-tile,
+    .apple-tactical-card,
+    .apple-hotline-card,
+    .apple-aid-card,
+    .create-post-card,
+    .feed-post-card,
+    .emergency-strip,
+    .module-group,
+    .btn-gps-refresh {
+      transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                  box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                  border-color 320ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+      will-change: transform;
+    }
+    @media (hover: hover) {
+      .clean-tile:hover,
+      .apple-tactical-card:hover,
+      .apple-hotline-card:hover,
+      .apple-aid-card:hover,
+      .create-post-card:hover,
+      .feed-post-card:hover {
+        transform: translateY(-2.5px) !important;
+        box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.8), 0 0 24px rgba(255, 255, 255, 0.05) !important;
+      }
+    }
+    .clean-tile:active,
+    .apple-tactical-card:active,
+    .apple-hotline-card:active,
+    .apple-aid-card:active {
+      transform: scale(0.978) !important;
+      transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+    }
+
+    /* Refined Underline Links */
+    .apple-link {
+      position: relative;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+    }
+    .apple-link::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      width: 100%;
+      height: 1px;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 380ms cubic-bezier(0.22, 1, 0.36, 1);
+      opacity: 0.85;
+    }
+    .apple-link:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    /* 5. Top Bar Dynamic Scroll Blur */
+    .top-bar {
+      transition: background 380ms cubic-bezier(0.16, 1, 0.3, 1),
+                  border-color 380ms cubic-bezier(0.16, 1, 0.3, 1),
+                  box-shadow 380ms cubic-bezier(0.16, 1, 0.3, 1),
+                  backdrop-filter 380ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .top-bar.scrolled {
+      background: rgba(10, 10, 14, 0.82) !important;
+      backdrop-filter: blur(28px) saturate(190%) !important;
+      -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.09) !important;
+      box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.75) !important;
+    }
+
+    /* 6. Sticky Scroll Storytelling Section */
+    .apple-story-section {
+      margin: 16px 0 22px 0;
+      position: relative;
+    }
+    .apple-story-sticky-card {
+      position: sticky;
+      top: 8px;
+      z-index: 10;
+      background: linear-gradient(135deg, rgba(20, 22, 30, 0.9), rgba(12, 14, 18, 0.96));
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 20px;
+      padding: 16px 18px 14px 18px;
+      box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.85), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      transition: border-color 380ms ease, box-shadow 380ms ease;
+    }
+    .apple-story-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .apple-story-beacon {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 10px #38bdf8;
+      animation: appleStoryBeacon 2s infinite ease-in-out;
+    }
+    @keyframes appleStoryBeacon {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.4); opacity: 0.4; }
+    }
+    .apple-story-eyebrow-text {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+    .apple-story-badge {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 9999px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #38bdf8;
+    }
+    .apple-story-viewport {
+      position: relative;
+      min-height: 80px;
+    }
+    .apple-story-slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      opacity: 0;
+      transform: translateY(10px) scale(0.985);
+      transition: opacity 440ms cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 440ms cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+    .apple-story-slide.active {
+      position: relative;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+    .story-slide-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      margin-bottom: 7px;
+    }
+    .story-slide-icon.icon-cad { background: rgba(225, 29, 72, 0.18); color: #fb7185; }
+    .story-slide-icon.icon-escort { background: rgba(16, 185, 129, 0.18); color: #34d399; }
+    .story-slide-icon.icon-radar { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
+    .story-slide-icon.icon-cloud { background: rgba(56, 189, 248, 0.18); color: #38bdf8; }
+    .story-slide-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: -0.01em;
+      margin-bottom: 3px;
+    }
+    .story-slide-desc {
+      font-size: 11.5px;
+      line-height: 1.45;
+      color: #94a3b8;
+    }
+    .apple-story-nav {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      padding-top: 9px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .story-dot {
+      width: 20px;
+      height: 4px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.16);
+      cursor: pointer;
+      transition: all 340ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .story-dot.active {
+      width: 34px;
+      background: #38bdf8;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+    }
+    .apple-story-track {
+      position: relative;
+      height: 200px;
+      margin-top: -50px;
+      pointer-events: none;
+    }
+    .story-trigger {
+      height: 50px;
+    }
+
+    /* 7. Accessibility Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        transform: none !important;
+        scroll-behavior: auto !important;
+      }
+      ::view-transition-group(*),
+      ::view-transition-old(*),
+      ::view-transition-new(*) {
+        animation: none !important;
+      }
+    }
+
   </style>
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
 </head>
 <body>
 
@@ -4557,7 +4878,10 @@
           <span class="apple-beacon-live"></span>
           <span class="apple-hero-eyebrow-text">24/7 National Emergency Command</span>
         </div>
-        <h1 class="apple-help-hero-title" data-i18n="help_screen_title">Emergency Tactical Help</h1>
+        <h1 class="apple-help-hero-title" data-i18n="help_screen_title">
+          <span class="apple-mask-line"><span>Emergency</span></span>
+          <span class="apple-mask-line"><span>Tactical Help</span></span>
+        </h1>
         <p class="apple-help-hero-subtitle" data-i18n="help_screen_sub">Direct hotlines, immediate dispatches &amp; life-saving lifelines</p>
 
         <!-- Live Stats Ticker Strip -->
@@ -12302,17 +12626,49 @@
         }
       }
 
-      document.querySelectorAll('.screen').forEach(s => {
-        s.classList.remove('active');
-        s.style.display = 'none';
-      });
-      document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
-      const target = document.getElementById(id);
-      if (target) {
-        target.classList.add('active');
-        target.style.display = 'flex';
+      const updateDomScreen = () => {
+        document.querySelectorAll('.screen').forEach(s => {
+          s.classList.remove('active');
+          s.style.display = 'none';
+        });
+        document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+        const target = document.getElementById(id);
+        if (target) {
+          target.classList.add('active');
+          target.style.display = 'flex';
+          target.scrollTop = 0;
+        }
+        if (btn) btn.classList.add('active');
+
+        // Manage top-right profile button active state
+        const topProfBtn = document.getElementById('top-profile-btn');
+        if (topProfBtn) {
+          if (id === 'screen-profile') {
+            topProfBtn.classList.add('active');
+          } else {
+            topProfBtn.classList.remove('active');
+          }
+        }
+      };
+
+      const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!prefersReduced && document.startViewTransition) {
+        try {
+          const transition = document.startViewTransition(() => {
+            updateDomScreen();
+          });
+          await transition.finished.catch(() => {});
+        } catch (e) {
+          updateDomScreen();
+        }
+      } else {
+        updateDomScreen();
       }
-      if (btn) btn.classList.add('active');
+
+      // Re-trigger Apple motion reveals & smooth scroll for active screen
+      if (typeof window.triggerAppleMotionForScreen === 'function') {
+        window.triggerAppleMotionForScreen(id);
+      }
 
       if (id === 'screen-admin') {
         fetchAdminSosAlerts();
@@ -12339,16 +12695,6 @@
             initLeafletNavMap(currentCoords.lat || 23.8103, currentCoords.lon || 90.4125);
           }
         }, 150);
-      }
-
-      // Manage top-right profile button active state
-      const topProfBtn = document.getElementById('top-profile-btn');
-      if (topProfBtn) {
-        if (id === 'screen-profile') {
-          topProfBtn.classList.add('active');
-        } else {
-          topProfBtn.classList.remove('active');
-        }
       }
 
       if (id === 'screen-profile') {
@@ -15873,6 +16219,198 @@
         startSafeBdApplication();
       }
     }
+  </script>
+  <script>
+    /* ========================================================
+       APPLE MOTION ENGINE & CHOREOGRAPHY RUNTIME
+    ======================================================== */
+    let appleLenisInstance = null;
+
+    function initAppleLenisForActiveScreen() {
+      const activeScreen = document.querySelector('.screen.active');
+      if (!activeScreen) return;
+      if (typeof Lenis !== 'undefined') {
+        try {
+          if (appleLenisInstance) {
+            appleLenisInstance.destroy();
+            appleLenisInstance = null;
+          }
+          appleLenisInstance = new Lenis({
+            wrapper: activeScreen,
+            content: activeScreen.firstElementChild || activeScreen,
+            smoothWheel: true,
+            duration: 0.9,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            orientation: 'vertical',
+            gestureOrientation: 'vertical'
+          });
+          function appleRaf(time) {
+            if (appleLenisInstance) {
+              appleLenisInstance.raf(time);
+              requestAnimationFrame(appleRaf);
+            }
+          }
+          requestAnimationFrame(appleRaf);
+        } catch (e) {
+          activeScreen.style.scrollBehavior = 'smooth';
+        }
+      } else {
+        activeScreen.style.scrollBehavior = 'smooth';
+      }
+    }
+
+    // Dynamic Top-Bar Translucent Blur on Scroll
+    function attachAppleScrollEffects(screenEl) {
+      if (!screenEl || screenEl._hasAppleScrollAttached) return;
+      screenEl._hasAppleScrollAttached = true;
+
+      const topBar = document.querySelector('.top-bar');
+      screenEl.addEventListener('scroll', () => {
+        const scrollTop = screenEl.scrollTop;
+        if (topBar) {
+          if (scrollTop > 14) {
+            topBar.classList.add('scrolled');
+          } else {
+            topBar.classList.remove('scrolled');
+          }
+        }
+
+        // Hero Parallax subtle scale-down
+        const heroEl = screenEl.querySelector('.apple-help-hero, .sos-stage, .feed-section-header');
+        if (heroEl) {
+          const scale = Math.max(0.93, 1 - (scrollTop * 0.0003));
+          const translateY = Math.min(24, scrollTop * 0.18);
+          heroEl.style.transform = `translate3d(0, ${translateY}px, 0) scale(${scale})`;
+          heroEl.style.opacity = Math.max(0.45, 1 - (scrollTop * 0.0018));
+        }
+      }, { passive: true });
+    }
+
+    // Number Counter Animation with Apple easeOutExpo
+    function animateAppleCounter(el, target, duration = 1200, prefix = '', suffix = '') {
+      let start = 0;
+      const startTime = performance.now();
+      function update(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+        const current = Math.floor(ease * target);
+        el.textContent = `${prefix}${current.toLocaleString()}${suffix}`;
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          el.textContent = `${prefix}${target.toLocaleString()}${suffix}`;
+        }
+      }
+      requestAnimationFrame(update);
+    }
+
+    // IntersectionObserver for Scroll Reveals & Number Counters
+    let appleRevealObserver = null;
+    function initAppleRevealObserver() {
+      if (appleRevealObserver) appleRevealObserver.disconnect();
+      appleRevealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-revealed');
+            
+            // Trigger number counters once
+            if (entry.target.dataset.appleCounter && !entry.target._hasCounted) {
+              entry.target._hasCounted = true;
+              const target = parseInt(entry.target.dataset.appleCounter, 10);
+              const suffix = entry.target.dataset.counterSuffix || '';
+              animateAppleCounter(entry.target, target, 1300, '', suffix);
+            }
+          }
+        });
+      }, { threshold: 0.08, rootMargin: '0px 0px -25px 0px' });
+
+      // Observe auto-reveal targets
+      const elementsToObserve = document.querySelectorAll(
+        '.apple-reveal, .apple-stagger, .clean-tile, .apple-tactical-card, .apple-hotline-card, .apple-aid-card, .create-post-card, .feed-post-card, .emergency-strip, [data-apple-counter]'
+      );
+      elementsToObserve.forEach(el => {
+        if (!el.classList.contains('apple-reveal') && !el.classList.contains('apple-stagger') && !el.dataset.appleCounter) {
+          el.classList.add('apple-reveal');
+        }
+        appleRevealObserver.observe(el);
+      });
+    }
+
+    // Sticky Scroll Storytelling Handler
+    function jumpStorySlide(step) {
+      const slides = document.querySelectorAll('.apple-story-slide');
+      const dots = document.querySelectorAll('.story-dot');
+      const badge = document.getElementById('story-step-badge');
+
+      slides.forEach(s => {
+        if (parseInt(s.dataset.story, 10) === step) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+
+      dots.forEach((d, idx) => {
+        if (idx + 1 === step) d.classList.add('active');
+        else d.classList.remove('active');
+      });
+
+      if (badge) badge.textContent = `Pillar ${step}/4`;
+    }
+
+    function initAppleStoryScroll() {
+      const triggers = document.querySelectorAll('.story-trigger');
+      if (!triggers.length) return;
+      const storyObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const step = parseInt(entry.target.dataset.trigger, 10);
+            jumpStorySlide(step);
+          }
+        });
+      }, { threshold: 0.5 });
+      triggers.forEach(t => storyObserver.observe(t));
+    }
+
+    // Screen Activation Hook
+    window.triggerAppleMotionForScreen = function(screenId) {
+      const screenEl = document.getElementById(screenId);
+      if (!screenEl) return;
+
+      attachAppleScrollEffects(screenEl);
+      initAppleLenisForActiveScreen();
+
+      // Refresh reveals for dynamically mounted cards
+      setTimeout(() => {
+        initAppleRevealObserver();
+        initAppleStoryScroll();
+      }, 60);
+    };
+
+    // MutationObserver to auto-reveal dynamically added feed posts
+    const appleDomObserver = new MutationObserver((mutations) => {
+      let needsRefresh = false;
+      mutations.forEach(m => {
+        if (m.addedNodes.length > 0) needsRefresh = true;
+      });
+      if (needsRefresh) {
+        initAppleRevealObserver();
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.screen').forEach(attachAppleScrollEffects);
+      initAppleLenisForActiveScreen();
+      initAppleRevealObserver();
+      initAppleStoryScroll();
+
+      const feedContainer = document.getElementById('live-feed-posts');
+      if (feedContainer) {
+        appleDomObserver.observe(feedContainer, { childList: true, subtree: true });
+      }
+    });
+
   </script>
 </body>
 </html>
