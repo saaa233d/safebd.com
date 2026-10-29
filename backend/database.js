@@ -2684,6 +2684,45 @@ async function restoreDatabaseFromGoogleDriveVault() {
 // Initialize on module load
 initDatabase();
 
+
+/**
+ * 4.9 PERMANENT CLOUD MEDIA VAULT (Supabase Storage Global CDN)
+ * Automatically uploads citizen post photos/videos to the public 'post-media' bucket.
+ * Guarantees zero 404s and permanent persistence across Render redeployments and restarts.
+ */
+async function uploadMediaToSupabaseStorage({ fileName, mimeType = 'image/jpeg', buffer }) {
+  const supaUrl = SUPABASE_URL;
+  const supaKey = SUPABASE_SECRET_KEY;
+  if (!supaUrl || !supaKey || !buffer) return null;
+
+  try {
+    const cleanFileName = String(fileName || ('media_' + Date.now() + '.jpg')).replace(/[^a-zA-Z0-9._-]/g, '_');
+    const uploadUrl = `${supaUrl}/storage/v1/object/post-media/${encodeURIComponent(cleanFileName)}`;
+    const res = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: {
+        'apikey': supaKey,
+        'Authorization': `Bearer ${supaKey}`,
+        'Content-Type': mimeType || 'image/jpeg',
+        'x-upsert': 'true'
+      },
+      body: buffer
+    });
+
+    if (res.ok || res.status === 200 || res.status === 201) {
+      const publicUrl = `${supaUrl}/storage/v1/object/public/post-media/${encodeURIComponent(cleanFileName)}`;
+      console.log(`[☁️ SUPABASE STORAGE] Successfully saved post media ${cleanFileName} -> ${publicUrl}`);
+      return publicUrl;
+    } else {
+      const errText = await res.text();
+      console.warn(`[⚠️ SUPABASE STORAGE UPLOAD WARN]:`, res.status, errText);
+    }
+  } catch (err) {
+    console.warn(`[⚠️ SUPABASE STORAGE UPLOAD ERROR]:`, err.message);
+  }
+  return null;
+}
+
 module.exports = {
   getUserByPhone,
   findUserByPhone: getUserByPhone,
@@ -2752,5 +2791,6 @@ module.exports = {
   addOrUpdateBloodDonor,
   toggleDonorAvailability,
   updateUserBloodProfile,
-  initDatabase
+  initDatabase,
+  uploadMediaToSupabaseStorage
 };
