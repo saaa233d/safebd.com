@@ -7705,22 +7705,59 @@
       const file = event.target.files && event.target.files[0];
       if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        attachedMediaBase64 = e.target.result;
-        const isVid = (file.type && file.type.startsWith('video/')) || isVideoMedia(attachedMediaBase64);
-        const imgEl = document.getElementById('media-preview-img');
-        const vidEl = document.getElementById('media-preview-video');
-        const box = document.getElementById('media-preview-box');
+      const isVid = (file.type && file.type.startsWith('video/'));
 
-        if (isVid) {
+      // If video, read directly
+      if (isVid) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          attachedMediaBase64 = e.target.result;
+          const imgEl = document.getElementById('media-preview-img');
+          const vidEl = document.getElementById('media-preview-video');
+          const box = document.getElementById('media-preview-box');
           if (imgEl) { imgEl.style.display = 'none'; imgEl.src = ''; }
           if (vidEl) { vidEl.style.display = 'block'; vidEl.src = attachedMediaBase64; }
-        } else {
+          if (box) box.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+        return;
+      }
+
+      // If photo, auto-compress using HTML5 canvas (max 1400px, 82% quality) to guarantee instant upload
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const tempImg = new Image();
+        tempImg.onload = function() {
+          const MAX_DIM = 1400;
+          let w = tempImg.width;
+          let h = tempImg.height;
+          if (w > MAX_DIM || h > MAX_DIM) {
+            if (w > h) {
+              h = Math.round((h * MAX_DIM) / w);
+              w = MAX_DIM;
+            } else {
+              w = Math.round((w * MAX_DIM) / h);
+              h = MAX_DIM;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(tempImg, 0, 0, w, h);
+
+          attachedMediaBase64 = canvas.toDataURL('image/jpeg', 0.82);
+
+          const imgEl = document.getElementById('media-preview-img');
+          const vidEl = document.getElementById('media-preview-video');
+          const box = document.getElementById('media-preview-box');
+
           if (vidEl) { vidEl.style.display = 'none'; vidEl.src = ''; }
           if (imgEl) { imgEl.style.display = 'block'; imgEl.src = attachedMediaBase64; }
-        }
-        if (box) box.style.display = 'block';
+          if (box) box.style.display = 'block';
+        };
+        tempImg.src = e.target.result;
       };
       reader.readAsDataURL(file);
     }
@@ -8022,7 +8059,7 @@
 
       return `
         <div class="post-media-container image-container">
-          <img src="${safeMediaSrc}" class="post-media-attachment" alt="Post Photo Attachment" loading="lazy">
+          <img src="${safeMediaSrc}" class="post-media-attachment" alt="Post Photo Attachment" loading="lazy" onerror="this.onerror=null; this.closest('.post-media-container').style.display='none';">
           <div class="post-media-meta-bar">
             <span style="font-size: 11px; font-weight: 700; color: #38bdf8; display: inline-flex; align-items: center; gap: 5px;">
               <i class="fas fa-image"></i> Photo Attachment
