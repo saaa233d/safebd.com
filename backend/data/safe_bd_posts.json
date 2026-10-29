@@ -179,5 +179,24 @@
     "rejected": false,
     "createdAt": "2026-10-17T17:10:41.801+00:00",
     "approvedAt": "2026-10-17T17:10:41.801+00:00"
+  },
+  "post_1793209551567_3358": {
+    "id": "post_1793209551567_3358",
+    "author": "Citizen",
+    "authorPhone": "1993366000",
+    "authorRole": "Citizen",
+    "isFounder": false,
+    "verified": false,
+    "type": "community",
+    "category": "General Safety",
+    "content": "This was the old ui for safe bd. Now the ui design looks so cool man",
+    "media": "https://sdpewbutexztzspagjqu.supabase.co/storage/v1/object/public/post-media/post_1793209551567_3358.png",
+    "likes": 0,
+    "likedBy": [],
+    "comments": [],
+    "approved": true,
+    "rejected": false,
+    "createdAt": "2026-10-28T17:45:56.53+00:00",
+    "approvedAt": "2026-10-28T17:45:56.53+00:00"
   }
 }
